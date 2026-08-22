@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+build/
+dist/
+
+# experiment outputs
+runs/
+data/
+figures/
+*.sqlite
+*.parquet
+
+# latex build artifacts
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.bbl
+paper/*.blg
+paper/*.synctex.gz
+paper/*.fdb_latexmk
+paper/*.fls
+paper/build/
+
+# editor / os
+.DS_Store
+.idea/
+.vscode/
+.claude/
+CLAUDE.md
+scratch/
