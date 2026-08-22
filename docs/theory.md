@@ -106,11 +106,11 @@ rests on, and it has no analogue in pretraining, where there is a single level o
 
 Assume score isotropy across the two reward classes, `tr(S_0) ~= tr(S_1) ~= sigma_s^2`. Then for RLOO
 
-    p Q_1 + (1-p) Q_0 = p (1-p)     (exactly, for every G)
+    p Q_1 + (1-p) Q_0 = p (1-p) * G / (G - 1)     (exactly, for every G)
 
-so
+so, dividing by the G in (6),
 
-    tr(Sigma_w) ~= (sigma_s^2 / G) * E_x[ p(x) (1 - p(x)) ]                             (8)
+    tr(Sigma_w) ~= sigma_s^2 * E_x[ p(x) (1 - p(x)) ] / (G - 1)                         (8)
 
 The rollout-level noise is, up to one scalar, the **mean Bernoulli variance of the pass-rate
 distribution** — a quantity every RLVR trainer already logs for free. `sigma_s^2` is a slowly varying
@@ -137,17 +137,25 @@ Substituting (7) and writing `Gcal := g_bar^T H g_bar`:
 prompt diversity plus a term that `G` divides down. The steps/examples Pareto frontier retains the
 familiar form `S/S_min = 1 + Bcrit/P`, `E/E_min = 1 + P/Bcrit`.
 
-### Result 4 (the statistically optimal group size is the smallest one)
+### Result 4 (closed-form optimal group size)
 
-At a fixed number of rollouts per step `R = P G`, using `tr(H Sigma_w(G)) = tau_w / G + O(1/G^2)`,
+Write `tau_b := tr(H Sigma_b)` and `tau_w := (G-1) tr(H Sigma_w(G))`, the latter being
+`G`-independent to leading order by (8). Fix the rollouts available per step, `R = P G`, which is
+what hardware actually constrains, and split them. Progress per step is
+`dJ_max / (1 + G Bcrit(G) / R)`, so the optimal split minimises
 
-    progress per rollout  ∝  |g_bar(G)|^4 / [ Gcal(G) R + G tau_b + tau_w ]             (13)
+    G * Bcrit(G) = [ G tau_b + tau_w * G/(G-1) ] / Gcal                                 (13)
 
-For any estimator with `lambda` independent of `p` (RLOO, GRPO mean baseline) the numerator and
-`tau_b` do not depend on `G`, so (13) is strictly decreasing in `G`: **per rollout spent, the smallest
-admissible group is optimal.** For standardised GRPO, `lambda(p, G)` varies with `G` and the optimum is
-interior. This is a sharp prediction and it is consistent with the reported but unexplained observation
-that very small groups converge faster per sample than large ones.
+which is convex in `G` with the interior minimum
+
+    G* = 1 + sqrt( tau_w / tau_b )                                                      (14)
+
+**The optimal group size is one plus the square root of the ratio of within-prompt to
+between-prompt gradient noise**, and it does not depend on `R`. Both traces are measurable from a
+single batch by the two-split estimator of Section 6, so `G*` is an observable, not a hyperparameter.
+Holding `P` fixed instead of `R` gives `G* = 1 + sqrt(tau_w / (P Gcal + tau_b))`, which recovers (14)
+in the small-`P` regime. Estimators whose `lambda` depends on `p` shift `G*` through the numerator
+`|g_bar(G)|` as well; this is computed exactly rather than approximated.
 
 ### Result 5 (compute-optimal group size on real hardware)
 
@@ -156,18 +164,20 @@ prompt and decode once per rollout:
 
     cost per step  =  P ( c_pre + G c_dec )                                             (14)
 
-Maximising progress per unit *cost* rather than per rollout gives an interior optimum
+Minimising `(c_pre + G c_dec) * Bcrit(G)` instead of `G * Bcrit(G)` gives
 
-    G*  =  argmax_G  |g_bar(G)|^4 / [ (c_pre + G c_dec) ( Gcal(G) + (tau_b G + tau_w)/R ) ]   (15)
+    G* = 1 + sqrt( (1 + c_pre / c_dec) * tau_w / tau_b )                                (15)
 
-so the compute-optimal group size is set jointly by the pass-rate distribution and by the measured
-prefill/decode cost ratio of the serving stack. `c_pre` and `c_dec` are measured, not assumed.
+The compute-optimal group size is the statistically optimal one inflated by
+`sqrt(1 + c_pre/c_dec)`: sharing the prompt prefill across a group buys larger groups. Two
+measurements fix it — the noise ratio from the trainer, the cost ratio from the serving stack —
+and neither is a tuned quantity.
 
 ### Result 6 (schedule)
 
 `E_x[p(1-p)]` falls as a policy improves on a fixed prompt set, so by (8) `tau_w` falls while `tau_b`
-does not. By (13) and (15) the optimal `G` therefore *decreases* over a run and the optimal `P`
-increases at fixed budget. Fixed-`(P, G)` recipes are mis-allocated at one end of training or the other,
+does not. By (14) the optimal `G` therefore *decreases* over a run, as the square root of a quantity
+read straight off the reward histogram, and the optimal `P` increases at fixed budget. Fixed-`(P, G)` recipes are mis-allocated at one end of training or the other,
 by an amount the theory quantifies.
 
 ## 5. Drift and the step size
