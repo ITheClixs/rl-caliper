@@ -1,0 +1,52 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1.15in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib}
+
+\newtheorem{proposition}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{corollary}{Corollary}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\input{macros}
+
+\title{\bfseries Measure, Don't Tune: An Empirical Model of Batch and Step Size\\
+for Reinforcement Learning Post-Training of Language Models}
+
+\author{%
+  Mehmet Demir G\"uven\thanks{ETH Z\"urich neither endorsed nor funded this work. The author was a
+  BSc Computer Science student throughout this research, which is the source of the affiliation.}\\[2pt]
+  \textbf{ETH Z\"urich}\\[1pt]
+  \texttt{dgueven@student.ethz.ch}
+}
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Placeholder.
+\end{abstract}
+
+\input{sections/introduction}
+\input{sections/setup}
+\input{sections/theory}
+\input{sections/estimation}
+\input{sections/experiments}
+\input{sections/related}
+\input{sections/discussion}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\appendix
+\input{sections/appendix}
+
+\end{document}
