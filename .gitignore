@@ -10,9 +10,9 @@ build/
 dist/
 
 # experiment outputs
-runs/
-data/
-figures/
+/runs/
+/data/
+/figures/
 *.sqlite
 *.parquet
 

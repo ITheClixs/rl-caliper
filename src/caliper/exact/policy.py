@@ -119,3 +119,8 @@ def accept_set_for_pass_rate(
         accept[i] = 1
         total += probs[i]
     return accept
+
+
+def fisher(prompt: ExactPrompt) -> np.ndarray:
+    """Exact Fisher information of the policy on this prompt, E[s s^T]."""
+    return (prompt.scores * prompt.probs[:, None]).T @ prompt.scores
