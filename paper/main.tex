@@ -21,8 +21,7 @@
 for Reinforcement Learning Post-Training of Language Models}
 
 \author{%
-  Mehmet Demir G\"uven\thanks{ETH Z\"urich neither endorsed nor funded this work. The author was a
-  BSc Computer Science student throughout this research, which is the source of the affiliation.}\\[2pt]
+  Mehmet Demir G\"uven$^{\dagger}$\\[2pt]
   \textbf{ETH Z\"urich}\\[1pt]
   \texttt{dgueven@student.ethz.ch}
 }
@@ -30,6 +29,10 @@ for Reinforcement Learning Post-Training of Language Models}
 
 \begin{document}
 \maketitle
+\renewcommand{\thefootnote}{\textdagger}
+\footnotetext{ETH Z\"urich neither endorsed nor funded this work. The author was a BSc Computer
+Science student throughout this research, which is the source of the affiliation.}
+\renewcommand{\thefootnote}{\arabic{footnote}}
 
 \begin{abstract}
 Reinforcement learning with verifiable rewards samples at two levels -- prompts, and responses per
