@@ -13,7 +13,7 @@ and the second changes whenever the prompt-to-response length ratio does.
 \paragraph{What the estimator costs.} Four -- or $2K$ -- gradient buffers instead of one, and no
 extra responses. A trainer that already accumulates over microbatches gets the decomposition for
 the cost of tagging each microbatch with which prompt block and which rollout sub-group it came
-from. What it buys is $\Bcrit$, the efficiency $\rho$, and $G^{*}$, continuously, on the run in
+from. What it buys is $\Bcrit$, the efficiency $\rho$, and $G^{\star}$, continuously, on the run in
 progress rather than from a sweep that has to be repeated when anything changes.
 
 \paragraph{Limits.} The estimator family in \eqref{eq:family} covers advantages that depend on a

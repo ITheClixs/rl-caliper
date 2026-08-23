@@ -4,33 +4,25 @@
 All results in this section are exact at finite $G$, and all are verified against brute-force
 enumeration in Section~\ref{sec:experiments}. Define, for $m \sim \mathrm{Binomial}(G-1, p)$ and
 $m' \sim \mathrm{Binomial}(G-2, p)$,
-\begin{equation}
+\begin{align}
   \label{eq:contractions}
-  W_r := \E_m\big[w(r + m, r)\big], \quad
-  Q_r := \E_m\big[w(r + m, r)^2\big], \quad
-  C_{ab} := \E_{m'}\big[w(a + b + m', a)\, w(a + b + m', b)\big].
-\end{equation}
+    W_r &:= \E_m\big[w(r + m, r)\big], \notag \\
+  Q_r &:= \E_m\big[w(r + m, r)^2\big], \notag \\
+  C_{ab} &:= \E_{m'}\big[w(a + b + m', a)\, w(a + b + m', b)\big].
+\end{align}
 
 \subsection{The estimator zoo is a reweighting of prompt difficulty}
 
 \begin{proposition}[Exact expectation]
   \label{prop:mean}
   For any estimator of the form \eqref{eq:family} and any binary reward,
-  \begin{equation}
-    \E[z \mid x] \;=\; \lambda(p, G)\, h(x),
-    \qquad
-    \lambda(p, G) \;=\; W_1(p,G) - W_0(p,G).
+    \begin{equation}
+    \E[z \mid x] = \lambda(p, G)\, h(x), \quad \lambda := W_1(p,G) - W_0(p,G).
   \end{equation}
 \end{proposition}
 
-\begin{proof}
-  Condition on $r_j$. The other $G-1$ rewards are i.i.d.\ Bernoulli$(p)$ and, given $r_j$, are
-  independent of $\score(y_j)$, so
-  $\E[w(k, r_j)\score(y_j)] = \sum_{r} \Pr[r]\, W_r\, u_r$. Summing over $j$ and applying
-  \eqref{eq:score-identity} gives $\E[z] = p\,(W_1 - W_0)\,u_1 = \lambda h$.
-\end{proof}
 
-Three consequences follow immediately, and each is exact for every $p$ and every $G$.
+Each of the following is exact for every $p$ and every $G$.
 RLOO has $W_1 = 1-p$ and $W_0 = -p$, hence $\lambda \equiv 1$: it is unbiased.
 GRPO with a mean baseline has $\lambda = (G-1)/G$, independent of $p$: it is RLOO multiplied by a
 constant. Standardised GRPO has a $\lambda(p, G)$ with no closed form but an exact binomial sum.
@@ -56,21 +48,12 @@ alter what a run converges to. This is the sense in which most of the zoo is one
     = \frac{1}{G}\Big[ p\,Q_1 S_1 + (1-p)\,Q_0 S_0 \Big]
     + c_U(p, G)\, U ,
   \end{equation}
-  \begin{equation}
-    c_U = \frac{1}{G}\Big( p\,Q_1 + \frac{p^2 Q_0}{1-p} \Big)
-        + p^2\Big[ \frac{G-1}{G}\big( C_{11} - 2C_{10} + C_{00} \big) - \lambda^2 \Big].
-  \end{equation}
+    \begin{align}
+    c_U &= \frac{1}{G}\Big( p\,Q_1 + \frac{p^2 Q_0}{1-p} \Big) \notag \\
+    &\quad + p^2\Big[ \tfrac{G-1}{G}\big( C_{11} - 2C_{10} + C_{00} \big) - \lambda^2 \Big].
+  \end{align}
 \end{proposition}
 
-\begin{proof}
-  Split $\E[z z^{\!\top}]$ into diagonal and off-diagonal terms. The diagonal contributes
-  $G^{-1}[p Q_1 M_1 + (1-p) Q_0 M_0]$ with $M_r = S_r + u_r u_r^{\!\top}$. For $j \neq l$,
-  condition on $(r_j, r_l)$ and on the count $m'$ among the remaining $G-2$ responses; the two
-  scores are then conditionally independent, giving
-  $\frac{G-1}{G}\sum_{a,b}\Pr[a]\Pr[b]\,C_{ab}\,u_a u_b^{\!\top}$, which collapses to
-  $\frac{G-1}{G} p^2 (C_{11} - 2C_{10} + C_{00}) U$ by \eqref{eq:score-identity}. Subtracting
-  $\E[z]\E[z]^{\!\top} = \lambda^2 p^2 U$ completes the proof.
-\end{proof}
 
 \subsection{Two levels of noise}
 
@@ -78,11 +61,11 @@ Prompts are drawn independently, so with $\gbar := \E_x[\lambda h]$ the batch es
 \begin{equation}
   \label{eq:hierarchy}
   \Cov(\ghat) \;=\; \frac{1}{P}\Big[ \Sb + \Sw \Big],
-  \qquad
-  \Sb := \Cov_x\big( \lambda(p(x), G)\, h(x) \big),
-  \qquad
-  \Sw := \E_x\big[ \Cov(z \mid x) \big].
 \end{equation}
+\begin{align}
+  \Sb &:= \Cov_x\big( \lambda(p(x), G)\, h(x) \big), \notag \\
+  \Sw &:= \E_x\big[ \Cov(z \mid x) \big]. \notag
+\end{align}
 $\Sb$ is the irreducible variance of sampling prompts and does not shrink with $G$; $\Sw$ is the
 variance of sampling responses and does. Pretraining has one level of sampling and therefore one
 noise scale. RLVR has two, and the split of a fixed rollout budget between them is a free choice
@@ -117,11 +100,12 @@ the same range, and everything below is built on that instead.
 \subsection{Drift and efficiency}
 
 One update of size $\eta$ displaces the policy by
-\begin{equation}
+\begin{align}
   \label{eq:drift}
-  D(\eta) := \E_x\Big[ \KL\big( \pi_{t+1}(\cdot \mid x) \,\big\|\, \pi_t(\cdot \mid x) \big) \Big]
-  = \tfrac{1}{2}\eta^2 \Big( \mathcal{G} + \tfrac{N}{P} \Big) + O(\eta^3),
-\end{equation}
+  D(\eta) &:= \E_x\Big[ \KL\big( \pi_{t+1}(\cdot \mid x) \,\big\|\, \pi_t(\cdot \mid x) \big) \Big]
+  \notag \\
+  &\;= \tfrac{1}{2}\eta^2 \big( \mathcal{G} + N/P \big) + O(\eta^3),
+\end{align}
 with $F$ the Fisher information of the policy, $\mathcal{G} := \gbar^{\!\top} F \gbar$ and
 $N := \tr(F\Sb) + \tr(F\Sw)$. In the enumerable testbed this predicts the true KL to within $4\%$
 over three orders of magnitude in $\eta$.
@@ -175,9 +159,9 @@ own batch-size efficiency off the KL it already logs, without a sweep.
   \propto \sqrt{N_{\mathrm{s}}\rho}$.
 \end{proof}
 
-Two consequences are worth separating. The estimator enters only through $a/\sqrt{\mathcal{G}}$,
-the alignment of its mean with the true gradient in Fisher units, and the batch composition enters
-only through $\rho$. Because KL is quadratic in the step while progress is linear in it, many small
+The estimator enters \eqref{eq:progress} only through $a/\sqrt{\mathcal{G}}$, the alignment of
+its mean with the true gradient in Fisher units, and the batch composition enters only through
+$\rho$. Because KL is quadratic in the step while progress is linear in it, many small
 steps travel further than one large step of the same total drift, which is why $N_{\mathrm{s}}$
 appears under the square root.
 

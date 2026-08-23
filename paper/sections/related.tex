@@ -35,10 +35,12 @@ within a batch using heuristics tied to observed pass rates or gradient variance
 \citep{nguyen2026allocation}, or adapt the batch size from a divergence signal
 \citep{park2026batchscaling}, and one line of work argues for scaling the response count
 specifically \citep{hu2025brorl}. These are allocation policies; what has been missing is the
-quantity being optimised. Equation~\eqref{eq:gstar} supplies it in closed form and shows that the
-answer is a ratio of two measurable traces, which also explains why heuristics keyed to pass rate
-alone succeed on some corpora and not others: pass rate determines $\tau_w$ but says nothing about
-$\tau_b$.
+quantity being optimised. Theorem~\ref{thm:split} supplies it, and the answer is a ratio of two measurable traces. This
+also explains why heuristics keyed to pass rate alone succeed on some corpora and not others:
+the pass rate determines $\tau_w$ and says nothing about $\tau_b$. The two lines of work are
+largely orthogonal, since those methods distribute responses across prompts at a group size
+someone else chose, while the question here is what that group size should be; the baseline we
+compare against is therefore the fixed $G$ of a published recipe rather than an allocation rule.
 
 \paragraph{Trust regions and KL control.} Constraining how far a policy moves is old
 \citep{schulman2015trpo, schulman2017ppo} and its modern LLM forms clip importance ratios or

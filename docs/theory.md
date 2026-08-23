@@ -202,17 +202,29 @@ through `a/sqrt(Gcal)`; that contribution is computed exactly rather than approx
 ### Result 5 (compute-optimal group size on real hardware)
 
 Rollout cost is not uniform in `G`. When a group shares the prompt prefix, prefill is paid once per
-prompt and decode once per rollout:
+prompt and decode once per response, so a step costs `P (c_pre + G c_dec)`. Writing
+`alpha = c_pre/c_dec`, the objective to minimise at fixed `R = P G` is
 
-    cost per step  =  P ( c_pre + G c_dec )                                              (15)
+    f(G) = (alpha + G) ( R/G + beta_b + beta_w/(G-1) )                                   (15)
 
-Minimising `(c_pre + G c_dec) * Bcrit(G)` instead of `G * Bcrit(G)` gives
+`f` is strictly convex on `G > 1` (its second derivative is
+`2 alpha R / G^3 + 2 (1+alpha) beta_w / (G-1)^3 > 0`), `f'` runs from `-inf` at `G -> 1` to
+`beta_b > 0` at infinity, so there is a unique interior minimum, at the root of
 
-    G* = 1 + sqrt( (1 + c_pre / c_dec) * tau_w / tau_b )                                 (16)
+    beta_b = alpha R / G^2 + (1 + alpha) beta_w / (G-1)^2                                 (16)
 
-The compute-optimal group size is the statistically optimal one inflated by `sqrt(1 + c_pre/c_dec)`:
-sharing prefill across a group buys larger groups. Two measurements fix it -- the noise ratio from the
-trainer, the cost ratio from the serving stack -- and neither is tuned.
+Two consequences matter in practice.
+
+* With `alpha = 0` the first term vanishes and (16) collapses to `G* = 1 + sqrt(tau_w/tau_b)`,
+  exactly, with `R` dropping out. This is Result 4b.
+* With `alpha > 0`, `G*` is strictly increasing in both `alpha` and `R`. The convenient form
+  `G* = 1 + sqrt((1+alpha) tau_w/tau_b)` is only the `alpha R / G^2 -> 0` limit and understates the
+  optimum badly at large `R`: at the noise ratio measured on our transformers it gives 7.6 where
+  the true optimum is 51.0 (`alpha = 10.9`, `R = 8192`).
+
+An earlier version of these notes stated the small-batch form as if it held generally. It does not;
+`experiments/t1_optimum` checks the corrected statement against direct numerical minimisation and
+agrees to one part in 10^7.
 
 ### Result 6 (schedule)
 

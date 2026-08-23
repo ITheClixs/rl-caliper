@@ -39,7 +39,7 @@ a trainer can measure while it runs.
   \item \textbf{A drift model in place of a curvature model.} The obvious second-order treatment of
   the objective fails badly for RLVR, understating the useful step size at least fourfold
   against exactly computed improvement. Modelling how far the \emph{policy} moves instead is
-  accurate to $4\%$ over three orders of magnitude in step size, and yields an efficiency
+  accurate to $4\%$ across a thousandfold range of step sizes, and yields an efficiency
   $\rho = 1/(1 + \Bcrit/P)$ that a run can read off the KL it already logs: progress at a fixed
   drift budget scales as $\sqrt{\rho}$.
 
@@ -64,6 +64,6 @@ a trainer can measure while it runs.
   and what the failure attributes to.
 \end{itemize}
 
-Everything in this paper runs on one laptop. That is not incidental: the claim under test is that
-small-scale measurement determines large-scale choices, so a study that needed a cluster to make
-the measurement would be arguing against itself.
+Every experiment here runs on one laptop. The claim under test is that a small measurement
+determines a large choice, and a study that needed a cluster to take the measurement would be a
+poor advertisement for it.

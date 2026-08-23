@@ -4,9 +4,9 @@
 A policy $\policy(y \mid x)$ generates a response $y$ to a prompt $x \sim \mathcal{D}$, and a
 verifier returns a binary reward $r(x,y) \in \{0,1\}$. The objective is the expected pass rate
 \begin{equation}
-  J(\theta) \;=\; \E_{x \sim \mathcal{D}} \, \E_{y \sim \policy(\cdot \mid x)}\big[ r(x,y) \big]
-  \;=\; \E_{x}\big[ p(x) \big], \qquad p(x) := \Pr\big[ r = 1 \mid x \big].
+  J(\theta) = \E_{x} \E_{y \sim \policy(\cdot \mid x)}\big[ r(x,y) \big] = \E_{x}\big[ p(x) \big],
 \end{equation}
+with $p(x) := \Pr[\, r = 1 \mid x \,]$ the pass rate on prompt $x$.
 Write $\score(y) := \nabla_\theta \log \policy(y \mid x)$ for the score, so that
 $\E_{y}[\score] = 0$, and let $u_r := \E[\score \mid r]$ and $S_r := \Cov(\score \mid r)$ be the
 mean and covariance of the score conditional on the reward. The zero-mean property of the score
@@ -35,18 +35,24 @@ that is, any rule in which a response's advantage depends only on its own reward
 of its group-mates succeeded. This covers the estimators in current use, each of which is fully
 described by a $(G+1) \times 2$ table:
 
-\begin{center}
-\begin{tabular}{ll}
-  \toprule
-  estimator & $w(k, r)$ \\
-  \midrule
-  RLOO \citep{ahmadian2024rloo} & $r - (k - r)/(G-1)$ \\
-  GRPO with a mean baseline \citep{liu2025drgrpo} & $r - k/G$ \\
-  GRPO, standardised \citep{shao2024deepseekmath} & $\big(r - k/G\big) \big/ \sqrt{(k/G)(1 - k/G)}$, zero when $k \in \{0, G\}$ \\
-  fixed external baseline & $r - \hat{p}$ \\
-  \bottomrule
-\end{tabular}
-\end{center}
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{ll}
+    \toprule
+    estimator & $w(k, r)$ \\
+    \midrule
+    RLOO \citep{ahmadian2024rloo} & $r - (k - r)/(G-1)$ \\
+    GRPO, mean baseline \citep{liu2025drgrpo} & $r - k/G$ \\
+    GRPO, standardised \citep{shao2024deepseekmath}
+      & $\dfrac{r - k/G}{\sqrt{(k/G)(1 - k/G)}}$ \\[6pt]
+    fixed external baseline & $r - \hat{p}$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{The estimators in current use, each a $(G+1)\times 2$ table. Standardised GRPO is
+  defined to be zero when $k \in \{0, G\}$, where the group has no spread.}
+  \label{tab:family}
+\end{table}
 
 The per-prompt estimator and the batch estimator are
 \begin{equation}
