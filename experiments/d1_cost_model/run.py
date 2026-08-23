@@ -39,10 +39,19 @@ def prefill_seconds(model, length: int, batch: int, repeats: int) -> float:
 
 
 def decode_seconds(model, context: int, batch: int, repeats: int) -> float:
-    """Time for one decode step over `batch` streams that already hold `context` tokens."""
-    prompt = mx.array(np.random.randint(0, 1000, size=(batch, context)))
+    """Time for one decode step over `batch` streams that already hold `context` tokens.
+
+    The cache is built once at batch one and broadcast, which is both cheaper to set up and the
+    situation the cost model describes: responses in a group share their prompt's prefill.
+    """
+    prompt = mx.array(np.random.randint(0, 1000, size=(1, context)))
     cache = make_prompt_cache(model)
     mx.eval(model(prompt, cache=cache))
+    for layer in cache:
+        keys, values = layer.state
+        layer.keys = mx.repeat(keys, batch, axis=0)
+        layer.values = mx.repeat(values, batch, axis=0)
+        layer.offset = keys.shape[2]
     step = mx.array(np.random.randint(0, 1000, size=(batch, 1)))
 
     def run():
