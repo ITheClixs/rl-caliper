@@ -31,7 +31,8 @@ packages = ["src/caliper"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+addopts = "-q -m 'not mlx'"
+markers = ["mlx: needs MLX and a downloaded model; Apple Silicon only"]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
