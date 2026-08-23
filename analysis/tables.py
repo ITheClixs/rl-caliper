@@ -133,12 +133,22 @@ def table_real() -> None:
     write("real", "\n".join(lines))
 
 
+PLACEHOLDER = r"\emph{pending: this table is generated from a run that has not been stored yet.}"
+
+
 def main() -> None:
-    for fn in (table_exact_agreement, table_transfer, table_transformer, table_real):
+    for name, fn in (
+        ("exact_agreement", table_exact_agreement),
+        ("transfer", table_transfer),
+        ("transformer", table_transformer),
+        ("real", table_real),
+    ):
         try:
             fn()
         except SystemExit as exc:
-            print("skipped:", exc)
+            if not (TABLES / f"{name}.tex").exists():
+                write(name, PLACEHOLDER)
+            print("pending:", exc)
 
 
 if __name__ == "__main__":

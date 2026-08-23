@@ -229,7 +229,14 @@ def main() -> None:
             fn()
             print("wrote", name)
         except SystemExit as exc:
-            print("skipped", name, "-", exc)
+            print("pending", name, "-", exc)
+            target = FIGURES / f"{name}.pdf"
+            if not target.exists():
+                fig, ax = plt.subplots(figsize=(3, 2))
+                ax.text(0.5, 0.5, "pending", ha="center", va="center", color="0.5")
+                ax.axis("off")
+                fig.savefig(target, bbox_inches="tight")
+                plt.close(fig)
 
 
 if __name__ == "__main__":

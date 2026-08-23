@@ -116,3 +116,52 @@ coefficient $\mathcal{G} + N/P$ measured at the initial policy predicts a smalle
 observed over a full run. The gap is itself the argument for measuring rather than scheduling, since
 the coefficient changes as the policy improves and a controller tracks it while a fixed learning
 rate cannot.
+
+\subsection{A pretrained model}
+
+The same measurement on Qwen2.5-0.5B-Instruct, with LoRA adapters as the trainable parameters and
+corpora built from short exact-match families -- counting a letter in a word, naming the $k$-th item
+of a list, adding two numbers -- plus a mixture of all of them. Families differ in how often the
+model succeeds, and mixing them makes prompts pull in different directions, so the two knobs move
+the two noise terms separately. Table~\ref{tab:real} reports what the probe measures.
+
+\begin{table}[t]
+  \centering
+  \input{tables/real}
+  \caption{Noise terms measured on a pretrained model. The last column tests
+  Corollary~\ref{cor:bernoulli} by dividing the within-prompt term by the mean Bernoulli variance of
+  the corpus; the corollary predicts a constant, and the constant it predicts is the score scale
+  $\sigma_s^2$, which is shared only among corpora whose responses have comparable structure.}
+  \label{tab:real}
+\end{table}
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.42\linewidth]{figures/real_model.pdf}
+  \caption{Within-prompt noise against the reward histogram on a pretrained model. The dashed line
+  is a single fitted scale.}
+  \label{fig:real-model}
+\end{figure}
+
+\subsection{What the hardware is worth}
+
+Equation~\eqref{eq:gstar-cost} inflates the optimal group size by
+$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$, and both costs are properties of the serving stack.
+Measuring them on this machine, for a $0.5$B model in bfloat16, gives a ratio that varies over three
+orders of magnitude with the shape of the workload: prefill dominates when prompts are long and
+responses short, and is negligible in the opposite case. Figure~\ref{fig:cost-model} converts the
+measurement into the inflation it implies.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.48\linewidth]{figures/cost_model.pdf}
+  \caption{Group-size inflation from sharing a prompt's prefill across its group, measured on an
+  Apple M4. Long prompts with short responses justify groups several times larger than the
+  statistical optimum; long responses do not.}
+  \label{fig:cost-model}
+\end{figure}
+
+This is the practical resolution of the gap between measured optima of three to five and the eight
+to sixty-four in common use. For short-answer verifiable tasks, where a long instruction is followed
+by a few tokens of answer, prefill amortisation justifies most of the difference. For
+reasoning-length responses it justifies almost none of it, and the statistical optimum stands.
