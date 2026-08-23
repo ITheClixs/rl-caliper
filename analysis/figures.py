@@ -150,6 +150,71 @@ def figure_transfer() -> None:
     plt.close(fig)
 
 
+def figure_cost_model() -> None:
+    """Measured prefill-to-decode ratio and the group-size inflation it implies."""
+    runs = [r for r in io.load_all("d1_cost_model") if "ratios" in r["result"]]
+    if not runs:
+        raise SystemExit("no cost model run")
+    ratios = runs[-1]["result"]["ratios"]
+    fig, ax = plt.subplots(figsize=(4.6, 3.2))
+    responses = sorted({r["response_length"] for r in ratios})
+    prompts = sorted({r["prompt_length"] for r in ratios})
+    for prompt, colour in zip(prompts, PALETTE, strict=False):
+        values = []
+        for response in responses:
+            group = [
+                r["inflation"]
+                for r in ratios
+                if r["prompt_length"] == prompt
+                and r["response_length"] == response
+                and r["group_size"] == 8
+            ]
+            values.append(group[0])
+        ax.plot(responses, values, "o-", color=colour, lw=1.5, label=f"prompt {prompt}")
+    ax.axhline(1.0, color="0.6", lw=1, ls="--")
+    ax.set_xscale("log", base=2)
+    ax.legend(frameon=False, fontsize=8)
+    style(
+        ax,
+        "response length (tokens)",
+        r"$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$",
+        "inflation of $G^{*}$ from prefill sharing",
+    )
+    fig.tight_layout()
+    fig.savefig(FIGURES / "cost_model.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def figure_real_model() -> None:
+    """Within-prompt noise against the reward histogram on a pretrained model."""
+    runs = [
+        r
+        for r in io.load_all("c1_real_noise")
+        if r["result"]["rows"] and "bernoulli" in r["result"]["rows"][0]
+    ]
+    if not runs:
+        raise SystemExit("no real-model run")
+    rows = runs[-1]["result"]["rows"]
+    bernoulli = np.array([r["bernoulli"] for r in rows])
+    tau_w = np.array([r["tau_w_scaled"] for r in rows])
+    fig, ax = plt.subplots(figsize=(3.6, 3.2))
+    slope = float((tau_w * bernoulli).sum() / (bernoulli**2).sum())
+    grid = np.linspace(0, bernoulli.max() * 1.15, 20)
+    ax.plot(grid, slope * grid, color="0.6", lw=1, ls="--")
+    ax.scatter(bernoulli, tau_w, s=34, color=PALETTE[0], zorder=3)
+    for row, x, y in zip(rows, bernoulli, tau_w, strict=True):
+        ax.annotate(
+            row["corpus"].replace("_", " "), (x, y), fontsize=7,
+            textcoords="offset points", xytext=(4, 4),
+        )
+    ax.set_xlim(left=0)
+    ax.set_ylim(bottom=0)
+    style(ax, r"$\mathbb{E}[p(1-p)]$", r"$\tau_w$")
+    fig.tight_layout()
+    fig.savefig(FIGURES / "real_model.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
@@ -157,6 +222,8 @@ def main() -> None:
         ("estimator_accuracy", figure_estimator_accuracy),
         ("transformer_curves", figure_transformer_curves),
         ("transfer", figure_transfer),
+        ("cost_model", figure_cost_model),
+        ("real_model", figure_real_model),
     ]:
         try:
             fn()
