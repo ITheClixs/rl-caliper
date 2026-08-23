@@ -1,1 +1,44 @@
-% discussion
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{What this says about group sizes in practice.} Across every setting measured here --
+enumerable policies, transformers trained from scratch, and a pretrained model on real verifiable
+tasks -- the statistically optimal group size came out small, in the range of three to five
+responses per prompt. Published recipes commonly use eight to sixty-four. Equation~\eqref{eq:gstar-cost}
+says what would justify the difference: prefill sharing within a group. A setting with long prompts
+and short responses can have $c_{\mathrm{pre}}/c_{\mathrm{dec}}$ in the tens, and the resulting
+$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ inflation covers much of the gap. The point is not
+that large groups are wrong; it is that whether they are right is a measurement about the serving
+stack, and one that changes when the prompt-to-response length ratio changes.
+
+\paragraph{What the estimator costs.} Four -- or $2K$ -- gradient buffers instead of one, and no
+extra responses. A trainer that already accumulates over microbatches gets the decomposition for
+the cost of tagging each microbatch with which prompt block and which rollout sub-group it came
+from. What it buys is $\Bcrit$, the efficiency $\rho$, and $G^{*}$, continuously, on the run in
+progress rather than from a sweep that has to be repeated when anything changes.
+
+\paragraph{Limits.} The estimator family in \eqref{eq:family} covers advantages that depend on a
+response's own reward and its group's success count. It does not cover token-level shaping, length
+normalisation, clipping, or a non-binary reward, and the exact moment calculations lean on the
+reward being binary. Clipping in particular makes the update a nonlinear function of the batch,
+which breaks the linearity the split estimator relies on; it can be handled by instrumenting the
+clipped update directly, but the closed forms would need redoing. The drift model is a second-order
+expansion and will understate movement for steps large enough to leave that regime. The largest
+model measured here is $0.5$B parameters, so the claim that these are the right quantities is
+tested across a sixtyfold range of parameter counts and not beyond it; the transfer result is
+demonstrated across batch size, not across model scale, where our sweeps were not sharp enough to
+separate the two parameterisations.
+
+\paragraph{Preconditioners.} All quantities must be read in the metric the update moves in.
+Instrumenting the preconditioned gradient does this, but Adam's preconditioner is itself estimated
+from the same noisy gradients, and at small batch its own noise interacts with the noise being
+measured. We treat the preconditioner as slowly varying, which is standard and, at the batch sizes
+used here, not obviously safe.
+
+\paragraph{What we would measure next.} Three things. Whether $\tau_w/\tau_b$ moves once responses
+are long and reasoning-heavy rather than short and exact-match, since the within-prompt term should
+grow with the entropy of the response distribution. Whether the drift target transfers across model
+scale as cleanly as it does across batch size, which needs a sharper experiment than the one run
+here. And whether the same decomposition explains the well-known instability of RLVR at small batch
+sizes: a run below its critical batch size spends most of its drift budget on diffusion, and the
+diffusive fraction is exactly what \eqref{eq:efficiency} measures.

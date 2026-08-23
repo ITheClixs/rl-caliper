@@ -1,1 +1,19 @@
-% appendix
+\section{Reproducing the results}
+\label{app:repro}
+
+Every figure and table is regenerated from stored run records by
+\texttt{analysis/figures.py} and \texttt{analysis/tables.py}; no number in this paper is
+transcribed by hand. Each run writes a manifest holding the configuration, its hash, the commit the
+code was at, and the interpreter and platform it ran on.
+
+The exactness tests in \texttt{tests/} check every analytic result in Section~\ref{sec:theory}
+against brute-force enumeration, and check the batched estimator against the reference
+implementation term by term.
+
+\section{The estimator family as a table}
+\label{app:family}
+
+Because the advantage depends only on $(k, r)$, an estimator is a $(G+1) \times 2$ array, and the
+moments in \eqref{eq:contractions} are contractions of that array against a binomial distribution.
+This is what makes the exact treatment cheap: no sampling is involved in evaluating
+$\lambda(p, G)$, $Q_r$ or $C_{ab}$ for any member of the family, at any group size.
