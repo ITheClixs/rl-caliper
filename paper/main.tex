@@ -1,69 +1,94 @@
-\documentclass[11pt]{article}
+\documentclass[10pt,twocolumn]{article}
 
-\usepackage[margin=1.15in]{geometry}
+\usepackage[letterpaper,margin=0.85in,columnsep=0.28in]{geometry}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{bm}
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{microtype}
+\usepackage{caption}
 \usepackage[hidelinks]{hyperref}
 \usepackage{natbib}
 
+\captionsetup{font=small,labelfont=bf,skip=6pt}
+\setlength{\abovecaptionskip}{6pt}
+\setlength{\textfloatsep}{14pt}
+\bibliographystyle{plainnat}
+\setlength{\bibsep}{2pt}
+
+\newtheorem{theorem}{Theorem}
 \newtheorem{proposition}{Proposition}
 \newtheorem{lemma}{Lemma}
 \newtheorem{corollary}{Corollary}
 \theoremstyle{definition}
-\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
 
 \input{macros}
 
-\title{\bfseries Measure, Don't Tune: An Empirical Model of Batch and Step Size\\
-for Reinforcement Learning Post-Training of Language Models}
-
-\author{%
-  Mehmet Demir G\"uven$^{\dagger}$\\[2pt]
-  \textbf{ETH Z\"urich}\\[1pt]
-  \texttt{dgueven@student.ethz.ch}
+\newcommand{\ruledtitle}[1]{%
+  \par\noindent\rule{\textwidth}{1.6pt}\par\vspace{3pt}
+  {\centering\fontsize{15}{17}\selectfont\bfseries #1\par}
+  \vspace{3pt}\noindent\rule{\textwidth}{0.4pt}\par
 }
-\date{}
 
 \begin{document}
-\maketitle
+
+\twocolumn[
+  \ruledtitle{Your Group Size Is a Hardware Parameter:\\
+  Measuring, Not Tuning, the Batch and Step Size of RL Post-Training}
+  \vspace{6pt}
+  {\centering
+    \normalsize Mehmet Demir G\"uven$^{\dagger}$\par\vspace{2pt}
+    \normalsize\textbf{ETH Z\"urich}\par\vspace{1pt}
+    \small\texttt{dgueven@student.ethz.ch}\par
+  }
+  \vspace{6pt}
+  \begin{minipage}{\textwidth}
+  \begin{center}\textbf{Abstract}\end{center}
+  \vspace{-4pt}
+  \begin{quote}
+  Reinforcement learning with verifiable rewards samples twice: once over prompts, once over
+responses within each prompt. How a fixed rollout budget should be divided between the two is
+currently a tuned constant, reported without justification and re-tuned whenever anything changes.
+We show it is a measurement. For binary rewards we derive the exact finite-$G$ mean and covariance
+of the advantage estimators in current use, which yields two results. First, the estimators differ
+only through a weight $\lambda(p,G)$ on prompt difficulty; when $\lambda$ does not depend on the
+pass rate, as for RLOO and mean-baseline GRPO, they are the same estimator and the step size
+absorbs the difference exactly. Second, the gradient noise splits into a between-prompt term
+$\tau_b$ that more responses cannot reduce and a within-prompt term $\tau_w$ that falls as
+$1/(G-1)$. Optimising the split then gives a closed form, $G^{\star} = 1 + \sqrt{\tau_w/\tau_b}$,
+and both traces are estimable from the microbatch gradients a trainer already accumulates, at no
+extra rollout cost. Measured this way, across enumerable policies, transformers trained from
+scratch and a pretrained model, $G^{\star}$ lands between three and six. Common recipes use eight
+to sixty-four. Pricing prefill sharing into the objective accounts for the gap rather than
+contradicting it: the optimum then solves a one-line stationarity condition that is increasing in
+both the prefill ratio and the batch size, and at the ratios we measure on real hardware it ranges
+from three to fifty-one. Which end of that range a run belongs at is fixed by its
+prompt-to-response length ratio, so a group size of sixteen is a defensible reading of one regime
+and a poor one for another. Either way it is a measurement, not a constant.
+  \end{quote}
+  \end{minipage}
+  \vspace{8pt}
+  \begin{minipage}{\textwidth}
+    \centering
+    {\includegraphics[width=\textwidth]{figures/teaser.pdf}}
+    \captionof{figure}{\textbf{Left:} the efficiency $\rho(G)$ predicted from two measured traces
+    with no fitted parameters, against the gain actually obtained by training at that split.
+    Settings differ in run length and task, so both axes are standardised within a setting; what is
+    pooled is the shape. \textbf{Right:} the optimal group size from Theorem~\ref{thm:split} at that
+    measured noise ratio, against the rollout budget, for the prefill ratios $\alpha$ we measure on
+    real hardware. Statistics alone say three; the hardware says the rest, and says something
+    different for long prompts with short answers than for reasoning-length responses.}
+    \label{fig:teaser}
+  \end{minipage}
+  \vspace{10pt}
+]
+
 \renewcommand{\thefootnote}{\textdagger}
 \footnotetext{ETH Z\"urich neither endorsed nor funded this work. The author was a BSc Computer
 Science student throughout this research, which is the source of the affiliation.}
 \renewcommand{\thefootnote}{\arabic{footnote}}
 
-\begin{abstract}
-Reinforcement learning with verifiable rewards samples at two levels -- prompts, and responses per
-prompt -- and every run must decide how to split a fixed rollout budget between them and how large a
-step the result supports. Both are currently tuned. We show they can be measured. For binary
-rewards we give the exact finite-$G$ mean and covariance of the estimators in current use, from
-which two facts follow: the family differs only through a weight $\lambda(p, G)$ on prompt
-difficulty, so that variants with a $p$-independent $\lambda$ are the same estimator up to a step
-size; and the gradient noise decomposes into a between-prompt term $\tau_b$ that responses cannot
-reduce and a within-prompt term $\tau_w$ that shrinks as $1/(G-1)$ and equals, up to one scalar, the
-mean Bernoulli variance of the pass-rate distribution. A second-order model of the objective turns
-out to be a poor guide -- it understates the useful step size at least fourfold against exactly
-computed improvement -- while a model of how far the \emph{policy} moves predicts measured KL to
-within 4\% over three decades in step size. Building on the latter gives an efficiency
-$\rho = 1/(1 + \Bcrit/P)$ that a trainer can read off the KL it already logs, a closed form for the
-optimal group size $G^{*} = 1 + \sqrt{\tau_w/\tau_b}$, inflated by
-$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ once prefill sharing is priced in, and an estimator
-that recovers both noise terms from the microbatch gradients a trainer already accumulates, at no
-extra rollout cost. We validate on exactly enumerable policies, on populations of transformers trained from scratch as
-a single batched kernel, and on a pretrained model with real verifiers; the law holds under Adam as
-well as gradient ascent, once the noise is measured in the metric Adam actually moves in, which
-takes priming the preconditioner and putting a floor under it.
-Measured optima are small -- three to six responses per prompt on transformers and on a pretrained model, before hardware is priced in -- and the drift target that maximises
-progress is unchanged across an eightfold change in batch size, while transferring the learning rate
-tuned at the smallest batch costs 22\% of the achievable gain at the largest. Carrying a whole
-recipe further, to a setting with four times the budget, we find the group-size prediction still
-holds -- it wins by 11\% against a predicted 10\% -- while the drift target no longer transfers,
-and a tuned constant learning rate beats the best constant drift, which says the optimal drift
-schedule is not flat. All experiments run on one laptop, which is the point: the claim is that small
-measurements determine large choices.
-\end{abstract}
 
 \input{sections/introduction}
 \input{sections/setup}
@@ -73,7 +98,6 @@ measurements determine large choices.
 \input{sections/related}
 \input{sections/discussion}
 
-\bibliographystyle{plainnat}
 \bibliography{refs}
 
 \appendix

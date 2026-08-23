@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 from caliper.runtime import io  # noqa: E402
 
 FIGURES = Path(__file__).resolve().parents[1] / "paper" / "figures"
+BETA_B = 40.07 / 1.144  # tau_b / signal, measured on the transformer tier
 PALETTE = ["#1b3a5c", "#c1502e", "#2e7d5b", "#7a5195", "#b58900"]
 
 
@@ -215,9 +216,100 @@ def figure_real_model() -> None:
     plt.close(fig)
 
 
+def figure_teaser() -> None:
+    """Page-one figure: the prediction tracks measured gains, and it reconciles 3 with 8-64."""
+    from scipy.optimize import brentq
+
+    transformer = latest("b1_group_size", "predicted_efficiency")
+    try:
+        adam = latest("b6_adam", "predicted_efficiency")
+    except SystemExit:
+        adam = []
+
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 2.55))
+
+    # Each setting has its own run length and task, so gains differ in level and scale between
+    # settings even where the shape agrees. Standardising within a setting removes both and leaves
+    # the shape, which is what the prediction is about.
+    ax = axes[0]
+    series = [(c, "gradient ascent", PALETTE[0], "o") for c in transformer]
+    for cell in adam:
+        if cell["optimiser"] == "adam":
+            series.append((cell, "Adam", PALETTE[1], "^"))
+    pooled_x, pooled_y, seen = [], [], set()
+    for cell, label, colour, marker in series:
+        x = np.sqrt(np.array(cell["predicted_efficiency"]))
+        y = np.array(cell["observed"])
+        x = (x - x.mean()) / x.std(ddof=1)
+        y = (y - y.mean()) / y.std(ddof=1)
+        ax.scatter(
+            x, y, s=17, marker=marker, color=colour, alpha=0.85,
+            label=label if label not in seen else None,
+        )
+        seen.add(label)
+        pooled_x.append(x)
+        pooled_y.append(y)
+    x = np.concatenate(pooled_x)
+    y = np.concatenate(pooled_y)
+    coef = np.polyfit(x, y, 1)
+    resid = y - np.polyval(coef, x)
+    r2 = 1 - (resid**2).sum() / ((y - y.mean()) ** 2).sum()
+    grid = np.linspace(x.min(), x.max(), 20)
+    ax.plot(grid, np.polyval(coef, grid), color="0.35", lw=1.2, zorder=1)
+    ax.legend(frameon=False, fontsize=7, loc="upper left")
+    ax.set_title(f"no free parameters, {len(series)} settings ($R^2={r2:.2f}$)", fontsize=8.5)
+    style(ax, r"predicted $\sqrt{\rho(G)}$, standardised", "measured gain, standardised")
+
+    ax = axes[1]
+    rows = [r for r in io.load_all("t1_optimum") if "rows" in r["result"]][-1]["result"]["rows"]
+    ratios = sorted({r["prefill_ratio"] for r in rows})
+    budgets = np.logspace(np.log10(32), np.log10(16384), 40)
+    baseline = next(r for r in rows if r["prefill_ratio"] == 0.0)
+    b_ratio = (baseline["closed_form"] - 1) ** 2
+    ax.axhspan(8, 64, color="0.88", zorder=0)
+    for ratio, colour in zip(ratios, PALETTE + ["#8a8a8a"], strict=False):
+        if ratio == 0.0:
+            ax.axhline(
+                baseline["exact"], color="0.2", lw=1.6, ls="--",
+                label=r"$\alpha=0$: statistics only",
+            )
+            continue
+        values = [
+            brentq(
+                lambda g, ratio=ratio, budget=budget: 1.0
+                - ratio * budget / (g**2 * BETA_B)
+                - (1 + ratio) * b_ratio / (g - 1) ** 2,
+                1 + 1e-9,
+                1e6,
+            )
+            for budget in budgets
+        ]
+        ax.plot(budgets, values, color=colour, lw=1.5, label=rf"$\alpha={ratio:g}$")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator([2, 4, 8, 16, 32, 64]))
+    ax.yaxis.set_minor_locator(matplotlib.ticker.NullLocator())
+    ax.yaxis.set_major_formatter(
+        matplotlib.ticker.FixedFormatter(["2", "4", "8", "16", "32", "64"])
+    )
+    ax.set_ylim(2, 110)
+    ax.text(
+        14000, 68, "in common use", fontsize=6.5, color="0.4", va="bottom", ha="right"
+    )
+    ax.legend(frameon=False, fontsize=6.5, loc="upper left", handlelength=1.6,
+              labelspacing=0.25, borderpad=0.2)
+    ax.set_title("measured hardware moves the optimum", fontsize=8.5)
+    style(ax, "rollouts per step $R$", r"optimal group size $G^{\star}$")
+
+    fig.tight_layout()
+    fig.savefig(FIGURES / "teaser.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
+        ("teaser", figure_teaser),
         ("exact_curves", figure_exact_curves),
         ("estimator_accuracy", figure_estimator_accuracy),
         ("transformer_curves", figure_transformer_curves),

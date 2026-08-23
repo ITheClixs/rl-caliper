@@ -43,9 +43,12 @@ a trainer can measure while it runs.
   $\rho = 1/(1 + \Bcrit/P)$ that a run can read off the KL it already logs: progress at a fixed
   drift budget scales as $\sqrt{\rho}$.
 
-  \item \textbf{A closed form for the group size}, $G^{*} = 1 + \sqrt{\tau_w/\tau_b}$, independent
-  of the rollouts per step, and inflated by $\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ once
-  prefill sharing within a group is priced in (Proposition~\ref{prop:gstar}).
+  \item \textbf{A closed form for the group size.} When rollouts cost the same however they are
+  grouped, $G^{\star} = 1 + \sqrt{\tau_w/\tau_b}$ exactly, independent of the rollouts per step.
+  Pricing in prefill sharing makes the optimum the root of a one-line stationarity condition that
+  is increasing in both the prefill ratio and the batch size (Theorem~\ref{thm:split}), which is
+  what reconciles a statistical optimum of three to six with the eight to sixty-four in published
+  recipes.
 
   \item \textbf{An estimator that costs no extra rollouts}, reading both noise terms off a
   $K \times 2$ grid of the microbatch gradients a trainer already accumulates, together with three

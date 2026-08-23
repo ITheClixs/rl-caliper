@@ -219,6 +219,44 @@ def table_adam() -> None:
     write("adam", "\n".join(lines))
 
 
+def table_optimum() -> None:
+    """Theorem 1 against exact numerical optimisation of the cost-aware objective."""
+    runs = [r for r in io.load_all("t1_optimum") if "rows" in r["result"]]
+    if not runs:
+        raise SystemExit("no optimum verification run")
+    rows = runs[-1]["result"]["rows"]
+    budgets = sorted({r["rollouts"] for r in rows})
+    ratios = sorted({r["prefill_ratio"] for r in rows})
+    lines = [
+        r"\begin{tabular}{lcccc}",
+        r"\toprule",
+        r"$c_{\mathrm{pre}}/c_{\mathrm{dec}}$ & "
+        + " & ".join(f"$R={b}$" for b in budgets)
+        + r" \\",
+        r"\midrule",
+    ]
+    for ratio in ratios:
+        cells = []
+        for budget in budgets:
+            row = next(
+                r for r in rows if r["prefill_ratio"] == ratio and r["rollouts"] == budget
+            )
+            cells.append(f"{row['exact']:.1f}")
+        lines.append(f"{ratio:.2f} & " + " & ".join(cells) + r" \\")
+    lines.append(r"\midrule")
+    approx = {}
+    for ratio in ratios:
+        approx[ratio] = next(r for r in rows if r["prefill_ratio"] == ratio)["closed_form"]
+    summary = ", ".join(f"$\\alpha={k:.2f}$: {v:.1f}" for k, v in approx.items())
+    lines.append(
+        r"\multicolumn{5}{l}{\footnotesize small-batch limit \eqref{eq:gstar-cost} --- "
+        + summary
+        + r"} \\"
+    )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("optimum", "\n".join(lines))
+
+
 def main() -> None:
     for name, fn in (
         ("exact_agreement", table_exact_agreement),
@@ -228,6 +266,7 @@ def main() -> None:
         ("difficulty", table_difficulty),
         ("diagnosis", table_diagnosis),
         ("adam", table_adam),
+        ("optimum", table_optimum),
     ):
         try:
             fn()

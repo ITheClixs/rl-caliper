@@ -1,15 +1,14 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What this says about group sizes in practice.} Across every setting measured here --
-enumerable policies, transformers trained from scratch, and a pretrained model on real verifiable
-tasks -- the statistically optimal group size came out small, between roughly three and six
-responses per prompt. Published recipes commonly use eight to sixty-four. Equation~\eqref{eq:gstar-cost}
-says what would justify the difference: prefill sharing within a group. A setting with long prompts
-and short responses can have $c_{\mathrm{pre}}/c_{\mathrm{dec}}$ in the tens, and the resulting
-$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ inflation covers much of the gap. The point is not
-that large groups are wrong; it is that whether they are right is a measurement about the serving
-stack, and one that changes when the prompt-to-response length ratio changes.
+\paragraph{Group sizes in practice.} Measured on enumerable policies, on transformers trained from
+scratch and on a pretrained model, the purely statistical optimum came out between three and six
+responses per prompt. Published recipes commonly use eight to sixty-four, and
+Theorem~\ref{thm:split}(iii) accounts for the difference without either side being wrong: prefill
+sharing and a large rollout budget both push the optimum up, and at the prefill ratios we measure
+for long prompts with short answers they push it into the tens. What the theorem removes is the
+need to guess. Both inputs are measurements, one from the trainer and one from the serving stack,
+and the second changes whenever the prompt-to-response length ratio does.
 
 \paragraph{What the estimator costs.} Four -- or $2K$ -- gradient buffers instead of one, and no
 extra responses. A trainer that already accumulates over microbatches gets the decomposition for

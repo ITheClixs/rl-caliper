@@ -171,27 +171,44 @@ sixty-four in common use. What closes that gap is not statistics but hardware, w
 subsection measures.
 
 \subsection{What the hardware is worth}
+\label{sec:hardware}
 
-Equation~\eqref{eq:gstar-cost} inflates the optimal group size by
-$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$, and both costs are properties of the serving stack.
-Measuring them on this machine, for a $0.5$B model in bfloat16, gives a ratio that varies over three
-orders of magnitude with the shape of the workload: prefill dominates when prompts are long and
-responses short, and is negligible in the opposite case. Figure~\ref{fig:cost-model} converts the
-measurement into the inflation it implies.
+Theorem~\ref{thm:split} turns the split into a question about the serving stack as much as about
+the learning problem, through the prefill ratio $\alpha = c_{\mathrm{pre}}/c_{\mathrm{dec}}$. We
+measured both costs for a $0.5$B model in bfloat16 on the machine everything else ran on. The ratio
+is governed almost entirely by the prompt-to-response length ratio, running from $0.04$ when a
+short prompt is followed by a thousand tokens of response to $10.9$ when a thousand-token prompt is
+followed by a short answer.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/optimum}
+  \caption{The optimum $G^{\star}$ from Theorem~\ref{thm:split}, at the noise ratio measured on our
+  transformers, across measured prefill ratios and rollout budgets. Entries are the root of
+  \eqref{eq:stationary}, which agrees with direct numerical minimisation of \eqref{eq:objective} to
+  one part in $10^{7}$. The last row shows the small-batch limit, which is what one would quote
+  from \eqref{eq:gstar-cost} alone and which understates the optimum badly at large $R$.}
+  \label{tab:optimum}
+\end{table}
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.48\linewidth]{figures/cost_model.pdf}
-  \caption{Group-size inflation from sharing a prompt's prefill across its group, measured on an
-  Apple M4. Long prompts with short responses justify groups several times larger than the
-  statistical optimum; long responses do not.}
+  \includegraphics[width=\linewidth]{figures/cost_model.pdf}
+  \caption{Measured prefill-to-decode economics on an Apple M4, as the group-size inflation implied
+  in the small-batch limit. Long responses make prefill sharing almost worthless; short answers
+  behind long prompts make it decisive.}
   \label{fig:cost-model}
 \end{figure}
 
-This is the practical resolution of the gap between measured optima of three to six and the eight
-to sixty-four in common use. For short-answer verifiable tasks, where a long instruction is followed
-by a few tokens of answer, prefill amortisation justifies most of the difference. For
-reasoning-length responses it justifies almost none of it, and the statistical optimum stands.
+Table~\ref{tab:optimum} is the reconciliation the paper has been building towards. A purely
+statistical reading of the split says three; the settings in which published recipes were developed
+say otherwise, and the theorem says how much of that is justified. Long prompts with short answers
+at a large batch put the optimum in the tens, which is where the recipes are. Reasoning-length
+responses, where the response dwarfs the prompt, put it back at three to four, and there a group of
+sixteen is spending most of its budget on responses that a second prompt would have used better.
+The disagreement between a recipe and this analysis is therefore not evidence against either: it
+identifies the regime the recipe came from.
 
 \subsection{Under Adam}
 \label{sec:adam}
