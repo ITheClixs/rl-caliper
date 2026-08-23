@@ -15,7 +15,7 @@ enters only where a real trainer would have it.
 | `(G-1) tr(Sigma_w)` is G-independent | sweep G = 2..32 | varies by 6% over a 16x range in G |
 | Constant rescaling of advantages changes nothing | RLOO vs mean-baseline GRPO | identical critical batch size and identical progress; step size absorbs the factor exactly |
 | Drift model, `D = (1/2) eta^2 E[g^T F g]` | exact KL after a real update | within 3% over three orders of magnitude in eta |
-| Split estimator recovers the noise terms | 16 pools spanning `G* = 3.9` to `31.6` | median error in `G*` of 2.3%, worst case 16.6% |
+| Split estimator recovers the noise terms | 15 pools spanning `G* = 3.8` to `15.2` | median error in `G*` of 1.3%, worst case 6.2%; `tau_w` to 2.1% and `tau_b` to 3.4% at the median |
 | Result 4b, `G* = 1 + sqrt(tau_w/tau_b)` | training at every split of a fixed rollout budget | see below |
 
 ## The curvature model does not hold; the drift model does
@@ -51,3 +51,17 @@ the measured curves are flat to within their standard errors, which is the same 
 Sensitivity to the split is itself predicted: it grows as the rollouts per step fall, because the
 G-dependent term enters as `G Bcrit(G) / R`. At R = 240 the predicted spread reaches 7.5x on
 heterogeneous pools; at R = 48 on homogeneous pools it is 1.05x and nothing is measurable.
+
+## The estimator's failure modes
+
+Three biases had to be found and fixed before the estimator tracked the exact values. Each was
+diagnosed against known ground truth, which is the reason the exact tier exists.
+
+| bias | effect | fix |
+|---|---|---|
+| subtractive form for `tau_b` | negative `tau_b` and infinite `G*` on homogeneous pools; compresses the answer elsewhere (reports 6.1 where the truth is 9.4, 6.9 where it is 15.2) | estimate `tau_b` from a product of independent sub-group gradients instead of a difference of variances |
+| prompts repeated within a batch | `tau_b` biased down by 45% on the most homogeneous pool | draw distinct prompts per batch |
+| finite corpus, sampled without replacement | blocks anticorrelated; the signal estimate went negative on one pool | add `tau_b/(N-1)` to the different-block inner product |
+
+Raising the number of prompt blocks from 2 to 8 cut the error in `G*` on the hardest pool from 53%
+to 21% before the other two fixes were applied, and the estimator saturates beyond `K = 8`.

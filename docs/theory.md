@@ -234,22 +234,32 @@ transfer conjecture in Section 7.
 
 ## 6. Estimation from a single batch
 
-Split the batch two ways and use, for any PSD `M`, the unbiased pair
+Index the microbatches by prompt block `a = 1..K` and rollout sub-group `b = 1,2`, and accumulate
 
-    g_bar^T M g_bar  =  E[ g_A^T M g_B ]
-    tr(M Cov)        =  (1/4) E[ (g_A - g_B)^T M (g_A - g_B) ]                          (18)
+    g[a][b] = mean gradient over prompt block a using sub-group b
 
-for independent half-batch estimates `g_A, g_B`.
+Blocks hold disjoint prompts and, given a prompt, the sub-groups are independent, so
 
-* Split by **prompt** (disjoint halves of the `P` prompts): yields `tr(M(Sigma_b + Sigma_w))/P`.
-* Split by **rollout** (within each prompt, half the group against the other half): the prompt-level
-  component is shared and cancels, yielding `tr(M Sigma_w)` alone.
-* Difference: `tr(M Sigma_b)`.
+    signal = mean over a != a' of  g[a][0] . g[a'][1]
+    tau_b  = (P/K) * ( mean over a of g[a][0] . g[a][1]  -  signal )
+    tau_w  = (P/(2K)) * mean over a of | g[a][0] - g[a][1] |^2
 
-Both splits reuse gradients that are computed anyway, so the full hierarchical decomposition costs no
-extra rollouts and no extra backward passes beyond accumulating into two buffers instead of one.
-`M = I` gives the practical noise scale; `M = F` is obtained from measured KL rather than from
-materialising `F`.
+Every term is an inner product of independent quantities rather than a difference of two large
+variances. Raising `K` averages the block statistics over `K(K-1)` pairs instead of one and shrinks
+the `P/K` multiplier on the noisiest term, so more microbatches means a better estimate at no extra
+cost. `M = I` gives the practical form; `M = F` comes from measured KL.
+
+Three biases have to be handled, all found by checking against exactly known values:
+
+1. Estimating `tau_b` as (total variance - within-prompt variance) is badly conditioned; it returns
+   a negative `tau_b` on homogeneous pools and compresses the answer elsewhere.
+2. A prompt sampled twice in one batch lands in two blocks, so the different-block product picks up
+   a same-prompt term and `tau_b` is biased down. Draw distinct prompts.
+3. Drawing without replacement from a corpus of `N` makes blocks anticorrelated; the exact
+   correction `+ tau_b/(N-1)` restores the signal estimate. See (7b).
+
+With those in place the estimator recovers `G*` to a median error of 1.3% over pools spanning a
+factor of 26 in the noise ratio.
 
 ## 7. Scale transfer (conjecture under test)
 
