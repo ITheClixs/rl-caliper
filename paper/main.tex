@@ -44,16 +44,16 @@ difficulty, so that variants with a $p$-independent $\lambda$ are the same estim
 size; and the gradient noise decomposes into a between-prompt term $\tau_b$ that responses cannot
 reduce and a within-prompt term $\tau_w$ that shrinks as $1/(G-1)$ and equals, up to one scalar, the
 mean Bernoulli variance of the pass-rate distribution. A second-order model of the objective turns
-out to be a poor guide -- it understates the useful step size more than fourfold against exactly
+out to be a poor guide -- it understates the useful step size at least fourfold against exactly
 computed improvement -- while a model of how far the \emph{policy} moves predicts measured KL to
-within 3\% over three decades in step size. Building on the latter gives an efficiency
+within 4\% over three decades in step size. Building on the latter gives an efficiency
 $\rho = 1/(1 + \Bcrit/P)$ that a trainer can read off the KL it already logs, a closed form for the
 optimal group size $G^{*} = 1 + \sqrt{\tau_w/\tau_b}$, inflated by
 $\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ once prefill sharing is priced in, and an estimator
 that recovers both noise terms from the microbatch gradients a trainer already accumulates, at no
 extra rollout cost. We validate on exactly enumerable policies, on populations of transformers
 trained from scratch as a single batched kernel, and on a pretrained model with real verifiers.
-Measured optima are small -- three to five responses per prompt before hardware is priced in -- and
+Measured optima are small -- three to six responses per prompt on transformers and on a pretrained model, before hardware is priced in -- and
 the drift target that maximises progress is unchanged across an eightfold change in batch size,
 while transferring the learning rate tuned at the smallest batch costs 22\% of the achievable gain
 at the largest. All experiments run on one laptop, which is the point: the claim is that small

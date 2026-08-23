@@ -37,7 +37,7 @@ a trainer can measure while it runs.
   already sitting in every training log.
 
   \item \textbf{A drift model in place of a curvature model.} The obvious second-order treatment of
-  the objective fails badly for RLVR, understating the useful step size by more than fourfold
+  the objective fails badly for RLVR, understating the useful step size at least fourfold
   against exactly computed improvement. Modelling how far the \emph{policy} moves instead is
   accurate to $4\%$ over three orders of magnitude in step size, and yields an efficiency
   $\rho = 1/(1 + \Bcrit/P)$ that a run can read off the KL it already logs: progress at a fixed
