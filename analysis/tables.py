@@ -136,12 +136,39 @@ def table_real() -> None:
 PLACEHOLDER = r"\emph{pending: this table is generated from a run that has not been stored yet.}"
 
 
+def table_difficulty() -> None:
+    runs = [
+        r
+        for r in io.load_all("c2_difficulty")
+        if r["result"]["rows"] and "bernoulli" in r["result"]["rows"][0]
+    ]
+    if not runs:
+        raise SystemExit("no difficulty-bucket run")
+    rows = runs[-1]["result"]["rows"]
+    ratios = np.array([r["tau_w_scaled"] / max(r["bernoulli"], 1e-12) for r in rows])
+    lines = [
+        r"\begin{tabular}{lccccc}",
+        r"\toprule",
+        r"bucket & screened $p$ & measured $p$ & $\E[p(1-p)]$ & $\tau_w$ & "
+        r"$\tau_w/\E[p(1-p)]$, relative \\",
+        r"\midrule",
+    ]
+    for row, ratio in zip(rows, ratios / ratios.mean(), strict=True):
+        lines.append(
+            f"{row['bucket']} & {row['screen_pass_rate']:.3f} & {row['probe_pass_rate']:.3f} & "
+            f"{row['bernoulli']:.3f} & {row['tau_w_scaled']:.2e} & {ratio:.2f} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("difficulty", "\n".join(lines))
+
+
 def main() -> None:
     for name, fn in (
         ("exact_agreement", table_exact_agreement),
         ("transfer", table_transfer),
         ("transformer", table_transformer),
         ("real", table_real),
+        ("difficulty", table_difficulty),
     ):
         try:
             fn()

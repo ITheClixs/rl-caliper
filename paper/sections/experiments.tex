@@ -128,20 +128,40 @@ the two noise terms separately. Table~\ref{tab:real} reports what the probe meas
 \begin{table}[t]
   \centering
   \input{tables/real}
-  \caption{Noise terms measured on a pretrained model. The last column tests
-  Corollary~\ref{cor:bernoulli} by dividing the within-prompt term by the mean Bernoulli variance of
-  the corpus; the corollary predicts a constant, and the constant it predicts is the score scale
-  $\sigma_s^2$, which is shared only among corpora whose responses have comparable structure.}
+  \caption{Noise terms measured on a pretrained model, normalised so the last column would be
+  constant if Corollary~\ref{cor:bernoulli} held across corpora. It does not: the ratio spans almost
+  an order of magnitude. This is the corollary's stated assumption failing, not the corollary --
+  the constant it predicts is the score scale $\sigma_s^2$, and families whose responses are a
+  single number and families whose responses are four numbers do not share one. Tested within a
+  family, where that assumption holds, the prediction survives (Table~\ref{tab:difficulty}).}
   \label{tab:real}
 \end{table}
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.42\linewidth]{figures/real_model.pdf}
-  \caption{Within-prompt noise against the reward histogram on a pretrained model. The dashed line
-  is a single fitted scale.}
+  \caption{Within-prompt noise against the reward histogram across corpora on a pretrained model,
+  with a single fitted scale. The scatter around the line is the score scale differing between task
+  families.}
   \label{fig:real-model}
 \end{figure}
+
+Splitting one family into difficulty buckets removes that confound. Prompts are screened with a
+larger sample than the one used in the measurement, so the bucket boundaries do not inherit the
+noise of the quantity under test, and the pass rate reported is the one re-measured during the
+probe rather than the one used to sort.
+
+\begin{table}[t]
+  \centering
+  \input{tables/difficulty}
+  \caption{Within-prompt noise across difficulty buckets of a single task family.}
+  \label{tab:difficulty}
+\end{table}
+
+Measured optimal group sizes on this model run from under three to about six, in the same range as
+the enumerable policies and the transformers trained from scratch, and well below the eight to
+sixty-four in common use. What closes that gap is not statistics but hardware, which the next
+subsection measures.
 
 \subsection{What the hardware is worth}
 
