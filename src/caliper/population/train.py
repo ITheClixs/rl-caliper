@@ -45,6 +45,7 @@ class RLConfig:
     eval_every: int = 5
     controller_gain: float = 0.5
     max_step_ratio: float = 1.5
+    control: bool = True
     history: dict = field(default_factory=dict)
 
 
@@ -60,15 +61,18 @@ def make_pool(task, population: int, pool_size: int, generator) -> torch.Tensor:
 
 
 def draw_prompts(task, pool, n, count, generator):
-    """Prompts drawn either from the full task distribution or from a fixed per-member pool."""
+    """Draw `count` distinct prompts per population member from a fixed pool.
+
+    Distinctness matters: a prompt appearing in two accumulation blocks makes the between-block
+    inner product pick up a same-prompt term, which biases the between-prompt noise estimate down.
+    """
     if pool is None:
         return task.sample_prompts(n * count, generator).reshape(n, count, task.prompt_len)
-    idx = torch.randint(
-        0, pool.shape[1], (n, count), generator=generator, device=pool.device
-    )
-    return torch.gather(
-        pool, 1, idx.unsqueeze(-1).expand(-1, -1, task.prompt_len)
-    )
+    if count > pool.shape[1]:
+        raise ValueError("cannot draw more distinct prompts than the pool holds")
+    order = torch.rand(n, pool.shape[1], generator=generator, device=pool.device).argsort(dim=1)
+    idx = order[:, :count]
+    return torch.gather(pool, 1, idx.unsqueeze(-1).expand(-1, -1, task.prompt_len))
 
 
 @torch.no_grad()
@@ -276,8 +280,9 @@ class RLVRTrainer:
         self.optimiser.step(step_sizes)
 
         drift = self._token_kl(old_logits, self._response_logits(tokens))
-        for member, value in enumerate(drift.tolist()):
-            self.controllers[member].update(value)
+        if self.config.control:
+            for member, value in enumerate(drift.tolist()):
+                self.controllers[member].update(value)
 
         info = {
             "drift": drift.tolist(),

@@ -1,1 +1,222 @@
-% theory
+\section{What the estimators compute, and how noisy they are}
+\label{sec:theory}
+
+All results in this section are exact at finite $G$, and all are verified against brute-force
+enumeration in Section~\ref{sec:experiments}. Define, for $m \sim \mathrm{Binomial}(G-1, p)$ and
+$m' \sim \mathrm{Binomial}(G-2, p)$,
+\begin{equation}
+  \label{eq:contractions}
+  W_r := \E_m\big[w(r + m, r)\big], \quad
+  Q_r := \E_m\big[w(r + m, r)^2\big], \quad
+  C_{ab} := \E_{m'}\big[w(a + b + m', a)\, w(a + b + m', b)\big].
+\end{equation}
+
+\subsection{The estimator zoo is a reweighting of prompt difficulty}
+
+\begin{proposition}[Exact expectation]
+  \label{prop:mean}
+  For any estimator of the form \eqref{eq:family} and any binary reward,
+  \begin{equation}
+    \E[z \mid x] \;=\; \lambda(p, G)\, h(x),
+    \qquad
+    \lambda(p, G) \;=\; W_1(p,G) - W_0(p,G).
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Condition on $r_j$. The other $G-1$ rewards are i.i.d.\ Bernoulli$(p)$ and, given $r_j$, are
+  independent of $\score(y_j)$, so
+  $\E[w(k, r_j)\score(y_j)] = \sum_{r} \Pr[r]\, W_r\, u_r$. Summing over $j$ and applying
+  \eqref{eq:score-identity} gives $\E[z] = p\,(W_1 - W_0)\,u_1 = \lambda h$.
+\end{proof}
+
+Three consequences follow immediately, and each is exact for every $p$ and every $G$.
+RLOO has $W_1 = 1-p$ and $W_0 = -p$, hence $\lambda \equiv 1$: it is unbiased.
+GRPO with a mean baseline has $\lambda = (G-1)/G$, independent of $p$: it is RLOO multiplied by a
+constant. Standardised GRPO has a $\lambda(p, G)$ with no closed form but an exact binomial sum.
+
+So no member of this family points in the wrong direction. Each computes the true per-prompt
+gradient $h(x)$, scaled by a weight that depends on the prompt's difficulty; the family optimises
+the reweighted gradient field $\E_x[\lambda(p(x), G)\, h(x)]$, and its members differ only through
+$\lambda$. Standardisation is therefore not a variance-reduction device. It is a change of
+objective, one that upweights prompts whose pass rate is near $0$ or $1$ relative to prompts of
+intermediate difficulty.
+
+A constant $\lambda$ is invisible: rescaling an estimator by $c$ rescales the optimal step size by
+$1/c$ and leaves every trajectory unchanged. Only the \emph{dependence of $\lambda$ on $p$} can
+alter what a run converges to. This is the sense in which most of the zoo is one estimator.
+
+\subsection{Exact covariance at finite group size}
+
+\begin{proposition}[Exact per-prompt covariance]
+  \label{prop:cov}
+  With $U := u_1 u_1^{\!\top}$,
+  \begin{equation}
+    \Cov(z \mid x)
+    = \frac{1}{G}\Big[ p\,Q_1 S_1 + (1-p)\,Q_0 S_0 \Big]
+    + c_U(p, G)\, U ,
+  \end{equation}
+  \begin{equation}
+    c_U = \frac{1}{G}\Big( p\,Q_1 + \frac{p^2 Q_0}{1-p} \Big)
+        + p^2\Big[ \frac{G-1}{G}\big( C_{11} - 2C_{10} + C_{00} \big) - \lambda^2 \Big].
+  \end{equation}
+\end{proposition}
+
+\begin{proof}
+  Split $\E[z z^{\!\top}]$ into diagonal and off-diagonal terms. The diagonal contributes
+  $G^{-1}[p Q_1 M_1 + (1-p) Q_0 M_0]$ with $M_r = S_r + u_r u_r^{\!\top}$. For $j \neq l$,
+  condition on $(r_j, r_l)$ and on the count $m'$ among the remaining $G-2$ responses; the two
+  scores are then conditionally independent, giving
+  $\frac{G-1}{G}\sum_{a,b}\Pr[a]\Pr[b]\,C_{ab}\,u_a u_b^{\!\top}$, which collapses to
+  $\frac{G-1}{G} p^2 (C_{11} - 2C_{10} + C_{00}) U$ by \eqref{eq:score-identity}. Subtracting
+  $\E[z]\E[z]^{\!\top} = \lambda^2 p^2 U$ completes the proof.
+\end{proof}
+
+\subsection{Two levels of noise}
+
+Prompts are drawn independently, so with $\gbar := \E_x[\lambda h]$ the batch estimator has
+\begin{equation}
+  \label{eq:hierarchy}
+  \Cov(\ghat) \;=\; \frac{1}{P}\Big[ \Sb + \Sw \Big],
+  \qquad
+  \Sb := \Cov_x\big( \lambda(p(x), G)\, h(x) \big),
+  \qquad
+  \Sw := \E_x\big[ \Cov(z \mid x) \big].
+\end{equation}
+$\Sb$ is the irreducible variance of sampling prompts and does not shrink with $G$; $\Sw$ is the
+variance of sampling responses and does. Pretraining has one level of sampling and therefore one
+noise scale. RLVR has two, and the split of a fixed rollout budget between them is a free choice
+that nothing in the literature currently determines.
+
+\begin{corollary}[The reward histogram predicts the response-level noise]
+  \label{cor:bernoulli}
+  For RLOO, $p Q_1 + (1-p) Q_0 = p(1-p)\,G/(G-1)$ exactly, for every $G$. If the conditional score
+  covariances are comparable across the two reward classes, $\tr S_0 \approx \tr S_1 \approx
+  \sigma_s^2$, then
+  \begin{equation}
+    \label{eq:bernoulli}
+    \tr \Sw \;\approx\; \frac{\sigma_s^2}{G-1}\, \E_x\big[ p(x)\,(1 - p(x)) \big].
+  \end{equation}
+\end{corollary}
+
+The response-level noise is, up to one slowly varying scalar, the mean Bernoulli variance of the
+pass-rate distribution: a quantity every RLVR trainer already logs, at no cost. The isotropy
+assumption is measured rather than asserted in Section~\ref{sec:experiments}.
+
+\section{Drift, efficiency, and how to split a rollout budget}
+\label{sec:drift}
+
+The usual route to a critical batch size is a second-order model of the objective
+\citep{mccandlish2018empirical}. It does not survive contact with RLVR. The objective $J = \E[r]$
+is not a log-likelihood, its Hessian is not the negative Fisher information, and along a policy
+gradient direction a log-linear policy keeps improving well past the step at which a quadratic
+model turns over. Measured against exactly computed improvement in
+Section~\ref{sec:experiments}, the curvature model understates the useful step size by more than a
+factor of four.
+
+What is accurate is a model of how far the policy moves.
+
+\subsection{The drift model}
+
+One update of size $\eta$ displaces the policy by
+\begin{equation}
+  \label{eq:drift}
+  D(\eta) \;:=\; \E_x\Big[ \KL\big( \pi_{t+1}(\cdot \mid x) \,\big\|\, \pi_t(\cdot \mid x) \big) \Big]
+  \;=\; \tfrac{1}{2}\eta^2\, \E\big[ \ghat^{\!\top} F\, \ghat \big] + O(\eta^3)
+  \;=\; \tfrac{1}{2}\eta^2 \Big( \mathcal{G} + \tfrac{N}{P} \Big),
+\end{equation}
+where $F$ is the Fisher information of the policy,
+$\mathcal{G} := \gbar^{\!\top} F \gbar$ and $N := \tr(F\Sb) + \tr(F\Sw)$. In the enumerable
+testbed \eqref{eq:drift} predicts the true KL to within $3\%$ over three orders of magnitude in
+$\eta$.
+
+Drift decomposes into a \emph{signal} part $\tfrac{1}{2}\eta^2\mathcal{G}$, which moves the policy
+along the mean update, and a \emph{diffusive} part $\tfrac{1}{2}\eta^2 N/P$, which is a random walk
+in function space and buys nothing. Their ratio defines the efficiency
+\begin{equation}
+  \label{eq:efficiency}
+  \rho \;:=\; \frac{\mathcal{G}}{\mathcal{G} + N/P} \;=\; \frac{1}{1 + \Bcrit/P},
+  \qquad
+  \Bcrit \;:=\; \frac{N}{\mathcal{G}} \;=\; \frac{\tr(F\Sb) + \tr(F\Sw)}{\gbar^{\!\top} F \gbar},
+\end{equation}
+which is the RLVR analogue of the gradient noise scale, measured in prompts, and is a two-level
+quantity: a floor set by prompt diversity plus a term that $G$ divides down. Equation
+\eqref{eq:efficiency} also says that \textbf{a trainer can read its own batch-size efficiency off
+the KL it already logs}: a run whose measured drift is mostly diffusive is running below its
+critical batch size, and by how much is quantified without a sweep.
+
+\subsection{Progress at a fixed drift budget}
+
+To first order an update improves the objective by $\eta\, a$ with $a := \nabla J^{\!\top}\gbar$.
+Solving \eqref{eq:drift} for $\eta$ at a prescribed drift $D$,
+\begin{equation}
+  \label{eq:progress}
+  \E[\Delta J] \;=\; a\sqrt{\frac{2D}{\mathcal{G} + N/P}}
+  \;=\; \sqrt{2D}\;\frac{a}{\sqrt{\mathcal{G}}}\;\sqrt{\rho}.
+\end{equation}
+Progress at a fixed drift budget scales as the \emph{square root} of the efficiency. The estimator
+enters only through $a/\sqrt{\mathcal{G}}$, the alignment of its mean with the true gradient in
+Fisher units; the batch composition enters only through $\rho$.
+
+Since KL is quadratic in the step, a fixed total drift $D_{\mathrm{tot}}$ spread over $N_{\text{s}}$
+updates buys path length $\propto \sqrt{N_{\text{s}} D_{\mathrm{tot}}}$: many small steps travel
+further than one large step of the same total drift. Total progress over a run therefore scales as
+$\sqrt{N_{\text{s}}\,\rho}$, and maximising it over the batch composition means maximising
+$N_{\text{s}}\rho$.
+
+\subsection{The optimal group size}
+
+Let $\tau_b := \tr(F\Sb)$ and $\tau_w := (G-1)\tr(F\Sw)$, the latter independent of $G$ to leading
+order by Corollary~\ref{cor:bernoulli}. With the rollouts per step $R = PG$ fixed by hardware,
+maximising $N_{\text{s}}\rho = R_{\mathrm{tot}} / \big( G (P + \Bcrit(G)) \big)$ means minimising
+\begin{equation}
+  \label{eq:objective}
+  G\,\Bcrit(G) \;=\; \frac{1}{\mathcal{G}}\Big[ G\,\tau_b + \tau_w\,\frac{G}{G-1} \Big],
+\end{equation}
+which is convex in $G$ with an interior minimum.
+
+\begin{proposition}[Optimal group size]
+  \label{prop:gstar}
+  At a fixed number of rollouts per step,
+  \begin{equation}
+    \label{eq:gstar}
+    G^{*} \;=\; 1 + \sqrt{\frac{\tau_w}{\tau_b}} ,
+  \end{equation}
+  independently of $R$. Holding $P$ fixed instead gives
+  $G^{*} = 1 + \sqrt{\tau_w / (P\mathcal{G} + \tau_b)}$, which recovers \eqref{eq:gstar} when the
+  run is below its critical batch size.
+\end{proposition}
+
+The optimal group size is one plus the square root of the ratio of within-prompt to
+between-prompt gradient noise. Both traces are measurable from a single batch
+(Section~\ref{sec:estimation}), so $G^{*}$ is an observable rather than a hyperparameter.
+
+\paragraph{Rollouts are not equally expensive.} When a group shares its prompt's prefix, prefill is
+paid once per prompt and decode once per response, so the cost of a step is
+$P\,(c_{\mathrm{pre}} + G\,c_{\mathrm{dec}})$. Minimising
+$(c_{\mathrm{pre}} + G c_{\mathrm{dec}})\Bcrit(G)$ in place of \eqref{eq:objective} gives
+\begin{equation}
+  \label{eq:gstar-cost}
+  G^{*}_{\mathrm{compute}} \;=\; 1 + \sqrt{\Big(1 + \frac{c_{\mathrm{pre}}}{c_{\mathrm{dec}}}\Big)
+  \frac{\tau_w}{\tau_b}} .
+\end{equation}
+The compute-optimal group size is the statistically optimal one inflated by
+$\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$. Two measurements fix it: the noise ratio from the
+trainer and the prefill-to-decode cost ratio from the serving stack.
+
+\paragraph{The optimum moves during a run.} Both $\tau_w$ and $\tau_b$ change as the policy
+improves: $\E_x[p(1-p)]$ falls once a task is largely solved, and prompt-to-prompt gradient
+heterogeneity falls as a model acquires a shared algorithm. Which effect dominates is an empirical
+question, not a theoretical one, and Section~\ref{sec:experiments} shows both directions occurring
+in different settings. This is the point of the paper in miniature: the schedule is measurable, and
+it is not guessable.
+
+\subsection{The step size is a drift target}
+
+Equation \eqref{eq:drift} inverts to
+$\eta(D) = \sqrt{2D / (\mathcal{G} + N/P)}$, so a run can be specified by a target drift instead of
+a learning rate. Learning rate, clip range and KL coefficient are three controls acting on the
+single quantity $D$, which is why they interact, and why none of them transfers between scales or
+tasks on its own. Drift is measured in nats per token and is a property of the policy's behaviour
+rather than of its parameterisation; whether that makes it transfer is tested in
+Section~\ref{sec:experiments}.

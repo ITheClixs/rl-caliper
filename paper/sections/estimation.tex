@@ -1,1 +1,50 @@
-% estimation
+\section{Measuring the two noise scales from a single batch}
+\label{sec:estimation}
+
+Both $\tau_b$ and $\tau_w$ are recoverable from gradients a trainer already computes. Partition the
+batch by prompt half and by rollout sub-group, and accumulate the four resulting microbatch
+gradients separately:
+\begin{equation}
+  g_{ab} \;:=\; \text{mean gradient over prompt half } a \text{ using rollout sub-group } b,
+  \qquad a, b \in \{0, 1\},
+\end{equation}
+each computed with its own sub-group's advantages. The two prompt halves are independent, and
+given a prompt the two sub-groups are independent, so every term below is an inner product of
+independent quantities:
+\begin{align}
+  \label{eq:estimators}
+  \gbar^{\!\top} M \gbar &= \E\big[ g_{00}^{\!\top} M\, g_{11} \big],
+  &&\text{different prompts, different responses,} \\
+  \tr(M\Sb) &= \tfrac{P}{2}\Big( \E\big[ g_{a0}^{\!\top} M\, g_{a1} \big]
+                                 - \E\big[ g_{00}^{\!\top} M\, g_{11} \big] \Big),
+  &&\text{same prompts, different responses,} \nonumber \\
+  \tr(M\Sw) &= \tfrac{P}{4}\, \E\big[ \| g_{a0} - g_{a1} \|_M^2 \big],
+  &&\text{the prompt term cancels in the difference.} \nonumber
+\end{align}
+
+The cost is four gradient buffers rather than one, no extra responses, and no extra backward work
+beyond accumulating into four accumulators instead of one -- which any trainer using gradient
+accumulation over microbatches is already doing. Setting $M = I$ gives the practical form; setting
+$M = F$ is obtained from measured KL rather than from materialising the Fisher.
+
+\paragraph{Conditioning.} The obvious alternative, estimating the total variance and subtracting
+the within-prompt part, is a difference of two large and highly correlated variances. On
+homogeneous prompt pools it routinely returns a negative $\tau_b$ and an infinite $G^{*}$. The form
+in \eqref{eq:estimators} differences two quantities of comparable size that share no sampling
+noise, and it tracked the exact $\tau_b$ to within $4\%$ across pools spanning a factor of seven in
+$G^{*}$ where the subtractive form failed outright.
+
+\paragraph{Preconditioners.} An update is $\eta\, \Pi\, \ghat$ for a preconditioner $\Pi$, and Adam
+is scale invariant, so both the drift model and the estimators must be read in the metric the
+update actually moves in. In practice this means instrumenting the preconditioned gradient: all
+results in \eqref{eq:estimators} carry over with $F \mapsto \Pi F \Pi$ under the standard
+assumption that $\Pi$ varies slowly relative to batch-to-batch fluctuation.
+
+\paragraph{Controlling drift.} Since $D \propto \eta^2$, a multiplicative controller
+\begin{equation}
+  \eta_{t+1} \;=\; \eta_t \cdot \mathrm{clip}\Big( \big( D^{*} / D_t \big)^{1/2},\ c^{-1},\ c \Big)
+\end{equation}
+corrects a mis-set step in a single update when the drift estimate is clean. Measured over runs on
+transformers, this controller holds the median drift at its target with no detectable bias in log
+space. Exponential smoothing of $D_t$, the obvious refinement, makes it worse: the lag biases the
+realised drift low by roughly a factor of two.
