@@ -134,3 +134,31 @@ Each group size was swept over a learning-rate grid and over a drift-target grid
 The negative result is more informative than a win would have been: it separates the unit (drift,
 which is right) from the schedule (constant, which is not) and puts a bound on the range over which
 a single target can be carried.
+
+## Under Adam
+
+The same sweep under gradient ascent and under Adam, at 256 rollouts per step and a corpus of 1024:
+
+| gain by group size | 2 | 4 | 8 | 16 | 32 | 64 | measured `G*` | `R^2` |
+|---|---|---|---|---|---|---|---|---|
+| gradient ascent | +0.409 | +0.413 | +0.390 | +0.333 | +0.300 | +0.250 | 2.94 | 0.992 |
+| Adam | +0.519 | +0.527 | +0.514 | +0.492 | +0.447 | +0.384 | 3.42 | 0.969 |
+
+Both optimisers put the optimum at `G = 4`, and the parameter-free prediction explains the curve
+about as well for each. Adam is visibly flatter in `G`, which is what a scale-invariant update
+should look like.
+
+Measuring in Adam's metric took two fixes, both consequences of the preconditioner being estimated
+rather than fixed:
+
+1. **Prime it.** A probe at a frozen policy starts with an empty second moment, so there is no
+   metric yet. Running the optimiser state forward on real batches with a zero step size gives the
+   preconditioner a real run would have, without moving the policy.
+2. **Floor it.** Dividing by `sqrt(v)` is unbounded: coordinates that rarely receive gradient have a
+   tiny second moment, which is harmless for Adam's update but dominates an inner product between
+   two noisy gradients. Unfloored, the estimator returned a negative `tau_b` and an inverted
+   efficiency curve.
+
+The floor does not need tuning. Over three orders of magnitude in it the measured `G*` moves only
+from 3.51 to 3.15, against an observed optimum of 4; with no floor at all the same measurement
+reports 11.9.
