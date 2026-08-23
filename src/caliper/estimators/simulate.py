@@ -44,6 +44,7 @@ def simulate_split_batch(
     chosen = rng.choice(len(prompts), size=n_prompts, replace=True)
     dim = prompts[0].scores.shape[1]
     buffers = {k: np.zeros(dim) for k in ("pa", "pb", "ra", "rb", "refa", "refb")}
+    between = 0.0
 
     for slot, prompt_idx in enumerate(chosen):
         prompt = prompts[prompt_idx]
@@ -53,11 +54,17 @@ def simulate_split_batch(
         half = "pa" if slot < n_prompts // 2 else "pb"
         buffers[half] += full
         buffers["refa" if slot < n_prompts // 2 else "refb"] += ref
-        buffers["ra"] += group_gradient(prompt, idx[:subgroup], w_sub)
-        buffers["rb"] += group_gradient(prompt, idx[subgroup:], w_sub)
+        sub_a = group_gradient(prompt, idx[:subgroup], w_sub)
+        sub_b = group_gradient(prompt, idx[subgroup:], w_sub)
+        buffers["ra"] += sub_a
+        buffers["rb"] += sub_b
+        # the two sub-groups are independent given the prompt, so their inner product has
+        # expectation tr(M(Sigma_b + g_bar g_bar^T)) with no within-prompt contribution
+        between += sub_a @ sub_b if matrix is None else sub_a @ matrix @ sub_b
 
     half_n = n_prompts // 2
     return decompose(
+        between_second_moment=between / n_prompts,
         prompt_half_a=buffers["pa"] / half_n,
         prompt_half_b=buffers["pb"] / half_n,
         rollout_half_a=buffers["ra"] / n_prompts,

@@ -118,87 +118,104 @@ property of the model, not of the data, so a single calibration measurement conv
 histogram into a noise estimate at zero cost. Isotropy is an assumption and is measured, not asserted,
 in the exact testbed.
 
-## 4. Progress, efficiency and the critical batch size
+## 4. Drift, efficiency and the critical batch size
 
-Second-order model of one gradient-ascent step of size `eta` with curvature `H`:
+A curvature model of the objective is tempting but wrong here: `J = E[r]` is not a log-likelihood,
+its Hessian is not the negative Fisher, and along a policy-gradient direction a log-linear policy
+keeps improving far past the point a quadratic model predicts. This was measured, not assumed
+(experiment A2). What *is* accurate is the model of how far the policy moves.
 
-    E[dJ] = eta |g_bar|^2 - (1/2) eta^2 ( g_bar^T H g_bar + tr(H Cov(g_hat)) )          (9)
+### The drift model
 
-    eta*   = |g_bar|^2 / ( g_bar^T H g_bar + tr(H Cov(g_hat)) )
-    E[dJ]* = (1/2) |g_bar|^4 / ( g_bar^T H g_bar + tr(H Cov(g_hat)) )                   (10)
+One update of size `eta` moves the policy by
 
-Substituting (7) and writing `Gcal := g_bar^T H g_bar`:
+    D(eta) := E_x[ KL( pi_{t+1}(.|x) || pi_t(.|x) ) ]
+            = (1/2) eta^2 E[ g_hat^T F g_hat ] + O(eta^3)
+            = (1/2) eta^2 ( Gcal + N / P ),                                              (9)
 
-    E[dJ]* = dJ_max / (1 + Bcrit(G) / P),      dJ_max := (1/2) |g_bar|^4 / Gcal         (11)
+    Gcal := g_bar^T F g_bar,        N := tr(F Sigma_b) + tr(F Sigma_w(G))
 
-    Bcrit(G) := [ tr(H Sigma_b) + tr(H Sigma_w(G)) ] / Gcal        (units: prompts)     (12)
+with `F` the Fisher information of the policy. In the exactly enumerable testbed this predicts the
+true KL to within 3% over three orders of magnitude in `eta`.
 
-`Bcrit` is the RL analogue of the gradient noise scale, and it is a *two-level* quantity: a floor set by
-prompt diversity plus a term that `G` divides down. The steps/examples Pareto frontier retains the
-familiar form `S/S_min = 1 + Bcrit/P`, `E/E_min = 1 + P/Bcrit`.
+Drift splits into a **signal** part `(1/2) eta^2 Gcal`, which moves the policy along the mean update,
+and a **diffusive** part `(1/2) eta^2 N / P`, which is a random walk in function space. Their ratio is
+the efficiency
 
-### Result 4 (closed-form optimal group size)
+    rho := Gcal / (Gcal + N/P) = 1 / (1 + Bcrit / P),      Bcrit := N / Gcal             (10)
 
-Write `tau_b := tr(H Sigma_b)` and `tau_w := (G-1) tr(H Sigma_w(G))`, the latter being
-`G`-independent to leading order by (8). Fix the rollouts available per step, `R = P G`, which is
-what hardware actually constrains, and split them. Progress per step is
-`dJ_max / (1 + G Bcrit(G) / R)`, so the optimal split minimises
+`Bcrit` is measured in prompts and is the RL analogue of the gradient noise scale. It is a *two-level*
+quantity: a floor set by prompt diversity plus a term that `G` divides down.
 
-    G * Bcrit(G) = [ G tau_b + tau_w * G/(G-1) ] / Gcal                                 (13)
+### Result 4a (progress at a fixed drift budget)
 
-which is convex in `G` with the interior minimum
+To first order the expected improvement of an update is `eta * a` with `a := grad J^T g_bar`. Solving
+(9) for `eta` at a given drift `D`,
 
-    G* = 1 + sqrt( tau_w / tau_b )                                                      (14)
+    E[dJ] = a * sqrt( 2D / (Gcal + N/P) ) = sqrt(2D) * (a / sqrt(Gcal)) * sqrt(rho)      (11)
+
+**Progress at a fixed drift budget scales as the square root of the efficiency.** The estimator enters
+only through `a / sqrt(Gcal)`, the alignment of its mean with the true gradient measured in Fisher
+units; the batch composition enters only through `rho`.
+
+Because KL is quadratic in the step, a fixed *total* drift `D_tot` spread over `N` steps buys path
+length `sqrt(2 N D_tot / (Gcal + N/P))`: many small steps traverse further than one large step of the
+same total drift. Total progress over a run is therefore
+
+    total dJ  ∝  sqrt( N * rho ),          N = number of updates                          (12)
+
+### Result 4b (closed-form optimal group size)
+
+Write `tau_b := tr(F Sigma_b)` and `tau_w := (G-1) tr(F Sigma_w(G))`, the latter `G`-independent to
+leading order by (8) -- verified to 6% over G = 2..32 in the exact testbed. Hardware fixes the
+rollouts available per step, `R = P G`; the question is how to split them. Maximising (12) means
+maximising `N rho = R_tot / (G (P + Bcrit(G)))`, i.e. minimising
+
+    G * ( P + Bcrit(G) ),     Bcrit(G) = ( tau_b + tau_w/(G-1) ) / Gcal                  (13)
+
+At fixed `R = P G` this is convex in `G` with the interior minimum
+
+    G* = 1 + sqrt( tau_w / tau_b )                                                       (14)
 
 **The optimal group size is one plus the square root of the ratio of within-prompt to
-between-prompt gradient noise**, and it does not depend on `R`. Both traces are measurable from a
-single batch by the two-split estimator of Section 6, so `G*` is an observable, not a hyperparameter.
-Holding `P` fixed instead of `R` gives `G* = 1 + sqrt(tau_w / (P Gcal + tau_b))`, which recovers (14)
-in the small-`P` regime. Estimators whose `lambda` depends on `p` shift `G*` through the numerator
-`|g_bar(G)|` as well; this is computed exactly rather than approximated.
+between-prompt gradient noise**, independent of `R`. Both traces are measurable from a single batch
+by the two-split estimator of Section 6, so `G*` is an observable, not a hyperparameter. Holding `P`
+fixed rather than `R` gives `G* = 1 + sqrt(tau_w / (P Gcal + tau_b))`, which recovers (14) when the
+run is below its critical batch size. Estimators whose `lambda` depends on `p` also shift `G*`
+through `a/sqrt(Gcal)`; that contribution is computed exactly rather than approximated.
 
 ### Result 5 (compute-optimal group size on real hardware)
 
-Rollout cost is not uniform in `G`. When the group shares the prompt prefix, prefill is paid once per
+Rollout cost is not uniform in `G`. When a group shares the prompt prefix, prefill is paid once per
 prompt and decode once per rollout:
 
-    cost per step  =  P ( c_pre + G c_dec )                                             (14)
+    cost per step  =  P ( c_pre + G c_dec )                                              (15)
 
 Minimising `(c_pre + G c_dec) * Bcrit(G)` instead of `G * Bcrit(G)` gives
 
-    G* = 1 + sqrt( (1 + c_pre / c_dec) * tau_w / tau_b )                                (15)
+    G* = 1 + sqrt( (1 + c_pre / c_dec) * tau_w / tau_b )                                 (16)
 
-The compute-optimal group size is the statistically optimal one inflated by
-`sqrt(1 + c_pre/c_dec)`: sharing the prompt prefill across a group buys larger groups. Two
-measurements fix it — the noise ratio from the trainer, the cost ratio from the serving stack —
-and neither is a tuned quantity.
+The compute-optimal group size is the statistically optimal one inflated by `sqrt(1 + c_pre/c_dec)`:
+sharing prefill across a group buys larger groups. Two measurements fix it -- the noise ratio from the
+trainer, the cost ratio from the serving stack -- and neither is tuned.
 
 ### Result 6 (schedule)
 
 `E_x[p(1-p)]` falls as a policy improves on a fixed prompt set, so by (8) `tau_w` falls while `tau_b`
 does not. By (14) the optimal `G` therefore *decreases* over a run, as the square root of a quantity
-read straight off the reward histogram, and the optimal `P` increases at fixed budget. Fixed-`(P, G)` recipes are mis-allocated at one end of training or the other,
-by an amount the theory quantifies.
+read straight off the reward histogram, and the optimal `P` rises at fixed budget.
 
-## 5. Drift and the step size
+## 5. The step size is a drift target
 
-The realised behavioural drift of one update, in nats per token, is
+Equation (9) inverts to give the step size that realises a chosen drift:
 
-    D := E_x[ KL( pi_{t+1}(.|x) || pi_t(.|x) ) ] ~= (1/2) eta^2 * E[ g_hat^T F g_hat ]
-       = (1/2) eta^2 ( g_bar^T F g_bar + tr(F Cov(g_hat)) )                             (16)
+    eta(D) = sqrt( 2D / (Gcal + N/P) )                                                   (17)
 
-with `F` the Fisher information of the policy. Drift splits into a signal part and a diffusive part that
-buys nothing. Their ratio is
-
-    rho := g_bar^T F g_bar / ( g_bar^T F g_bar + tr(F Cov(g_hat)) ) = 1 / (1 + Bcrit^F / P)   (17)
-
-### Result 7 (drift decomposition identity)
-
-Comparing (11) and (17): when curvature and Fisher agree (the Gauss-Newton correspondence that holds for
-policy gradients near on-policy), **the batch-size efficiency equals the signal fraction of the measured
-drift**. Efficiency is therefore observable from the KL a trainer already logs, with no extra gradient
-work: a run whose logged drift is mostly diffusive is running below its critical batch size, and the
-deficit is quantified without a sweep.
+so a run can be specified by a drift target `D*` instead of a learning rate. Learning rate, clip
+range and KL coefficient are three knobs acting on the single quantity `D`, which is why they
+interact and why none of them transfers between scales or tasks. `D` is in nats per prompt and is
+a property of the policy's behaviour, not of its parameterisation, which is the basis of the
+transfer conjecture in Section 7.
 
 ## 6. Estimation from a single batch
 

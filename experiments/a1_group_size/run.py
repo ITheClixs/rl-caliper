@@ -93,9 +93,10 @@ def main() -> None:
                 "mean_p_one_minus_p": mean_pq,
                 "n_prompts": len(model.prompts),
             }
+            ratio = results[f"{est}/{label}"]["tau_ratio"]
             print(
                 f"{est:10s} {label:6s} exact G*={best['group_size']:3d} "
-                f"predicted={predicted:6.2f}  tau_w/tau_b={results[f'{est}/{label}']['tau_ratio']:8.2f} "
+                f"predicted={predicted:6.2f}  tau_w/tau_b={ratio:8.2f} "
                 f"E[p(1-p)]={mean_pq:.3f}"
             )
 

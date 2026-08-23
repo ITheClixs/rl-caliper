@@ -63,6 +63,7 @@ def decompose(
     matrix: np.ndarray | None = None,
     reference_half_a: np.ndarray | None = None,
     reference_half_b: np.ndarray | None = None,
+    between_second_moment: float | None = None,
 ) -> SplitEstimates:
     """Single-batch estimates of the hierarchical noise terms.
 
@@ -82,7 +83,15 @@ def decompose(
     # convert from the sub-group size actually used to the full group size
     tau_w_scaled = tau_w_sub * (subgroup_size - 1) if subgroup_size > 1 else tau_w_sub
     tau_w = tau_w_scaled / (group_size - 1)
-    tau_b = tau_total - tau_w
+
+    # E_i[z_A^T M z_B] over two independent sub-groups of the same prompt estimates
+    # tr(M(Sigma_b + g_bar g_bar^T)) with no within-prompt contribution, so subtracting the signal
+    # leaves Sigma_b. Falling back to tau_total - tau_w is a difference of two large variances and
+    # is badly conditioned when the pool is homogeneous. The direct form assumes lambda does not
+    # depend on G, which holds for RLOO and for the mean baseline.
+    tau_b = (
+        tau_total - tau_w if between_second_moment is None else between_second_moment - signal
+    )
 
     if reference_half_a is not None and reference_half_b is not None:
         alignment = 0.5 * (

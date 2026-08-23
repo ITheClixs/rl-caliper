@@ -52,6 +52,21 @@ class TabularPolicy:
         e = np.exp(z)
         return e / e.sum(axis=1, keepdims=True)
 
+    def sequence_probs(self) -> np.ndarray:
+        """Probabilities of every sequence, without the scores."""
+        probs_tab = self._softmax()
+        seqs = self.sequences()
+        probs = np.ones(seqs.shape[0])
+        for i, seq in enumerate(seqs):
+            for t in range(self.length):
+                ctx = _context_index(tuple(seq[:t]), self.vocab)
+                probs[i] *= probs_tab[ctx, seq[t]]
+        return probs
+
+    def perturbed(self, delta: np.ndarray) -> TabularPolicy:
+        shifted = self.logits + delta.reshape(self.logits.shape)
+        return TabularPolicy(self.vocab, self.length, shifted)
+
     def enumerate(self) -> tuple[np.ndarray, np.ndarray]:
         """Return (probs, scores) over all vocab**length sequences."""
         probs_tab = self._softmax()
