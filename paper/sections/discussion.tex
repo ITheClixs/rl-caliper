@@ -37,8 +37,9 @@ used here, not obviously safe.
 
 \paragraph{What we would measure next.} Three things. Whether $\tau_w/\tau_b$ moves once responses
 are long and reasoning-heavy rather than short and exact-match, since the within-prompt term should
-grow with the entropy of the response distribution. Whether the drift target transfers across model
-scale as cleanly as it does across batch size, which needs a sharper experiment than the one run
-here. And whether the same decomposition explains the well-known instability of RLVR at small batch
+grow with the entropy of the response distribution. How the drift target should be scheduled rather than held constant, since a tuned
+constant learning rate beat the best constant drift on the held-out setting of
+Section~\ref{sec:recipe}, and whether it transfers across model scale, which needs a sharper
+experiment than the one run here. And whether the same decomposition explains the well-known instability of RLVR at small batch
 sizes: a run below its critical batch size spends most of its drift budget on diffusion, and the
 diffusive fraction is exactly what \eqref{eq:efficiency} measures.

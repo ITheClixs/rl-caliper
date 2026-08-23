@@ -55,9 +55,10 @@ a trainer can measure while it runs.
 
   \item \textbf{Validation at three levels}: exactly enumerable policies where every quantity is
   computed rather than estimated; transformers trained from scratch, where a population of
-  independent runs is executed as a single batched kernel; and the batch-size transfer question,
-  where the drift target that maximises progress is unchanged across an eightfold change in batch
-  size while the learning rate that realises it is not.
+  independent runs is executed as a single batched kernel; and the transfer question, where the drift target that maximises
+  progress is unchanged across an eightfold change in batch size while the learning rate that
+  realises it is not -- together with the setting where carrying that target further stops working,
+  and what the failure attributes to.
 \end{itemize}
 
 Everything in this paper runs on one laptop. That is not incidental: the claim under test is that

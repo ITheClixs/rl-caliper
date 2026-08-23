@@ -162,6 +162,38 @@ def table_difficulty() -> None:
     write("difficulty", "\n".join(lines))
 
 
+def table_diagnosis() -> None:
+    """The 2x2 at the held-out setting: group size against the rule that sets the step."""
+    runs = [r for r in io.load_all("b5_diagnosis") if "rows" in r["result"]]
+    if not runs:
+        raise SystemExit("no diagnosis run")
+    result = runs[-1]["result"]
+    rows = result["rows"]
+    groups = sorted({r["group_size"] for r in rows})
+    lines = [
+        r"\begin{tabular}{lcc}",
+        r"\toprule",
+        r"best achievable gain & " + " & ".join(f"$G = {g}$" for g in groups) + r" \\",
+        r"\midrule",
+    ]
+    modes = (("step_size", "tuning a learning rate"), ("drift", "tuning a drift target"))
+    for mode, label in modes:
+        values = []
+        for g in groups:
+            row = next(r for r in rows if r["group_size"] == g and r["mode"] == mode)
+            mark = r"$^{\ast}$" if row["at_edge"] else ""
+            values.append(f"{row['best_gain']:+.4f}{mark}")
+        lines.append(label + " & " + " & ".join(values) + r" \\")
+    predicted = []
+    for g in groups:
+        bcrit = (result["tau_b"] + result["tau_w_scaled"] / (g - 1)) / result["signal"]
+        prompts = runs[-1]["manifest"]["config"]["rollouts"] // g
+        predicted.append(f"{1 / (1 + bcrit / prompts):.3f}")
+    lines.append(r"predicted efficiency $\rho$ & " + " & ".join(predicted) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("diagnosis", "\n".join(lines))
+
+
 def main() -> None:
     for name, fn in (
         ("exact_agreement", table_exact_agreement),
@@ -169,6 +201,7 @@ def main() -> None:
         ("transformer", table_transformer),
         ("real", table_real),
         ("difficulty", table_difficulty),
+        ("diagnosis", table_diagnosis),
     ):
         try:
             fn()

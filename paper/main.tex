@@ -53,10 +53,13 @@ $\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ once prefill sharing is priced in
 that recovers both noise terms from the microbatch gradients a trainer already accumulates, at no
 extra rollout cost. We validate on exactly enumerable policies, on populations of transformers
 trained from scratch as a single batched kernel, and on a pretrained model with real verifiers.
-Measured optima are small -- three to six responses per prompt on transformers and on a pretrained model, before hardware is priced in -- and
-the drift target that maximises progress is unchanged across an eightfold change in batch size,
-while transferring the learning rate tuned at the smallest batch costs 22\% of the achievable gain
-at the largest. All experiments run on one laptop, which is the point: the claim is that small
+Measured optima are small -- three to six responses per prompt on transformers and on a pretrained model, before hardware is priced in -- and the drift target that maximises
+progress is unchanged across an eightfold change in batch size, while transferring the learning rate
+tuned at the smallest batch costs 22\% of the achievable gain at the largest. Carrying a whole
+recipe further, to a setting with four times the budget, we find the group-size prediction still
+holds -- it wins by 11\% against a predicted 10\% -- while the drift target no longer transfers,
+and a tuned constant learning rate beats the best constant drift, which says the optimal drift
+schedule is not flat. All experiments run on one laptop, which is the point: the claim is that small
 measurements determine large choices.
 \end{abstract}
 

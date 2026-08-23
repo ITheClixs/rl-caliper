@@ -192,3 +192,50 @@ This is the practical resolution of the gap between measured optima of three to 
 to sixty-four in common use. For short-answer verifiable tasks, where a long instruction is followed
 by a few tokens of answer, prefill amortisation justifies most of the difference. For
 reasoning-length responses it justifies almost none of it, and the statistical optimum stands.
+
+\subsection{Carrying a recipe to a setting it was not tuned on}
+\label{sec:recipe}
+
+The previous subsections tune one quantity at a time. The question a practitioner actually faces is
+whether the whole recipe survives a move, so we fixed two recipes on one setting and carried them,
+unchanged, to another with four times the rollout budget, eight times the corpus and a different
+seed. The default takes a common group size of sixteen and the learning rate that was best on the
+tuning setting. The measured recipe takes the group size its probe reports on the held-out setting
+and a drift target carried over from the tuning setting.
+
+\textbf{The measured recipe lost}, by $28.9\%$ of the default's gain (paired $t = -3.01$ over $32$
+runs). Because the two recipes differ in two ways at once, that result attributes nothing on its
+own, so we crossed the two factors on the held-out setting: each group size swept over both a
+learning-rate grid and a drift-target grid.
+
+\begin{table}[t]
+  \centering
+  \input{tables/diagnosis}
+  \caption{Best achievable gain at the held-out setting, crossing the group size against the rule
+  that sets the step. Starred entries sit at the edge of their grid and are therefore lower bounds.
+  The group size the theory prefers wins under both parameterisations; the loss above came from the
+  drift target, not from the group size.}
+  \label{tab:diagnosis}
+\end{table}
+
+Three things follow, and only the first is what we set out to show.
+
+\emph{The group-size prediction holds at this setting.} $G = 4$, which the probe selects, beats
+$G = 16$ under both parameterisations. Under drift control, where the step size is not a
+confound, it wins by $11.1\%$ against a predicted $\sqrt{\rho_4/\rho_{16}} - 1 = 10\%$.
+
+\emph{The drift target transfers across group size but not across this change of budget.} At the
+held-out setting both group sizes have their optimum at the same drift target, $1.45 \times
+10^{-3}$: the group size does not move it at all. The tuning setting's optimum was $3.19 \times
+10^{-3}$, a factor of $2.2$ away, and using it costs $20\%$ of the achievable gain. Section
+\ref{sec:experiments} showed the target holding to within $5\%$ across a fourfold change in batch
+size and $21\%$ across an eightfold one; a sixteenfold change in prompts per step, combined with a
+fourfold change in rollout budget, is past where it holds. The unit is right and the scope is
+narrower than the earlier sweep alone would suggest.
+
+\emph{A constant drift target is not the best schedule.} At both group sizes a tuned constant
+learning rate beat the best constant drift target, and its optimum sat at the edge of the grid. A
+fixed learning rate produces a drift that changes over a run as the gradient statistics change; the
+fact that this beats holding drift fixed says the optimal drift schedule is not flat. That is a
+statement about scheduling, not about the unit, and it is the most concrete thing this paper leaves
+open.
