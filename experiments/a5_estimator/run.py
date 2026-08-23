@@ -26,13 +26,15 @@ def main() -> None:
     ap.add_argument("--batches", type=int, default=2000)
     ap.add_argument("--prompts", type=int, default=16)
     ap.add_argument("--group-size", type=int, default=8)
-    ap.add_argument("--pool", type=int, default=64)
+    ap.add_argument("--pool", type=int, default=512)
+    ap.add_argument("--blocks", type=int, default=8)
     ap.add_argument("--estimator", default="rloo")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
     rows = []
-    print(f"{'band':6s} {'div':>5s} {'exact G*':>9s} {'crossed':>9s} {'err %':>7s} {'subtractive':>12s}")
+    header = f"{'band':6s} {'div':>5s} {'exact G*':>9s} {'crossed':>9s}"
+    print(header + f" {'err %':>7s} {'subtractive':>12s}")
     for band, diversity in itertools.product(BANDS, [0.03, 0.08, 0.2, 0.5, 1.0]):
         seed = args.seed + hash_seed(band, diversity)
         policy, accepts = build(3, 3, args.pool, BANDS[band], diversity, seed)
@@ -49,20 +51,19 @@ def main() -> None:
         est = average(
             [
                 simulate_split_batch(
-                    prompts, args.estimator, args.prompts, args.group_size, rng, matrix=matrix
+                    prompts,
+                    args.estimator,
+                    args.prompts,
+                    args.group_size,
+                    rng,
+                    matrix=matrix,
+                    blocks=args.blocks,
                 )
                 for _ in range(args.batches)
             ]
         )
         crossed_g = est.optimal_group_size()
-        # what a subtractive estimator would have produced from the same batches
-        subtractive_tau_b = est.tau_b + est.tau_w - est.tau_w  # placeholder, replaced below
-        subtractive_tau_b = (est.tau_b + est.tau_w) - est.tau_w
-        subtractive_g = (
-            1 + np.sqrt(est.tau_w_scaled / subtractive_tau_b)
-            if subtractive_tau_b > 0
-            else float("inf")
-        )
+        subtractive_g = est.subtractive_group_size()
         rows.append(
             {
                 "band": band,
@@ -81,7 +82,9 @@ def main() -> None:
             f"{100 * abs(crossed_g - exact_g) / exact_g:7.1f} {subtractive_g:12.2f}"
         )
 
-    err_g = np.array([abs(r["crossed_g_star"] - r["exact_g_star"]) / r["exact_g_star"] for r in rows])
+    err_g = np.array(
+        [abs(r["crossed_g_star"] - r["exact_g_star"]) / r["exact_g_star"] for r in rows]
+    )
     err_b = np.array([abs(r["crossed_tau_b"] - r["exact_tau_b"]) / r["exact_tau_b"] for r in rows])
     err_w = np.array(
         [

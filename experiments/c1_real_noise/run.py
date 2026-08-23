@@ -31,7 +31,8 @@ def build_corpus(name: str, size: int, rng: np.random.Generator) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="mlx-community/Qwen2.5-0.5B-Instruct-bf16")
-    ap.add_argument("--corpora", nargs="+", default=["count_letter", "nth_word", "add_two", "mixed"])
+    default_corpora = ["count_letter", "nth_word", "add_two", "mixed"]
+    ap.add_argument("--corpora", nargs="+", default=default_corpora)
     ap.add_argument("--corpus-size", type=int, default=256)
     ap.add_argument("--batches", type=int, default=48)
     ap.add_argument("--prompts", type=int, default=16)
