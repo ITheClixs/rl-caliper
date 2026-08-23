@@ -1,7 +1,6 @@
-"""Sampling harness that drives the split estimator from an enumerable policy.
+"""Sampling harness that drives the crossed split estimator from an enumerable policy.
 
-Used to check the estimator of `caliper.estimators.splits` against the exact quantities, and as
-the reference implementation of the four-buffer accumulation pattern a real trainer follows.
+Also the reference implementation of the accumulation pattern a real trainer follows.
 """
 
 from __future__ import annotations
@@ -33,46 +32,26 @@ def simulate_split_batch(
     matrix: np.ndarray | None = None,
     reference: str = "rloo",
 ) -> SplitEstimates:
-    """One batch: draw prompts, draw rollouts, fill the four buffers, decompose."""
-    if n_prompts % 2:
-        raise ValueError("prompt split needs an even number of prompts")
+    """One batch: draw prompts and rollouts, fill the 2x2 cells, decompose."""
+    if n_prompts % 2 or group_size % 2:
+        raise ValueError("the crossed split needs even prompt and group counts")
     subgroup = group_size // 2
-    w_full = weight_table(estimator, group_size)
     w_sub = weight_table(estimator, subgroup)
-    w_ref = weight_table(reference, group_size)
+    w_ref = weight_table(reference, subgroup)
 
     chosen = rng.choice(len(prompts), size=n_prompts, replace=True)
     dim = prompts[0].scores.shape[1]
-    buffers = {k: np.zeros(dim) for k in ("pa", "pb", "ra", "rb", "refa", "refb")}
-    between = 0.0
+    cells = np.zeros((2, 2, dim))
+    reference_cells = np.zeros((2, 2, dim))
 
     for slot, prompt_idx in enumerate(chosen):
         prompt = prompts[prompt_idx]
         idx = sample_group(prompt, group_size, rng)
-        full = group_gradient(prompt, idx, w_full)
-        ref = group_gradient(prompt, idx, w_ref)
-        half = "pa" if slot < n_prompts // 2 else "pb"
-        buffers[half] += full
-        buffers["refa" if slot < n_prompts // 2 else "refb"] += ref
-        sub_a = group_gradient(prompt, idx[:subgroup], w_sub)
-        sub_b = group_gradient(prompt, idx[subgroup:], w_sub)
-        buffers["ra"] += sub_a
-        buffers["rb"] += sub_b
-        # the two sub-groups are independent given the prompt, so their inner product has
-        # expectation tr(M(Sigma_b + g_bar g_bar^T)) with no within-prompt contribution
-        between += sub_a @ sub_b if matrix is None else sub_a @ matrix @ sub_b
+        half = 0 if slot < n_prompts // 2 else 1
+        for sub, piece in enumerate((idx[:subgroup], idx[subgroup:])):
+            cells[half, sub] += group_gradient(prompt, piece, w_sub)
+            reference_cells[half, sub] += group_gradient(prompt, piece, w_ref)
 
-    half_n = n_prompts // 2
-    return decompose(
-        between_second_moment=between / n_prompts,
-        prompt_half_a=buffers["pa"] / half_n,
-        prompt_half_b=buffers["pb"] / half_n,
-        rollout_half_a=buffers["ra"] / n_prompts,
-        rollout_half_b=buffers["rb"] / n_prompts,
-        n_prompts=n_prompts,
-        group_size=group_size,
-        subgroup_size=subgroup,
-        matrix=matrix,
-        reference_half_a=buffers["refa"] / half_n,
-        reference_half_b=buffers["refb"] / half_n,
-    )
+    cells /= n_prompts // 2
+    reference_cells /= n_prompts // 2
+    return decompose(cells, n_prompts, group_size, matrix, reference_cells)

@@ -1,13 +1,18 @@
-"""Hierarchical noise estimation from four gradient accumulations.
+"""Hierarchical noise estimation from a 2x2 crossing of the batch.
 
-A trainer that accumulates its batch gradient into four buffers instead of one -- prompt half A/B
-and rollout sub-group A/B -- can recover the full decomposition of Section 6 of docs/theory.md at
-no extra rollout cost and no extra backward passes.
+A trainer that already accumulates its batch gradient over microbatches can partition those
+microbatches by prompt half and by rollout sub-group, giving four gradients
 
-Prompt split:  disjoint halves of the prompts, each using all G rollouts.
-Rollout split: all prompts, each group cut into two independent sub-groups whose advantages are
-computed within the sub-group. The prompt-level component is common to both and cancels in the
-difference, which isolates the within-prompt term.
+    g[a][b] = mean gradient over prompt half a using rollout sub-group b
+
+Every term of the decomposition is then an inner product of two *independent* quantities, which is
+far better conditioned than differencing two large variances:
+
+    signal  = E[ g[0][0] . g[1][1] ]                      (different prompts, different rollouts)
+    tau_b   = P/2 * ( E[ g[a][0] . g[a][1] ] - signal )   (same prompts, different rollouts)
+    tau_w   = P/4 * E[ | g[a][0] - g[a][1] |^2 ]          (the prompt term cancels here)
+
+The cost is four gradient buffers instead of one, and no extra rollouts.
 """
 
 from __future__ import annotations
@@ -18,30 +23,28 @@ import numpy as np
 
 
 def _quad(x: np.ndarray, matrix: np.ndarray | None) -> float:
-    if matrix is None:
-        return float(x @ x)
-    return float(x @ matrix @ x)
+    return float(x @ x) if matrix is None else float(x @ matrix @ x)
 
 
 def _bilinear(x: np.ndarray, y: np.ndarray, matrix: np.ndarray | None) -> float:
-    if matrix is None:
-        return float(x @ y)
-    return float(x @ matrix @ y)
+    return float(x @ y) if matrix is None else float(x @ matrix @ y)
 
 
 @dataclass
 class SplitEstimates:
     signal: float  # g_bar^T M g_bar
-    alignment: float  # grad J^T M g_bar (equals signal for an unbiased estimator with M = I)
-    tau_total: float  # tr(M (Sigma_b + Sigma_w(G)))
+    alignment: float  # grad J^T M g_bar
     tau_w: float  # tr(M Sigma_w(G))
     tau_b: float  # tr(M Sigma_b)
     tau_w_scaled: float  # (G - 1) tr(M Sigma_w(G)), the G-independent form
     group_size: int
     n_prompts: int
 
+    def tau_total(self) -> float:
+        return self.tau_b + self.tau_w
+
     def critical_batch(self) -> float:
-        return self.tau_total / self.signal
+        return self.tau_total() / self.signal
 
     def efficiency(self) -> float:
         return 1.0 / (1.0 + self.critical_batch() / self.n_prompts)
@@ -53,58 +56,52 @@ class SplitEstimates:
 
 
 def decompose(
-    prompt_half_a: np.ndarray,
-    prompt_half_b: np.ndarray,
-    rollout_half_a: np.ndarray,
-    rollout_half_b: np.ndarray,
+    cells: np.ndarray,
     n_prompts: int,
     group_size: int,
-    subgroup_size: int,
     matrix: np.ndarray | None = None,
-    reference_half_a: np.ndarray | None = None,
-    reference_half_b: np.ndarray | None = None,
-    between_second_moment: float | None = None,
+    reference_cells: np.ndarray | None = None,
 ) -> SplitEstimates:
-    """Single-batch estimates of the hierarchical noise terms.
+    """cells has shape (2, 2, dim): prompt half by rollout sub-group.
 
-    Every quantity is unbiased on its own; in use they are averaged over batches before being
-    combined, since ratios of noisy estimates are not unbiased.
+    Each cell is the mean gradient over its own P/2 prompts and G/2 rollouts, computed with the
+    sub-group's own advantages. Every estimate is unbiased on its own; ratios are formed only after
+    the raw moments have been averaged over batches.
     """
-    if group_size % 2 or subgroup_size * 2 != group_size:
-        raise ValueError("the rollout split needs an even group size and two equal sub-groups")
+    if cells.shape[:2] != (2, 2):
+        raise ValueError("expected a 2x2 grid of gradient cells")
+    if group_size % 2 or n_prompts % 2:
+        raise ValueError("the crossed split needs an even group size and an even prompt count")
 
-    signal = _bilinear(prompt_half_a, prompt_half_b, matrix)
+    half_prompts = n_prompts // 2
+    subgroup = group_size // 2
 
-    diff_p = prompt_half_a - prompt_half_b
-    tau_total = 0.25 * n_prompts * _quad(diff_p, matrix)
+    across = 0.5 * (
+        _bilinear(cells[0, 0], cells[1, 1], matrix) + _bilinear(cells[0, 1], cells[1, 0], matrix)
+    )
+    within_prompts = 0.5 * (
+        _bilinear(cells[0, 0], cells[0, 1], matrix) + _bilinear(cells[1, 0], cells[1, 1], matrix)
+    )
+    tau_b = half_prompts * (within_prompts - across)
 
-    diff_r = rollout_half_a - rollout_half_b
-    tau_w_sub = 0.5 * n_prompts * _quad(diff_r, matrix)
-    # convert from the sub-group size actually used to the full group size
-    tau_w_scaled = tau_w_sub * (subgroup_size - 1) if subgroup_size > 1 else tau_w_sub
+    rollout_gap = 0.5 * (
+        _quad(cells[0, 0] - cells[0, 1], matrix) + _quad(cells[1, 0] - cells[1, 1], matrix)
+    )
+    tau_w_sub = 0.5 * half_prompts * rollout_gap
+    tau_w_scaled = tau_w_sub * (subgroup - 1) if subgroup > 1 else tau_w_sub
     tau_w = tau_w_scaled / (group_size - 1)
 
-    # E_i[z_A^T M z_B] over two independent sub-groups of the same prompt estimates
-    # tr(M(Sigma_b + g_bar g_bar^T)) with no within-prompt contribution, so subtracting the signal
-    # leaves Sigma_b. Falling back to tau_total - tau_w is a difference of two large variances and
-    # is badly conditioned when the pool is homogeneous. The direct form assumes lambda does not
-    # depend on G, which holds for RLOO and for the mean baseline.
-    tau_b = (
-        tau_total - tau_w if between_second_moment is None else between_second_moment - signal
-    )
-
-    if reference_half_a is not None and reference_half_b is not None:
+    if reference_cells is not None:
         alignment = 0.5 * (
-            _bilinear(reference_half_a, prompt_half_b, matrix)
-            + _bilinear(reference_half_b, prompt_half_a, matrix)
+            _bilinear(reference_cells[0, 0], cells[1, 1], matrix)
+            + _bilinear(reference_cells[1, 1], cells[0, 0], matrix)
         )
     else:
-        alignment = signal
+        alignment = across
 
     return SplitEstimates(
-        signal=signal,
+        signal=across,
         alignment=alignment,
-        tau_total=tau_total,
         tau_w=tau_w,
         tau_b=tau_b,
         tau_w_scaled=tau_w_scaled,
@@ -114,13 +111,11 @@ def decompose(
 
 
 def average(estimates: list[SplitEstimates]) -> SplitEstimates:
-    """Average the raw moment estimates before forming any ratio."""
+    """Average the raw moments before forming any ratio."""
     if not estimates:
         raise ValueError("no estimates")
-    fields = ["signal", "alignment", "tau_total", "tau_w", "tau_b", "tau_w_scaled"]
+    fields = ["signal", "alignment", "tau_w", "tau_b", "tau_w_scaled"]
     means = {f: float(np.mean([getattr(e, f) for e in estimates])) for f in fields}
     return SplitEstimates(
-        group_size=estimates[0].group_size,
-        n_prompts=estimates[0].n_prompts,
-        **means,
+        group_size=estimates[0].group_size, n_prompts=estimates[0].n_prompts, **means
     )

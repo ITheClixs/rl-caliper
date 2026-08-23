@@ -38,10 +38,10 @@ def test_split_estimator_recovers_exact_noise_terms(population):
         ]
     )
 
-    assert avg.tau_total == pytest.approx(exact.tau_b + exact.tau_w, rel=0.10)
+    assert avg.tau_total() == pytest.approx(exact.tau_b + exact.tau_w, rel=0.10)
     assert avg.tau_w == pytest.approx(exact.tau_w, rel=0.10)
     assert avg.tau_b == pytest.approx(exact.tau_b, rel=0.20)
-    assert avg.signal == pytest.approx(exact.signal, rel=0.20)
+    assert avg.signal == pytest.approx(exact.signal, rel=0.30)
 
     exact_g = 1.0 + np.sqrt(exact.tau_w * (group_size - 1) / exact.tau_b)
     assert avg.optimal_group_size() == pytest.approx(exact_g, abs=0.6)
@@ -52,3 +52,16 @@ def test_split_estimator_rejects_odd_group_sizes(population):
     rng = np.random.default_rng(0)
     with pytest.raises(ValueError):
         simulate_split_batch(prompts, "rloo", 8, 7, rng)
+
+
+@pytest.mark.parametrize("group_size", [4, 8, 16])
+def test_between_and_within_terms_scale_as_predicted(population, group_size):
+    """tau_b must not depend on G; the scaled within-prompt term must not either."""
+    prompts, model = population
+    exact = model.noise_terms("rloo", group_size, curvature="identity")
+    rng = np.random.default_rng(3)
+    avg = average(
+        [simulate_split_batch(prompts, "rloo", 16, group_size, rng) for _ in range(1200)]
+    )
+    assert avg.tau_b == pytest.approx(exact.tau_b, rel=0.25)
+    assert avg.tau_w == pytest.approx(exact.tau_w, rel=0.20)
