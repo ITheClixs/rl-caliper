@@ -21,8 +21,7 @@ the resulting improvement and KL exactly, the second-order model of the objectiv
 step at least four times below the step that actually maximises improvement, which is where the
 sweep ended, because $J = \E[r]$ is
 not a log-likelihood and a log-linear policy keeps improving past the turnover of a quadratic model.
-The drift model \eqref{eq:drift} predicts the measured KL to within $3\%$ across three orders of
-magnitude in step size. The theory in Section~\ref{sec:drift} is built on the second of these, not
+The drift model \eqref{eq:drift} predicts the measured KL to between $2.6\%$ and $3.9\%$ across three orders of magnitude in step size. The theory in Section~\ref{sec:drift} is built on the second of these, not
 the first.
 
 \paragraph{Splitting a rollout budget.} For each prompt pool the parameter-free efficiency curve
