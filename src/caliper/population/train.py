@@ -41,6 +41,7 @@ class RLConfig:
     optimiser: str = "sgd"
     temperature: float = 1.0
     instrument_every: int = 10
+    blocks: int = 8
     eval_batch: int = 256
     eval_every: int = 5
     controller_gain: float = 0.5
@@ -79,10 +80,20 @@ def draw_prompts(task, pool, n, count, generator):
 def pass_rate(
     model, task: ModSum, batch: int, generator: torch.Generator, pool: torch.Tensor | None = None
 ) -> torch.Tensor:
+    """Mean pass rate over the prompt distribution the run is training on.
+
+    A pool smaller than the evaluation batch is covered by repeated passes rather than by
+    sampling prompts twice within one pass.
+    """
     n = model.config.population
-    prompts = draw_prompts(task, pool, n, batch, generator)
-    out = model.generate(prompts, task.response_len, generator, temperature=1.0)
-    return task.reward(prompts, out[:, :, task.prompt_len :]).mean(dim=-1)
+    per_pass = batch if pool is None else min(batch, pool.shape[1])
+    passes = max(1, -(-batch // per_pass))
+    total = 0.0
+    for _ in range(passes):
+        prompts = draw_prompts(task, pool, n, per_pass, generator)
+        out = model.generate(prompts, task.response_len, generator, temperature=1.0)
+        total = total + task.reward(prompts, out[:, :, task.prompt_len :]).mean(dim=-1)
+    return total / passes
 
 
 def supervised_warmup(
@@ -163,10 +174,19 @@ class RLVRTrainer:
             )
             for _ in range(model.config.population)
         ]
+        self.blocks = self._usable_blocks()
         self.optimiser = self._make_optimiser()
         self.pool = pool
         if pool is None and config.pool_size is not None:
             self.pool = make_pool(task, model.config.population, config.pool_size, generator)
+
+    def _usable_blocks(self) -> int | None:
+        """Largest block count dividing the prompt count, or None if no split is possible."""
+        cfg = self.config
+        for blocks in range(min(cfg.blocks, cfg.prompts // 2), 1, -1):
+            if cfg.prompts % blocks == 0:
+                return blocks
+        return None
 
     def _make_optimiser(self):
         population = self.model.config.population
@@ -234,32 +254,27 @@ class RLVRTrainer:
         return kl.mean(dim=(1, 2))
 
     def _instrument(self, tokens, rewards) -> torch.Tensor:
-        """Four gradients on a 2x2 crossing of prompt half and rollout sub-group."""
-        if self.sub_weights is None:
-            raise ValueError("instrumentation needs a group size of at least 4")
+        """Gradients on a K x 2 crossing of prompt block and rollout sub-group."""
+        if self.sub_weights is None or self.blocks is None:
+            raise ValueError("instrumentation needs G >= 4 and at least two prompt blocks")
         cfg = self.config
-        half_p = cfg.prompts // 2
+        blocks = self.blocks
+        per_block = cfg.prompts // blocks
         sub = cfg.group_size // 2
 
         sub_rewards = (rewards[:, :, :sub], rewards[:, :, sub:])
         cells = []
-        for half in (0, 1):
-            prompt_mask = torch.zeros_like(rewards)
-            if half == 0:
-                prompt_mask[:, :half_p, :] = 1.0
-            else:
-                prompt_mask[:, half_p:, :] = 1.0
+        for block in range(blocks):
             row = []
             for piece in (0, 1):
                 advantage = torch.zeros_like(rewards)
                 columns = slice(0, sub) if piece == 0 else slice(sub, cfg.group_size)
                 advantage[:, :, columns] = self.advantages(sub_rewards[piece], self.sub_weights)
                 mask = torch.zeros_like(rewards)
-                mask[:, :, columns] = 1.0
-                mask = mask * prompt_mask
-                row.append(self.optimiser.precondition(
-                    self._gradient_for(tokens, advantage, mask)
-                ))
+                mask[:, block * per_block : (block + 1) * per_block, columns] = 1.0
+                row.append(
+                    self.optimiser.precondition(self._gradient_for(tokens, advantage, mask))
+                )
             cells.append(torch.stack(row))
         return torch.stack(cells)
 
@@ -295,7 +310,13 @@ class RLVRTrainer:
         return info
 
     def noise_estimates(self, cells: torch.Tensor) -> list[dict]:
-        terms = decompose_batched(cells, self.config.prompts, self.config.group_size)
+        corpus = None if self.pool is None else self.pool.shape[1]
+        terms = decompose_batched(
+            cells,
+            self.config.prompts // self.blocks * self.blocks,
+            self.config.group_size,
+            corpus_size=corpus,
+        )
         population = cells.shape[2]
         return [
             {name: float(value[i]) for name, value in terms.items()} for i in range(population)
@@ -306,7 +327,11 @@ class RLVRTrainer:
         history = {"step": [], "pass_rate": [], "drift": [], "step_size": [], "noise": []}
         realised_drift = []
         for t in range(cfg.steps):
-            measurable = self.sub_weights is not None and cfg.instrument_every > 0
+            measurable = (
+                self.sub_weights is not None
+                and self.blocks is not None
+                and cfg.instrument_every > 0
+            )
             info = self.step(instrument=measurable and t % cfg.instrument_every == 0)
             if t % cfg.eval_every == 0 or t == cfg.steps - 1:
                 rate = pass_rate(

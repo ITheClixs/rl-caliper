@@ -36,8 +36,8 @@ def efficiency(group_sizes, tau_b, tau_w_scaled, signal, rollouts):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--modulus", type=int, default=5)
-    ap.add_argument("--chain", type=int, default=3)
+    ap.add_argument("--modulus", type=int, default=7)
+    ap.add_argument("--chain", type=int, default=4)
     ap.add_argument("--width", type=int, default=64)
     ap.add_argument("--depth", type=int, default=2)
     ap.add_argument("--population", type=int, default=32)
@@ -53,7 +53,7 @@ def main() -> None:
 
     task = ModSum(modulus=args.modulus, chain=args.chain)
     group_sizes = [g for g in [2, 4, 8, 16, 32, 64] if args.rollouts_per_step % g == 0]
-    pools = [4, 32, None]
+    pools = [128, 512, 2048, None]
     cells = []
 
     for pool in pools:
@@ -79,7 +79,7 @@ def main() -> None:
         )
 
         probe = RLConfig(
-            prompts=32, group_size=8, pool_size=pool, optimiser=args.optimiser, steps=0
+            prompts=32, group_size=8, pool_size=pool, optimiser=args.optimiser, steps=0, blocks=8
         )
         terms = measure_noise(
             model, task, probe, generator, args.measure_batches, pool=prompt_pool
@@ -105,6 +105,7 @@ def main() -> None:
         for g in group_sizes:
             restore(model, base)
             rl = RLConfig(
+                blocks=8,
                 prompts=args.rollouts_per_step // g,
                 group_size=g,
                 pool_size=pool,
