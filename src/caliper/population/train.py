@@ -304,6 +304,7 @@ class RLVRTrainer:
     def run(self) -> dict:
         cfg = self.config
         history = {"step": [], "pass_rate": [], "drift": [], "step_size": [], "noise": []}
+        realised_drift = []
         for t in range(cfg.steps):
             measurable = self.sub_weights is not None and cfg.instrument_every > 0
             info = self.step(instrument=measurable and t % cfg.instrument_every == 0)
@@ -315,8 +316,12 @@ class RLVRTrainer:
                 history["pass_rate"].append(rate.tolist())
                 history["drift"].append(info["drift"])
                 history["step_size"].append(info["step_size"])
+            realised_drift.append(info["drift"])
             if "noise" in info:
                 history["noise"].append({"step": t, "terms": info["noise"]})
+        history["mean_drift"] = (
+            torch.tensor(realised_drift).mean(dim=0).tolist() if realised_drift else []
+        )
         history["final_pass_rate"] = pass_rate(
             self.model, self.task, cfg.eval_batch * 2, self.generator, self.pool
         ).tolist()

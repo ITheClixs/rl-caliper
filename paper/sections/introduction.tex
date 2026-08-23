@@ -1,2 +1,65 @@
 \section{Introduction}
-Placeholder.
+\label{sec:introduction}
+
+Reinforcement learning with verifiable rewards has become the dominant way to improve reasoning in
+language models \citep{deepseekr1, shao2024deepseekmath}, and a practitioner starting a run must
+choose, among other things, a learning rate, a clip range, a KL coefficient, how many prompts to
+put in a batch, and how many responses to sample per prompt. These choices interact, they are
+re-tuned at every model scale and on every new task, and the resulting recipes are reported as
+constants rather than as consequences of anything measurable.
+
+Pretraining is not like this. The gradient noise scale predicts the batch size beyond which
+parallelism stops buying speed \citep{mccandlish2018empirical, shallue2019measuring}, and $\mu$P
+prescribes how a learning rate found at small width should be carried to large width
+\citep{yang2021tensor, yang2022mutransfer}. Both replace a sweep with a measurement. RLVR has no
+equivalent. It also has a structural feature pretraining lacks: sampling happens at
+\emph{two} levels, prompts and responses, and the split of a fixed rollout budget between them is
+a free parameter that no existing analysis determines.
+
+This paper works out what determines that split, and what determines the step size, from quantities
+a trainer can measure while it runs.
+
+\paragraph{Contributions.}
+\begin{itemize}
+  \item \textbf{The estimator zoo is one estimator and a difficulty weight.} For binary verifiable
+  rewards, every advantage rule whose value depends on a response's own reward and its group's
+  success count -- RLOO, GRPO with a mean baseline, standardised GRPO, and their relatives --
+  computes the true per-prompt gradient scaled by a weight $\lambda(p, G)$
+  (Proposition~\ref{prop:mean}). RLOO has $\lambda \equiv 1$; the mean baseline has
+  $\lambda = (G-1)/G$, a constant the step size absorbs exactly. Only a $\lambda$ that depends on
+  the pass rate changes what a run optimises, which is what standardisation does.
+
+  \item \textbf{An exact finite-$G$ covariance}, and from it a hierarchical noise decomposition
+  into a between-prompt term $\tau_b$ that no amount of sampling per prompt can reduce and a
+  within-prompt term $\tau_w$ that shrinks as $1/(G-1)$ (Proposition~\ref{prop:cov},
+  Corollary~\ref{cor:bernoulli}). For RLOO the within-prompt term is, up to one slowly varying
+  scalar, the mean Bernoulli variance $\E_x[p(1-p)]$ of the pass-rate distribution -- a number
+  already sitting in every training log.
+
+  \item \textbf{A drift model in place of a curvature model.} The obvious second-order treatment of
+  the objective fails badly for RLVR, understating the useful step size by more than fourfold
+  against exactly computed improvement. Modelling how far the \emph{policy} moves instead is
+  accurate to $3\%$ over three orders of magnitude in step size, and yields an efficiency
+  $\rho = 1/(1 + \Bcrit/P)$ that a run can read off the KL it already logs: progress at a fixed
+  drift budget scales as $\sqrt{\rho}$.
+
+  \item \textbf{A closed form for the group size}, $G^{*} = 1 + \sqrt{\tau_w/\tau_b}$, independent
+  of the rollouts per step, and inflated by $\sqrt{1 + c_{\mathrm{pre}}/c_{\mathrm{dec}}}$ once
+  prefill sharing within a group is priced in (Proposition~\ref{prop:gstar}).
+
+  \item \textbf{An estimator that costs no extra rollouts}, reading both noise terms off a
+  $K \times 2$ grid of the microbatch gradients a trainer already accumulates, together with three
+  biases that have to be handled for it to work: the badly conditioned subtractive form, prompts
+  repeated within a batch, and the finite-corpus correlation induced by sampling without
+  replacement.
+
+  \item \textbf{Validation at three levels}: exactly enumerable policies where every quantity is
+  computed rather than estimated; transformers trained from scratch, where a population of
+  independent runs is executed as a single batched kernel; and the batch-size transfer question,
+  where the drift target that maximises progress is unchanged across an eightfold change in batch
+  size while the learning rate that realises it is not.
+\end{itemize}
+
+Everything in this paper runs on one laptop. That is not incidental: the claim under test is that
+small-scale measurement determines large-scale choices, so a study that needed a cluster to make
+the measurement would be arguing against itself.

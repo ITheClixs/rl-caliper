@@ -52,7 +52,7 @@ def probe_drift_coefficient(model, task, generator, base, pool, prompts, group_s
 
 
 def sweep(model, task, generator, base, pool, prompts, group_size, steps, grid, mode, start):
-    means, ses, realised = [], [], []
+    means, ses, realised, drifts = [], [], [], []
     for value in grid:
         restore(model, base)
         config = RLConfig(
@@ -71,7 +71,8 @@ def sweep(model, task, generator, base, pool, prompts, group_size, steps, grid, 
         means.append(float(gain.mean()))
         ses.append(float(gain.std(ddof=1) / np.sqrt(gain.size)))
         realised.append(float(np.mean([c.step_size for c in trainer.controllers])))
-    return means, ses, realised
+        drifts.append(float(np.mean(history["mean_drift"])))
+    return means, ses, realised, drifts
 
 
 def peak(grid, means):
@@ -131,11 +132,11 @@ def main() -> None:
             model, task, generator, base, pool, prompts, args.group_size, 0.02,
             args.probe_repeats,
         )
-        step_means, step_ses, _ = sweep(
+        step_means, step_ses, _, step_drifts = sweep(
             model, task, generator, base, pool, prompts, args.group_size, args.steps,
             step_grid, "step_size", start,
         )
-        drift_means, drift_ses, realised = sweep(
+        drift_means, drift_ses, realised, drift_drifts = sweep(
             model, task, generator, base, pool, prompts, args.group_size, args.steps,
             drift_grid, "drift", start,
         )
@@ -156,12 +157,16 @@ def main() -> None:
                 "best_drift": best_drift,
                 "best_drift_at_edge": drift_edge,
                 "realised_step_size": realised,
+                "step_sweep_drift": step_drifts,
+                "drift_sweep_drift": drift_drifts,
             }
         )
+        at_best = float(np.interp(np.log(best_step), np.log(step_grid), step_drifts))
         print(
             f"P={prompts:3d}  Gcal+N/P = {coefficient.mean():.3e}  "
             f"best eta {best_step:.4f}{' (edge)' if step_edge else ''}  "
-            f"best D* {best_drift:.2e}{' (edge)' if drift_edge else ''}"
+            f"best D* {best_drift:.2e}{' (edge)' if drift_edge else ''}  "
+            f"drift at best eta {at_best:.2e}"
         )
 
     reference = rows[0]
