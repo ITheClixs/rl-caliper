@@ -1,1 +1,54 @@
-% related
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Batch size and gradient noise.} The gradient noise scale predicts the batch size beyond
+which data parallelism stops buying speed, and does so from statistics measurable during training
+\citep{mccandlish2018empirical}; the empirical picture across tasks and optimisers is mapped in
+\citet{shallue2019measuring}. Both concern a single level of sampling. RLVR samples prompts and then
+samples responses within each prompt, and the resulting two-level noise scale, the split it implies,
+and the fact that the response-level term is readable off the reward histogram, have no counterpart
+in that literature. The variance decomposition itself is the classical two-stage sampling result
+\citep{cochran1977sampling}, applied here to policy gradients.
+
+\paragraph{Hyperparameter transfer.} $\mu$P makes learning rates transfer across width by fixing what
+a step does to the network's functions rather than to its parameters
+\citep{yang2021tensor, yang2022mutransfer}. This paper takes the same stance one level up: fix what
+a step does to the policy's \emph{behaviour}, measured as drift in nats per token, and the recipe
+transfers across batch size. We find no comparable prescription for RL post-training in the
+literature; the closest work reports empirical scaling behaviour and fitted power laws
+\citep{tan2025scalingbehaviors, khatri2025artofscaling, ghosh2026predictable} rather than a
+quantity to hold fixed.
+
+\paragraph{Estimators for RLVR.} RLOO \citep{ahmadian2024rloo, williams1992reinforce}, GRPO
+\citep{shao2024deepseekmath}, its unnormalised correction \citep{liu2025drgrpo}, DAPO
+\citep{yu2025dapo} and sequence-level variants \citep{zheng2025gspo} are usually compared by
+benchmark deltas. Proposition~\ref{prop:mean} shows that, for binary rewards, the members of this
+family differ only through a difficulty weight $\lambda(p, G)$, that a $p$-independent $\lambda$ is
+absorbed exactly by the step size, and that standardisation is a change of objective rather than a
+variance reduction -- a sharpening of the argument in \citet{liu2025drgrpo}. Recent analyses of why
+normalisation helps \citep{ge2026normalization} and of what outcome-reward objectives cannot
+simultaneously be \citep{ding2026impossibility} are complementary: they characterise the estimator,
+while the question here is how many samples to give it and how far to step.
+
+\paragraph{Allocating rollouts.} Several recent methods vary the number of responses per prompt
+within a batch using heuristics tied to observed pass rates or gradient variance
+\citep{nguyen2026allocation}, or adapt the batch size from a divergence signal
+\citep{park2026batchscaling}, and one line of work argues for scaling the response count
+specifically \citep{hu2025brorl}. These are allocation policies; what has been missing is the
+quantity being optimised. Equation~\eqref{eq:gstar} supplies it in closed form and shows that the
+answer is a ratio of two measurable traces, which also explains why heuristics keyed to pass rate
+alone succeed on some corpora and not others: pass rate determines $\tau_w$ but says nothing about
+$\tau_b$.
+
+\paragraph{Trust regions and KL control.} Constraining how far a policy moves is old
+\citep{schulman2015trpo, schulman2017ppo} and its modern LLM forms clip importance ratios or
+penalise divergence from a reference. The drift used here is neither: it is the KL between
+\emph{consecutive} policies, used as a measurement and a control target rather than as a penalty,
+and its role in this paper is to supply the unit in which a recipe transfers.
+
+\paragraph{Asynchrony and off-policy correction.} A parallel literature studies what happens when
+the sampling policy and the training policy differ, whether through pipeline staleness
+\citep{song2026staleness} or numerical mismatch between rollout and training engines. That work
+asks how much mismatch a run tolerates. This paper asks a question that arises before any mismatch:
+given that the sampler and the trainer agree, how should the sampling budget be divided, and how
+large a step should the result support.
