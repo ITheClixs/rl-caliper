@@ -99,7 +99,22 @@ Prompts are iid, so with `g_bar := E_x[lambda h]`,
     Sigma_w := E_x[ Cov(z | x) ]                 (within-prompt, shrinks with G)
 
 `Sigma_b` is the irreducible variance of prompt sampling; `Sigma_w` is the reducible variance of rollout
-sampling. Increasing `G` attacks only the second term. This is the structural fact the rest of the paper
+sampling.
+
+**Finite corpora.** Real runs draw prompts without replacement from a corpus of `N`, not i.i.d. from
+an infinite distribution. The standard finite-population correction applies to the prompt level only:
+
+    Cov(g_hat) = (1/P) [ (1 - f) Sigma_b + Sigma_w ],      f := (P - 1) / (N - 1)          (7b)
+
+When the batch covers the whole corpus, `f = 1` and prompt sampling contributes no variance at all.
+Everything downstream inherits the factor: `Bcrit` uses `(1-f) tau_b`, and
+
+    G* = 1 + sqrt( tau_w / ((1 - f) tau_b) )                                              (14b)
+
+so the optimal group size *grows* as the corpus shrinks toward the batch size. This is a knob on
+`G*` that does not require changing the task, and it is the one the transformer experiments use.
+It also explains why the same estimator must be corrected when it is run: the different-block inner
+product has expectation `|g_bar|^2 - tau_b/(N-1)` rather than `|g_bar|^2`. Increasing `G` attacks only the second term. This is the structural fact the rest of the paper
 rests on, and it has no analogue in pretraining, where there is a single level of sampling.
 
 ### Result 3 (the reward histogram predicts the rollout-level noise)

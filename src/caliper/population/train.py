@@ -50,8 +50,8 @@ class RLConfig:
     history: dict = field(default_factory=dict)
 
 
-def _sequence_log_probs(model, tokens, prompt_len) -> torch.Tensor:
-    return model.log_probs(tokens, prompt_len).sum(dim=-1)
+def _sequence_log_probs(model, tokens, prompt_len, temperature=1.0) -> torch.Tensor:
+    return model.log_probs(tokens, prompt_len, temperature).sum(dim=-1)
 
 
 def make_pool(task, population: int, pool_size: int, generator) -> torch.Tensor:
@@ -214,7 +214,9 @@ class RLVRTrainer:
 
     def _loss(self, tokens, advantage, mask=None):
         n, cfg = self.model.config.population, self.config
-        logp = _sequence_log_probs(self.model, tokens, self.task.prompt_len)
+        logp = _sequence_log_probs(
+            self.model, tokens, self.task.prompt_len, self.config.temperature
+        )
         logp = logp.reshape(n, cfg.prompts, cfg.group_size)
         term = advantage * logp
         if mask is not None:
@@ -242,7 +244,7 @@ class RLVRTrainer:
 
     @torch.no_grad()
     def _response_logits(self, tokens: torch.Tensor) -> torch.Tensor:
-        logits = self.model(tokens[:, :, :-1])
+        logits = self.model(tokens[:, :, :-1]) / self.config.temperature
         return logits[:, :, self.task.prompt_len - 1 :, :]
 
     @staticmethod

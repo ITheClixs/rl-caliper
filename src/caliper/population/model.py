@@ -127,8 +127,14 @@ class PopulationTransformer(nn.Module):
             tokens = torch.cat([tokens, flat.reshape(n, b, 1)], dim=-1)
         return tokens
 
-    def log_probs(self, tokens: torch.Tensor, start: int) -> torch.Tensor:
-        """Per-token log probabilities of the tokens from position `start` onwards."""
-        logits = self.forward(tokens[:, :, :-1])[:, :, start - 1 :, :]
+    def log_probs(
+        self, tokens: torch.Tensor, start: int, temperature: float = 1.0
+    ) -> torch.Tensor:
+        """Per-token log probabilities from position `start` onwards.
+
+        The temperature belongs to the policy, not to the sampler: training against responses drawn
+        at temperature T while scoring them at T = 1 would be off-policy without a correction.
+        """
+        logits = self.forward(tokens[:, :, :-1])[:, :, start - 1 :, :] / temperature
         targets = tokens[:, :, start:]
         return torch.log_softmax(logits, dim=-1).gather(-1, targets.unsqueeze(-1)).squeeze(-1)
