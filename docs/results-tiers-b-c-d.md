@@ -96,3 +96,41 @@ inflation `sqrt(1 + c_pre/c_dec)` that equation (16) applies to `G*`:
 This is the resolution of the gap between measured optima near three to six and the eight to
 sixty-four in common use. Short answers behind long instructions justify groups several times
 larger than the statistical optimum. Reasoning-length responses do not.
+
+## Carrying a whole recipe to a setting it was not tuned on
+
+Two recipes were fixed on a tuning setting (256 rollouts per step, corpus 512) and carried unchanged
+to a held-out setting (1024 rollouts per step, corpus 4096, different seed):
+
+* **default** — group size 16, and the learning rate that was best on the tuning setting
+* **measured** — the group size the probe reports on the held-out setting (`G* = 3.1`, so 4), and
+  the drift target that was best on the tuning setting
+
+The measured recipe **lost**, by 28.9% of the default's gain, paired `t = -3.01` over 32 runs.
+
+Since the recipes differ in two ways at once, the two factors were crossed at the held-out setting.
+Each group size was swept over a learning-rate grid and over a drift-target grid:
+
+| best achievable gain | `G = 4` | `G = 16` |
+|---|---|---|
+| tuning a learning rate | +0.4947 (grid edge) | +0.4780 (grid edge) |
+| tuning a drift target | +0.4431 | +0.3989 |
+| predicted efficiency | 0.815 | 0.674 |
+
+1. **The group-size prediction held.** `G = 4` beat `G = 16` under both parameterisations. Under
+   drift control, where the step size is not a confound, by 11.1% against a predicted 10%.
+2. **The drift target transfers across group size, exactly.** Both group sizes have their optimum
+   at the same drift target, `1.45e-3`.
+3. **It did not transfer across this change of budget.** The tuning setting's optimum was
+   `3.19e-3`, a factor of 2.2 away, and using it cost 20% of the achievable gain. Earlier the
+   target held to within 5% across a fourfold change in batch size and 21% across an eightfold one;
+   a sixteenfold change in prompts per step combined with a fourfold change in rollout budget is
+   past where it holds.
+4. **A constant drift target is not the best schedule.** At both group sizes a tuned constant
+   learning rate beat the best constant drift, with its optimum at the edge of the grid. A fixed
+   learning rate produces a drift that changes over a run; that this wins says the optimal drift
+   schedule is not flat.
+
+The negative result is more informative than a win would have been: it separates the unit (drift,
+which is right) from the schedule (constant, which is not) and puts a bound on the range over which
+a single target can be carried.
