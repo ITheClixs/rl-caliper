@@ -23,9 +23,9 @@ normalisation, clipping, or a non-binary reward, and the exact moment calculatio
 reward being binary. Clipping in particular makes the update a nonlinear function of the batch,
 which breaks the linearity the split estimator relies on; it can be handled by instrumenting the
 clipped update directly, but the closed forms would need redoing. The drift model is a second-order
-expansion and will understate movement for steps large enough to leave that regime. The largest
-model measured here is $0.5$B parameters, so the claim that these are the right quantities is
-tested across a sixtyfold range of parameter counts and not beyond it; the transfer result is
+expansion and will understate movement for steps large enough to leave that regime. The models measured here run from tabular policies through transformers of $25$k to $400$k
+parameters to a pretrained model of $0.5$B, so the claim that these are the right quantities is
+tested over four orders of magnitude in parameter count and not beyond; the transfer result is
 demonstrated across batch size, not across model scale, where our sweeps were not sharp enough to
 separate the two parameterisations.
 

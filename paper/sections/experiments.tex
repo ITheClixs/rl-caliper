@@ -49,8 +49,10 @@ pools by how much $\rho$ varies across the splits on offer.
 
 \subsection{The estimator}
 
-Figure~ef{fig:estimator-accuracy} compares the group size recovered by the estimator of
-Section~ef{sec:estimation} against the exactly known value, over pools whose noise ratio spans a
+Figure~
+ef{fig:estimator-accuracy} compares the group size recovered by the estimator of
+Section~
+ef{sec:estimation} against the exactly known value, over pools whose noise ratio spans a
 factor of $26$ and whose $G^{*}$ runs from $3.8$ to $15.2$. The median error in $G^{*}$ is $1.3\%$
 and the worst is $6.2\%$, using $2500$ batches of $32$ prompts split into $K = 8$ blocks; the
 individual traces are recovered to $2.1\%$ ($	au_w$) and $3.4\%$ ($	au_b$) at the median.
@@ -74,7 +76,11 @@ the task.
 \begin{table}[t]
   \centering
   \input{tables/transformer}
-  \caption{Predicted and measured optimum on transformers trained from scratch.}
+  \caption{Predicted and measured optimum on transformers trained from scratch. The sweep visits
+  $G \in \{2, 4, 8, 16, 32, 64\}$, so a predicted optimum near three can only appear as a peak at
+  two or four; those two are within one standard error of each other in four of the five corpora,
+  and every corpus shows the predicted decline beyond $G = 8$. Spearman and $R^2$ are computed
+  against the parameter-free prediction across the whole sweep.}
   \label{tab:transformer}
 \end{table}
 
@@ -120,8 +126,11 @@ rate cannot.
 The same measurement on Qwen2.5-0.5B-Instruct, with LoRA adapters as the trainable parameters and
 corpora built from short exact-match families -- counting a letter in a word, naming the $k$-th item
 of a list, adding two numbers -- plus a mixture of all of them. Families differ in how often the
-model succeeds, and mixing them makes prompts pull in different directions, so the two knobs move
-the two noise terms separately. Table~\ref{tab:real} reports what the probe measures.
+model succeeds, and mixing them makes prompts pull in different directions, so the two knobs move the two noise terms separately. Table~\ref{tab:real} reports what the probe
+measures, and shows Corollary~\ref{cor:bernoulli} failing across families: the ratio
+$\tau_w/\E[p(1-p)]$, which the corollary says should be constant, varies by a factor of $8.8$.
+That constant is the score scale $\sigma_s^2$, and a family whose answer is a single number does
+not share one with a family whose answer is four numbers.
 
 \begin{table}[t]
   \centering
