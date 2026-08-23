@@ -407,3 +407,74 @@ def measure_noise(
         totals = terms if totals is None else {k: totals[k] + v for k, v in terms.items()}
     trainer.optimiser.zero_grad()
     return {k: v / batches for k, v in totals.items()}
+
+
+@torch.no_grad()
+def clone_member(model: PopulationTransformer, source: int = 0) -> None:
+    """Give every population member the same parameters.
+
+    Members then differ only in the randomness of their rollouts, which is what isolates the
+    variance a practitioner sees when they change a seed and rerun.
+    """
+    for value in model.state_dict().values():
+        value.copy_(value[source].unsqueeze(0).expand_as(value))
+
+
+@torch.no_grad()
+def pairwise_policy_divergence(
+    model: PopulationTransformer,
+    task: ModSum,
+    prompts: torch.Tensor,
+    pairs: int = 64,
+    generator: torch.Generator | None = None,
+) -> dict[str, float]:
+    """Mean KL between the policies of distinct population members on a shared prompt batch.
+
+    prompts has shape (batch, prompt_len) and is shared by every member, so the only thing that
+    differs between the distributions being compared is the training each member received.
+    """
+    n = model.config.population
+    wide = prompts.unsqueeze(0).expand(n, -1, -1).contiguous()
+    logits = model(wide)[:, :, task.prompt_len - 1 :, :]
+    logp = torch.log_softmax(logits, dim=-1)
+    probs = logp.exp()
+
+    rng = generator or torch.Generator(device=prompts.device).manual_seed(0)
+    left = torch.randint(0, n, (pairs,), generator=rng, device=prompts.device)
+    right = torch.randint(0, n, (pairs,), generator=rng, device=prompts.device)
+    keep = left != right
+    left, right = left[keep], right[keep]
+    kl = (probs[left] * (logp[left] - logp[right])).sum(dim=-1)
+    return {
+        "pairwise_kl": float(kl.mean()),
+        "pairwise_kl_se": float(kl.mean(dim=(1, 2)).std(correction=1) / max(len(left) ** 0.5, 1.0)),
+    }
+
+
+@torch.no_grad()
+def resolved_spread(
+    model: PopulationTransformer,
+    task: ModSum,
+    generator: torch.Generator,
+    pool: torch.Tensor | None,
+    samples: int,
+) -> dict[str, float]:
+    """Spread of the pass rate across population members, corrected for evaluation noise.
+
+    Each member is scored on `samples` responses, so its measured pass rate carries a binomial
+    error of p(1-p)/samples. That error inflates the observed spread between members, and at the
+    sample counts normally used it can account for all of it. Subtracting it in variance is what
+    leaves the spread actually attributable to the members differing.
+    """
+    rates = pass_rate(model, task, samples, generator, pool)
+    observed = float(rates.var(correction=1))
+    mean = float(rates.mean())
+    evaluation = mean * (1.0 - mean) / samples
+    corrected = max(observed - evaluation, 0.0)
+    return {
+        "mean_pass_rate": mean,
+        "observed_spread": observed**0.5,
+        "evaluation_spread": evaluation**0.5,
+        "true_spread": corrected**0.5,
+        "resolvable": observed > 2 * evaluation,
+    }
