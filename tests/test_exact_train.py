@@ -79,3 +79,13 @@ def test_exact_trainer_rejects_unknown_estimators(group_size):
     policy, accepts = build(3, 3, 8, (0.2, 0.8), 1.0, seed=4)
     with pytest.raises(KeyError):
         ExactTrainer(policy, accepts, RunConfig(estimator="nope", group_size=group_size))
+
+
+def test_runs_are_returned_oldest_first(tmp_path, monkeypatch):
+    """The filename is a configuration hash, so ordering has to come from the manifest."""
+    monkeypatch.setattr(io, "RUNS", tmp_path)
+    io.save("ordering", {"which": "first"}, {"n": 1})
+    io.save("ordering", {"which": "second"}, {"n": 2})
+    clocks = [r["manifest"]["wall_clock"] for r in io.load_all("ordering")]
+    assert clocks == sorted(clocks)
+    assert io.load_all("ordering")[-1]["manifest"]["config"]["which"] == "second"

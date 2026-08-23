@@ -18,7 +18,8 @@ theory treats as $G$-independent, varies by $6\%$ over $G = 2$ to $32$.
 
 \paragraph{The curvature model fails, the drift model does not.} Taking a real update and computing
 the resulting improvement and KL exactly, the second-order model of the objective places its optimal
-step more than four times below the step that actually maximises improvement, because $J = \E[r]$ is
+step at least four times below the step that actually maximises improvement, which is where the
+sweep ended, because $J = \E[r]$ is
 not a log-likelihood and a log-linear policy keeps improving past the turnover of a quadratic model.
 The drift model \eqref{eq:drift} predicts the measured KL to within $3\%$ across three orders of
 magnitude in step size. The theory in Section~\ref{sec:drift} is built on the second of these, not
@@ -158,7 +159,7 @@ probe rather than the one used to sort.
   \label{tab:difficulty}
 \end{table}
 
-Measured optimal group sizes on this model run from under three to about six, in the same range as
+Measured optimal group sizes on this model run from $2.7$ to $6.2$, in the same range as
 the enumerable policies and the transformers trained from scratch, and well below the eight to
 sixty-four in common use. What closes that gap is not statistics but hardware, which the next
 subsection measures.

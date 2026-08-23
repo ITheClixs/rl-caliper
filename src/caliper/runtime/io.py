@@ -52,7 +52,13 @@ def save(name: str, config: dict[str, Any], payload: dict[str, Any]) -> Path:
 
 
 def load_all(name: str) -> list[dict[str, Any]]:
+    """Every stored run of `name`, oldest first.
+
+    Ordered by the wall clock recorded in the manifest rather than by filename, which is a
+    configuration hash and carries no ordering.
+    """
     out = RUNS / name
     if not out.exists():
         return []
-    return [json.loads(p.read_text()) for p in sorted(out.glob("*.json"))]
+    records = [json.loads(p.read_text()) for p in out.glob("*.json")]
+    return sorted(records, key=lambda r: r["manifest"].get("wall_clock", 0.0))

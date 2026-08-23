@@ -3,7 +3,7 @@
 
 \paragraph{What this says about group sizes in practice.} Across every setting measured here --
 enumerable policies, transformers trained from scratch, and a pretrained model on real verifiable
-tasks -- the statistically optimal group size came out small, in the range of three to five
+tasks -- the statistically optimal group size came out small, between roughly three and six
 responses per prompt. Published recipes commonly use eight to sixty-four. Equation~\eqref{eq:gstar-cost}
 says what would justify the difference: prefill sharing within a group. A setting with long prompts
 and short responses can have $c_{\mathrm{pre}}/c_{\mathrm{dec}}$ in the tens, and the resulting
