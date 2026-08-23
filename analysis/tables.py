@@ -194,6 +194,31 @@ def table_diagnosis() -> None:
     write("diagnosis", "\n".join(lines))
 
 
+def table_adam() -> None:
+    runs = [r for r in io.load_all("b6_adam") if "cells" in r["result"]]
+    if not runs:
+        raise SystemExit("no optimiser comparison run")
+    cells = runs[-1]["result"]["cells"]
+    groups = cells[0]["group_sizes"]
+    lines = [
+        r"\begin{tabular}{l" + "c" * len(groups) + r"cc}",
+        r"\toprule",
+        r"gain by group size & " + " & ".join(str(g) for g in groups)
+        + r" & measured $G^{*}$ & $R^2$ \\",
+        r"\midrule",
+    ]
+    for cell in cells:
+        name = {"sgd": "gradient ascent", "adam": "Adam"}.get(
+            cell["optimiser"], cell["optimiser"]
+        )
+        values = " & ".join(f"{v:+.3f}" for v in cell["observed"])
+        lines.append(
+            f"{name} & {values} & {cell['g_star']:.2f} & {cell['r2']:.3f} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("adam", "\n".join(lines))
+
+
 def main() -> None:
     for name, fn in (
         ("exact_agreement", table_exact_agreement),
@@ -202,6 +227,7 @@ def main() -> None:
         ("real", table_real),
         ("difficulty", table_difficulty),
         ("diagnosis", table_diagnosis),
+        ("adam", table_adam),
     ):
         try:
             fn()

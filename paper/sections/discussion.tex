@@ -29,11 +29,13 @@ tested over four orders of magnitude in parameter count and not beyond; the tran
 demonstrated across batch size, not across model scale, where our sweeps were not sharp enough to
 separate the two parameterisations.
 
-\paragraph{Preconditioners.} All quantities must be read in the metric the update moves in.
-Instrumenting the preconditioned gradient does this, but Adam's preconditioner is itself estimated
-from the same noisy gradients, and at small batch its own noise interacts with the noise being
-measured. We treat the preconditioner as slowly varying, which is standard and, at the batch sizes
-used here, not obviously safe.
+\paragraph{Preconditioners.} All quantities must be read in the metric the update moves in, and
+Section~\ref{sec:adam} shows what that takes in practice: prime the preconditioner before measuring,
+and put a floor under its second moment before inverting it, or the coordinates that rarely receive
+gradient take over the inner products and the sign of $\tau_b$ stops being reliable. With both in
+place the law holds under Adam as well as under gradient ascent. We still treat the preconditioner
+as slowly varying relative to batch-to-batch fluctuation, which is standard and which we have not
+tested at batch sizes small enough to stress it.
 
 \paragraph{What we would measure next.} Three things. Whether $\tau_w/\tau_b$ moves once responses
 are long and reasoning-heavy rather than short and exact-match, since the within-prompt term should

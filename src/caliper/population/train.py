@@ -39,6 +39,7 @@ class RLConfig:
     drift_target: float = 2e-3
     initial_step_size: float = 0.1
     optimiser: str = "sgd"
+    measurement_floor: float = 0.0
     temperature: float = 1.0
     instrument_every: int = 10
     blocks: int = 8
@@ -193,7 +194,11 @@ class RLVRTrainer:
         if self.config.optimiser == "sgd":
             return PopulationSGD(self.model.parameters(), population)
         if self.config.optimiser == "adam":
-            return PopulationAdam(self.model.parameters(), population)
+            return PopulationAdam(
+                self.model.parameters(),
+                population,
+                measurement_floor=self.config.measurement_floor,
+            )
         raise KeyError(self.config.optimiser)
 
     def rollout(self):
@@ -373,6 +378,7 @@ def measure_noise(
     generator: torch.Generator,
     batches: int,
     pool: torch.Tensor | None = None,
+    prime_batches: int = 0,
 ) -> dict[str, torch.Tensor]:
     """Estimate the noise terms at a frozen policy, averaging raw moments over batches.
 
@@ -380,6 +386,18 @@ def measure_noise(
     moving target. Ratios are formed only after averaging.
     """
     trainer = RLVRTrainer(model, task, config, generator, pool=pool)
+
+    # A preconditioned optimiser has to be measured in the metric it actually moves in, and that
+    # metric does not exist until its second-moment estimate has seen some gradients. Priming runs
+    # the optimiser's state forward on real batches with a zero step size, so the policy is
+    # untouched while the preconditioner becomes the one a real run would have.
+    for _ in range(prime_batches):
+        tokens, rewards = trainer.rollout()
+        advantage = trainer.advantages(rewards, trainer.weights)
+        trainer.optimiser.zero_grad()
+        trainer._loss(tokens, advantage).backward()
+        trainer.optimiser.step(torch.zeros(model.config.population, device=tokens.device))
+
     totals = None
     for _ in range(batches):
         tokens, rewards = trainer.rollout()

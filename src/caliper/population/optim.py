@@ -38,10 +38,22 @@ class PopulationSGD(PopulationOptimiser):
 
 
 class PopulationAdam(PopulationOptimiser):
-    def __init__(self, parameters, population: int, betas=(0.9, 0.95), eps: float = 1e-8):
+    def __init__(
+        self,
+        parameters,
+        population: int,
+        betas=(0.9, 0.95),
+        eps: float = 1e-8,
+        measurement_floor: float = 0.0,
+    ):
         super().__init__(parameters, population)
         self.betas = betas
         self.eps = eps
+        # Coordinates that rarely receive gradient have a tiny second moment, and dividing by its
+        # square root amplifies them without bound. That is harmless for the update, which is
+        # bounded by construction, but it wrecks an inner product between two noisy gradients. The
+        # floor is expressed relative to the mean second moment so it does not need retuning.
+        self.measurement_floor = measurement_floor
         self.t = 0
         self.m = [torch.zeros_like(p) for p in self.params]
         self.v = [torch.zeros_like(p) for p in self.params]
@@ -66,7 +78,11 @@ class PopulationAdam(PopulationOptimiser):
         if self.t == 0:
             return flat_grad
         bias2 = 1 - self.betas[1] ** self.t
-        scale = torch.cat(
-            [((v / bias2).sqrt() + self.eps).reshape(self.population, -1) for v in self.v], dim=1
+        second = torch.cat(
+            [(v / bias2).reshape(self.population, -1) for v in self.v], dim=1
         )
-        return flat_grad / scale
+        if self.measurement_floor > 0:
+            second = second.clamp_min(
+                self.measurement_floor * second.mean(dim=1, keepdim=True)
+            )
+        return flat_grad / (second.sqrt() + self.eps)

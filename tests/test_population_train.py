@@ -163,3 +163,28 @@ def test_pass_rate_covers_a_small_pool_by_repeating(setup):
     rate = pass_rate(model, task, 32, generator, pool)
     assert rate.shape == (4,)
     assert np.all((rate.numpy() >= 0) & (rate.numpy() <= 1))
+
+
+def test_priming_moves_the_preconditioner_but_not_the_policy(setup):
+    """Adam's metric does not exist until its second moment has seen gradients."""
+    task, model, generator = setup
+    state = snapshot(model)
+    config = RLConfig(prompts=8, group_size=4, blocks=2, optimiser="adam")
+    measure_noise(model, task, config, generator, batches=1, prime_batches=2)
+    torch.testing.assert_close(model.token_embedding, state["token_embedding"])
+
+
+def test_priming_changes_what_the_probe_reports_under_adam():
+    task = ModSum(modulus=5, chain=2)
+    generator = torch.Generator().manual_seed(11)
+    config = ModelConfig(
+        vocab=task.vocab, context=task.total_len, width=32, depth=2, heads=2, population=2
+    )
+    model = PopulationTransformer(config, generator)
+    supervised_warmup(
+        model, task, SFTConfig(steps=200, batch=32, target_pass_rate=None), generator
+    )
+    settings = RLConfig(prompts=8, group_size=4, blocks=2, optimiser="adam")
+    cold = measure_noise(model, task, settings, generator, batches=3, prime_batches=0)
+    warm = measure_noise(model, task, settings, generator, batches=3, prime_batches=4)
+    assert not torch.allclose(cold["tau_w"], warm["tau_w"])
