@@ -131,6 +131,7 @@ def main() -> None:
             trainer, states, corpus, held_out, args.learning_rate, args.prompts,
             mx.random.key(4242 + 31 * repeat), seed=args.seed + 991 * repeat,
             epsilon=args.epsilon, batches=args.adjoint_batches,
+            check_agreement=(repeat == 0),  # the diagnostic costs a second backward pass
         ))
         print(f"forecast {repeat}: sd {repeats[-1].std:.5f} "
               f"(variance {repeats[-1].variance:.3e}) in {(time.time() - started) / 60:.1f} min",
