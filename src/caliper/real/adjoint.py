@@ -8,6 +8,10 @@ Three quantities are needed per update, and each is one pass a trainer already k
               the stored parameters. The two evaluations share a random key, so they sample the
               same responses wherever the perturbation does not change which token wins, and the
               difference is a directional derivative rather than a difference of two noise draws.
+              The difference step has a floor: model weights are float32 here, so below about
+              1e-4 the two evaluations cancel into rounding error rather than into a derivative.
+              The default of 1e-3 sits above that floor and well below the scale on which the
+              gradient field bends.
   b^T Q_t b   the variance across prompts of the batch gradient projected onto b, times eta^2 / P.
               One scalar.
 
