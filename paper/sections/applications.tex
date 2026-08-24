@@ -7,12 +7,14 @@ between prompts and responses? It follows from the same decomposition, which is 
 not in a separate paper.
 \label{sec:drift}
 
+\subsection{Why the usual route does not work here}
+
 The standard route to a critical batch size is a second-order model of the objective
 \citep{mccandlish2018empirical}. For RLVR it is the wrong model. The objective $J = \E[r]$ is not a
 log-likelihood, its Hessian is not the negative Fisher information, and along a policy gradient
 direction a log-linear policy keeps improving well past the step at which a quadratic model turns
-over; measured against exactly computed improvement in Section~\ref{sec:experiments}, it places its
-optimum at least four times too low. A model of how far the \emph{policy} moves is accurate over
+over; measured against exactly computed improvement below, it places its optimum at least four
+times too low. A model of how far the \emph{policy} moves is accurate over
 the same range, and everything below is built on that instead.
 
 \subsection{Drift and efficiency}
