@@ -16,8 +16,8 @@ and $H := \partial\gbar/\partial\theta$ the Jacobian of the mean gradient field,
 \begin{equation}
   \label{eq:seed-recursion}
   \Delta_{t+1} = \big( I + \eta H \big)\Delta_t + \eta\,\nu_t,
-  \qquad \Cov(\nu_t) = \tfrac{2}{P}\Sigma,
 \end{equation}
+with $\Cov(\nu_t) = \tfrac{2}{P}\Sigma$,
 to first order in $\Delta$, where $\Sigma = \Sb + \Sw$ is the batch noise of
 Section~\ref{sec:theory} and the factor of two is because both runs contribute an independent draw.
 
@@ -39,12 +39,11 @@ and it has an answer.
   Suppose $H$ is negative definite with $\eta\lambda_i \ll 1$ for its eigenvalues $-\lambda_i$, and
   that $\Sigma$, $H$ and $\eta$ vary slowly relative to $\max_i 1/(\eta\lambda_i)$. Then
   $\E[\|\Delta_t\|^2]$ converges, and the divergence between the two policies satisfies
-  \begin{equation}
+    \begin{equation}
     \label{eq:stationary}
     \E\big[\KL(\pi^A \,\|\, \pi^B)\big] \;\longrightarrow\; \tau_c \cdot D_{\mathrm{noise}},
-    \qquad
-    \tau_c := \frac{1}{\eta\bar\lambda},
   \end{equation}
+  where $\tau_c := 1/(\eta\bar\lambda)$ and
   where $D_{\mathrm{noise}} = (1-\rho)\,D = \tfrac{1}{2}\eta^2 N/P$ is the diffusive part of the
   drift of Section~\ref{sec:drift} and $\bar\lambda$ is the curvature of the gradient field averaged
   in the Fisher metric.

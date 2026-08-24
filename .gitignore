@@ -26,6 +26,8 @@ paper/*.synctex.gz
 paper/*.fdb_latexmk
 paper/*.fls
 paper/build/
+paper/arxiv/submission/
+paper/arxiv/submission.tar.gz
 
 # editor / os
 .DS_Store
