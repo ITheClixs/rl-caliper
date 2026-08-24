@@ -201,6 +201,20 @@ group is not unanimous. Then one rollout and backward pass on the evaluation set
 $\nabla M(\theta_T)$, and the backward sweep of Algorithm~\ref{alg:forecast}. The extra cost is two
 gradient evaluations per stored update and one vector of parameter size held in memory.
 
+\paragraph{What it costs, plainly.} As written, the backward pass makes three passes per stored
+update: one batch for the injected term, and two for the Hessian-vector product. That is about
+three times the compute of the training run itself, not a rounding error, and we would rather state
+it than let a reader discover it. Two things reduce it. The injected term can reuse the rollouts the
+run already made, if they were stored, which removes one of the three. And the kernel is smooth in
+$t$ (Figure~\ref{fig:forecast}, right), so the backward pass can be run on a subsample of updates
+and interpolated, at a cost in accuracy we have not characterised.
+
+The comparison that matters is not against zero. Estimating the same quantity by replication costs
+$N$ full runs and returns an $N$-seed estimate whose own interval is wide --- at six seeds, wide
+enough to leave the shape of a divergence trace unresolved (Section~\ref{sec:exp-seeds}). Two to
+three times one run is cheaper than that for any $N$ above three, and it is available on a run that
+has already finished.
+
 The number that comes out is the seed component only. A reported score also carries the randomness
 of the evaluation set, which is the binomial term the eval literature already estimates
 \citep{miller2024adding}. The two are independent by construction --- one is over training seeds at
