@@ -33,8 +33,8 @@ be carried against the gradient of the reported metric instead of being formed.
   update, with no covariance matrix formed. The transpose the backward pass would need is free,
   because the mean update of any count-based estimator is the gradient of a scalar potential
   $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
-  pass rate itself. It costs two to three times the compute of the run it
-  reads, against $N$ full runs for replication. Tested prospectively --- one run trained and frozen
+  pass rate itself. In its cheap form --- which an ablation shows loses nothing at
+  these run lengths --- it costs one extra pass per update, against $N$ full runs for replication. Tested prospectively --- one run trained and frozen
   and the forecast recorded before the remaining seeds were trained --- its median absolute error
   against the realised spread is $\numForecastMedian\times$ across $\numForecastSettings$ settings --- two policy shapes, two prompt-pool diversities, and a
   $\numForecastSpreadRange\times$ range of spreads --- its worst is $\numForecastWorst\times$, and it falls inside the measured $95\%$
@@ -49,6 +49,13 @@ be carried against the gradient of the reported metric instead of being formed.
   improves; only $\numSpectrumShareLow$--$\numSpectrumShareHigh\%$ of directions contract, a share that grows during the run; and the
   contracting timescales span tens of updates to effectively unbounded. Divergence stays bounded
   because expansion is slow relative to run length, not because every direction shrinks.
+
+  \item \textbf{An honest accounting of what the backward pass buys.} Holding the adjoint at
+  $\nabla M$ instead of carrying it back changes the forecast by a median of $2\%$ and the median
+  error not at all, so the Hessian-vector products --- two of the three passes per update --- are
+  unnecessary over runs of this length. The recursion explains why: most of the spectrum of $A_t$
+  sits within $10^{-4}$ of one and $\nabla M$ points into that part of it. We recommend the cheap
+  estimator and say what would make the full one necessary.
 
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
   leaves the rollouts, the batch composition and the step sizes untouched, turns a divergence trace

@@ -51,8 +51,10 @@ result.kernel             # each update's share of the variance
 result.memory()           # how many final updates hold 95% of it
 ```
 
-The backward pass costs about three passes per stored update -- roughly three times the training
-run, or twice if the rollouts were stored -- against `N` full runs for replication.
+The full backward pass costs three passes per stored update. An ablation over 192 settings shows
+the transport is worth a median of 2% at these run lengths, so the recommended default is the cheap
+form -- hold `b` at `grad M` and accumulate one scalar per update, one extra pass, no
+Hessian-vector products. The recursion is what tells you when that stops being enough.
 
 Two implementations of that protocol ship here: `caliper.exact.adjoint` for enumerable policies,
 where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX -- two
