@@ -44,9 +44,10 @@ be carried against the gradient of the reported metric instead of being formed.
   approximation.
 
   \item \textbf{What the filter actually is} (Section~\ref{sec:exp-spectrum}). Measuring the
-  spectrum of $A_t$ along a run: the spectral radius exceeds one throughout, only $31$--$51\%$ of
-  directions contract, and among those the decay timescales span tens of updates to effectively
-  unbounded. Divergence stays bounded because expansion is slow relative to run length, not because
+  spectrum of $A_t$ along a run: the spectral radius exceeds one throughout, by up to $2\%$ early and
+  decaying towards zero as the policy improves; only $31$--$51\%$ of directions contract, a share
+  that grows during the run; and among those the decay timescales span tens of updates to
+  effectively unbounded. Divergence stays bounded because expansion is slow relative to run length, not because
   every direction shrinks --- and this is why one effective timescale cannot work.
 
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which

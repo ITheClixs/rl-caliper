@@ -61,7 +61,8 @@
   perturbation entering at one update is passed through every later update and reweighted by them,
   so the covariance of a run about its mean obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Measuring
   the spectrum of $A_t$ shows what that reweighting is and what it is not: only a third to a half of
-  directions contract, the leading one expands by one to two percent per update, and among the
+  directions contract, the leading direction expands rather than contracts --- by up to two percent
+  per update early in training, decaying towards zero as the policy improves --- and among the
   contracting directions the timescales run from tens of updates to effectively unbounded. It is a
   filter, not a contraction, and no single number stands in for it. Carrying the gradient of the reported metric
   backwards along one stored trajectory then gives the across-seed variance of that metric as a sum
