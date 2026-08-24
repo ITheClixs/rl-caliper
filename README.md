@@ -15,12 +15,14 @@ covariance matrix formed.
 ```
 src/caliper/
   objectives/   the estimator family as a (G+1) x 2 weight table
-  exact/        enumerable policies: exact scores, Fisher, moments, and a trainer
+  exact/        enumerable policies: exact scores, Fisher, moments, a trainer,
+                the covariance recursion, the adjoint, and Adam's lifted state
   estimators/   the K x 2 split estimator and its sampling harness
   population/   transformers trained as a batched population, and the RLVR trainer
   control/      step size as a feedback loop on realised drift
   real/         the same measurement on a pretrained model through MLX
-  analysis/     peak fitting and interval estimation
+  forecast.py   the backward pass, as a protocol any trainer can implement
+  analysis/     the efficiency curve and interval estimation
   runtime/      run manifests
 experiments/    one directory per experiment, config-driven
 analysis/       figure and table generation for the paper
