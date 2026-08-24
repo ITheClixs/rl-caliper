@@ -169,6 +169,20 @@ def main() -> None:
               f"held out {held.mean():.4f} | {(time.time() - started) / 60:.1f} min", flush=True)
         del trainer
 
+    if len(scores) < 2:
+        print("\nonly one seed: no spread to compare the forecast against")
+        io.save("s7_real_forecast", vars(args), {
+            "label": args.label,
+            "predicted_std": prediction.std,
+            "predicted_variance": prediction.variance,
+            "kernel": prediction.kernel,
+            "adjoint_norm": prediction.adjoint_norm,
+            "jvp_agreement": prediction.jvp_agreement,
+            "live_share": prediction.live_share,
+            "held_out_scores": scores,
+            "base_pass_rate": float(base_rates.mean()),
+        })
+        return
     observed = spread_interval(np.array(scores), n_boot=4000, seed=args.seed)
     binomial = float(
         np.mean(np.array(per_prompt) * (1.0 - np.array(per_prompt)))
