@@ -1,11 +1,14 @@
 \section{Experiments}
 \label{sec:experiments}
 
-Three levels of evidence. Policies small enough to enumerate, where the objective, the Fisher
-information, the drift and both noise terms are computed rather than estimated. Transformers trained
-from scratch, where a population of independent runs executes as one batched kernel so that sweeps
-carry standard errors rather than anecdotes. And a pretrained model, where the same measurement is
-made on a real policy and a real verifier. Everything ran on a single Apple M4 laptop.
+Four levels of evidence, in decreasing order of what can be computed and increasing order of what
+a practitioner would recognise. Policies small enough to enumerate, where the objective, the Fisher
+information, the drift and both noise terms are computed rather than estimated, and where the
+forecast can be checked against the quantity it predicts rather than against an estimate of it.
+Transformers trained from scratch, where a population of independent runs executes as one batched
+kernel so that sweeps carry standard errors rather than anecdotes. A pretrained model of half a
+billion parameters. And Qwen2.5-7B, eight seeds, which is what this machine holds. Everything ran on
+a single Apple M4 laptop with $24$\,GB of memory.
 
 \subsection{Forecasting the spread of a reported number}
 \label{sec:exp-forecast}
