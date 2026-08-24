@@ -42,7 +42,25 @@ The failure is what (S3) predicts when a spectrum of decay rates is fitted with 
 fast directions equilibrate within a few updates and slow ones set the final level, so a single
 fitted timescale is pinned by the early rise.
 
-## 4. The contraction comes from learning
+## 3b. The operator is not a contraction
+
+Measuring the spectrum of `A_t = I + eta J_t` along a 600-update mean trajectory, at three pool
+difficulties:
+
+* the spectral radius exceeds one everywhere -- `10^3(rho - 1)` runs from about 20 early to 0.1 late;
+* only 31%-51% of directions contract at all, and that share rises as the run proceeds;
+* among the contracting directions the fastest has eigenvalue about 0.98 and the slowest is 1.0000
+  to four places -- decay timescales from roughly 45 updates to effectively unbounded.
+
+Three consequences. Divergence stays bounded over the horizons measured because expansion is slow
+relative to run length (1.02^25 is about 1.6), not because perturbations are destroyed. One
+effective timescale cannot stand in for a spectrum this wide, which is the 195x failure in section
+3. And the slow end of the spectrum has forgotten nothing after eighty updates, which is why the
+per-update kernel has no horizon (see `forecast.md`).
+
+The word used throughout is *filtered*, not *contracted*, and this is what it means.
+
+## 4. The filtering comes from learning
 
 Removing the learning signal while leaving the noise intact -- every reward replaced by an
 independent coin flip -- turns a flat divergence trace into one that grows 10.7x over eighty
@@ -54,12 +72,13 @@ flat, `J ~ 0`, and there divergence accumulates exactly as (S1) says it should.
 
 ## 5. What is not established
 
-* **No one-run error bar on a benchmark number.** (S3) predicts policy divergence. Carrying that to
-  outcome spread via `sqrt(KL)` failed: fitted exponent +0.10, 95% CI [-0.03, +0.45] against a
-  predicted +0.5, interval containing zero. The claim is withdrawn. The route that should work is to
-  propagate the covariance against the gradient of the target metric directly.
+* ~~**No one-run error bar on a benchmark number.**~~ Superseded. Carrying (S3) to outcome spread
+  via `sqrt(KL)` failed (fitted exponent +0.10, 95% CI [-0.03, +0.45] against a predicted +0.5) and
+  the claim was withdrawn; propagating against the gradient of the target metric directly does work,
+  and is written up in `forecast.md`.
 * **Bounded, not stationary.** Tail slopes from -1.15 to +0.26 reject accumulation. They do not
-  establish strict stationarity, since `J_t`, `Sigma_t` and `eta_t` all move during training.
+  establish strict stationarity, since `J_t`, `Sigma_t` and `eta_t` all move during training, and
+  the spectral radius above one means the bound is a statement about horizons, not a fixed point.
 * **Scaling is weakly pinned.** Nine settings give exponent -0.61 in `P` (95% CI [-1.42, +0.24]) and
   +0.59 in `D` (95% CI [+0.27, +1.04]). Both intervals contain the predicted -1/2 and +1/2; the `P`
   interval also contains zero.
