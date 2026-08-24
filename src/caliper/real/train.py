@@ -62,9 +62,13 @@ class RealRLTrainer(RealNoiseProbe):
         return {"pass_rate": float(rewards.mean())}, key
 
 
-def response_log_probs(model, sequences: mx.array, prompt_len: int) -> mx.array:
-    """Log-probabilities over the vocabulary at each response position of a fixed batch."""
-    logits = model(sequences[:, :-1])[:, prompt_len - 1 :, :].astype(mx.float32)
+def response_log_probs(model, sequences: mx.array) -> mx.array:
+    """Log-probabilities over the vocabulary at every next-token position of a fixed batch.
+
+    Prompts differ in length, so the response positions are selected by the mask that accompanies
+    the batch rather than by an offset; returning all positions keeps the two aligned.
+    """
+    logits = model(sequences[:, :-1]).astype(mx.float32)
     return logits - mx.logsumexp(logits, axis=-1, keepdims=True)
 
 

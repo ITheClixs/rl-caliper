@@ -1,46 +1,42 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{Group sizes in practice.} Measured on enumerable policies, on transformers trained from
-scratch and on a pretrained model, the purely statistical optimum came out between three and six
-responses per prompt. Published recipes commonly use eight to sixty-four, and
-Theorem~\ref{thm:split}(iii) accounts for the difference without either side being wrong: prefill
-sharing and a large rollout budget both push the optimum up, and at the prefill ratios we measure
-for long prompts with short answers they push it into the tens. What the theorem removes is the
-need to guess. Both inputs are measurements, one from the trainer and one from the serving stack,
-and the second changes whenever the prompt-to-response length ratio does.
+\paragraph{What a practitioner should take from this.} Three things, in decreasing order of how
+confident we are in them. Running longer does not cost reproducibility: the spread across seeds is
+flat in the number of updates, so there is no reason to cut a run short to keep results stable.
+Batch composition is the dominant lever, and it acts as $P^{-1/2}$, so the returns are real but slow
+-- quadrupling the batch halves the spread. And the step size matters less than one would expect,
+entering as $D^{+1/2}$, which means a run can be made faster without being made much less
+reproducible, up to the saturation boundary below.
 
-\paragraph{What the estimator costs.} Four -- or $2K$ -- gradient buffers instead of one, and no
-extra responses. A trainer that already accumulates over microbatches gets the decomposition for
-the cost of tagging each microbatch with which prompt block and which rollout sub-group it came
-from. What it buys is $\Bcrit$, the efficiency $\rho$, and $G^{\star}$, continuously, on the run in
-progress rather than from a sweep that has to be repeated when anything changes.
+\paragraph{On reporting.} The honest consequence of Section~\ref{sec:exp-seeds} is not that error
+bars are now free. It is that they are cheap in a way they were not: the scaling transfers, so one
+calibration -- a handful of seeds at one setting -- lets a practitioner carry an error bar across
+changes of batch and step size, which is where most of the variation between reported configurations
+comes from. What we could not deliver is the absolute level from a single run, and
+Section~\ref{sec:exp-seeds} says exactly why the obvious route fails.
 
-\paragraph{Limits.} The estimator family in \eqref{eq:family} covers advantages that depend on a
-response's own reward and its group's success count. It does not cover token-level shaping, length
-normalisation, clipping, or a non-binary reward, and the exact moment calculations lean on the
-reward being binary. Clipping in particular makes the update a nonlinear function of the batch,
-which breaks the linearity the split estimator relies on; it can be handled by instrumenting the
-clipped update directly, but the closed forms would need redoing. The drift model is a second-order
-expansion and will understate movement for steps large enough to leave that regime. The models measured here run from tabular policies through transformers of $25$k to $400$k
-parameters to a pretrained model of $0.5$B, so the claim that these are the right quantities is
-tested over four orders of magnitude in parameter count and not beyond; the transfer result is
-demonstrated across batch size, not across model scale, where our sweeps were not sharp enough to
-separate the two parameterisations.
+\paragraph{Against drift targeting, in one case.} Section~\ref{sec:drift} recommends specifying a
+run by a drift target rather than a learning rate, and Section~\ref{sec:experiments} shows that
+target transferring across batch size where a learning rate does not. Section~\ref{sec:exp-seeds}
+shows the same technique destroying two runs. The mechanism is specific and worth stating plainly:
+$\E_x[p(1-p)] \to 0$ as a task is solved, the signal goes with it, and a controller holding drift
+constant answers by raising the step without bound. Any drift-targeted schedule needs a floor on the
+signal or a cap on the step; ours had neither.
 
-\paragraph{Preconditioners.} All quantities must be read in the metric the update moves in, and
-Section~\ref{sec:adam} shows what that takes in practice: prime the preconditioner before measuring,
-and put a floor under its second moment before inverting it, or the coordinates that rarely receive
-gradient take over the inner products and the sign of $\tau_b$ stops being reliable. With both in
-place the law holds under Adam as well as under gradient ascent. We still treat the preconditioner
-as slowly varying relative to batch-to-batch fluctuation, which is standard and which we have not
-tested at batch sizes small enough to stress it.
+\paragraph{Limits.} The linearisation behind Proposition~\ref{prop:stationary} assumes the two runs
+stay close enough that the mean gradient field is locally linear between them, which is the same
+assumption that fails at saturation. The largest model measured is $0.5$B parameters, and the tasks
+are short-answer and exactly verifiable; whether the same picture holds for reasoning-length
+responses, where a single rollout carries far more entropy, is the obvious next measurement and we
+have not made it. The contraction time is treated as a single number and is not one. And the
+estimator family of \eqref{eq:family} excludes clipping, which makes the update a nonlinear function
+of the batch and breaks the linearity the noise decomposition relies on.
 
-\paragraph{What we would measure next.} Three things. Whether $\tau_w/\tau_b$ moves once responses
-are long and reasoning-heavy rather than short and exact-match, since the within-prompt term should
-grow with the entropy of the response distribution. How the drift target should be scheduled rather than held constant, since a tuned
-constant learning rate beat the best constant drift on the held-out setting of
-Section~\ref{sec:recipe}, and whether it transfers across model scale, which needs a sharper
-experiment than the one run here. And whether the same decomposition explains the well-known instability of RLVR at small batch
-sizes: a run below its critical batch size spends most of its drift budget on diffusion, and the
-diffusive fraction is exactly what \eqref{eq:efficiency} measures.
+\paragraph{What we would do next.} Measure the spectrum of the contraction rather than a single
+timescale, since that is what stands between the scaling law and an absolute error bar. Repeat the
+measurement where responses are long, which is both the regime that matters most and the one where
+the within-prompt noise term should be largest. And check whether the same balance explains a
+phenomenon we did not set out to study: if divergence between two seeds is stationary, then so is
+divergence from any perturbation, including a change of data order or of hardware numerics, and the
+same instrument should predict those.

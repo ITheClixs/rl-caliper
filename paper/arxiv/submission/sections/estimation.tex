@@ -1,0 +1,78 @@
+\section{Measuring the two noise scales from a single batch}
+\label{sec:estimation}
+
+Both $\tau_b$ and $\tau_w$ are recoverable from gradients a trainer already computes. Index the
+microbatches by prompt block and by rollout sub-group and accumulate them separately:
+\begin{equation}
+  \label{eq:cells}
+  g_{ab} := \text{mean gradient over block } a \text{ using sub-group } b,
+\end{equation}
+for $a = 1 \dots K$ and $b \in \{1,2\}$, each computed with its own sub-group's advantages over
+$P/K$ prompts and $G/2$ responses.
+Blocks hold disjoint prompts, and given a prompt the two sub-groups are independent, so every term
+below is an inner product of independent quantities:
+\begin{align}
+  \label{eq:estimators}
+  \gbar^{\!\top} M \gbar &= \E\big[ g_{a1}^{\!\top} M\, g_{a'2} \big]_{a \neq a'}, \\
+  \tr(M\Sb) &= \tfrac{P}{K}\Big( \E\big[ g_{a1}^{\!\top} M\, g_{a2} \big]
+     - \gbar^{\!\top} M \gbar \Big), \notag \\
+  \tr(M\Sw) &= \tfrac{P}{2K}\, \E\big[ \| g_{a1} - g_{a2} \|_M^2 \big]. \notag
+\end{align}
+The first pairs different prompts with different responses, the second the same prompts with
+different responses, and the third cancels the prompt-level term inside the difference.
+
+The cost is $2K$ gradient buffers rather than one, no extra responses, and no extra backward work
+beyond tagging each microbatch -- which any trainer using gradient accumulation is already
+positioned to do. Raising $K$ averages the block statistics over $K(K-1)$ ordered pairs rather than
+one and shrinks the $P/K$ multiplier in front of the noisiest term, so the estimate improves with
+the number of microbatches the trainer already uses. $M = I$ gives the practical form; $M = F$ is
+obtained from measured KL rather than by materialising the Fisher.
+
+Getting this right requires handling three biases, each easy to walk into.
+
+\paragraph{The subtractive form is badly conditioned.} Estimating the total variance and
+subtracting the within-prompt part differences two large, highly correlated quantities. On
+homogeneous pools it returns a negative $\tau_b$ and an infinite $G^{\star}$; where it returns something
+finite, it compresses the answer toward the middle of the range. Measured against exactly known
+values over pools whose noise ratio spans a factor of $26$, \eqref{eq:estimators} recovers $G^{\star}$
+to a median error of $1.3\%$ and a worst case of $6.2\%$, while the subtractive form reports
+$6.1$ where the truth is $9.4$ and $6.9$ where the truth is $15.2$.
+
+\paragraph{A repeated prompt lands in two blocks.} Sampling prompts with replacement puts the same
+prompt in two blocks, so the different-block inner product picks up a same-prompt term and
+$\tau_b$ is biased down -- by $45\%$ on the most homogeneous pool tested. Drawing distinct prompts
+within a batch, which iterating a dataset does anyway, removes it.
+
+\paragraph{A finite corpus makes blocks anticorrelated.} Drawing without replacement from a corpus
+of $N$ has the opposite effect on the other term: two blocks hold distinct prompts, so
+\begin{equation}
+  \label{eq:finite-corpus}
+  \E\big[ g_{a1}^{\!\top} M\, g_{a'2} \big]_{a \neq a'}
+  \;=\; \gbar^{\!\top} M \gbar \;-\; \frac{\tr(M\Sb)}{N-1},
+\end{equation}
+which is exact and which the estimator corrects using the $\tau_b$ it already has. The correction
+matters whenever $\tau_b$ is large relative to the signal -- that is, whenever the run is far below
+its critical batch size, which is the usual case. Uncorrected, the signal estimate on one pool came
+out negative. The same factor appears in the theory: with a finite corpus the between-prompt
+variance enters $\Cov(\ghat)$ multiplied by $1 - (P-1)/(N-1)$, so
+\begin{equation}
+  \label{eq:gstar-corpus}
+  G^{\star} \;=\; 1 + \sqrt{\frac{\tau_w}{\big(1 - \tfrac{P-1}{N-1}\big)\tau_b}},
+\end{equation}
+and a run that covers its whole corpus every step should use larger groups than one that samples
+from a large corpus.
+
+\paragraph{Preconditioners.} An update is $\eta\,\Pi\,\ghat$ for a preconditioner $\Pi$, and Adam
+is scale invariant, so both the drift model and the estimators must be read in the metric the
+update actually moves in. In practice this means instrumenting the preconditioned gradient: the
+results carry over with $F \mapsto \Pi F \Pi$ under the standard assumption that $\Pi$ varies
+slowly relative to batch-to-batch fluctuation.
+
+\paragraph{Controlling drift.} Since $D \propto \eta^2$, a multiplicative controller
+\begin{equation}
+  \eta_{t+1} \;=\; \eta_t \cdot \mathrm{clip}\Big( \big( D^{*} / D_t \big)^{1/2},\ c^{-1},\ c \Big)
+\end{equation}
+corrects a mis-set step in a single update when the drift estimate is clean. Measured over runs on
+transformers, it holds the median drift at its target with no detectable bias in log space.
+Exponential smoothing of $D_t$, the obvious refinement, makes it worse: the lag biases the realised
+drift low by roughly a factor of two.

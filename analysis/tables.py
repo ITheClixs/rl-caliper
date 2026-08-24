@@ -87,7 +87,7 @@ def table_transformer() -> None:
     lines = [
         r"\begin{tabular}{lcccccc}",
         r"\toprule",
-        r"corpus $N$ & $\tau_b$ & $\tau_w$ & predicted $G^{\\star}$ & "
+        r"corpus $N$ & $\tau_b$ & $\tau_w$ & predicted $G^{\star}$ & "
         r"best measured $G$ & Spearman & $R^2$ \\",
         r"\midrule",
     ]
@@ -118,7 +118,7 @@ def table_real() -> None:
     lines = [
         r"\begin{tabular}{lcccccc}",
         r"\toprule",
-        r"corpus & pass rate & $\E[p(1-p)]$ & $\tau_b$ & $\tau_w$ & $G^{\\star}$ & "
+        r"corpus & pass rate & $\E[p(1-p)]$ & $\tau_b$ & $\tau_w$ & $G^{\star}$ & "
         r"$\tau_w/\E[p(1-p)]$ \\",
         r"\midrule",
     ]
@@ -204,7 +204,7 @@ def table_adam() -> None:
         r"\begin{tabular}{l" + "c" * len(groups) + r"cc}",
         r"\toprule",
         r"gain by group size & " + " & ".join(str(g) for g in groups)
-        + r" & measured $G^{\\star}$ & $R^2$ \\",
+        + r" & measured $G^{\star}$ & $R^2$ \\",
         r"\midrule",
     ]
     for cell in cells:

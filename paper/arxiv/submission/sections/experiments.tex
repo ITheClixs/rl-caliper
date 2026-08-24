@@ -51,29 +51,6 @@ early rise and underestimates what matters. The consequence for practice is a re
 the batch or the step changes, which is the question that actually comes up. The absolute level
 still requires that one calibration.
 
-\paragraph{It holds on a pretrained model.} The transformers above are small and their task is
-synthetic, and a policy with a single attractor might reconverge for uninteresting reasons. We
-repeated the measurement on Qwen2.5-0.5B-Instruct with LoRA adapters, six runs differing only in
-rollout randomness, on a corpus of exactly verifiable short-answer problems. Because LoRA adapters
-start at zero the runs begin from an identical policy by construction, and every checkpoint is
-scored on one fixed batch of sequences so the comparison is on identical inputs.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.86\linewidth]{figures/real_seeds.pdf}
-  \caption{Divergence between six runs of a pretrained model that differ only in their rollout
-  randomness. It peaks at ten updates and then falls, as it does for the small transformers. Error
-  bars are standard errors over the fifteen distinct pairs.}
-  \label{fig:real-seeds}
-\end{figure}
-
-The pattern repeats: divergence rises to $1.98 \times 10^{-1}$ at ten updates, falls by a factor of
-$2.4$, and is flat thereafter, with a tail slope of $+0.22$. The six runs finish within
-$0.835 \pm 0.044$ of each other in pass rate. We are not claiming the small-scale law transfers
-quantitatively to this model -- six seeds and forty updates do not support that -- but the
-qualitative claim that the paper rests on, that divergence between seeds stops growing, is not an
-artefact of small models or synthetic tasks.
-
 \paragraph{Where it stops.} Two of the twelve settings leave the contracting regime, and both do it
 the same way. Under a fixed drift target the controller must raise $\eta$ as the signal decays, and
 $\E_x[p(1-p)] \to 0$ as a task is solved takes the signal with it. In the two settings that reach a

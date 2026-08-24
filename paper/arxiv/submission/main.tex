@@ -54,9 +54,8 @@
 
   Two runs that start from the same policy and differ only in the randomness of their rollouts do
   not drift apart. Their divergence rises over the first few tens of updates, settles, and stays
-  settled: across nine settings the log-log slope of policy divergence against update count runs
-  from $-1.15$ to $+0.26$, where an accumulating random walk requires $+1$. The same holds on a
-  pretrained $0.5$B model, where six runs peak at ten updates and then reconverge. The mechanism is a balance.
+  settled: across ten settings the log-log slope of policy divergence against update count is at
+  most $+0.26$, where an accumulating random walk requires $+1$. The mechanism is a balance.
   Gradient noise pushes two runs apart at a rate we can measure, the curvature of the shared
   objective pulls them back, and the fixed point is $\KL_\infty = \tau_c D_{\mathrm{noise}}$: the
   diffusive drift injected per update, times the number of updates a perturbation survives. Both
@@ -66,12 +65,9 @@
   The law makes four predictions and we test each. Divergence stops growing; run length does not
   enter it; it scales as $P^{-1/2} D^{+1/2}$ in the batch and the drift, measured at
   $P^{-0.45} D^{0.35}$ with $R^2 = 0.94$; and the spread in final task performance follows
-  $\sqrt{\KL_\infty}$. The practical consequences cut against the usual intuitions: training longer does not cost
-  reproducibility, larger steps cost it only as a square root, and batch composition is the dominant
-  lever. We report what we could not get: a single exponential does not identify $\tau_c$, so the
-  scaling transfers from one calibration but the absolute level does not yet come free. And we find
-  where the picture breaks, which is a failure of drift-targeted control at saturation rather than of
-  the law.
+  $\sqrt{\KL_\infty}$. The practical consequences cut against the usual intuitions: training longer
+  does not cost reproducibility, larger steps cost it only as a square root, and batch composition
+  is the dominant lever. We also find where it breaks, which is not where one would guess.
 
   Supporting this is an exact finite-$G$ covariance for the advantage estimators in current use,
   which is what makes the injected noise measurable, and which separately settles what those

@@ -27,9 +27,9 @@ fixed point is what an error bar on a single run should be built from.
 \paragraph{Contributions.}
 \begin{itemize}
   \item \textbf{Seed divergence is stationary, not accumulating} (Section~\ref{sec:seeds},
-  Section~\ref{sec:experiments}). Measured on transformers trained from scratch over an eightfold range of batch size and a tenfold
-  range of step size, tail slopes run from $-1.15$ to $+0.26$ against the $+1$ accumulation requires,
-  and the same holds on Qwen2.5-0.5B.
+  Section~\ref{sec:experiments}). We measure it on transformers trained from scratch across a
+  tenfold range of batch sizes and step sizes, and on a pretrained model, and in no setting that is
+  still learning does it accumulate.
 
   \item \textbf{A law with two measurable factors.}
   $\KL_\infty = \tau_c D_{\mathrm{noise}}$ (Proposition~\ref{prop:stationary}): the diffusive drift

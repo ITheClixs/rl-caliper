@@ -306,9 +306,154 @@ def figure_teaser() -> None:
     plt.close(fig)
 
 
+def _contraction_cells():
+    """Every stored contraction sweep, restricted to updates that are still learning."""
+    cells = []
+    for run in io.load_all("s1_contraction"):
+        for cell in run["result"]["cells"]:
+            history = cell["history"]
+            if "true_spread" not in history:
+                continue  # an early run that measured spread without the noise correction
+            pass_rate = np.array(history["pass_mean"])
+            drift = np.array(history["drift"])
+            keep = (pass_rate < 0.85) & (drift < 3 * cell["drift_target"])
+            if keep.sum() >= 4:
+                cells.append((cell, keep))
+    if not cells:
+        raise SystemExit("no contraction runs")
+    return cells
+
+
+def _matched_progress(cells, target=0.60):
+    """One summary per setting: divergence and outcome spread at a common pass rate.
+
+    Trajectory points within a setting cannot be pooled -- the divergence is already at its
+    stationary value and what varies along a trajectory is measurement noise, not signal. Settings
+    also differ in their noise scale, so they are compared where the policies are equally good.
+    """
+    rows = []
+    for cell, keep in cells:
+        pass_rate = np.array(cell["history"]["pass_mean"])[keep]
+        kl = np.array(cell["history"]["pairwise_kl"])[keep]
+        spread = np.array(cell["history"]["true_spread"])[keep]
+        if not (pass_rate.min() <= target <= pass_rate.max()):
+            continue
+        rows.append(
+            {
+                "prompts": cell["prompts"],
+                "drift": cell["drift_target"],
+                "critical_batch": cell.get("critical_batch", float("nan")),
+                "kl": float(np.interp(target, pass_rate, kl)),
+                "spread": float(np.interp(target, pass_rate, spread)),
+            }
+        )
+    return rows
+
+
+def figure_reconvergence() -> None:
+    """Divergence settles; the level scales as predicted; the outcome spread follows."""
+    cells = _contraction_cells()
+    rows = _matched_progress(cells)
+    fig, axes = plt.subplots(1, 3, figsize=(10.4, 2.8))
+
+    ax = axes[0]
+    shown = sorted({c["prompts"] for c, _ in cells})
+    for prompts, colour in zip(shown, PALETTE, strict=False):
+        picked = [c for c, k in cells if c["prompts"] == prompts and c["drift_target"] == 1e-4]
+        if not picked:
+            continue
+        cell = picked[0]
+        steps = np.array(cell["history"]["step"], dtype=float)
+        kl = np.array(cell["history"]["pairwise_kl"])
+        ax.plot(steps, kl, "o-", ms=3, lw=1.3, color=colour, label=f"$P={prompts}$")
+    anchor = float(np.mean([c["history"]["pairwise_kl"][0] for c, _ in cells]))
+    grid = np.array([1.0, 100.0])
+    ax.plot(grid, anchor * grid, "--", color="0.45", lw=1.2)
+    ax.text(5, anchor * 12, "random walk", fontsize=7, color="0.4", rotation=30)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.legend(frameon=False, fontsize=7, loc="lower left")
+    style(ax, "updates", r"divergence between seeds")
+    ax.set_title("divergence settles", fontsize=8.5)
+
+    # scaling: control for the drift target, which shifts the level, before fitting in P
+    ax = axes[1]
+    drifts = sorted({r["drift"] for r in rows})
+    for drift, colour, marker in zip(drifts, PALETTE, ("o", "^"), strict=False):
+        subset = [r for r in rows if r["drift"] == drift]
+        if len(subset) < 2:
+            continue
+        x = np.array([r["prompts"] for r in subset], dtype=float)
+        y = np.array([r["kl"] for r in subset])
+        order = np.argsort(x)
+        ax.plot(x[order], y[order], marker, ms=6, color=colour, label=rf"$D^\star={drift:g}$")
+        slope, intercept = np.polyfit(np.log(x), np.log(y), 1)
+        grid = np.geomspace(x.min(), x.max(), 20)
+        ax.plot(grid, np.exp(intercept) * grid**slope, "-", lw=1.1, color=colour, alpha=0.7)
+        ax.plot(grid, y[order][0] * (grid / x[order][0]) ** -0.5, ":", lw=1.1, color="0.5")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.legend(frameon=False, fontsize=7)
+    style(ax, "prompts per update $P$", r"divergence at matched progress")
+    ax.set_title(r"level $\propto P^{-1/2}$ (dotted)", fontsize=8.5)
+
+    ax = axes[2]
+    x = np.array([r["kl"] for r in rows])
+    y = np.array([r["spread"] for r in rows])
+    good = (x > 0) & (y > 0)
+    x, y = x[good], y[good]
+    ax.scatter(x, y, s=30, color=PALETTE[0])
+    slope, intercept = np.polyfit(np.log(x), np.log(y), 1)
+    resid = np.log(y) - np.polyval([slope, intercept], np.log(x))
+    r2 = 1 - (resid**2).sum() / ((np.log(y) - np.log(y).mean()) ** 2).sum()
+    grid = np.geomspace(x.min(), x.max(), 20)
+    ax.plot(grid, np.exp(intercept) * grid**slope, color="0.35", lw=1.2,
+            label=rf"fit $\propto \mathrm{{KL}}^{{{slope:.2f}}}$, $R^2={r2:.2f}$")
+    ax.plot(grid, y[0] * (grid / x[0]) ** 0.5, ":", color="0.55", lw=1.2,
+            label=r"theory $\mathrm{KL}^{1/2}$")
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.legend(frameon=False, fontsize=6.5)
+    style(ax, "divergence at matched progress", "spread in pass rate")
+    ax.set_title("outcome spread follows", fontsize=8.5)
+
+    fig.tight_layout()
+    fig.savefig(FIGURES / "reconvergence.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
+def figure_real_seeds() -> None:
+    """The same measurement on a pretrained model."""
+    runs = [r for r in io.load_all("s3_real_seeds") if "rows" in r["result"]]
+    if not runs:
+        raise SystemExit("no real-model seed run")
+    run = runs[-1]
+    rows = run["result"]["rows"]
+    steps = np.array([r["step"] for r in rows], dtype=float)
+    kl = np.array([r["pairwise_kl"] for r in rows])
+    err = np.array([r["pairwise_kl_se"] for r in rows])
+
+    fig, ax = plt.subplots(figsize=(3.5, 2.8))
+    ax.errorbar(steps, kl, yerr=err, fmt="o-", ms=4, lw=1.4, capsize=2, color=PALETTE[0])
+    grid = np.array([1.0, steps.max()])
+    ax.plot(grid, kl[0] * grid, "--", color="0.45", lw=1.2)
+    ax.text(3.0, kl[0] * 6.0, "random walk", fontsize=7, color="0.4", rotation=30)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    style(ax, "updates", "divergence between seeds")
+    ax.set_title(
+        f"Qwen2.5-0.5B, {run['manifest']['config']['seeds']} seeds", fontsize=8.5
+    )
+    fig.tight_layout()
+    fig.savefig(FIGURES / "real_seeds.pdf", bbox_inches="tight")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
+        ("reconvergence", figure_reconvergence),
+        ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),
         ("exact_curves", figure_exact_curves),
         ("estimator_accuracy", figure_estimator_accuracy),

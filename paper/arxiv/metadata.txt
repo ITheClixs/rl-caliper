@@ -1,0 +1,29 @@
+Title:
+  Seeds Reconverge: Run-to-Run Variance in Reinforcement Learning
+  Post-Training Is Stationary, and Predictable from One Run
+
+Authors:
+  Mehmet Demir Guven (ETH Zurich)
+
+Primary category:
+  cs.LG   (Machine Learning)
+
+Cross-lists:
+  cs.AI   (Artificial Intelligence)
+  stat.ML (Machine Learning, Statistics)
+
+ACM classes:
+  I.2.6
+
+Comments field:
+  Code and stored run records for every figure and table are released with the paper.
+  All experiments run on a single laptop.
+
+License:
+  CC BY 4.0 recommended (arXiv perpetual non-exclusive is the minimum).
+
+Submission checklist:
+  - main.tex compiles with pdflatex against a standard TeX Live; no non-standard packages
+  - figures are PDF; no external font or image dependencies
+  - main.bbl is included so the bibliography builds without a bibtex pass
+  - no absolute paths; every \input and \includegraphics is relative to the source root

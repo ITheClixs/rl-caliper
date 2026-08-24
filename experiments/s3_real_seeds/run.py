@@ -50,6 +50,8 @@ def main() -> None:
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--probe-prompts", type=int, default=8)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--score-only", action="store_true",
+                    help="reuse checkpointed adapters instead of retraining")
     args = ap.parse_args()
 
     checkpoints = sorted({1, 2, 5, 10, 20, 30, args.steps})
@@ -77,12 +79,17 @@ def main() -> None:
     probe_sequences, probe_masks, _ = build_probe_batch(
         reference, corpus, args.probe_prompts, mx.random.key(12345)
     )
-    prompt_len = probe_sequences[0].shape[1] - args.max_tokens
     initial_adapter = adapter_state(reference.model)
     del reference, model
 
     pass_history = {}
-    for seed in range(args.seeds):
+    if args.score_only:
+        previous = [
+            r for r in io.load_all("s3_real_seeds") if "pass_history" in r["result"]
+        ]
+        if previous:
+            pass_history = {int(k): v for k, v in previous[-1]["result"]["pass_history"].items()}
+    for seed in ([] if args.score_only else range(args.seeds)):
         model, tokenizer = load(args.model)
         trainer = RealRLTrainer(model, tokenizer, config)
         load_adapter(trainer.model, initial_adapter)
@@ -109,7 +116,7 @@ def main() -> None:
             state = dict(np.load(store / f"seed{seed}_step{step}.npz"))
             load_adapter(scorer.model, state)
             per_prompt = [
-                response_log_probs(scorer.model, seq, prompt_len) for seq in probe_sequences
+                response_log_probs(scorer.model, seq) for seq in probe_sequences
             ]
             logps.append(per_prompt)
         divergences = []
@@ -127,14 +134,19 @@ def main() -> None:
                         )
                     )
                 )
-        window = [np.mean(pass_history[s][max(0, step - 5) : step]) for s in range(args.seeds)]
+        if pass_history:
+            window = [
+                np.mean(pass_history[s][max(0, step - 5) : step]) for s in range(args.seeds)
+            ]
+        else:
+            window = [float("nan")]
         rows.append(
             {
                 "step": step,
                 "pairwise_kl": float(np.mean(divergences)),
                 "pairwise_kl_se": float(np.std(divergences, ddof=1) / np.sqrt(len(divergences))),
                 "pass_mean": float(np.mean(window)),
-                "pass_spread": float(np.std(window, ddof=1)),
+                "pass_spread": float(np.std(window, ddof=1)) if len(window) > 1 else float("nan"),
             }
         )
         print(
