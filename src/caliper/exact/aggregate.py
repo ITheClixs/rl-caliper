@@ -84,6 +84,32 @@ class ExactBatchModel:
         ]
         return np.mean(covs, axis=0)
 
+    def projected_variance(self, w: np.ndarray, direction: np.ndarray) -> float:
+        """b^T (Sigma_b + Sigma_w) b, accumulated as scalars rather than as a matrix.
+
+        Every term is the variance of a gradient projected onto one direction, which is what a
+        trainer can carry alongside an update. Equal to the quadratic form of the assembled
+        covariance; kept separate because on a real model only this route is affordable.
+        """
+        per = np.array(
+            [
+                moments.difficulty_weight(w, m["p"]) * (direction @ m["h"])
+                for m in self.prompts
+            ]
+        )
+        between = float(per.var())
+        within = float(
+            np.mean(
+                [
+                    moments.projected_covariance(
+                        w, m["p"], m["s0"], m["s1"], m["u1"], direction
+                    )
+                    for m in self.prompts
+                ]
+            )
+        )
+        return between + within
+
     def noise_terms(self, estimator: str, group_size: int, curvature: str = "fisher") -> NoiseTerms:
         w = weight_table(estimator, group_size)
         matrix = self.curvature(curvature)

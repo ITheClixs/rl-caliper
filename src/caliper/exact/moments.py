@@ -75,6 +75,30 @@ def covariance(
     return cov + coef * np.outer(u1, u1)
 
 
+def projected_covariance(
+    w: np.ndarray,
+    p: float,
+    s0: np.ndarray,
+    s1: np.ndarray,
+    u1: np.ndarray,
+    direction: np.ndarray,
+) -> float:
+    """b^T Cov(z | x) b, the same expression contracted against one direction.
+
+    The outer-product term collapses to a scalar and the conditional score covariances enter
+    only through their quadratic forms, so nothing of size dim x dim is needed.
+    """
+    group_size = w.shape[0] - 1
+    q0, q1 = second_moments(w, p)
+    c00, c10, c11 = cross_moments(w, p)
+    lam = difficulty_weight(w, p)
+
+    quad = (p * q1 * (direction @ s1 @ direction) + (1.0 - p) * q0 * (direction @ s0 @ direction))
+    coef = (p * q1 + p**2 * q0 / (1.0 - p)) / group_size
+    coef += p**2 * (((group_size - 1) / group_size) * (c11 - 2 * c10 + c00) - lam**2)
+    return float(quad / group_size + coef * (direction @ u1) ** 2)
+
+
 def mean(w: np.ndarray, p: float, u1: np.ndarray) -> np.ndarray:
     """Exact E[z | x] = lambda(p, G) * p * u1."""
     return difficulty_weight(w, p) * p * u1

@@ -13,6 +13,7 @@ import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 import numpy as np
+from mlx.utils import tree_map
 
 from caliper.objectives.advantages import weight_table
 from caliper.real.probe import ProbeConfig, RealNoiseProbe
@@ -31,20 +32,31 @@ class RealRLTrainer(RealNoiseProbe):
         self.full_weights = weight_table(config.estimator, config.group_size)
 
     def _gradient(self, sequences, masks, advantages):
-        def loss_fn(model):
-            total = mx.zeros(())
-            count = 0.0
-            for seq, mask, adv in zip(sequences, masks, advantages, strict=True):
+        """Sum of per-prompt gradients, accumulated one prompt at a time.
+
+        Holding the whole batch in one graph is what pushes a 7B model past the memory of this
+        machine; the sum is the same either way.
+        """
+        count = float(sum(adv.shape[0] for adv in advantages))
+        scale = -1.0 / max(count, 1.0)
+        total = None
+        loss = 0.0
+        for seq, mask, adv in zip(sequences, masks, advantages, strict=True):
+            weight = mx.array(adv)
+
+            def loss_fn(model, seq=seq, mask=mask, weight=weight):
                 logits = model(seq[:, :-1])
                 logprobs = nn.losses.cross_entropy(
                     logits.astype(mx.float32), seq[:, 1:], reduction="none"
                 )
                 per_sequence = -(logprobs * mask).sum(axis=1)
-                total = total + (mx.array(adv) * per_sequence).sum()
-                count += adv.shape[0]
-            return -total / max(count, 1.0)
+                return scale * (weight * per_sequence).sum()
 
-        return nn.value_and_grad(self.model, loss_fn)(self.model)
+            value, grads = nn.value_and_grad(self.model, loss_fn)(self.model)
+            total = grads if total is None else tree_map(mx.add, total, grads)
+            mx.eval(total)
+            loss += float(value)
+        return loss, total
 
     def step(self, corpus, rng: np.random.Generator, key: mx.array):
         cfg = self.config

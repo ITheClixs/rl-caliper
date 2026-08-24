@@ -104,6 +104,33 @@ def pairwise_mean_interval(
     }
 
 
+def spread_interval(
+    scores: np.ndarray, n_boot: int = 4000, seed: int = 0, level: float = 0.95
+) -> dict[str, float]:
+    """Across-seed standard deviation of a reported number, with a bootstrap interval.
+
+    Resampling is over runs, which are the independent units; the interval is wide at the seed
+    counts anyone actually trains, and saying so is the point of reporting it.
+    """
+    values = np.asarray(scores, dtype=float)
+    if values.size < 2:
+        raise ValueError("need at least two runs to speak of a spread")
+    rng = np.random.default_rng(seed)
+    draws = np.empty(n_boot)
+    for i in range(n_boot):
+        pick = rng.integers(0, values.size, size=values.size)
+        draws[i] = values[pick].std(ddof=1)
+    tail = (1.0 - level) / 2.0
+    lo, hi = np.percentile(draws, [100 * tail, 100 * (1.0 - tail)])
+    return {
+        "std": float(values.std(ddof=1)),
+        "lo": float(lo),
+        "hi": float(hi),
+        "mean": float(values.mean()),
+        "n_runs": int(values.size),
+    }
+
+
 def loglog_fit(
     predictors: dict[str, np.ndarray],
     response: np.ndarray,
