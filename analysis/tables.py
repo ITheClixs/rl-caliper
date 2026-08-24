@@ -257,6 +257,37 @@ def table_optimum() -> None:
     write("optimum", "\n".join(lines))
 
 
+def table_propagation() -> None:
+    """Candidate models of seed divergence against exact Monte Carlo ground truth."""
+    runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
+    if not runs:
+        raise SystemExit("no propagation validation run")
+    cells = runs[-1]["result"]["cells"]
+    measured = np.array([c["measured_kl"] for c in cells])
+    lines = [
+        r"\begin{tabular}{lccc}",
+        r"\toprule",
+        r"model of seed divergence & median error & worst & range of ratio \\",
+        r"\midrule",
+    ]
+    names = [
+        ("propagated_kl", r"propagated covariance, \eqref{eq:unrolled}"),
+        ("walk_kl", "accumulation, no contraction"),
+        ("scalar_kl", "single timescale"),
+    ]
+    for key, label in names:
+        predicted = np.array([c[key] for c in cells])
+        ratio = predicted / measured
+        error = np.abs(np.log(ratio))
+        lines.append(
+            f"{label} & {np.exp(np.median(error)):.2f}$\\times$ & "
+            f"{np.exp(error.max()):.1f}$\\times$ & "
+            f"{ratio.min():.2f}--{ratio.max():.2f} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("propagation", "\n".join(lines))
+
+
 def main() -> None:
     for name, fn in (
         ("exact_agreement", table_exact_agreement),
@@ -267,6 +298,7 @@ def main() -> None:
         ("diagnosis", table_diagnosis),
         ("adam", table_adam),
         ("optimum", table_optimum),
+        ("propagation", table_propagation),
     ):
         try:
             fn()

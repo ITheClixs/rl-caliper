@@ -2,60 +2,50 @@
 \label{sec:introduction}
 
 A paper reports that reinforcement learning post-training moved a benchmark by two points. Whether
-that is a result depends on a number nobody has: how much the same procedure would have moved it
-had the seed been different. The field is aware of the problem and has documented it
-\citep{hochlehnert2025sober}, and the only instrument it has is replication -- run the recipe $N$
-times and look at the spread. At the compute scale RLVR now operates at, that instrument is close to
-unaffordable, and so the number usually goes unmeasured.
+that is a result depends on a number nobody has: how much the same recipe would have moved it with
+a different seed. The problem is documented \citep{henderson2018matters, hochlehnert2025sober} and
+the only instrument the field has is replication, which at current RL compute is close to
+unaffordable. So the number usually goes unmeasured.
 
-This paper is about what happens between two runs of the same recipe, and it starts from an
-observation that turns out to be wrong in a useful way.
+Start from the obvious model. Gradient noise perturbs each update, perturbations accumulate, two
+runs execute a random walk away from each other, and reproducibility decays with run length. That
+picture is implicit in how run-to-run variance is discussed, and it is what a noisy gradient
+suggests.
 
-If gradient noise perturbs each update and perturbations accumulate, two runs that begin from the
-same policy execute a random walk away from each other. Their divergence grows linearly in the
-number of updates, a long run is less reproducible than a short one, and the only defence is a
-bigger batch. That picture is implicit in how run-to-run variance is discussed, and it is the
-natural reading of a noisy gradient.
-
-It does not survive measurement. Two runs which differ only in the randomness of their rollouts
-diverge for a few tens of updates and then stop. Across the settings we measure, the log-log slope
-of divergence against update count is at most $+0.26$ against the $+1$ a random walk requires, and
-usually negative. The runs are climbing the same objective, and its curvature pulls them back
-together as fast as the noise pushes them apart. We call this \emph{seed reconvergence}, and its
-fixed point is what an error bar on a single run should be built from.
+It is wrong, and the way it is wrong is the subject of this paper. Noise from one update does not
+survive to the end of training unchanged. It is passed through every update that follows, and where
+the shared objective is locally concave those updates shrink it. What reaches the end is a
+convolution of injected noise with the sensitivity of the remaining trajectory, and that object is
+computable.
 
 \paragraph{Contributions.}
 \begin{itemize}
-  \item \textbf{Seed divergence is stationary, not accumulating} (Section~\ref{sec:seeds},
-  Section~\ref{sec:experiments}). Measured on transformers trained from scratch over an eightfold range of batch size and a tenfold
-  range of step size, tail slopes run from $-1.15$ to $+0.26$ against the $+1$ accumulation requires,
-  and the same holds on Qwen2.5-0.5B.
+  \item \textbf{A finite-time covariance law} (Theorem~\ref{thm:propagation}).
+  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$, giving expected divergence between seeds as
+  $\tr(F_T S_T)$ and attributing it to individual updates through a per-update kernel. In an
+  exactly solvable policy it predicts measured divergence to $9\%$ at the median over twelve
+  settings, against $2.0\times$ for accumulation and two orders of magnitude for a single-timescale
+  approximation.
 
-  \item \textbf{A law with two measurable factors.}
-  $\KL_\infty = \tau_c D_{\mathrm{noise}}$ (Proposition~\ref{prop:stationary}): the diffusive drift
-  injected per update, times how long a perturbation survives. It predicts a $P^{-1/2}D^{+1/2}$
-  scaling in the batch and the drift, measured at $P^{-0.45}D^{0.35}$ with $R^2 = 0.94$, and an
-  outcome spread going as $\sqrt{\KL_\infty}$.
+  \item \textbf{The contraction is caused by learning.} Replacing rewards with coin flips, which
+  leaves noise and batch composition untouched, turns a flat divergence trace into one that grows
+  $10.7\times$ over eighty updates. This separates the result from a claim that seeds merely end up
+  nearby.
 
-  \item \textbf{An error bar from one run.} $D_{\mathrm{noise}}$ comes from gradients a trainer is
-  already accumulating (Section~\ref{sec:estimation}); $\tau_c$ comes from forking the run for a few
-  tens of updates rather than repeating it. The alternative currently in use costs $N$ full runs.
+  \item \textbf{The machinery that makes the injected noise measurable}: an exact finite-$G$ mean
+  and covariance for the count-based advantage estimators under binary rewards
+  (Propositions~\ref{prop:mean} and \ref{prop:cov}), a decomposition of the gradient noise into
+  between-prompt and within-prompt terms, and an estimator that recovers both from the microbatch
+  gradients a trainer already accumulates. The same decomposition fixes the compute-optimal group
+  size (Theorem~\ref{thm:split}), which we validate prospectively.
 
-  \item \textbf{Where it fails, and why that matters.} A run held to a fixed drift target must raise
-  its step size as the objective saturates, because $\E_x[p(1-p)] \to 0$ takes the gradient with it.
-  Runs that cross that point leave the contracting regime and separate. The failure is a property of
-  drift-targeted control rather than of the law, and it is a caution about a technique this paper
-  otherwise recommends.
-
-  \item \textbf{The machinery underneath}, which is of independent use: an exact finite-$G$ mean and
-  covariance for the advantage estimators in current use under binary rewards
-  (Propositions~\ref{prop:mean} and \ref{prop:cov}). Two things fall out. The estimators differ only
-  through a weight $\lambda(p,G)$ on prompt difficulty, so those with a $p$-independent $\lambda$ are
-  the same estimator up to a step size. And the gradient noise separates into a between-prompt term
-  and a within-prompt term, which is what makes $D_{\mathrm{noise}}$ measurable at all, and which
-  incidentally fixes the group size (Theorem~\ref{thm:split}).
+  \item \textbf{An explicit account of what does not hold.} A single contraction timescale fails by
+  two orders of magnitude, and we report it as the comparator rather than the law. A predicted
+  square-root relation between policy divergence and outcome spread is not supported by our data
+  and is withdrawn. Drift-targeted control, which Section~\ref{sec:drift} otherwise recommends,
+  destroys runs at saturation. The largest model we measure is $0.5$B, which bounds what any of
+  this establishes about frontier-scale RLVR.
 \end{itemize}
 
-Every experiment here runs on one laptop. The claim under test is that a small measurement replaces
-a large one, and a study that needed a cluster to take the measurement would be a poor advertisement
-for it.
+Every experiment here runs on one laptop, which sets the ceiling on the last point and is stated
+plainly in Section~\ref{sec:discussion} rather than left for a reader to infer.

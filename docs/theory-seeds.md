@@ -1,4 +1,4 @@
-# Seed dynamics: why run-to-run divergence settles
+# Seed dynamics: how training noise reaches the end of a run
 
 Companion to `theory.md`, which supplies the noise decomposition this rests on.
 
@@ -8,76 +8,68 @@ Two RLVR runs start from the same policy and differ only in the randomness of th
 far apart do they end up, and does the gap grow with the length of the run?
 
 The default mental model is a random walk: gradient noise perturbs each update, perturbations
-accumulate, and the divergence between two runs grows linearly in the number of steps. Under that
-model the only defence is a bigger batch, and a longer run is always less reproducible than a short
-one.
+accumulate, and divergence grows linearly in the number of steps.
 
 ## 2. The recursion
 
-Let `D_t = theta_t^A - theta_t^B`. With updates `theta <- theta + eta g_hat`,
+Let `D_t = theta_t^A - theta_t^B`. With updates `theta <- theta + eta g_hat` and
+`J_t = d g_bar / d theta`,
 
-    D_{t+1} = D_t + eta [ g_bar(theta^A) - g_bar(theta^B) ] + eta [ xi^A_t - xi^B_t ]
+    D_{t+1} = A_t D_t + eta nu_t,      A_t = I + eta J_t,   Cov(nu) = 2 Sigma / P        (S1)
 
-where `xi` is the sampling noise of one batch, with `Cov(xi) = Sigma / P` from `theory.md` (7).
-Linearising the mean gradient field around the shared trajectory, with `H := d g_bar / d theta`,
+Where the objective is locally concave `A_t` contracts, so a perturbation injected at one update
+decays over the ones that follow. The covariance of a run about its mean therefore satisfies
 
-    D_{t+1} = (I + eta H) D_t + eta nu_t,     Cov(nu) = 2 Sigma / P                       (S1)
+    S_{t+1} = A_t S_t A_t^T + Q_t,     Q_t = eta^2 Sigma_t / P,   S_0 = 0                (S2)
 
-This is a linear stochastic recursion. Everything follows from the spectrum of `I + eta H`.
+and unrolling,
 
-* Where the objective is locally concave, `H` is negative definite, `|I + eta H| < 1`, and the
-  homogeneous part **contracts**. Divergence injected at step `t` decays.
-* Where the objective is flat, `H ~ 0`, the recursion is a random walk and divergence accumulates.
+    S_T = sum_t  Phi(T,t+1) Q_t Phi(T,t+1)^T,   Phi(T,s) = A_{T-1} ... A_s               (S3)
 
-RLVR is optimising a shared objective, and both runs are pulled toward the same attractor. The
-question is whether the restoring term or the noise term dominates.
+Two independent seeds have `Cov(theta^A - theta^B) = 2 S_T`, so their expected policy divergence is
+`tr(F_T S_T)`. Per-update contributions `k_t = tr(F_T Phi Q_t Phi^T)` say where in training the
+surviving noise was injected.
 
-## 3. Stationary divergence
+## 3. What replaced what
 
-Take a single eigendirection with `eta H` eigenvalue `-eta lambda`, `lambda > 0`, and per-step
-noise variance `2 eta^2 sigma^2 / P`. The stationary variance solves
+An earlier version of these notes compressed the spectrum of `A_t` into one effective eigenvalue and
+claimed `KL_inf = tau_c * D_noise`. Measured against exact Monte Carlo in the enumerable policy, that
+scalar law is wrong by a median factor of **195x**. The recursion (S3) is accurate to **1.09x** at
+the median and 1.17x at worst over twelve settings; ignoring contraction entirely is wrong by up to
+3.9x. The scalar law is kept only as a comparator.
 
-    c = (1 - eta lambda)^2 c + 2 eta^2 sigma^2 / P
+The failure is what (S3) predicts when a spectrum of decay rates is fitted with one exponential:
+fast directions equilibrate within a few updates and slow ones set the final level, so a single
+fitted timescale is pinned by the early rise.
 
-so `c (2 eta lambda - eta^2 lambda^2) = 2 eta^2 sigma^2 / P`, and for `eta lambda << 1`
+## 4. The contraction comes from learning
 
-    c = eta sigma^2 / (lambda P)                                                          (S2)
+Removing the learning signal while leaving the noise intact -- every reward replaced by an
+independent coin flip -- turns a flat divergence trace into one that grows 10.7x over eighty
+updates. Same batches, same step sizes, same gradient magnitudes. This is what separates the result
+from a claim that seeds happen to end up nearby.
 
-In function space the divergence between the two policies is `KL ~= (1/2) D^T F D`, so
+The tabular policy at small drift is the other side of the same coin: its gradient field is nearly
+flat, `J ~ 0`, and there divergence accumulates exactly as (S1) says it should.
 
-    E[KL_inf] = (eta / (2 P)) * sum_i (F-weighted sigma_i^2 / lambda_i)
-              = D_noise / (eta lambda_bar)                                                (S3)
+## 5. What is not established
 
-using `D_noise = (1/2) eta^2 tr(F Sigma) / P`, the diffusive part of the drift from `theory.md`
-(9), and `lambda_bar` for the curvature-weighted mean. Writing `tau_c := 1 / (eta lambda_bar)` for
-the number of updates over which an injected divergence persists,
+* **No one-run error bar on a benchmark number.** (S3) predicts policy divergence. Carrying that to
+  outcome spread via `sqrt(KL)` failed: fitted exponent +0.10, 95% CI [-0.03, +0.45] against a
+  predicted +0.5, interval containing zero. The claim is withdrawn. The route that should work is to
+  propagate the covariance against the gradient of the target metric directly.
+* **Bounded, not stationary.** Tail slopes from -1.15 to +0.26 reject accumulation. They do not
+  establish strict stationarity, since `J_t`, `Sigma_t` and `eta_t` all move during training.
+* **Scaling is weakly pinned.** Nine settings give exponent -0.61 in `P` (95% CI [-1.42, +0.24]) and
+  +0.59 in `D` (95% CI [+0.27, +1.04]). Both intervals contain the predicted -1/2 and +1/2; the `P`
+  interval also contains zero.
+* **Transfer operators are exact only where the policy is enumerable.** On a real model `A_t` would
+  need Jacobian-vector products along a stored trajectory.
+* **Scale.** The largest model measured is 0.5B, six seeds, forty updates.
 
-    E[KL_inf] = tau_c * D_noise                                                           (S4)
+## 6. Where the linearisation breaks
 
-**The stationary divergence between two seeds is the diffusive drift injected per step, multiplied
-by how long a perturbation survives.** Both factors are measurable: `D_noise` from the split
-estimator at no extra cost, `tau_c` from a short fork of the run.
-
-## 4. What this predicts
-
-1. **Divergence does not accumulate.** `E[KL_t]` approaches `E[KL_inf]` and then stays there. A
-   log-log slope of divergence against step count is `+1` under the random-walk model and `0` here.
-2. **Run length is irrelevant.** Nothing in (S4) depends on `T`.
-3. **Scaling.** Holding the drift target `D` fixed, `eta = sqrt(2D / (Gcal + N/P))`. Below the
-   critical batch size the noise term dominates, `eta ~ sqrt(D P / N)`, and (S3) gives
-
-       KL_inf  ∝  P^(-1/2) * D^(+1/2)                                                     (S5)
-
-   Bigger batches and smaller steps both reduce it, and neither the number of updates nor the
-   total movement of the policy appears.
-4. **Outcome variance.** A displacement-linear reading of the objective gives a spread in final
-   task performance proportional to `sqrt(KL_inf)`.
-
-## 5. Where it breaks
-
-(S1) linearises the gradient field and (S3) assumes `eta lambda << 1`. Both fail when the step
-grows relative to the curvature. This is not hypothetical: a controller holding drift at a fixed
-target raises `eta` as the signal `Gcal` decays, and once a task saturates `Gcal` collapses, `eta`
-grows without bound, and the runs separate rather than settling. Measured runs cross from one
-regime to the other, which bounds where the law should be applied and is a caution about drift
-targeting rather than about the law.
+(S1) needs the runs close enough for `g_bar` to be locally linear between them and `eta ||J|| << 1`.
+A controller holding drift at a fixed target raises `eta` as the signal decays, and
+`E[p(1-p)] -> 0` as a task is solved takes the signal with it. Runs cross out of the regime exactly
+this way; the observable that announces it is the realised drift departing from its target.

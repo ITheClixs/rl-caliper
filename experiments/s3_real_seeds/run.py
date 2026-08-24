@@ -16,6 +16,7 @@ import numpy as np
 from mlx.utils import tree_flatten, tree_unflatten
 from mlx_lm import load
 
+from caliper.analysis.uncertainty import pairwise_mean_interval_from_matrix
 from caliper.real.tasks import FAMILIES
 from caliper.real.train import RealRLConfig, RealRLTrainer, policy_divergence, response_log_probs
 from caliper.runtime import io
@@ -119,39 +120,46 @@ def main() -> None:
                 response_log_probs(scorer.model, seq) for seq in probe_sequences
             ]
             logps.append(per_prompt)
-        divergences = []
+        matrix = np.zeros((args.seeds, args.seeds))
         for a in range(args.seeds):
-            for b in range(args.seeds):
-                if a == b:
-                    continue
-                divergences.append(
-                    float(
-                        np.mean(
-                            [
-                                policy_divergence(logps[a][i], logps[b][i], probe_masks[i])
-                                for i in range(len(probe_sequences))
-                            ]
-                        )
+            for b in range(a + 1, args.seeds):
+                value = float(
+                    np.mean(
+                        [
+                            policy_divergence(logps[a][i], logps[b][i], probe_masks[i])
+                            for i in range(len(probe_sequences))
+                        ]
                     )
                 )
+                matrix[a, b] = matrix[b, a] = value
+        divergences = [matrix[a, b] for a in range(args.seeds) for b in range(a + 1, args.seeds)]
         if pass_history:
             window = [
                 np.mean(pass_history[s][max(0, step - 5) : step]) for s in range(args.seeds)
             ]
         else:
             window = [float("nan")]
+        # the pairs share runs, so an interval has to be resampled at the level of runs
+        interval = pairwise_mean_interval_from_matrix(matrix, seed=step)
         rows.append(
             {
                 "step": step,
                 "pairwise_kl": float(np.mean(divergences)),
                 "pairwise_kl_se": float(np.std(divergences, ddof=1) / np.sqrt(len(divergences))),
+                "pairwise_lo": interval["lo"],
+                "pairwise_hi": interval["hi"],
+                "bootstrap_se": interval["bootstrap_se"],
+                "naive_se_over_pairs": interval["naive_se_over_pairs"],
+                "pairwise_values": [float(v) for v in divergences],
                 "pass_mean": float(np.mean(window)),
                 "pass_spread": float(np.std(window, ddof=1)) if len(window) > 1 else float("nan"),
             }
         )
         print(
-            f"{step:6d} {rows[-1]['pairwise_kl']:13.4e} {rows[-1]['pass_spread']:13.4f} "
-            f"{rows[-1]['pass_mean']:11.3f}"
+            f"{step:6d} {rows[-1]['pairwise_kl']:13.4e} "
+            f"[{interval['lo']:.3e}, {interval['hi']:.3e}]  "
+            f"run-level SE {interval['bootstrap_se']:.2e} vs naive "
+            f"{interval['naive_se_over_pairs']:.2e}"
         )
 
     steps = np.array([r["step"] for r in rows], dtype=float)

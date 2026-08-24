@@ -1,103 +1,107 @@
 \section{What happens to two runs that differ only in their seed}
 \label{sec:seeds}
 
-Everything so far concerns one update. This section concerns the whole run, and it is where the
-noise decomposition earns its keep.
-
 Fix a policy $\theta_0$ and start two runs from it. They see the same prompts and the same
 objective, and differ only in the randomness of their rollouts. This is the comparison a
-practitioner makes when they change a seed and rerun, and it is the comparison whose spread is
-quoted as an error bar when anyone bothers to compute one.
+practitioner makes when they change a seed and rerun.
 
-\subsection{The recursion}
+\subsection{Noise is filtered, not accumulated}
 
 Write $\Delta_t := \theta^A_t - \theta^B_t$. With updates $\theta \leftarrow \theta + \eta\ghat$
-and $H := \partial\gbar/\partial\theta$ the Jacobian of the mean gradient field,
+and $J_t := \partial\gbar/\partial\theta$ the Jacobian of the mean update,
 \begin{equation}
   \label{eq:seed-recursion}
-  \Delta_{t+1} = \big( I + \eta H \big)\Delta_t + \eta\,\nu_t,
+  \Delta_{t+1} = A_t \Delta_t + \eta\,\nu_t,
+  \qquad A_t := I + \eta J_t,
 \end{equation}
-with $\Cov(\nu_t) = \tfrac{2}{P}\Sigma$,
-to first order in $\Delta$, where $\Sigma = \Sb + \Sw$ is the batch noise of
-Section~\ref{sec:theory} and the factor of two is because both runs contribute an independent draw.
+to first order in $\Delta$, with $\Cov(\nu_t) = 2\Sigma_t/P$ for the batch noise $\Sigma$ of
+Section~\ref{sec:theory}.
 
-Equation \eqref{eq:seed-recursion} is a linear stochastic recursion, and its behaviour is decided
-by the spectrum of $I + \eta H$. If the objective were flat, $H = 0$, the recursion would be a
-random walk: divergence would accumulate, $\E[\|\Delta_t\|^2] \propto t$, and a longer run would be
-strictly less reproducible than a short one. That is the implicit model behind treating run-to-run
-variance as something to be measured by brute force and reduced only by enlarging the batch.
+If the objective were flat, $J = 0$, this would be a random walk: divergence would accumulate,
+$\E\|\Delta_t\|^2 \propto t$, and a longer run would be strictly less reproducible than a short one.
+That is the implicit model behind treating run-to-run variance as something to be measured by
+brute force. But two RLVR runs are climbing the same objective, and where it is locally concave
+$A_t$ is a contraction: divergence injected at one update decays over the ones that follow.
 
-But two RLVR runs are climbing the same objective. Wherever that objective is locally concave, $H$
-is negative definite, $I + \eta H$ is a contraction, and divergence injected at one step decays
-over subsequent ones. Whether divergence grows or settles is then a question about which term wins,
-and it has an answer.
+The consequence is that noise from update $t$ is not added to the final divergence. It is passed
+through every subsequent update first.
 
-\subsection{The stationary level}
-
-\begin{proposition}[Stationary seed divergence]
-  \label{prop:stationary}
-  Suppose $H$ is negative definite with $\eta\lambda_i \ll 1$ for its eigenvalues $-\lambda_i$, and
-  that $\Sigma$, $H$ and $\eta$ vary slowly relative to $\max_i 1/(\eta\lambda_i)$. Then
-  $\E[\|\Delta_t\|^2]$ converges, and the divergence between the two policies satisfies
-    \begin{equation}
-    \label{eq:stationary}
-    \E\big[\KL(\pi^A \,\|\, \pi^B)\big] \;\longrightarrow\; \tau_c \cdot D_{\mathrm{noise}},
+\begin{theorem}[Finite-time covariance]
+  \label{thm:propagation}
+  Let $S_t$ denote the covariance of a run about its mean trajectory, with $S_0 = 0$ when both runs
+  start from the same policy. Under the linearisation \eqref{eq:seed-recursion},
+  \begin{equation}
+    \label{eq:lyapunov}
+    S_{t+1} = A_t S_t A_t^{\!\top} + Q_t,
+    \qquad Q_t := \eta^2 \Sigma_t / P,
   \end{equation}
-  where $\tau_c := 1/(\eta\bar\lambda)$ and
-  where $D_{\mathrm{noise}} = (1-\rho)\,D = \tfrac{1}{2}\eta^2 N/P$ is the diffusive part of the
-  drift of Section~\ref{sec:drift} and $\bar\lambda$ is the curvature of the gradient field averaged
-  in the Fisher metric.
-\end{proposition}
+  and therefore
+  \begin{equation}
+    \label{eq:unrolled}
+    S_T = \sum_{t=0}^{T-1} \Phi_{T,t+1}\, Q_t\, \Phi_{T,t+1}^{\!\top},
+    \qquad \Phi_{T,s} := A_{T-1}A_{T-2}\cdots A_{s}.
+  \end{equation}
+  Two independent seeds satisfy $\Cov(\theta^A_T - \theta^B_T) = 2S_T$, so their expected policy
+  divergence is
+  \begin{equation}
+    \label{eq:predicted-kl}
+    \E\big[\KL(\pi^A \,\|\, \pi^B)\big] \;\approx\; \tr\!\big(F_T\, S_T\big).
+  \end{equation}
+\end{theorem}
 
 \begin{proof}
-  In an eigendirection of $H$ with eigenvalue $-\lambda$, \eqref{eq:seed-recursion} is a scalar
-  AR(1) recursion with multiplier $1-\eta\lambda$ and innovation variance $2\eta^2\sigma^2/P$. Its
-  stationary variance $c$ solves $c = (1-\eta\lambda)^2 c + 2\eta^2\sigma^2/P$, that is
-  $c\,(2\eta\lambda - \eta^2\lambda^2) = 2\eta^2\sigma^2/P$, so $c = \eta\sigma^2/(\lambda P)$ to
-  first order in $\eta\lambda$. Summing over directions in the Fisher metric and using
-  $\KL \approx \tfrac{1}{2}\Delta^{\!\top} F \Delta$ gives
-  $\E[\KL_\infty] = \eta\tr(F\Sigma)/(2\bar\lambda P)$, and substituting
-  $D_{\mathrm{noise}} = \tfrac{1}{2}\eta^2\tr(F\Sigma)/P$ yields \eqref{eq:stationary}.
+  Taking the covariance of \eqref{eq:seed-recursion} for a single run about its mean and using
+  independence of $\nu_t$ from $\Delta_t$ gives \eqref{eq:lyapunov}; unrolling it from $S_0 = 0$
+  gives \eqref{eq:unrolled}. Two independent runs have independent noise, so the covariance of
+  their difference is twice that of one about the mean. Expanding
+  $\KL(\pi^A\|\pi^B) \approx \tfrac{1}{2}\Delta^{\!\top}F\Delta$ and taking expectations gives
+  $\tfrac{1}{2}\tr(F\cdot 2S_T)$.
 \end{proof}
 
-The statement is worth reading slowly, because each factor is something a trainer can put a number
-on. $D_{\mathrm{noise}}$ is how much useless movement one update injects, and
-Section~\ref{sec:estimation} recovers it from gradients that are already being accumulated.
-$\tau_c$ is how many updates an injected perturbation survives, and it can be had from a short fork
-of the run rather than a second full run. Their product is the gap between two seeds.
-
-\subsection{Four predictions}
-
-\eqref{eq:stationary} is falsifiable in four separate ways, and Section~\ref{sec:experiments} tests
-each.
-
-\paragraph{Divergence stops growing.} A log-log regression of divergence against update count has
-slope $+1$ under the random-walk model and $0$ once \eqref{eq:stationary} is reached.
-
-\paragraph{Run length does not enter.} No $T$ appears in \eqref{eq:stationary}. Training for longer
-does not make a run less reproducible, which is not what the random-walk picture would suggest.
-
-\paragraph{The scaling is fixed.} Holding a drift target $D$ rather than a learning rate,
-$\eta = \sqrt{2D/(\mathcal{G} + N/P)}$. Below the critical batch size the noise term dominates the
-denominator, $\eta \propto \sqrt{DP/N}$, and \eqref{eq:stationary} becomes
+Equation \eqref{eq:unrolled} is the object this section is about, and it is worth reading as a
+convolution: what survives to the end is the noise injected at each update, weighted by how
+strongly the remaining trajectory preserves a perturbation entering there. Write
 \begin{equation}
-  \label{eq:seed-scaling}
-  \E[\KL_\infty] \;\propto\; P^{-1/2}\, D^{+1/2}.
+  \label{eq:kernel}
+  k_t \;:=\; \tr\!\big(F_T\, \Phi_{T,t+1} Q_t \Phi_{T,t+1}^{\!\top}\big),
+  \qquad
+  \E[\KL] = \sum_{t} k_t,
 \end{equation}
-Reproducibility improves with the square root of the batch and degrades with the square root of the
-step, and depends on nothing else.
+for the contribution of update $t$. Two runs are not equally sensitive to noise at every point in
+training, and $k_t$ says where the sensitivity is.
 
-\paragraph{Outcome spread follows.} Reading the objective as locally linear in the displacement, the
-spread in final task performance across seeds goes as $\sqrt{\E[\KL_\infty]}$.
+\subsection{Why a single timescale is not enough}
+
+An earlier version of this work replaced the spectrum of $A_t$ by one effective eigenvalue,
+giving $\E[\KL_\infty] = \tau_c D_{\mathrm{noise}}$ for a persistence time $\tau_c$. That
+approximation is the natural first move and it fails badly:
+Section~\ref{sec:exp-seeds} measures it at a median error of two orders of magnitude, against
+$9\%$ for \eqref{eq:unrolled}. The reason is visible in \eqref{eq:unrolled}. $A_t$ has a spectrum,
+fast directions equilibrate within a few updates while slow ones set the final level, and a single
+fitted exponential is pinned by the early rise and blind to what dominates the answer. We report
+the scalar law only as the comparator it turned out to be.
+
+\subsection{What the recursion predicts}
+
+\paragraph{Divergence stops growing when, and because, the run is learning.} Contraction requires
+$J_t$ to be meaningfully negative definite, which requires a signal. With no learning signal
+\eqref{eq:seed-recursion} degenerates to a random walk. This is testable directly by removing the
+signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does.
+
+\paragraph{The level is set by batch composition.} $Q_t \propto \Sigma_t/P$, so halving the
+injected noise requires quadrupling the batch, and nothing in \eqref{eq:unrolled} depends on the
+number of updates once the sum has converged.
+
+\paragraph{Seed memory is finite where contraction is strong.} If $\Phi_{T,t+1}$ decays with
+$T - t$, the sum in \eqref{eq:unrolled} is dominated by its last terms, and the fraction of final
+divergence attributable to the final $h$ updates approaches one for $h \ll T$. Where contraction is
+weak, $k_t$ is flat and every update matters equally. Both regimes appear in our measurements.
 
 \subsection{Where the argument stops}
 
-Proposition~\ref{prop:stationary} linearises the gradient field and assumes
-$\eta\bar\lambda \ll 1$. Both fail when the step grows relative to the curvature, and there is a
-concrete way for that to happen in RLVR: a controller holding drift at a fixed target must raise
-$\eta$ as the signal $\mathcal{G}$ decays, and $\mathcal{G}$ decays to zero as a task is solved,
-because $\E_x[p(1-p)] \to 0$ takes the gradient with it. A run that saturates while under drift
-control therefore drives its own step size up without bound. Section~\ref{sec:experiments} shows
-runs crossing out of the contracting regime exactly this way. The law applies while a run is still
-learning, which is the regime anyone reports numbers from, and the crossing is a caution about drift
-targeting rather than about \eqref{eq:stationary}.
+Everything above linearises the update around the shared trajectory, which requires the two runs to
+stay close enough for $\gbar$ to be locally linear between them, and requires
+$\eta\|J_t\| \ll 1$. Both fail when the step grows relative to the curvature, and RLVR supplies a
+concrete way for that to happen: a controller holding drift at a fixed target must raise $\eta$ as
+the signal decays, and $\E_x[p(1-p)] \to 0$ as a task is solved takes the signal with it.
+Section~\ref{sec:exp-seeds} shows runs crossing out of the regime exactly this way.

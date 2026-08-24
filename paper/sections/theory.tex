@@ -27,12 +27,14 @@ RLOO has $W_1 = 1-p$ and $W_0 = -p$, hence $\lambda \equiv 1$: it is unbiased.
 GRPO with a mean baseline has $\lambda = (G-1)/G$, independent of $p$: it is RLOO multiplied by a
 constant. Standardised GRPO has a $\lambda(p, G)$ with no closed form but an exact binomial sum.
 
-So no member of this family points in the wrong direction. Each computes the true per-prompt
-gradient $h(x)$, scaled by a weight that depends on the prompt's difficulty; the family optimises
-the reweighted gradient field $\E_x[\lambda(p(x), G)\, h(x)]$, and its members differ only through
-$\lambda$. Standardisation is therefore not a variance-reduction device. It is a change of
-objective, one that upweights prompts whose pass rate is near $0$ or $1$ relative to prompts of
-intermediate difficulty.
+So no member of this family points in the wrong direction \emph{on any individual prompt}: each
+computes $h(x)$ scaled by a positive weight. This does not carry over to the aggregate. The family
+optimises the reweighted field $\E_x[\lambda(p(x), G)\, h(x)]$, which need not be collinear with
+$\E_x[h(x)]$ once prompts disagree, so a $p$-dependent $\lambda$ can rotate the direction the run
+actually follows. Standardisation is therefore not \emph{merely} a variance-reduction transformation: under binary
+rewards it also changes the expected gradient, upweighting prompts whose pass rate is near $0$ or
+$1$ relative to prompts of intermediate difficulty. Whether it additionally reduces variance is a
+separate question that Proposition~\ref{prop:mean} does not settle either way.
 
 A constant $\lambda$ is invisible: rescaling an estimator by $c$ rescales the optimal step size by
 $1/c$ and leaves every trajectory unchanged. Only the \emph{dependence of $\lambda$ on $p$} can

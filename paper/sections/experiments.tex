@@ -7,80 +7,114 @@ from scratch, where a population of independent runs executes as one batched ker
 carry standard errors rather than anecdotes. And a pretrained model, where the same measurement is
 made on a real policy and a real verifier. Everything ran on a single Apple M4 laptop.
 
-\subsection{Seeds reconverge}
+\subsection{How training noise reaches the end of a run}
 \label{sec:exp-seeds}
 
-A population of transformers is warmed up, given identical parameters, and then trained with each
-member drawing its own rollouts. Members differ in nothing else: same prompts corpus, same
-objective, same schedule. Divergence is the mean KL between members' policies on a shared batch of
-prompts, and outcome spread is the standard deviation of their pass rates, corrected for the
-binomial error of the evaluation itself, which at the sample counts normally used accounts for most
-of the raw spread and has to be removed before anything can be seen.
+\paragraph{The recursion predicts divergence; a single timescale does not.} The enumerable policy
+admits three things at once: the exact linearised recursion \eqref{eq:lyapunov}, the exact Fisher
+information, and as many independent stochastic trajectories as we care to run. That allows
+candidate models of seed divergence to be scored against ground truth rather than against each
+other. Over twelve settings spanning prompt diversity, group size, batch size and step size, we
+compare the propagated covariance against two alternatives: accumulation with no contraction, and
+the single-timescale law an earlier version of this work relied on.
 
-\begin{figure*}[t]
+\begin{table}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/reconvergence.pdf}
-  \caption{\textbf{Left:} divergence between seeds against updates, at a common drift target. The
-  dashed line is what an accumulating random walk requires. \textbf{Centre:} the level it settles
-  at, compared at matched pass rate rather than matched step count, against the batch; the dotted
-  lines are the predicted $P^{-1/2}$. \textbf{Right:} the spread in final pass rate against the
-  divergence, one point per setting.}
-  \label{fig:reconvergence}
-\end{figure*}
+  \small
+  \input{tables/propagation}
+  \caption{Predicted against measured divergence between independent runs in the enumerable policy,
+  with $300$ trajectories per setting. Error is the ratio of predicted to measured, summarised as
+  $\exp$ of the median absolute log ratio.}
+  \label{tab:propagation}
+\end{table}
 
-\paragraph{It settles.} In every setting that is still learning, divergence rises over the first
-few tens of updates and then stops. Fitting a log-log slope over the second half of each run gives
-values from $-1.15$ to $+0.26$ across ten settings spanning an eightfold range of batch size and a
-tenfold range of drift target, against the $+1$ that accumulation requires. The outcome spread
-behaves the same way: it is flat in the number of updates, not growing.
+The propagated recursion is accurate to $9\%$ at the median and $17\%$ at worst. Ignoring
+contraction overshoots by up to $3.9\times$, and does so exactly where the policy is learning:
+on the most homogeneous prompt pools, where the objective supplies the most curvature, it is wrong
+by a factor of two and a half, while on heterogeneous pools where little learning happens it is
+indistinguishable from the truth. The single-timescale law is wrong by two orders of magnitude.
+That failure is informative rather than embarrassing: it is what \eqref{eq:unrolled} predicts when
+a spectrum of contraction rates is compressed to one number.
 
-\paragraph{It scales as predicted.} Compared at matched progress, the level follows
-$P^{-0.45}D^{0.35}$ against the $P^{-1/2}D^{+1/2}$ of \eqref{eq:seed-scaling}, with $R^2 = 0.94$
-over the seven settings where the comparison is available. Both exponents have the right sign and
-close to the right magnitude, and the batch is confirmed as the dominant lever: an eightfold
-increase in $P$ buys more reproducibility than a tenfold reduction in the step.
+\paragraph{Contraction requires a learning signal.} If divergence stops growing because the shared
+objective pulls two runs together, then removing the objective while leaving the noise in place
+should restore accumulation. We ran a population of transformers twice from identical parameters:
+once normally, and once with every reward replaced by an independent coin flip, which leaves the
+rollout sampling, the batch composition and the gradient magnitudes intact while destroying the
+learning signal.
 
-\paragraph{What we could not pin down.} \eqref{eq:stationary} factors the level into an injected
-noise and a persistence time. The first is measurable; the second is not, at least not the way we
-tried. Fitting a single exponential to the approach gives timescales of one to two updates and
-predicted levels that miss the measured ones by factors between $1.5$ and $6.6$, with no pattern.
-The likely reason is that $H$ has a spectrum rather than one eigenvalue: fast directions equilibrate
-immediately and slow ones dominate the final level, so a single-exponential fit is pinned by the
-early rise and underestimates what matters. The consequence for practice is a real limitation. The
-\emph{scaling} transfers, so a run calibrated once can predict how its reproducibility moves when
-the batch or the step changes, which is the question that actually comes up. The absolute level
-still requires that one calibration.
+\begin{table}[t]
+  \centering
+  \small
+  \begin{tabular}{lcccc}
+    \toprule
+    & \multicolumn{2}{c}{learning} & \multicolumn{2}{c}{signal removed} \\
+    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
+    updates & divergence & pass rate & divergence & pass rate \\
+    \midrule
+    1  & $1.15\times10^{-3}$ & 0.191 & $3.99\times10^{-3}$ & 0.184 \\
+    20 & $1.26\times10^{-3}$ & 0.267 & $1.11\times10^{-2}$ & 0.177 \\
+    40 & $1.35\times10^{-3}$ & 0.341 & $1.71\times10^{-2}$ & 0.185 \\
+    80 & $0.94\times10^{-3}$ & 0.513 & $4.28\times10^{-2}$ & 0.184 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Divergence between runs that differ only in rollout randomness, with and without a
+  learning signal. Same noise, same batches, same step sizes; only the rewards differ.}
+  \label{tab:signal}
+\end{table}
 
-\paragraph{It holds on a pretrained model.} The transformers above are small and their task is
-synthetic, and a policy with a single attractor might reconverge for uninteresting reasons. We
-repeated the measurement on Qwen2.5-0.5B-Instruct with LoRA adapters, six runs differing only in
-rollout randomness, on a corpus of exactly verifiable short-answer problems. Because LoRA adapters
-start at zero the runs begin from an identical policy by construction, and every checkpoint is
-scored on one fixed batch of sequences so the comparison is on identical inputs.
+With a signal, divergence is flat while the pass rate climbs from $0.19$ to $0.51$. Without one it
+grows by a factor of $10.7$ over the same eighty updates. The contraction is caused by the
+objective, which is what \eqref{eq:seed-recursion} says and what separates this from a claim that
+seeds happen to end up nearby.
+
+\paragraph{On a pretrained model.} The transformers above are small and their task is synthetic.
+We repeated the measurement on Qwen2.5-0.5B-Instruct with LoRA adapters, six runs differing only in
+rollout randomness on exactly verifiable short-answer problems; because LoRA adapters start at zero
+the runs begin from an identical policy by construction, and every checkpoint is scored on one fixed
+batch of sequences.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.86\linewidth]{figures/real_seeds.pdf}
-  \caption{Divergence between six runs of a pretrained model that differ only in their rollout
-  randomness. It peaks at ten updates and then falls, as it does for the small transformers. Error
-  bars are standard errors over the fifteen distinct pairs.}
+  \includegraphics[width=0.9\linewidth]{figures/real_seeds.pdf}
+  \caption{Divergence between six runs of a pretrained model differing only in rollout randomness.
+  Intervals are $95\%$ bootstrap intervals resampled over runs rather than over pairs, since the
+  fifteen pairwise distances are built from six runs. They are wide enough that the shape of the
+  trace is not resolved; what is resolved is that the trace is not the dashed line.}
   \label{fig:real-seeds}
 \end{figure}
 
-The pattern repeats: divergence rises to $1.98 \times 10^{-1}$ at ten updates, falls by a factor of
-$2.4$, and is flat thereafter, with a tail slope of $+0.22$. The six runs finish within
-$0.835 \pm 0.044$ of each other in pass rate. We are not claiming the small-scale law transfers
-quantitatively to this model -- six seeds and forty updates do not support that -- but the
-qualitative claim that the paper rests on, that divergence between seeds stops growing, is not an
-artefact of small models or synthetic tasks.
+Divergence reaches $1.22\times10^{-1}$ at ten updates and is $8.9\times10^{-2}$ at forty, with a
+tail slope of $+0.14$ against the $+1$ accumulation requires. Two caveats belong with that number.
+The fifteen pairwise distances come from six runs and are not independent, so intervals are
+resampled over runs; doing so roughly doubles the standard error against treating the pairs as
+independent. And once that is done the intervals at ten and forty updates overlap heavily, so the
+apparent peak-and-fall is not resolved at six seeds. What the experiment supports is the weaker
+statement that divergence does not accumulate on a pretrained model either. The six runs finish
+within $0.835 \pm 0.044$ of each other in pass rate.
 
-\paragraph{Where it stops.} Two of the twelve settings leave the contracting regime, and both do it
-the same way. Under a fixed drift target the controller must raise $\eta$ as the signal decays, and
-$\E_x[p(1-p)] \to 0$ as a task is solved takes the signal with it. In the two settings that reach a
-pass rate above $0.94$, the realised drift runs away to a hundred times its target, divergence jumps
-by two orders of magnitude, and the seeds end up in visibly different places: the outcome spread
-reaches $0.24$ against $0.01$ elsewhere. This is a failure of drift-targeted control at saturation
-rather than of \eqref{eq:stationary}, and it is a caution about a technique we otherwise recommend.
+\paragraph{Bounded, not proven stationary.} Across the settings in which a run is still learning,
+the log-log slope of divergence against update count runs from $-1.15$ to $+0.26$, against the
+$+1$ that accumulation requires. That rejects accumulation. It does not establish stationarity in
+the strict sense: $J_t$, $\Sigma_t$ and $\eta_t$ all move during training, so the level that
+\eqref{eq:unrolled} converges to is itself slowly varying, and we describe the divergence as
+bounded rather than stationary throughout.
+
+\paragraph{How the level scales.} Compared at matched pass rate rather than matched step count,
+a log-log fit over nine settings gives an exponent of $-0.61$ in the batch, $95\%$ CI
+$[-1.42, +0.24]$, and $+0.59$ in the drift target, $95\%$ CI $[+0.27, +1.04]$, with $R^2 = 0.70$.
+Both intervals contain the values $-1/2$ and $+1/2$ that follow from
+$Q_t \propto \eta^2\Sigma/P$, and the batch interval also contains zero. Nine settings are too few
+to pin a two-dimensional scaling law, and we report the intervals rather than the point estimates
+for that reason.
+
+\paragraph{What we do not claim.} An earlier version of this work predicted that the spread in
+final task performance would follow $\sqrt{\KL_\infty}$. It does not, in our data: the fitted
+exponent is $+0.10$ with $95\%$ CI $[-0.03, +0.45]$ against a predicted $+0.5$, and the interval
+contains zero. Policy divergence and outcome spread are positively associated across our settings,
+but these experiments do not establish the predicted relation, and we withdraw it. Predicting a
+task metric directly, rather than through policy divergence, is the obvious route and we have not
+taken it.
 
 \subsection{Exactly enumerable policies}
 

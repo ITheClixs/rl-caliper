@@ -1,42 +1,47 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What a practitioner should take from this.} Three things, in decreasing order of how
-confident we are in them. Running longer does not cost reproducibility: the spread across seeds is
-flat in the number of updates, so there is no reason to cut a run short to keep results stable.
-Batch composition is the dominant lever, and it acts as $P^{-1/2}$, so the returns are real but slow
--- quadrupling the batch halves the spread. And the step size matters less than one would expect,
-entering as $D^{+1/2}$, which means a run can be made faster without being made much less
-reproducible, up to the saturation boundary below.
+\paragraph{What this establishes.} That training noise in RLVR is filtered rather than accumulated,
+that the filter is the shared objective and not an artefact of runs starting nearby, and that the
+covariance recursion \eqref{eq:lyapunov} predicts the resulting divergence to within about $10\%$
+where it can be checked exactly. The practical readings are that run length does not enter the
+answer, and that batch composition does, with square-root returns.
 
-\paragraph{On reporting.} The honest consequence of Section~\ref{sec:exp-seeds} is not that error
-bars are now free. It is that they are cheap in a way they were not: the scaling transfers, so one
-calibration -- a handful of seeds at one setting -- lets a practitioner carry an error bar across
-changes of batch and step size, which is where most of the variation between reported configurations
-comes from. What we could not deliver is the absolute level from a single run, and
-Section~\ref{sec:exp-seeds} says exactly why the obvious route fails.
+\paragraph{What it does not establish.} We do not deliver an error bar on a benchmark number from a
+single run. Three things stand between here and there. The recursion predicts \emph{policy}
+divergence, and our attempt to carry that to \emph{outcome} spread through $\sqrt{\KL}$ failed; the
+right route is to propagate the covariance against the gradient of the target metric directly,
+which \eqref{eq:unrolled} supports and we have not implemented. The transfer operators $A_t$ are
+computed exactly only in the enumerable policy; on a real model they would need Jacobian-vector
+products along a stored trajectory. And the largest model we measure is $0.5$B, with six seeds over
+forty updates on short-answer tasks.
+
+\paragraph{On the size of the models.} The obvious next experiment is a 3--7B reasoning model with
+a dozen seeds over several hundred updates, measuring whether the same recursion predicts the same
+quantities there. We did not run it, and not because it was overlooked: every experiment in this
+paper was executed on a single laptop, which is enough for exact validation on solvable systems and
+for populations of small transformers, and is not enough for that. We would rather state the
+boundary than gesture past it.
 
 \paragraph{Against drift targeting, in one case.} Section~\ref{sec:drift} recommends specifying a
 run by a drift target rather than a learning rate, and Section~\ref{sec:experiments} shows that
-target transferring across batch size where a learning rate does not. Section~\ref{sec:exp-seeds}
-shows the same technique destroying two runs. The mechanism is specific and worth stating plainly:
-$\E_x[p(1-p)] \to 0$ as a task is solved, the signal goes with it, and a controller holding drift
-constant answers by raising the step without bound. Any drift-targeted schedule needs a floor on the
-signal or a cap on the step; ours had neither.
+target transferring across batch size where a learning rate does not. The same technique destroys
+two of our runs. The mechanism is specific: $\E_x[p(1-p)] \to 0$ as a task is solved, the signal
+goes with it, and a controller holding drift constant answers by raising the step without bound.
+Any drift-targeted schedule needs a floor on the signal or a cap on the step; ours had neither. The
+defensible claim is that behavioural drift is a more invariant coordinate for update magnitude, not
+that a constant value of it is a good schedule.
 
-\paragraph{Limits.} The linearisation behind Proposition~\ref{prop:stationary} assumes the two runs
-stay close enough that the mean gradient field is locally linear between them, which is the same
-assumption that fails at saturation. The largest model measured is $0.5$B parameters, and the tasks
-are short-answer and exactly verifiable; whether the same picture holds for reasoning-length
-responses, where a single rollout carries far more entropy, is the obvious next measurement and we
-have not made it. The contraction time is treated as a single number and is not one. And the
-estimator family of \eqref{eq:family} excludes clipping, which makes the update a nonlinear function
-of the batch and breaks the linearity the noise decomposition relies on.
+\paragraph{Limits of the linearisation.} \eqref{eq:seed-recursion} requires the two runs to stay
+close enough that the mean gradient field is locally linear between them, and
+$\eta\|J_t\| \ll 1$. Both fail at saturation, which is the same boundary the drift controller
+crosses. A diagnostic exists and is cheap: the realised drift departing from its target is the
+observable that announces it.
 
-\paragraph{What we would do next.} Measure the spectrum of the contraction rather than a single
-timescale, since that is what stands between the scaling law and an absolute error bar. Repeat the
-measurement where responses are long, which is both the regime that matters most and the one where
-the within-prompt noise term should be largest. And check whether the same balance explains a
-phenomenon we did not set out to study: if divergence between two seeds is stationary, then so is
-divergence from any perturbation, including a change of data order or of hardware numerics, and the
-same instrument should predict those.
+\paragraph{What we would do next, in order.} Propagate the covariance against a task metric rather
+than the Fisher information, which converts a statement about policies into an error bar on a
+reported number. Implement the transfer operators through Jacobian-vector products so the recursion
+runs on a real model without materialising anything. Then measure the per-update kernel on a run
+long enough for the question to be interesting, and ask how much of the final variance was
+generated in the last few percent of updates, because if that fraction is large then replicating a
+run means replicating only its tail.

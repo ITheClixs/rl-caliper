@@ -431,9 +431,12 @@ def figure_real_seeds() -> None:
     rows = run["result"]["rows"]
     steps = np.array([r["step"] for r in rows], dtype=float)
     kl = np.array([r["pairwise_kl"] for r in rows])
-    err = np.array([r["pairwise_kl_se"] for r in rows])
+    # intervals resampled over runs; the pairs share runs and are not independent
+    lo = np.array([r.get("pairwise_lo", np.nan) for r in rows])
+    hi = np.array([r.get("pairwise_hi", np.nan) for r in rows])
+    err = np.vstack([kl - lo, hi - kl]) if np.isfinite(lo).all() else None
 
-    fig, ax = plt.subplots(figsize=(3.5, 2.8))
+    fig, ax = plt.subplots(figsize=(3.6, 2.8))
     ax.errorbar(steps, kl, yerr=err, fmt="o-", ms=4, lw=1.4, capsize=2, color=PALETTE[0])
     grid = np.array([1.0, steps.max()])
     ax.plot(grid, kl[0] * grid, "--", color="0.45", lw=1.2)
@@ -444,6 +447,7 @@ def figure_real_seeds() -> None:
     ax.set_title(
         f"Qwen2.5-0.5B, {run['manifest']['config']['seeds']} seeds", fontsize=8.5
     )
+    ax.set_ylim(bottom=max(np.nanmin(lo) * 0.6, 1e-3))
     fig.tight_layout()
     fig.savefig(FIGURES / "real_seeds.pdf", bbox_inches="tight")
     plt.close(fig)

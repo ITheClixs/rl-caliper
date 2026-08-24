@@ -9,10 +9,12 @@ is the only instrument available without a model of where the variance comes fro
 supplies such a model, and the practical difference is between paying $N$ runs and paying one run
 plus a short fork.
 
-\paragraph{Stochastic dynamics of training.} Treating SGD as a stochastic process with a stationary
-distribution set by the balance of gradient noise against curvature is standard
-\citep{mandt2017sgd}, and the Ornstein-Uhlenbeck argument in Section~\ref{sec:seeds} is that
-argument applied to the gap between two runs. What is not established, and what
+\paragraph{Stochastic dynamics of training.} Treating stochastic optimisation as a process
+whose covariance is set by the balance of gradient noise against curvature is standard
+\citep{mandt2017sgd}, and the Lyapunov recursion in Theorem~\ref{thm:propagation} is not new
+as mathematics. What we add is the RLVR-specific measurement of $Q_t$ through the two-level
+noise decomposition, the finite-time rather than stationary treatment, and the observation
+that the resulting filter, not the size of the noise, is what governs reproducibility here. What is not established, and what
 Section~\ref{sec:experiments} tests, is whether it survives RLVR: the objective is non-stationary
 because the data distribution is the policy's own samples, the noise covariance depends on the
 pass-rate distribution and moves as the policy improves, and the reward is binary. None of that is
