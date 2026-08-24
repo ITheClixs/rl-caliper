@@ -328,6 +328,35 @@ def table_adam_lift() -> None:
     write("adam_lift", "\n".join(lines))
 
 
+def table_spectrum() -> None:
+    """What the transfer operator's spectrum looks like at points along a run."""
+    runs = [r for r in io.load_all("p6_spectrum") if len(r["result"].get("cells", [])) >= 6]
+    if not runs:
+        raise SystemExit("no spectrum sweep")
+    cells = runs[-1]["result"]["cells"]
+    bands = sorted({c["band"] for c in cells})
+    updates = sorted({c["update"] for c in cells})
+    lines = [
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\begin{tabular}{@{}l" + "c" * len(updates) + r"@{}}",
+        r"\toprule",
+        "update & " + " & ".join(str(u) for u in updates) + r" \\",
+        r"\midrule",
+    ]
+    for band in bands:
+        rows = {c["update"]: c for c in cells if c["band"] == band}
+        radii = [
+            f"{1000 * (rows[u]['radius'] - 1.0):.1f}" if u in rows else "--" for u in updates
+        ]
+        shares = [f"{100 * rows[u]['contracted_share']:.0f}" if u in rows else "--"
+                  for u in updates]
+        lines.append(rf"{band}, $10^3(\rho - 1)$ & " + " & ".join(radii) + r" \\")
+        lines.append(r"\quad contracting, \% & " + " & ".join(shares) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("spectrum", "\n".join(lines))
+
+
 def table_propagation() -> None:
     """Candidate models of seed divergence against exact Monte Carlo ground truth."""
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
@@ -374,6 +403,7 @@ def main() -> None:
         ("forecast", table_forecast),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
+        ("spectrum", table_spectrum),
     ):
         try:
             fn()

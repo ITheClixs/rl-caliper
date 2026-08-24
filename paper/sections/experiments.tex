@@ -213,6 +213,47 @@ where the variance is --- or, on a saturated evaluation, zero. No scalar functio
 recover that. Theorem~\ref{thm:adjoint} takes the direct route instead, and
 Section~\ref{sec:exp-forecast} is what it delivers.
 
+\subsection{The filter is not a contraction}
+\label{sec:exp-spectrum}
+
+It is convenient to say that the updates following a perturbation shrink it. Measuring the spectrum
+of $A_t = I + \eta\mathcal{J}_t$ along a run says something more careful, and the more careful
+statement is the one the paper should make.
+
+\begin{table}[t]
+  \centering
+  \input{tables/spectrum}
+  \caption{The spectrum of the transfer operator along a run of $600$ updates at $\eta = 1$,
+  reported as $10^3(\rho - 1)$ for the spectral radius $\rho$. The operator expands in its leading
+  direction throughout, and contracts in a minority of directions that grows as the run proceeds.}
+  \label{tab:spectrum}
+\end{table}
+
+Three things are visible in Table~\ref{tab:spectrum} and none of them is a uniform contraction.
+
+The spectral radius exceeds one everywhere we look, by $1$--$2\%$ early and decaying towards
+$1.0001$ as the policy improves. There are directions in which a perturbation grows. Over a run of
+twenty-five updates that growth is a factor of $1.02^{25} \approx 1.6$, which is why divergence
+stays bounded over the horizons anyone trains and why it would not stay bounded forever: what makes
+the spread finite here is that expansion is slow relative to run length, not that every direction
+shrinks.
+
+The share of directions that contract at all is between $31\%$ and $51\%$, and it rises as the run
+proceeds --- $36\%$ to $51\%$ on the mixed pool. The filter changes shape during training. This is
+the non-stationarity that Theorem~\ref{thm:propagation} handles by construction, since it carries
+$A_t$ rather than an average of it.
+
+Among the directions that do contract, the fastest has an eigenvalue around $0.98$ and the slowest
+is $1.0000$ to four places. That is a range of decay timescales from roughly $45$ updates to
+effectively unbounded, in the same operator, at the same moment. It is the direct explanation of two
+results reported above: why replacing the spectrum by one effective timescale is wrong by two orders
+of magnitude, and why the per-update kernel has no horizon --- the slow end of the spectrum has not
+forgotten anything by the end of an eighty-update run.
+
+We therefore say that noise is \emph{filtered} rather than contracted, and mean by it that
+\eqref{eq:unrolled} reweights each update's contribution by a spectrum straddling one, most of
+which is very close to it.
+
 \subsection{How far the linearisation can be pushed}
 \label{sec:exp-linearity}
 
