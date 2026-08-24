@@ -191,6 +191,35 @@ but these experiments do not establish the predicted relation, and we withdraw i
 task metric directly, rather than through policy divergence, is the obvious route and we have not
 taken it.
 
+\subsection{How far the linearisation can be pushed}
+\label{sec:exp-linearity}
+
+Everything above linearises the mean update field between the two runs. That assumption is
+checkable without knowing the answer, which makes it a diagnostic a run can apply to itself. For a
+pair of runs at $\theta^A$ and $\theta^B$ with $\Delta = \theta^B - \theta^A$, define the residual
+\begin{equation}
+  \label{eq:residual}
+  \varepsilon \;:=\;
+  \frac{\big\|\,\gbar(\theta^B) - \gbar(\theta^A) - J(\theta^A)\Delta\,\big\|}
+       {\big\|\,\gbar(\theta^B) - \gbar(\theta^A)\,\big\|},
+\end{equation}
+zero where the field is linear between them. We measure its median along $36$ pairs of runs and
+report the forecast error against it.
+
+The residual behaves as it should: raising the step size eightfold raises it from $0.028$ to
+$0.165$. The forecast does not follow. Its median error is $1.11\times$ where the residual is below
+$5\%$, $1.18\times$ between $5$ and $12\%$, $1.08\times$ between $12$ and $25\%$, and $1.18\times$
+above that, with a rank correlation of $0.17$ between residual and error across the grid. What does
+track the residual is the tail: the worst case is $1.21\times$ below $5\%$ and around $1.57\times$
+above it.
+
+Two things follow. The derivation asks for more than the result needs --- a $16\%$ departure from
+linearity costs nothing at the median --- so the honest statement of the assumption is that it
+bounds the worst case rather than setting the accuracy. And $\varepsilon$ is worth logging anyway,
+because it is the quantity that separates the regime where the forecast has a worst case of
+$1.2\times$ from the regime where it has one of $1.6\times$, and computing it costs one extra
+gradient evaluation on a checkpoint a run already has.
+
 \subsection{Exactly enumerable policies}
 
 The policy is a tabular autoregressive model over a small vocabulary, so its distribution over
@@ -276,6 +305,7 @@ the task.
 
 \subsection{Under Adam}
 \label{sec:adam}
+\label{sec:exp-adam}
 
 Everything above is under plain gradient ascent, where the update is the gradient and the noise can
 be read in the parameter metric. Real runs use Adam, which moves in a different metric and is scale

@@ -1,30 +1,51 @@
 \section{Discussion}
 \label{sec:discussion}
 
-\paragraph{What this establishes.} That training noise in RLVR is filtered rather than accumulated,
-that the filter is the shared objective and not an artefact of runs starting nearby, and that the
-covariance recursion \eqref{eq:lyapunov} predicts the resulting divergence to within about $10\%$
-where it can be checked exactly. The practical readings are that run length does not enter the
-answer, and that batch composition does, with square-root returns.
+\paragraph{What this establishes.} That the across-seed spread of a reported RLVR score can be
+forecast from a single training run, to a median factor of $1.08$ over $48$ settings where the
+comparison can be made exactly; that the mechanism is filtering rather than accumulation, and that
+the filter is the shared objective and not an artefact of runs starting nearby; and that the
+backward pass the forecast needs is cheap because the mean update of a count-based estimator is a
+gradient field. The practical readings are that run length does not enter the answer, that batch
+composition does with square-root returns, and that rollout sampling rather than prompt selection
+is what the reported number mostly remembers.
 
-\paragraph{What it does not establish.} We do not deliver an error bar on a benchmark number from a
-single run. Three things stand between here and there. The recursion predicts \emph{policy}
-divergence, and our attempt to carry that to \emph{outcome} spread through $\sqrt{\KL}$ failed; the
-right route is to propagate the covariance against the gradient of the target metric directly,
-which \eqref{eq:unrolled} supports and we have not implemented. The transfer operators $A_t$ are
-computed exactly only in the enumerable policy; on a real model they would need Jacobian-vector
-products along a stored trajectory. And the largest model we measure is $0.5$B, with six seeds over
-forty updates on short-answer tasks.
+\paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
+and the injected covariance are all exact. On a real model each becomes an estimate, and the
+composition of three estimates is not something our measurements bound. We report the ingredients
+separately at $7$B --- the realised spread over eight seeds, and the divergence between them --- but
+not the forecast itself, because we could not validate the backward pass at that scale within this
+machine's budget. That gap is the single most valuable thing to close next, and
+Section~\ref{sec:exp-forecast} states exactly what it would take: two gradient evaluations per
+stored update, with common random numbers so the difference is not swamped.
 
-\paragraph{On the size of the models.} The obvious next experiment is a 3--7B reasoning model with
-a dozen seeds over several hundred updates, measuring whether the same recursion predicts the same
-quantities there. We did not run it, and not because it was overlooked: every experiment in this
-paper was executed on a single laptop, which is enough for exact validation on solvable systems and
-for populations of small transformers, and is not enough for that. We would rather state the
+\paragraph{On the size of the models.} The largest measurement here is Qwen2.5-7B with eight seeds
+over twenty updates. That is enough to say that a $7$B model's reported number moves under
+reseeding by an amount we can measure and that its policy divergence does not accumulate; it is not
+enough to say anything about a run of several hundred updates on a reasoning model. We did not run
+that, and not because it was overlooked: every experiment in this paper was executed on a single
+laptop, which is enough for exact validation on solvable systems, for populations of small
+transformers, and for eight seeds at $7$B, and is not enough for that. We would rather state the
 boundary than gesture past it.
 
+\paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
+only partly works in practice. It halves the error of ignoring the optimiser state, and the
+optimiser state clearly does carry seed information --- freezing the second moment makes the
+prediction worse, not better. But where the pass rate saturates at either end, Adam's normalisation
+is the nonlinearity that bounds the spread, and a linear recursion cannot see a bound it does not
+contain. Section~\ref{sec:exp-adam} reports where it holds and where it does not, rather than
+reporting the median alone.
+
+\paragraph{Limits of the linearisation, with a diagnostic.} \eqref{eq:seed-recursion} requires the
+two runs to stay close enough that the mean gradient field is locally linear between them, and
+$\eta\|J_t\| \ll 1$. Section~\ref{sec:exp-linearity} measures the residual
+$\|\gbar(\theta^B) - \gbar(\theta^A) - J(\theta^A)\Delta\| / \|\gbar(\theta^B) - \gbar(\theta^A)\|$
+along real pairs of runs and reports the forecast error against it. The residual is computable
+during training without knowing the answer, which is what makes it useful: a run can say whether
+its own forecast is inside the regime that produced it.
+
 \paragraph{Against drift targeting, in one case.} Section~\ref{sec:drift} recommends specifying a
-run by a drift target rather than a learning rate, and Section~\ref{sec:experiments} shows that
+run by a drift target rather than a learning rate, and Section~\ref{sec:applications} shows that
 target transferring across batch size where a learning rate does not. The same technique destroys
 two of our runs. The mechanism is specific: $\E_x[p(1-p)] \to 0$ as a task is solved, the signal
 goes with it, and a controller holding drift constant answers by raising the step without bound.
@@ -32,16 +53,9 @@ Any drift-targeted schedule needs a floor on the signal or a cap on the step; ou
 defensible claim is that behavioural drift is a more invariant coordinate for update magnitude, not
 that a constant value of it is a good schedule.
 
-\paragraph{Limits of the linearisation.} \eqref{eq:seed-recursion} requires the two runs to stay
-close enough that the mean gradient field is locally linear between them, and
-$\eta\|J_t\| \ll 1$. Both fail at saturation, which is the same boundary the drift controller
-crosses. A diagnostic exists and is cheap: the realised drift departing from its target is the
-observable that announces it.
-
-\paragraph{What we would do next, in order.} Propagate the covariance against a task metric rather
-than the Fisher information, which converts a statement about policies into an error bar on a
-reported number. Implement the transfer operators through Jacobian-vector products so the recursion
-runs on a real model without materialising anything. Then measure the per-update kernel on a run
-long enough for the question to be interesting, and ask how much of the final variance was
-generated in the last few percent of updates, because if that fraction is large then replicating a
-run means replicating only its tail.
+\paragraph{What we would do next, in order.} Validate the backward pass on a real model, which is
+an engineering task rather than a scientific one and which turns Section~\ref{sec:exp-forecast}
+into a tool. Then ask whether the forecast survives a run long enough for the kernel to have
+structure, since over the horizons reachable here it does not. Then treat the estimation error in
+$\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
+thing a practitioner will actually be handed.
