@@ -19,11 +19,14 @@ to first order in $\Delta$, with $\Cov(\nu_t) = 2\Sigma_t/P$. The batch noise $\
 explicit in Section~\ref{sec:theory}, where it is computed exactly at finite group size; nothing
 in this section depends on which estimator produced it.
 
-If the objective were flat, $\mathcal{J} = 0$, this would be a random walk: divergence would accumulate,
-$\E\|\Delta_t\|^2 \propto t$, and a longer run would be strictly less reproducible than a short one.
-That is the implicit model behind treating run-to-run variance as something to be measured by
-brute force. But two RLVR runs are climbing the same objective, and where it is locally concave
-$A_t$ is a contraction: divergence injected at one update decays over the ones that follow.
+If the objective were flat, $\mathcal{J} = 0$, this would be a random walk: divergence would
+accumulate, $\E\|\Delta_t\|^2 \propto t$, and a longer run would be strictly less reproducible than
+a short one. That is the implicit model behind treating run-to-run variance as something to be
+measured by brute force. But two RLVR runs are climbing the same objective, and $A_t$ reweights a
+perturbation by the local curvature rather than passing it through. We will call this filtering
+rather than contraction, because Section~\ref{sec:exp-spectrum} measures the spectrum of $A_t$ and
+finds it straddling one: a minority of directions contract, the leading direction expands slowly,
+and the contracting timescales differ among themselves by more than an order of magnitude.
 
 The consequence is that noise from update $t$ is not added to the final divergence. It is passed
 through every subsequent update first.
@@ -95,10 +98,11 @@ signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does
 injected noise requires quadrupling the batch, and nothing in \eqref{eq:unrolled} depends on the
 number of updates once the sum has converged.
 
-\paragraph{A memory horizon, if contraction is strong enough to make one.} If $\Phi_{T,t+1}$
+\paragraph{A memory horizon, if the filter is sharp enough to make one.} If $\Phi_{T,t+1}$
 decays with $T - t$, the sum in \eqref{eq:unrolled} is dominated by its last terms and the final
 $h \ll T$ updates account for nearly all of the spread; reproducing a result would then mean
-reproducing its end. Where contraction is weak, $k_t$ is flat and every update counts the same.
+reproducing its end. Where the filter is close to the identity, $k_t$ is flat and every update
+counts the same.
 Section~\ref{sec:exp-seeds} asks which of these holds and finds the second, over every setting we
 can reach.
 

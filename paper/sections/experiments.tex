@@ -113,7 +113,7 @@ indistinguishable from the truth. The single-timescale law is wrong by two order
 That failure is informative rather than embarrassing: it is what \eqref{eq:unrolled} predicts when
 a spectrum of contraction rates is compressed to one number.
 
-\paragraph{Contraction requires a learning signal.} If divergence stops growing because the shared
+\paragraph{The filtering requires a learning signal.} If divergence stops growing because the shared
 objective pulls two runs together, then removing the objective while leaving the noise in place
 should restore accumulation. We ran a population of transformers twice from identical parameters:
 once normally, and once with every reward replaced by an independent coin flip, which leaves the
@@ -142,8 +142,7 @@ learning signal.
 \end{table}
 
 With a signal, divergence is flat while the pass rate climbs from $0.19$ to $0.51$. Without one it
-grows by a factor of $10.7$ over the same eighty updates. The contraction is caused by the
-objective, which is what \eqref{eq:seed-recursion} says and what separates this from a claim that
+grows by a factor of $10.7$ over the same eighty updates. The filtering is caused by the objective, which is what \eqref{eq:seed-recursion} says and what separates this from a claim that
 seeds happen to end up nearby.
 
 \paragraph{On a pretrained model.} The transformers above are small and their task is synthetic.

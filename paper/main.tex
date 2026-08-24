@@ -58,9 +58,12 @@
   show that a run already contains enough information to forecast its own spread.
 
   The correction that makes this possible is to stop treating training noise as accumulating. A
-  perturbation entering at one update is passed through every later update, and where the shared
-  objective is locally concave those updates contract it, so the covariance of a run about its mean
-  obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric
+  perturbation entering at one update is passed through every later update and reweighted by them,
+  so the covariance of a run about its mean obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Measuring
+  the spectrum of $A_t$ shows what that reweighting is and what it is not: only a third to a half of
+  directions contract, the leading one expands by one to two percent per update, and among the
+  contracting directions the timescales run from tens of updates to effectively unbounded. It is a
+  filter, not a contraction, and no single number stands in for it. Carrying the gradient of the reported metric
   backwards along one stored trajectory then gives the across-seed variance of that metric as a sum
   of scalars, one per update, with no covariance matrix formed. The transpose the backward pass
   needs is free: the mean update of a count-based estimator is the gradient of a scalar potential,
@@ -70,9 +73,9 @@
   only then the remaining seeds trained. Across $48$ settings spanning a $30\times$ range of
   spreads its median absolute error against the realised standard deviation is $1.08\times$, its worst
   is $1.67\times$, and it lands inside the measured $95\%$ interval in $36$ of them. The underlying covariance law predicts policy
-  divergence to $9\%$ at the median where it can be checked exactly; ignoring contraction is wrong
+  divergence to $9\%$ at the median where it can be checked exactly; ignoring the filter is wrong
   by up to $3.9\times$ and compressing it to a single timescale by two orders of magnitude. The
-  contraction is caused by learning, not by proximity: replacing every reward with a coin flip
+  filtering is caused by learning, not by proximity: replacing every reward with a coin flip
   leaves noise, batches and step sizes untouched and divergence then grows $10.7\times$ over eighty
   updates instead of staying flat.
 
@@ -99,7 +102,7 @@
     trained afterwards. Bars are bootstrap intervals over runs; the solid line is equality and the
     dotted lines a factor of $1.5$. \textbf{Right:} predicted against measured policy divergence
     for three models of where training noise goes. Propagating the covariance tracks it; treating
-    noise as accumulating is wrong by up to $3.9\times$; compressing the contraction to one
+    noise as accumulating is wrong by up to $3.9\times$; compressing the filter to one
     timescale is wrong by two orders of magnitude.}
     \label{fig:teaser}
   \end{minipage}

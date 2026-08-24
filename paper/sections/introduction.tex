@@ -17,10 +17,9 @@ is that gradient noise perturbs each update, perturbations accumulate, two runs 
 walk away from each other, and reproducibility decays with run length. That picture is implicit in
 how run-to-run variance is discussed, and it is what a noisy gradient suggests. It is wrong. Noise
 from one update does not survive to the end of training unchanged: it is passed through every
-update that follows, and where the shared objective is locally concave those updates shrink it.
-What reaches the end is a convolution of injected noise with the sensitivity of the remaining
-trajectory --- an object that obeys a recursion, and that can be carried against the gradient of
-the reported metric instead of being formed.
+update that follows, which reweights it. What reaches the end is a convolution of injected noise
+with the sensitivity of the remaining trajectory --- an object that obeys a recursion, and that can
+be carried against the gradient of the reported metric instead of being formed.
 
 \paragraph{Contributions.}
 \begin{itemize}
@@ -44,7 +43,13 @@ the reported metric instead of being formed.
   settings, against $2.0\times$ for accumulation and two orders of magnitude for a single-timescale
   approximation.
 
-  \item \textbf{The contraction is caused by learning.} Replacing rewards with coin flips, which
+  \item \textbf{What the filter actually is} (Section~\ref{sec:exp-spectrum}). Measuring the
+  spectrum of $A_t$ along a run: the spectral radius exceeds one throughout, only $31$--$51\%$ of
+  directions contract, and among those the decay timescales span tens of updates to effectively
+  unbounded. Divergence stays bounded because expansion is slow relative to run length, not because
+  every direction shrinks --- and this is why one effective timescale cannot work.
+
+  \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
   leaves noise and batch composition untouched, turns a flat divergence trace into one that grows
   $10.7\times$ over eighty updates. This separates the result from a claim that seeds merely end up
   nearby.
@@ -67,8 +72,7 @@ the reported metric instead of being formed.
   policies still differ by up to $8\times10^{-2}$ in KL. A zero measured spread on a saturated
   benchmark is not evidence of a reproducible procedure.
 
-  \item \textbf{An explicit account of what does not hold.} A single contraction timescale fails by
-  two orders of magnitude. A predicted square-root relation between policy divergence and outcome
+  \item \textbf{An explicit account of what does not hold.} A single effective timescale fails by two orders of magnitude. A predicted square-root relation between policy divergence and outcome
   spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
   long run whose spread is generated only near its end --- and did not find one. Lifting the
   recursion to Adam's optimiser state improves on ignoring that state by a factor of two at the
