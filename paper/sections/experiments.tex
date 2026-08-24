@@ -183,13 +183,19 @@ $Q_t \propto \eta^2\Sigma/P$, and the batch interval also contains zero. Nine se
 to pin a two-dimensional scaling law, and we report the intervals rather than the point estimates
 for that reason.
 
-\paragraph{What we do not claim.} An earlier version of this work predicted that the spread in
-final task performance would follow $\sqrt{\KL_\infty}$. It does not, in our data: the fitted
-exponent is $+0.10$ with $95\%$ CI $[-0.03, +0.45]$ against a predicted $+0.5$, and the interval
-contains zero. Policy divergence and outcome spread are positively associated across our settings,
-but these experiments do not establish the predicted relation, and we withdraw it. Predicting a
-task metric directly, rather than through policy divergence, is the obvious route and we have not
-taken it.
+\paragraph{Why the route through policy divergence was abandoned.} An earlier version of this work
+predicted that the spread in final task performance would follow $\sqrt{\KL_\infty}$. It does not,
+in our data: the fitted exponent is $+0.10$ with $95\%$ CI $[-0.03, +0.45]$ against a predicted
+$+0.5$, and the interval contains zero. Policy divergence and outcome spread are positively
+associated across our settings, but these experiments do not establish the predicted relation, and
+we withdraw it.
+
+The reason is structural rather than statistical, and Section~\ref{sec:exp-scale} shows it in its
+extreme form. $\KL$ weights every direction the policy can move in by the Fisher information; a
+task metric weights them by $\nabla M$, which is a single direction and can be nearly orthogonal to
+where the variance is --- or, on a saturated evaluation, zero. No scalar function of $\KL$ can
+recover that. Theorem~\ref{thm:adjoint} takes the direct route instead, and
+Section~\ref{sec:exp-forecast} is what it delivers.
 
 \subsection{How far the linearisation can be pushed}
 \label{sec:exp-linearity}
