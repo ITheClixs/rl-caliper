@@ -265,14 +265,16 @@ def table_propagation() -> None:
     cells = runs[-1]["result"]["cells"]
     measured = np.array([c["measured_kl"] for c in cells])
     lines = [
-        r"\begin{tabular}{lccc}",
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{3.5pt}",
+        r"\begin{tabular}{@{}lccc@{}}",
         r"\toprule",
-        r"model of seed divergence & median error & worst & range of ratio \\",
+        r"model of seed divergence & median & worst & ratio \\",
         r"\midrule",
     ]
     names = [
-        ("propagated_kl", r"propagated covariance, \eqref{eq:unrolled}"),
-        ("walk_kl", "accumulation, no contraction"),
+        ("propagated_kl", r"propagated, \eqref{eq:unrolled}"),
+        ("walk_kl", "accumulation"),
         ("scalar_kl", "single timescale"),
     ]
     for key, label in names:

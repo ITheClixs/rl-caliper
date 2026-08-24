@@ -46,11 +46,12 @@ learning signal.
 \begin{table}[t]
   \centering
   \small
-  \begin{tabular}{lcccc}
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{@{}lcccc@{}}
     \toprule
     & \multicolumn{2}{c}{learning} & \multicolumn{2}{c}{signal removed} \\
     \cmidrule(lr){2-3}\cmidrule(lr){4-5}
-    updates & divergence & pass rate & divergence & pass rate \\
+    updates & diverg. & pass & diverg. & pass \\
     \midrule
     1  & $1.15\times10^{-3}$ & 0.191 & $3.99\times10^{-3}$ & 0.184 \\
     20 & $1.26\times10^{-3}$ & 0.267 & $1.11\times10^{-2}$ & 0.177 \\

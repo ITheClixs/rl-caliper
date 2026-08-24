@@ -37,20 +37,21 @@ described by a $(G+1) \times 2$ table:
 
 \begin{table}[t]
   \centering
-  \small
-  \begin{tabular}{ll}
+  \footnotesize
+  \setlength{\tabcolsep}{3.5pt}
+  \begin{tabular}{@{}ll@{}}
     \toprule
     estimator & $w(k, r)$ \\
     \midrule
     RLOO \citep{ahmadian2024rloo} & $r - (k - r)/(G-1)$ \\
     GRPO, mean baseline \citep{liu2025drgrpo} & $r - k/G$ \\
     GRPO, standardised \citep{shao2024deepseekmath}
-      & $\dfrac{r - k/G}{\sqrt{(k/G)(1 - k/G)}}$ \\[6pt]
+      & $\big(r - \bar{r}\big)/\sqrt{\bar{r}(1 - \bar{r})}$ \\
     fixed external baseline & $r - \hat{p}$ \\
     \bottomrule
   \end{tabular}
   \caption{The estimators in current use, each a $(G+1)\times 2$ table. Standardised GRPO is
-  defined to be zero when $k \in \{0, G\}$, where the group has no spread.}
+  defined to be zero when $k \in \{0, G\}$, where the group has no spread; $\bar{r} = k/G$.}
   \label{tab:family}
 \end{table}
 

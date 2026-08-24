@@ -39,8 +39,9 @@ through every subsequent update first.
   \begin{equation}
     \label{eq:unrolled}
     S_T = \sum_{t=0}^{T-1} \Phi_{T,t+1}\, Q_t\, \Phi_{T,t+1}^{\!\top},
-    \qquad \Phi_{T,s} := A_{T-1}A_{T-2}\cdots A_{s}.
+    \qquad \Phi_{T,s} := \!\!\prod_{u=s}^{T-1}\!\! A_u ,
   \end{equation}
+  the product taken in order of decreasing $u$.
   Two independent seeds satisfy $\Cov(\theta^A_T - \theta^B_T) = 2S_T$, so their expected policy
   divergence is
   \begin{equation}
