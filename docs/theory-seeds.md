@@ -94,3 +94,33 @@ flat, `J ~ 0`, and there divergence accumulates exactly as (S1) says it should.
 A controller holding drift at a fixed target raises `eta` as the signal decays, and
 `E[p(1-p)] -> 0` as a task is solved takes the signal with it. Runs cross out of the regime exactly
 this way; the observable that announces it is the realised drift departing from its target.
+
+## 8. Adam, and the limits of lifting
+
+Adam's state is `z = (theta, m, v)`, not theta alone: a gradient perturbation survives in the
+moments after the step that produced it. `caliper/exact/lifted.py` takes the transfer operator
+`dPhi/dz` and the injection `B Cov(g_hat) B^T` with `B = dPhi/dg_hat` by central differences on the
+exact mean map, so nothing about the derivation is taken on faith.
+
+Two structural facts. The map is singular at `v = 0` -- the derivative of `1/(sqrt(v) + eps)`
+diverges -- so the moments must be warmed before the covariance is propagated; every seed shares the
+warmed state, so `S_0 = 0` still holds. And the difference steps must be taken relative to each
+coordinate, since `v` is of order `g^2` and an absolute epsilon is meaningless there.
+
+Measured against 48 independent Adam runs over 24 settings (`experiments/p5_adam_lift`):
+
+| model of seed divergence | median | worst | live signal only |
+|---|---|---|---|
+| lifted, `z = (theta, m, v)` | 2.61x | 141.5x | **1.48x** |
+| second moment frozen | 15.92x | 230.3x | 4.29x |
+| theta block only | 5.45x | 39.2x | 14.04x |
+| accumulation | 5.50x | 38.4x | 13.93x |
+
+Readings. The optimiser state carries seed information -- freezing `v` is six times worse than
+propagating it, not better. Where the learning signal is live the lift is accurate to 1.5x. Where
+the pass rate saturates the linearised map acquires a spectral radius above one and the prediction
+runs away, because Adam's normalisation is what bounds the real spread and a linear recursion does
+not contain that bound.
+
+The condition for trusting it is the same one that appears everywhere else in these notes:
+`E[p(1-p)]` well away from zero.
