@@ -88,6 +88,8 @@ def main() -> None:
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--epsilon", type=float, default=1e-3)
     ap.add_argument("--adjoint-batches", type=int, default=2)
+    ap.add_argument("--forecast-repeats", type=int, default=2,
+                    help="independent forecasts from one run, to see how much the estimate moves")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--store", default="runs/s7_forecast")
     args = ap.parse_args()
@@ -120,15 +122,25 @@ def main() -> None:
     print(f"seed 0: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "
           f"held out {first_rates.mean():.4f} | {(time.time() - started) / 60:.1f} min", flush=True)
 
-    # (2) the forecast, from that run alone
-    started = time.time()
-    prediction = forecast(
-        trainer, states, corpus, held_out, args.learning_rate, args.prompts,
-        mx.random.key(4242), seed=args.seed, epsilon=args.epsilon,
-        batches=args.adjoint_batches,
-    )
-    print(f"forecast: sd {prediction.std:.5f} (variance {prediction.variance:.3e}) "
-          f"in {(time.time() - started) / 60:.1f} min", flush=True)
+    # (2) the forecast, from that run alone. Repeating it with independent batches says how
+    # much of what it reports is the run and how much is the estimate.
+    repeats = []
+    for repeat in range(max(args.forecast_repeats, 1)):
+        started = time.time()
+        repeats.append(forecast(
+            trainer, states, corpus, held_out, args.learning_rate, args.prompts,
+            mx.random.key(4242 + 31 * repeat), seed=args.seed + 991 * repeat,
+            epsilon=args.epsilon, batches=args.adjoint_batches,
+        ))
+        print(f"forecast {repeat}: sd {repeats[-1].std:.5f} "
+              f"(variance {repeats[-1].variance:.3e}) in {(time.time() - started) / 60:.1f} min",
+              flush=True)
+    prediction = repeats[0]
+    spread_of_forecasts = float(np.std([r.std for r in repeats], ddof=1)) if len(repeats) > 1 \
+        else float("nan")
+    print(f"forecast: sd {prediction.std:.5f}, and across {len(repeats)} independent "
+          f"estimates from the same run the sd of that number is {spread_of_forecasts:.5f}",
+          flush=True)
     print(f"kernel {np.round(prediction.kernel, 8).tolist()}", flush=True)
     if prediction.jvp_agreement:
         agree = np.array(prediction.jvp_agreement)
@@ -173,6 +185,8 @@ def main() -> None:
         "kernel": prediction.kernel,
         "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement,
+        "repeat_stds": [r.std for r in repeats],
+        "forecast_estimation_sd": spread_of_forecasts,
         "held_out_scores": scores,
         "observed_spread": observed,
         "binomial_variance": binomial,
