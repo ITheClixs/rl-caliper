@@ -130,9 +130,14 @@ def main() -> None:
     print(f"forecast: sd {prediction.std:.5f} (variance {prediction.variance:.3e}) "
           f"in {(time.time() - started) / 60:.1f} min", flush=True)
     print(f"kernel {np.round(prediction.kernel, 8).tolist()}", flush=True)
+    if prediction.jvp_agreement:
+        agree = np.array(prediction.jvp_agreement)
+        print(f"Hessian-vector product agreement across independent draws: "
+              f"median {np.nanmedian(agree):.3f}, min {np.nanmin(agree):.3f}", flush=True)
     (store / "forecast.json").write_text(json.dumps({
         "variance": prediction.variance, "std": prediction.std,
         "kernel": prediction.kernel, "adjoint_norm": prediction.adjoint_norm,
+        "jvp_agreement": prediction.jvp_agreement,
     }))
     del trainer
 
@@ -167,6 +172,7 @@ def main() -> None:
         "predicted_variance": prediction.variance,
         "kernel": prediction.kernel,
         "adjoint_norm": prediction.adjoint_norm,
+        "jvp_agreement": prediction.jvp_agreement,
         "held_out_scores": scores,
         "observed_spread": observed,
         "binomial_variance": binomial,

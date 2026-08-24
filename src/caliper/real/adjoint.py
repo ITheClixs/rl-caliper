@@ -120,6 +120,7 @@ class RealForecast:
     kernel: list[float]
     adjoint_norm: list[float]
     metric_value: float
+    jvp_agreement: list[float]  # cosine between two independent estimates of J b
 
 
 def forecast(
@@ -133,10 +134,16 @@ def forecast(
     seed: int = 0,
     epsilon: float = 1e-3,
     batches: int = 1,
+    check_agreement: bool = True,
 ) -> RealForecast:
     """Carry the metric gradient back along the stored states of one run.
 
     `states[t]` are the adapters after update t, so `states[-1]` is where the run ended.
+
+    With `check_agreement`, each Hessian-vector product is estimated a second time from an
+    independent draw of prompts and the cosine between the two is recorded. A forecast whose
+    backward pass is dominated by sampling noise will show cosines near zero, and that is worth
+    knowing before the number it produces is believed.
     """
     steps = len(states) - 1
     displaced(trainer, states[-1], np.zeros(flatten(states[-1]).size), 0.0)
@@ -146,6 +153,7 @@ def forecast(
 
     kernel = [0.0] * steps
     norms = [0.0] * steps
+    agreement = []
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
         projected, _, key = projected_batch_variance(
@@ -153,9 +161,16 @@ def forecast(
         )
         kernel[t] = step_size**2 * projected / n_prompts
         norms[t] = float(np.linalg.norm(adjoint))
-        adjoint = adjoint + step_size * hessian_vector(
+        product = hessian_vector(
             trainer, states[t], corpus, adjoint, key, seed + 500 + t, epsilon, batches
         )
+        if check_agreement:
+            other = hessian_vector(
+                trainer, states[t], corpus, adjoint, key, seed + 9000 + t, epsilon, batches
+            )
+            scale = np.linalg.norm(product) * np.linalg.norm(other)
+            agreement.append(float(product @ other / scale) if scale > 0 else float("nan"))
+        adjoint = adjoint + step_size * product
     variance = float(sum(kernel))
     return RealForecast(
         variance=variance,
@@ -163,4 +178,5 @@ def forecast(
         kernel=kernel,
         adjoint_norm=norms,
         metric_value=metric,
+        jvp_agreement=agreement,
     )
