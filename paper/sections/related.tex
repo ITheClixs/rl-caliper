@@ -67,8 +67,10 @@ in that literature. The variance decomposition itself is the classical two-stage
 
 \paragraph{Published recipes.} Open post-training recipes report the batch sizes, group sizes and
 learning rates they used \citep{lambert2024tulu, deepseekr1} without a stated principle for
-choosing them, which is what makes them useful external evidence: the settings were arrived at by
-tuning, so agreement with a predicted optimum is not circular.
+choosing them. Those settings were arrived at by tuning, so they are a record of which regimes
+practitioners actually train in. Section~\ref{sec:applications} uses them that way --- to ask which
+prefill ratio and rollout budget would make a group of sixteen optimal --- rather than as a test the
+theory could pass or fail.
 
 \paragraph{Hyperparameter transfer.} $\mu$P makes learning rates transfer across width by fixing what
 a step does to the network's functions rather than to its parameters
