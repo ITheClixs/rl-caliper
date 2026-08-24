@@ -1,5 +1,10 @@
-\section{What the estimators compute, and how noisy they are}
+\section{Supplying $\Sigma_t$: what the estimators compute, and how noisy they are}
 \label{sec:theory}
+
+Section~\ref{sec:seeds} left two objects abstract: the batch covariance $\Sigma_t$ that
+\eqref{eq:lyapunov} injects, and the difficulty weight $\lambda$ that
+Proposition~\ref{prop:potential} integrates into a potential. This section computes both, exactly,
+at the group sizes actually used. Everything the forecast needs about the estimator is here.
 
 All results in this section are exact at finite $G$, and all are verified against brute-force
 enumeration in Section~\ref{sec:experiments}. Define, for $m \sim \mathrm{Binomial}(G-1, p)$ and
