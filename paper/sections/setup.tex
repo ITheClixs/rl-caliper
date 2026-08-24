@@ -63,3 +63,14 @@ The per-prompt estimator and the batch estimator are
 \end{equation}
 Token-level reshaping of the advantage, length normalisation and clipping fall outside
 \eqref{eq:family}; Section~\ref{sec:discussion} returns to them.
+
+\paragraph{How every interval in this paper is computed.} Seed experiments produce pairwise
+quantities: $n$ runs give $\binom{n}{2}$ distances, and it is tempting to treat those as
+$\binom{n}{2}$ observations. They are not. The independent units are the $n$ runs, and the
+distances built from them are dependent by construction --- every run appears in $n-1$ of the
+pairs. Treating the pairs as independent understates the standard error by roughly a factor of two
+at the seed counts anyone actually trains. Every interval reported here is a bootstrap that
+resamples \emph{runs} and rebuilds the pairwise quantity from the resampled set, and the difference
+this makes is stated wherever it changes a conclusion. It changes one: at six seeds it turns an
+apparent peak in the divergence trace of a pretrained model into a shape that is not resolved.
+
