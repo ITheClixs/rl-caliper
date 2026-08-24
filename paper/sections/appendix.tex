@@ -42,8 +42,16 @@ a training run and nothing else: the variance across prompts of the batch gradie
 direction, and a Jacobian-vector product of the mean update field with that direction. The released
 code states that as a protocol rather than a class hierarchy, so a trainer in another framework
 implements two methods and reuses the recursion. Two implementations ship with it, one for
-enumerable policies where every term is exact and one for a pretrained model through MLX, and the
-protocol is tested against linear systems whose answer is available in closed form.
+enumerable policies where every term is exact and one for a pretrained model through MLX. Both are
+tested against systems whose answer is available in closed form: the protocol against linear
+Gaussian recursions, and the pretrained-model implementation against a stand-in with the same
+interface whose mean update field is a fixed linear map, which exercises the finite-difference
+Hessian-vector product without needing a model to run it on.
+
+One numerical detail is worth recording. The difference step $\epsilon$ has a floor set by the
+precision the weights are held in: below roughly $10^{-4}$ in float32 the two evaluations cancel
+into rounding error rather than into a derivative. We use $10^{-3}$, which sits above that floor and
+well below the scale on which the gradient field bends.
 
 \paragraph{Which experiment produces what.}
 \begin{itemize}\itemsep1pt
