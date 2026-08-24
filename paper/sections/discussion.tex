@@ -48,6 +48,17 @@ laptop, which is enough for exact validation on solvable systems, for population
 transformers, and for eight seeds at $7$B, and is not enough for that. We would rather state the
 boundary than gesture past it.
 
+\paragraph{Two zeros that mean different things.} The most immediately usable thing in this paper
+may be a warning rather than a method. A run can report a zero seed spread for two reasons that
+look identical from outside. The response distribution can collapse, in which case
+$\Sigma_t = 0$ and no seed uncertainty is generated after that point; or the evaluation can
+saturate, in which case $\nabla M = 0$ on the evaluated distribution and no seed uncertainty is
+detected. Section~\ref{sec:exp-scale} exhibits both on real models, the first within a single update
+at a step size a practitioner might well pick. Neither is evidence that the training procedure is
+reproducible, and both are cheap to rule out: log the fraction of prompts whose group is not
+unanimous during training, and $\E_x[p(1-p)]$ on the evaluation set at the end. If either is zero,
+so is the error bar, and it means nothing.
+
 \paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
 only partly works in practice. It halves the error of ignoring the optimiser state, and the
 optimiser state clearly does carry seed information --- freezing the second moment makes the
