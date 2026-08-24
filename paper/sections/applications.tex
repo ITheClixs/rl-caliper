@@ -194,7 +194,9 @@ Equation \eqref{eq:drift} inverts to $\eta(D) = \sqrt{2D/(\mathcal{G} + N/P)}$, 
 specified by a target drift rather than a learning rate. Learning rate, clip range and KL
 coefficient are three controls acting on the single quantity $D$, which is why they interact and why
 none of them transfers between settings on its own. Drift is measured in nats per token and is a
-property of the policy's behaviour rather than of its parameterisation. Whether that makes it
+property of the policy's behaviour rather than of its parameterisation, which is the same
+reparameterisation-invariance argument that motivates the natural gradient
+\citep{amari1998natural}, used here to specify a step rather than to take one. Whether that makes it
 transfer is tested in Section~\ref{sec:recipe}, and the answer has a boundary.
 
 \subsection{What the hardware is worth}

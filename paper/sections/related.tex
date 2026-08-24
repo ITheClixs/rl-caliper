@@ -53,7 +53,10 @@ replication. Theorem~\ref{thm:adjoint} estimates the same quantity without repli
 components are separable rather than competing --- our real-model measurements subtract the binomial
 term explicitly to recover the seed term.
 
-\paragraph{Batch size and gradient noise.} The gradient noise scale predicts the batch size beyond
+\paragraph{Batch size and gradient noise.} Pretraining has a compute-allocation literature that
+tells a practitioner how to spend a budget before spending it \citep{kaplan2020scaling}; RLVR does
+not, which is part of what Section~\ref{sec:applications} is for. The gradient noise scale predicts
+the batch size beyond
 which data parallelism stops buying speed, and does so from statistics measurable during training
 \citep{mccandlish2018empirical}; the empirical picture across tasks and optimisers is mapped in
 \citet{shallue2019measuring}. Both concern a single level of sampling. RLVR samples prompts and then
@@ -61,6 +64,11 @@ samples responses within each prompt, and the resulting two-level noise scale, t
 and the fact that the response-level term is readable off the reward histogram, have no counterpart
 in that literature. The variance decomposition itself is the classical two-stage sampling result
 \citep{cochran1977sampling}, applied here to policy gradients.
+
+\paragraph{Published recipes.} Open post-training recipes report the batch sizes, group sizes and
+learning rates they used \citep{lambert2024tulu, deepseekr1} without a stated principle for
+choosing them, which is what makes them useful external evidence: the settings were arrived at by
+tuning, so agreement with a predicted optimum is not circular.
 
 \paragraph{Hyperparameter transfer.} $\mu$P makes learning rates transfer across width by fixing what
 a step does to the network's functions rather than to its parameters
