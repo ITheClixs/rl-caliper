@@ -303,43 +303,45 @@ the task.
   \label{fig:transformer-curves}
 \end{figure*}
 
-\subsection{Under Adam}
-\label{sec:adam}
+\subsection{When the optimiser carries state}
 \label{sec:exp-adam}
 
-Everything above is under plain gradient ascent, where the update is the gradient and the noise can
-be read in the parameter metric. Real runs use Adam, which moves in a different metric and is scale
-invariant, so the theory only carries over if the noise is measured after preconditioning. Repeating
-the sweep under both optimisers gives Table~\ref{tab:adam}.
+Adam's update depends on two moment estimates as well as the parameters, so a gradient perturbation
+outlives the step that produced it and $\theta$ alone is no longer a closed state. The recursion
+lifts: with $z = (\theta, m, v)$ and $\Phi_z$ the mean Adam map, the transfer operator is
+$\partial\Phi_z/\partial z$ and the injection is $B\,\Sigma_t B^{\!\top}$ with
+$B = \partial\Phi_z/\partial \hat{g}$, the sensitivity of one update to the gradient it was handed.
+Both are taken by central differences on the exact mean map, so nothing about the derivation has to
+be trusted.
 
-\begin{table*}[t]
+One caveat is structural. Adam's map is singular at $v = 0$: the derivative of
+$1/(\sqrt{v} + \epsilon)$ diverges there, and a recursion started at initialisation is not
+linearisable at all. We warm the moments on mean gradients before propagating, which every run does
+anyway, and every seed shares the warmed state so the covariance still starts at zero.
+
+\begin{table}[t]
   \centering
-  \input{tables/adam}
-  \caption{The same sweep under gradient ascent and under Adam. The optimum is at $G = 4$ for both,
-  and the predicted curve explains the measured one about as well. The measured $G^{\star}$ for Adam is
-  taken in Adam's own metric, which takes some care -- see below.}
-  \label{tab:adam}
-\end{table*}
+  \small
+  \input{tables/adam_lift}
+  \caption{Predicted against measured seed divergence under Adam, over $24$ settings. The
+  parameter-only row uses the same operators restricted to their $\theta$ block, so it isolates the
+  cost of pretending the optimiser state does not carry a perturbation forward.}
+  \label{tab:adam-lift}
+\end{table}
 
-The law survives, but measuring in Adam's metric required fixing two things, and both are
-consequences of the preconditioner being an estimated quantity rather than a fixed one.
+The optimiser state matters and the lift is worth taking: ignoring it underpredicts by
+$5.5\times$ at the median, and the lift brings that to $2.6\times$. Freezing the second moment
+rather than propagating it makes matters worse, not better, which says the second moment is
+genuinely carrying seed information rather than merely complicating the algebra.
 
-First, a probe run at a frozen policy starts with an empty second-moment estimate, so there is no
-metric to measure in yet. Priming it -- running the optimiser's state forward on real batches with
-a zero step size, so the policy does not move -- gives the preconditioner a real run would have.
-
-Second, and less obviously, dividing by $\sqrt{v}$ is unbounded. Coordinates that rarely receive
-gradient have a tiny second moment, which is harmless for the update, since Adam's update is
-bounded by construction, but ruinous for an inner product between two noisy gradients: those
-coordinates dominate it. Measured this way the estimator returned $\tau_b < 0$ and an inverted
-efficiency curve. Flooring the second moment at a fraction of its own mean before dividing fixes
-it, and the result is insensitive to where the floor is put: over three orders of magnitude in the
-floor, the measured $G^{\star}$ moves only from $3.51$ to $3.15$, against an observed optimum of $4$.
-Without a floor the same measurement reports $11.9$.
-
-This is the one place where our quantities need care that the plain-gradient case does not. The
-working rule is to instrument the update rather than the gradient, and to floor the preconditioner
-before inverting it.
+But the lift is not reliable, and where it fails is systematic. On pools with a live learning
+signal every setting lands within about a factor of two. On pools where the pass rate is saturated
+at either end the linearised map has a spectral radius above one and the prediction runs away, by
+up to two orders of magnitude in the worst case. This is Adam's normalisation acting as the
+nonlinearity that bounds the real spread --- a bound a linear recursion does not contain. The
+practical statement is that the forecast should be taken under gradient ascent, or under Adam only
+while $\E_x[p(1-p)]$ is well away from zero, and that a linear treatment of Adam over long horizons
+is an open problem rather than a solved one.
 
 \subsection{A pretrained model}
 

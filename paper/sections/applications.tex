@@ -263,6 +263,43 @@ coefficient $\mathcal{G} + N/P$ measured at the initial policy predicts a smalle
 observed over a full run. The coefficient keeps moving as the policy improves, so a controller that re-reads it tracks the
 optimum while a learning rate fixed in advance cannot.
 
+\subsection{Measuring the noise scales in Adam's metric}
+\label{sec:adam}
+
+Everything above is under plain gradient ascent, where the update is the gradient and the noise can
+be read in the parameter metric. Real runs use Adam, which moves in a different metric and is scale
+invariant, so the theory only carries over if the noise is measured after preconditioning. Repeating
+the sweep under both optimisers gives Table~\ref{tab:adam}.
+
+\begin{table*}[t]
+  \centering
+  \input{tables/adam}
+  \caption{The same sweep under gradient ascent and under Adam. The optimum is at $G = 4$ for both,
+  and the predicted curve explains the measured one about as well. The measured $G^{\star}$ for Adam is
+  taken in Adam's own metric, which takes some care -- see below.}
+  \label{tab:adam}
+\end{table*}
+
+The law survives, but measuring in Adam's metric required fixing two things, and both are
+consequences of the preconditioner being an estimated quantity rather than a fixed one.
+
+First, a probe run at a frozen policy starts with an empty second-moment estimate, so there is no
+metric to measure in yet. Priming it -- running the optimiser's state forward on real batches with
+a zero step size, so the policy does not move -- gives the preconditioner a real run would have.
+
+Second, and less obviously, dividing by $\sqrt{v}$ is unbounded. Coordinates that rarely receive
+gradient have a tiny second moment, which is harmless for the update, since Adam's update is
+bounded by construction, but ruinous for an inner product between two noisy gradients: those
+coordinates dominate it. Measured this way the estimator returned $\tau_b < 0$ and an inverted
+efficiency curve. Flooring the second moment at a fraction of its own mean before dividing fixes
+it, and the result is insensitive to where the floor is put: over three orders of magnitude in the
+floor, the measured $G^{\star}$ moves only from $3.51$ to $3.15$, against an observed optimum of $4$.
+Without a floor the same measurement reports $11.9$.
+
+This is the one place where our quantities need care that the plain-gradient case does not. The
+working rule is to instrument the update rather than the gradient, and to floor the preconditioner
+before inverting it.
+
 \subsection{A prospective test, and where the drift target stops transferring}
 \label{sec:recipe}
 

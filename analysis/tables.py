@@ -291,6 +291,43 @@ def table_forecast() -> None:
     write("forecast", "\n".join(lines))
 
 
+def table_adam_lift() -> None:
+    """How well each model of Adam's seed divergence does, overall and by pool."""
+    runs = [
+        r for r in io.load_all("p5_adam_lift") if len(r["result"].get("cells", [])) >= 8
+    ]
+    if not runs:
+        raise SystemExit("no Adam lift sweep")
+    cells = runs[-1]["result"]["cells"]
+    measured = np.array([c["measured_kl"] for c in cells])
+    lines = [
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}lccc@{}}",
+        r"\toprule",
+        r"model & median & worst & live signal only \\",
+        r"\midrule",
+    ]
+    live = [c for c in cells if c["band"] == "mixed"]
+    options = [("lifted_kl", r"lifted, $z = (\theta, m, v)$"),
+               ("momentum_kl", "second moment frozen"),
+               ("parameters_only_kl", r"$\theta$ block only"),
+               ("walk_kl", "accumulation")]
+    for key, label in options:
+        if key not in cells[0]:
+            continue
+        error = np.abs(np.log(np.array([c[key] for c in cells]) / measured))
+        live_error = np.abs(
+            np.log(np.array([c[key] for c in live]) / np.array([c["measured_kl"] for c in live]))
+        )
+        lines.append(
+            f"{label} & {np.exp(np.median(error)):.2f}$\\times$ & "
+            f"{np.exp(error.max()):.1f}$\\times$ & "
+            f"{np.exp(np.median(live_error)):.2f}$\\times$ \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("adam_lift", "\n".join(lines))
+
+
 def table_propagation() -> None:
     """Candidate models of seed divergence against exact Monte Carlo ground truth."""
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
@@ -336,6 +373,7 @@ def main() -> None:
         ("optimum", table_optimum),
         ("forecast", table_forecast),
         ("propagation", table_propagation),
+        ("adam_lift", table_adam_lift),
     ):
         try:
             fn()

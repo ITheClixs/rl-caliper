@@ -97,6 +97,42 @@ def _nth_word(rng):
     }
 
 
+def _count_in_string(rng):
+    """Counting a letter in a random string, which has no memorised answer to fall back on."""
+    letters = "abcdefghijklmnopqrstuvwxyz"
+    target = letters[rng.integers(6)]
+    body = "".join(letters[i] for i in rng.integers(0, 6, size=14))
+    return {
+        "prompt": (
+            f"How many times does the letter '{target}' appear in this string: {body}"
+            "\nAnswer with a single number and nothing else."
+        ),
+        "answer": str(body.count(target)),
+    }
+
+
+def _add_three(rng):
+    a, b, c = rng.integers(100, 1000, size=3)
+    return {
+        "prompt": (
+            f"What is {int(a)} + {int(b)} - {int(c)}?"
+            "\nAnswer with a single number and nothing else."
+        ),
+        "answer": str(int(a) + int(b) - int(c)),
+    }
+
+
+def _sort_words(rng):
+    picks = [WORDS[i] for i in rng.choice(len(WORDS), size=5, replace=False)]
+    return {
+        "prompt": (
+            "Sort these words alphabetically: " + ", ".join(picks)
+            + "\nAnswer with the sorted words separated by single spaces, and nothing else."
+        ),
+        "answer": " ".join(sorted(picks)),
+    }
+
+
 FAMILIES = {
     "sort_digits": Family("sort_digits", _sort_digits),
     "last_letters": Family("last_letters", _last_letters),
@@ -104,6 +140,9 @@ FAMILIES = {
     "count_letter": Family("count_letter", _count_letter),
     "add_two": Family("add_two", _add_two),
     "nth_word": Family("nth_word", _nth_word),
+    "count_in_string": Family("count_in_string", _count_in_string),
+    "add_three": Family("add_three", _add_three),
+    "sort_words": Family("sort_words", _sort_words),
 }
 
 
