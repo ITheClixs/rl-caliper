@@ -14,7 +14,7 @@ a single Apple M4 laptop with $24$\,GB of memory.
 \label{sec:exp-forecast}
 
 This is the experiment the paper is for, and its protocol is prospective by construction. In each
-of $192$ settings one run is trained and frozen; the states it passed through are carried backwards
+of $\numForecastSettings$ settings one run is trained and frozen; the states it passed through are carried backwards
 through \eqref{eq:adjoint} to produce a forecast of the across-seed standard deviation of the final
 pass rate; the forecast is recorded; and only then are $47$ further seeds trained and their spread
 measured. Nothing about the outcome is available when the prediction is made.
@@ -47,10 +47,10 @@ $47$.
   \label{tab:forecast}
 \end{table}
 
-Table~\ref{tab:forecast} reports a median absolute error of $1.11\times$ and a worst case of
-$1.58\times$, and the forecast lands inside the measured $95\%$ interval in $162$ of $192$
+Table~\ref{tab:forecast} reports a median absolute error of $\numForecastMedian\times$ and a worst case of
+$\numForecastWorst\times$, and the forecast lands inside the measured $95\%$ interval in $\numForecastInside$ of $\numForecastSettings$
 settings. Two things in the breakdown are worth noting. The two policy shapes agree with each other
---- $1.11\times$ against $1.10\times$ --- so the result is not a property of one tabular family.
+--- $\numForecastMedian\times$ against $1.10\times$ --- so the result is not a property of one tabular family.
 And accuracy is flat in run length at the median but its coverage is not: $90$ of $96$ settings at
 $\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
 where Section~\ref{sec:exp-linearity} says it should.
@@ -143,9 +143,9 @@ within a group rather than on whether that pattern is deserved.
 \end{table}
 
 The two conditions separate completely. With a signal, divergence rises for ten updates, turns
-over, and ends at $0.14$ of where it started while the pass rate climbs from $0.31$ to $0.91$.
-Without one it grows by a factor of $90.5$ over the same eighty updates and the pass rate does not
-move. At the end of the run the two differ by a factor of $671$.
+over, and ends at $\numNullLearning$ of where it started while the pass rate climbs from $0.31$ to $0.91$.
+Without one it grows by a factor of $\numNullCoin$ over the same eighty updates and the pass rate does not
+move. At the end of the run the two differ by a factor of $\numNullGap$.
 
 The control that matters is the step size. Mean realised drift per update is
 $6.10\times10^{-3}$ in the learning condition against $5.17\times10^{-3}$ in the null: the runs that
@@ -276,7 +276,7 @@ zero where the field is linear between them. We measure its median along $36$ pa
 report the forecast error against it.
 
 The residual behaves as it should: raising the step size eightfold raises it from $0.028$ to
-$0.165$. The forecast does not follow. Its median error is $1.11\times$ where the residual is below
+$0.165$. The forecast does not follow. Its median error is $\numForecastMedian\times$ where the residual is below
 $5\%$, $1.18\times$ between $5$ and $12\%$, $1.08\times$ between $12$ and $25\%$, and $1.18\times$
 above that, with a rank correlation of $0.17$ between residual and error across the grid. What does
 track the residual is the tail: the worst case is $1.21\times$ below $5\%$ and around $1.57\times$

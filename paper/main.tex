@@ -30,6 +30,7 @@
 \newtheorem{assumption}{Assumption}
 
 \input{macros}
+\input{tables/numbers}
 
 \newcommand{\ruledtitle}[1]{%
   \par\noindent\rule{\textwidth}{1.6pt}\par\vspace{3pt}
@@ -69,15 +70,15 @@
   scalar potential, so its Jacobian is symmetric.
 
   We test the forecast prospectively --- one run trained and frozen, the prediction recorded, and
-  only then the remaining seeds trained. Across $192$ settings spanning two policy shapes, two
-  prompt-pool diversities and a $47\times$ range of spreads, its median absolute error against the
-  realised standard deviation is $1.11\times$, its worst is $1.58\times$, and it lands inside the
-  measured $95\%$ interval in $162$ of them; the covariance law underneath predicts policy
+  only then the remaining seeds trained. Across $\numForecastSettings$ settings spanning two policy shapes, two
+  prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads, its median absolute error against the
+  realised standard deviation is $\numForecastMedian\times$, its worst is $\numForecastWorst\times$, and it lands inside the
+  measured $95\%$ interval in $\numForecastInside$ of them; the covariance law underneath predicts policy
   divergence to $9\%$ at the median, against $3.9\times$ for ignoring the filter and two orders of
   magnitude for compressing it to one timescale. The filtering is caused by learning, not by
   proximity: replacing every reward with a coin flip leaves the rollouts, the batches and the step
-  sizes untouched, and divergence then grows by a factor of $90$ over eighty updates instead of
-  ending at $0.14$ of where it started.
+  sizes untouched, and divergence then grows by a factor of $\numNullCoin$ over eighty updates instead of
+  ending at $\numNullLearning$ of where it started.
 
   Two consequences and one caution. Since $Q_t \propto \Sigma_t/P$, run length does not enter and
   batch composition is the lever, with square-root returns; restricting $\Sigma_t$ to one of its

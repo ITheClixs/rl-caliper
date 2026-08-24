@@ -24,8 +24,9 @@
 \label{app:repro}
 
 Every figure and table is regenerated from stored run records by
-\texttt{analysis/figures.py} and \texttt{analysis/tables.py}; no number in this paper is
-transcribed by hand. Each run writes a manifest holding the configuration, its hash, the commit the
+\texttt{analysis/figures.py} and \texttt{analysis/tables.py}, and so is every headline number in
+the prose: they are emitted as macros into \texttt{tables/numbers.tex} and referenced rather than
+typed, so a rerun that moves a number moves it in the text as well. Each run writes a manifest holding the configuration, its hash, the commit the
 code was at, and the interpreter and platform it ran on.
 
 The exactness tests in \texttt{tests/} check every analytic result in Section~\ref{sec:theory}

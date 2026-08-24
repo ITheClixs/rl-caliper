@@ -31,9 +31,9 @@ be carried against the gradient of the reported metric instead of being formed.
   $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
   pass rate itself. Tested prospectively, one run trained and frozen and the forecast recorded
   before the remaining seeds were trained, its median absolute error against the realised spread is
-  $1.11\times$ across $192$ settings --- two policy shapes, two prompt-pool diversities, and a
-  $47\times$ range of spreads --- its worst is $1.58\times$, and it falls inside the measured $95\%$
-  interval in $162$ of them.
+  $\numForecastMedian\times$ across $\numForecastSettings$ settings --- two policy shapes, two prompt-pool diversities, and a
+  $\numForecastSpreadRange\times$ range of spreads --- its worst is $\numForecastWorst\times$, and it falls inside the measured $95\%$
+  interval in $\numForecastInside$ of them.
 
   \item \textbf{A finite-time covariance law, and what its operator really does}
   (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
@@ -41,14 +41,14 @@ be carried against the gradient of the reported metric instead of being formed.
   over twelve settings, against $2.0\times$ for accumulation and two orders of magnitude for a
   single-timescale approximation. Measuring the spectrum of $A_t$ says why: it is not a contraction.
   The spectral radius exceeds one throughout, by up to $2\%$ early and decaying as the policy
-  improves; only $31$--$51\%$ of directions contract, a share that grows during the run; and the
+  improves; only $\numSpectrumShareLow$--$\numSpectrumShareHigh\%$ of directions contract, a share that grows during the run; and the
   contracting timescales span tens of updates to effectively unbounded. Divergence stays bounded
   because expansion is slow relative to run length, not because every direction shrinks.
 
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
   leaves the rollouts, the batch composition and the step sizes untouched, turns a divergence trace
-  that ends at $0.14$ of where it started into one that grows by a factor of $90$ over eighty
-  updates --- a gap of $671\times$ at the end of the run. The learning condition also moves
+  that ends at $\numNullLearning$ of where it started into one that grows by a factor of $\numNullCoin$ over eighty
+  updates --- a gap of $\numNullGap\times$ at the end of the run. The learning condition also moves
   \emph{further} per update, so what brings those runs back together is not smaller steps.
 
   \item \textbf{Where the uncertainty comes from.} Restricting the injected covariance to one of

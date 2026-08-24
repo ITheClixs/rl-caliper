@@ -361,6 +361,85 @@ def table_spectrum() -> None:
     write("spectrum", "\n".join(lines))
 
 
+def table_numbers() -> None:
+    """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
+    macros: dict[str, str] = {}
+
+    forecast = [
+        r for r in io.load_all("p2_metric_forecast") if len(r["result"].get("cells", [])) >= 100
+    ]
+    if forecast:
+        cells = forecast[-1]["result"]["cells"]
+        ratio = np.array([c["predicted_std"] / c["measured_std"] for c in cells])
+        error = np.abs(np.log(ratio))
+        spread = np.array([c["measured_std"] for c in cells])
+        inside = sum(c["measured_lo"] <= c["predicted_std"] <= c["measured_hi"] for c in cells)
+        macros |= {
+            "ForecastSettings": f"{len(cells)}",
+            "ForecastMedian": f"{np.exp(np.median(error)):.2f}",
+            "ForecastWorst": f"{np.exp(error.max()):.2f}",
+            "ForecastInside": f"{inside}",
+            "ForecastSpreadRange": f"{spread.max() / spread.min():.0f}",
+            "ForecastSeeds": f"{cells[0]['seeds']}",
+        }
+
+    null = [r for r in io.load_all("s8_null") if r["result"].get("growth")]
+    if null:
+        result = null[-1]["result"]
+        left = result["conditions"]["verifier"]
+        right = result["conditions"]["coin"]
+        macros |= {
+            "NullLearning": f"{result['growth']['verifier']:.2f}",
+            "NullCoin": f"{result['growth']['coin']:.1f}",
+            "NullGap": f"{right['pairwise_kl'][-1] / left['pairwise_kl'][-1]:.0f}",
+            "NullUpdates": f"{left['step'][-1]}",
+            "NullPassStart": f"{left['pass_rate'][0]:.2f}",
+            "NullPassEnd": f"{left['pass_rate'][-1]:.2f}",
+        }
+
+    spectrum = [r for r in io.load_all("p6_spectrum") if len(r["result"].get("cells", [])) >= 6]
+    if spectrum:
+        cells = spectrum[-1]["result"]["cells"]
+        radii = np.array([c["radius"] for c in cells])
+        shares = np.array([c["contracted_share"] for c in cells])
+        fastest = np.array([c["fastest"] for c in cells])
+        macros |= {
+            "SpectrumRadiusMax": f"{radii.max():.4f}",
+            "SpectrumRadiusMin": f"{radii.min():.4f}",
+            "SpectrumShareLow": f"{100 * shares.min():.0f}",
+            "SpectrumShareHigh": f"{100 * shares.max():.0f}",
+            "SpectrumFastest": f"{np.nanmin(fastest):.3f}",
+        }
+
+    memory = [r for r in io.load_all("p3_memory_sources") if r["result"].get("cells")]
+    if memory:
+        cells = memory[-1]["result"]["cells"]
+        fraction = np.array([c["horizon_95"] / c["steps"] for c in cells])
+        by_group: dict[int, list[float]] = {}
+        for cell in cells:
+            by_group.setdefault(cell["group_size"], []).append(cell["rollout_share"])
+        macros |= {
+            "MemorySettings": f"{len(cells)}",
+            "MemoryFraction": f"{np.median(fraction):.2f}",
+            "RolloutShareMedian": f"{100 * np.median([c['rollout_share'] for c in cells]):.0f}",
+        }
+        # LaTeX command names cannot contain digits, so the group size is spelled out
+        spelled = {2: "two", 4: "four", 8: "eight", 16: "sixteen", 32: "thirtytwo"}
+        for group, values in sorted(by_group.items()):
+            name = spelled.get(group)
+            if name:
+                macros[f"RolloutShareG{name}"] = f"{100 * np.median(values):.0f}"
+
+    if not macros:
+        raise SystemExit("no records to build paper macros from")
+    command = chr(92) + "newcommand"
+    lines = [
+        command + "{" + chr(92) + "num" + name + "}{" + value + "}"
+        for name, value in sorted(macros.items())
+    ]
+    write("numbers", chr(10).join(lines))
+
+
 def _sci(value: float) -> str:
     """Scientific notation the way the paper writes it."""
     mantissa, exponent = f"{value:.2e}".split("e")
@@ -440,6 +519,7 @@ def main() -> None:
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
         ("null", table_null),
+        ("numbers", table_numbers),
     ):
         try:
             fn()
