@@ -347,37 +347,6 @@ practical statement is that the forecast should be taken under gradient ascent, 
 while $\E_x[p(1-p)]$ is well away from zero, and that a linear treatment of Adam over long horizons
 is an open problem rather than a solved one.
 
-\subsection{A pretrained model}
-
-We repeat the measurement on Qwen2.5-0.5B-Instruct with LoRA adapters as the trainable parameters,
-over corpora of short exact-match tasks: counting a letter in a word, naming the $k$-th item of a
-list, adding two numbers, and a mixture of all of them. Measured optimal group sizes run from $2.7$
-to $6.2$, the same range as the enumerable policies and the transformers trained from scratch.
-
-Corollary~\ref{cor:bernoulli} predicts that the within-prompt noise tracks the reward histogram at a
-fixed score scale, and difficulty buckets inside one family are where that assumption is tenable.
-We screen prompts with a larger sample than the measurement uses, so the bucket boundaries do not
-inherit the noise of the quantity under test, and report the pass rate re-measured during the probe
-rather than the one used to sort. Across buckets spanning pass rates from $0.25$ to $0.30$, the
-ratio $\tau_w/\E[p(1-p)]$ is constant to within $14\%$ (Table~\ref{tab:difficulty}).
-
-\begin{table*}[t]
-  \centering
-  \small
-  \input{tables/difficulty}
-  \caption{Within-prompt noise across difficulty buckets of one task family. The gap between the
-  screened and re-measured pass rates in the outer buckets is regression to the mean, which is why
-  the screening sample is the larger of the two.}
-  \label{tab:difficulty}
-\end{table*}
-
-Across \emph{different} families the same ratio varies by a factor of $8.8$
-(Appendix~\ref{app:cross-family}), and the reason is visible in the assumption: the constant the corollary
-predicts is the score scale $\sigma_s^2$, and a family whose answer is one number does not share a
-score scale with one whose answer is four. This bounds how the corollary should be used. It
-converts a reward histogram into a noise estimate within a task distribution, after one calibration
-measurement, and it does not transport that calibration to a task of a different shape.
-
 \subsection{At seven billion parameters, and a metric that cannot see}
 \label{sec:exp-scale}
 
