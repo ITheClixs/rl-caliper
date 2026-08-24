@@ -281,3 +281,25 @@ efficiency `rho*` transfers across model width, depth and task, while the raw `(
 coefficient, P, G)` that realise them do not. The transfer experiment fits the map on a subset of widths
 and tasks and tests it on held-out ones; a negative result here is reported as such and does not affect
 Results 1-7.
+
+## The estimator potential
+
+Result 1 says the per-prompt mean of a count-based estimator is `lambda(p_x, G) grad p_x`, and
+`lambda` depends on theta only through `p_x`. Define `Lambda` with `Lambda' = lambda`. Then
+
+    g_bar(theta) = grad_theta E_x[ Lambda(p_x) ] =: grad Psi(theta)                    (P1)
+
+so the mean update is a gradient field, its Jacobian `grad^2 Psi` is symmetric, and the transfer
+operator `A = I + eta grad^2 Psi` is self-adjoint. Consequences:
+
+* the backward pass of `forecast.md` needs no transpose -- a Hessian-vector product suffices, which
+  finite differences give from two gradient evaluations;
+* `Psi` is not the objective `J` unless `lambda == 1`; the gap is exactly the difficulty
+  reweighting of Result 1;
+* for RLOO, `lambda == 1` and `Psi == J`: the mean update ascends the pass rate itself.
+
+Measured asymmetry of the Jacobian is 3e-10 across `rloo`, `grpo_mean` and `grpo_std`, which is the
+finite-difference floor. `tests/test_adjoint.py` checks it.
+
+Note that `Psi` being a potential does not make `A` a contraction. Its spectral radius exceeds one
+throughout a run; see `theory-seeds.md`.
