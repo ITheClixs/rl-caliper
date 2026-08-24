@@ -89,10 +89,14 @@ the scalar law only as the comparator it turned out to be.
 
 \subsection{What the recursion predicts}
 
-\paragraph{Divergence stops growing when, and because, the run is learning.} Contraction requires
-$\mathcal{J}_t$ to be meaningfully negative definite, which requires a signal. With no learning signal
-\eqref{eq:seed-recursion} degenerates to a random walk. This is testable directly by removing the
-signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does.
+\paragraph{Divergence stops growing when, and because, the run is learning.} $\mathcal{J}_t$ is
+the curvature of the estimator potential $\Psi$, and it is what makes $A_t$ anything other than the
+identity. With no learning signal there is no potential to be curved: $\mathcal{J}_t \to 0$,
+$A_t \to I$, and \eqref{eq:seed-recursion} degenerates to a random walk in which every update's
+noise survives to the end unaltered. Note that this does not require $\mathcal{J}_t$ to be negative
+definite, and Section~\ref{sec:exp-spectrum} finds that it is not; what it requires is that the
+directions carrying the variance are ones the objective bends. The claim is testable directly by
+removing the signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does.
 
 \paragraph{The level is set by batch composition.} $Q_t \propto \Sigma_t/P$, so halving the
 injected noise requires quadrupling the batch, and nothing in \eqref{eq:unrolled} depends on the
