@@ -76,6 +76,12 @@
   leaves noise, batches and step sizes untouched and divergence then grows $10.7\times$ over eighty
   updates instead of staying flat.
 
+  A caution comes out of the same framework. At $7$B on a task the base model already mostly
+  passes, twenty updates collapse the response distribution: every held-out prompt then scores
+  exactly $0$ or $1$, two seeds report the same number to the last decimal, and their policies still
+  differ. A zero measured spread on a saturated benchmark says the metric has stopped resolving the
+  procedure, not that the procedure is reproducible.
+
   Two readings follow. Since $Q_t \propto \Sigma_t/P$, run length does not enter and batch
   composition is the lever, with square-root returns. And restricting $\Sigma_t$ to one of its
   terms attributes the spread by origin: which responses were sampled dominates which prompts were
