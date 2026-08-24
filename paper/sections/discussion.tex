@@ -20,6 +20,16 @@ how long that is. The recursion is indifferent to the distinction, which is the 
 carrying the operator rather than a summary of it; the prose is not, which is why we say filtered
 and not contracted.
 
+\paragraph{On parameter space.} $S_T$ lives in parameter space, and a covariance there is not
+obviously about anything a reader of a paper cares about --- a reparameterisation could inflate or
+shrink it without changing the policy. That objection is answered by what the forecast predicts
+rather than by an argument. \eqref{eq:adjoint} contracts $S_T$ against $\nabla M$, so what is being
+tested is a functional of the policy: the standard deviation of a pass rate, in the units the pass
+rate is reported in. A quantity that were merely a coordinate artefact could not predict that to
+$\numForecastMedian\times$ over $\numForecastSettings$ settings. The same contraction is why
+policy divergence and metric spread come apart in Section~\ref{sec:exp-scale}: they weight the
+directions of $S_T$ differently, and one of the two weightings can be identically zero.
+
 \paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
 and the injected covariance are all exact. On a real model each becomes an estimate, and the
 composition of three estimates is not something our measurements bound. We report the ingredients
