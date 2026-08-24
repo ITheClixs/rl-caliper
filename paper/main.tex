@@ -69,7 +69,8 @@
   the backward pass needs is free: the mean update of a count-based estimator is the gradient of a
   scalar potential, so its Jacobian is symmetric.
 
-  We test the forecast prospectively --- one run trained and frozen, the prediction recorded, and
+  We test the forecast prospectively, in policies small enough that the reported score is exact
+  rather than sampled --- one run trained and frozen, the prediction recorded, and
   only then the remaining seeds trained. Across $\numForecastSettings$ settings spanning two policy shapes, two
   prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads, its median absolute error against the
   realised standard deviation is $\numForecastMedian\times$, its worst is $\numForecastWorst\times$, and it lands inside the
