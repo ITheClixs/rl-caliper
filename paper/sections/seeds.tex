@@ -162,6 +162,27 @@ gradient evaluations and reverse mode from one double backward. Neither $J$ nor 
 formed. For RLOO, where $\lambda \equiv 1$, the potential is the pass rate itself: the mean update
 ascends exactly the quantity being reported.
 
+\begin{algorithm}[t]
+\caption{The forecast, as a trainer would run it}
+\label{alg:forecast}
+\small
+\begin{algorithmic}[1]
+  \State train as usual, storing $\theta_t$ and $\eta_t$ for each update
+  \State $b \gets \nabla M(\theta_T)$ \Comment{one rollout and backward pass on the eval set}
+  \State $v \gets 0$
+  \For{$t = T-1$ \textbf{down to} $0$}
+    \State draw a batch at $\theta_t$; let $\hat{g}_{t,i}$ be its per-prompt gradients
+    \State $v \gets v + (\eta_t^2/P)\,\widehat{\Var}_i\big(b^{\!\top}\hat{g}_{t,i}\big)$
+      \Comment{one scalar}
+    \State $\delta \gets \epsilon\, b/\|b\|$
+    \State $b \gets b + \dfrac{\eta_t}{2}\cdot\dfrac{\|b\|}{\epsilon}
+      \big(\gbar(\theta_t + \delta) - \gbar(\theta_t - \delta)\big)$
+      \Comment{common random numbers}
+  \EndFor
+  \State \Return $\sqrt{v}$ \Comment{forecast s.d.\ of $M$ across seeds; $\sqrt{2v}$ for a gap}
+\end{algorithmic}
+\end{algorithm}
+
 Two consequences worth stating plainly. First, this is a \emph{forecast}: \eqref{eq:adjoint} reads
 only the states one run visited, so it can be computed before any second run exists, which is how
 Section~\ref{sec:exp-seeds} tests it. Second, restricting $\Sigma_t$ to one of its two terms
