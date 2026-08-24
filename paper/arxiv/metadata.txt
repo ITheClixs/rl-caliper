@@ -1,9 +1,30 @@
 Title:
-  Seeds Reconverge: Run-to-Run Variance in Reinforcement Learning
-  Post-Training Is Stationary, and Predictable from One Run
+  Training Noise Is Filtered, Not Accumulated: Predicting Run-to-Run
+  Divergence in RL Post-Training
 
 Authors:
   Mehmet Demir Guven (ETH Zurich)
+
+Abstract (plain text, as pasted into the submission form):
+  Improvements from reinforcement learning post-training are reported from single runs, and
+  the field establishes how much a rerun would move the number the only way it currently can:
+  by repeating the training. We show that the variation has structure, and that the structure
+  is predictable. Two runs starting from the same policy and differing only in rollout
+  randomness do not drift apart. The reason is not that noise is small but that it is
+  filtered: a perturbation entering at one update is passed through every later update, and
+  where the shared objective is locally concave those updates contract it. The covariance of a
+  run about its mean trajectory therefore obeys S_{t+1} = A_t S_t A_t^T + Q_t, so what
+  survives to the end is the noise injected at each update weighted by how strongly the
+  remaining trajectory preserves it. In an exactly solvable policy this predicts measured
+  divergence to 9% at the median across twelve settings; ignoring contraction is wrong by up
+  to 3.9x, and compressing the contraction to a single timescale is wrong by two orders of
+  magnitude. The contraction is caused by learning, not by proximity: replacing every reward
+  with a coin flip leaves the noise, the batches and the step sizes untouched, and divergence
+  then grows by a factor of 10.7 over eighty updates instead of staying flat. Since
+  Q_t is proportional to Sigma_t/P, run length does not enter and batch composition is the
+  lever, with square-root returns. Supporting this is an exact finite-G covariance for the
+  advantage estimators in current use, which makes the injected noise measurable and fixes the
+  compute-optimal group size.
 
 Primary category:
   cs.LG   (Machine Learning)
@@ -27,3 +48,4 @@ Submission checklist:
   - figures are PDF; no external font or image dependencies
   - main.bbl is included so the bibliography builds without a bibtex pass
   - no absolute paths; every \input and \includegraphics is relative to the source root
+  - zero overfull boxes; no unresolved references or citations

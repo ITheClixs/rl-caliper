@@ -12,6 +12,7 @@ import argparse
 import numpy as np
 import torch
 
+from caliper.analysis.efficiency import efficiency
 from caliper.envs.modsum import ModSum
 from caliper.population.model import ModelConfig, PopulationTransformer
 from caliper.population.train import (
@@ -26,15 +27,6 @@ from caliper.population.train import (
     supervised_warmup,
 )
 from caliper.runtime import io
-
-
-def efficiency(group_sizes, tau_b, tau_w_scaled, signal, rollouts, corpus=None):
-    """rho(G) with the finite-corpus factor, equations (13) and (7b) of docs/theory.md."""
-    g = np.asarray(group_sizes, dtype=float)
-    prompts = rollouts / g
-    share = 0.0 if corpus is None else (prompts - 1.0) / (corpus - 1.0)
-    bcrit = ((1.0 - share) * tau_b + tau_w_scaled / (g - 1.0)) / signal
-    return 1.0 / (1.0 + g * bcrit / rollouts)
 
 
 def main() -> None:

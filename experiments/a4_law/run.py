@@ -15,6 +15,7 @@ import zlib
 import numpy as np
 from scipy.stats import spearmanr
 
+from caliper.analysis.efficiency import efficiency
 from caliper.estimators.simulate import simulate_split_batch
 from caliper.estimators.splits import average
 from caliper.exact.aggregate import ExactBatchModel
@@ -30,12 +31,6 @@ BANDS = {
     "mid": (0.40, 0.60),
 }
 
-
-def efficiency(group_sizes, tau_b, tau_w_scaled, signal, rollouts):
-    """rho(G) = 1 / (1 + G * Bcrit(G) / R), with no fitted parameters."""
-    g = np.asarray(group_sizes, dtype=float)
-    bcrit = (tau_b + tau_w_scaled / (g - 1.0)) / signal
-    return 1.0 / (1.0 + g * bcrit / rollouts)
 
 
 def pool_terms(policy, accepts, estimator, probe_group, batches, seed):
