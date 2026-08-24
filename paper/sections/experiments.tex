@@ -354,14 +354,17 @@ practical statement is that the forecast should be taken under gradient ascent, 
 while $\E_x[p(1-p)]$ is well away from zero, and that a linear treatment of Adam over long horizons
 is an open problem rather than a solved one.
 
-\subsection{At seven billion parameters, and a metric that cannot see}
+\subsection{Two ways a run stops being measurable}
 \label{sec:exp-scale}
 
 The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
-LoRA adapters and AdamW on exactly verifiable short-answer problems. The first configuration we ran
-produced a result we did not plan for and which is worth reporting before the one we did.
+LoRA adapters and AdamW on exactly verifiable short-answer problems. Running it turned up two
+failure modes we did not plan for, and both are worth reporting because they are the same
+phenomenon at two different places in \eqref{eq:adjoint}: one kills $\Sigma_t$, the other kills
+$\nabla M$, and a practitioner who sees either will read a zero and conclude their pipeline is
+reproducible.
 
-\paragraph{The reported number went blind.} On counting a letter in a word --- a task the base model
+\paragraph{The metric went blind.} On counting a letter in a word --- a task the base model
 already passes at $0.41$ --- twenty updates take the held-out pass rate to $0.875$ and collapse the
 response distribution. Every one of the $32$ held-out prompts then has a per-prompt rate of exactly
 $0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout randomness report
