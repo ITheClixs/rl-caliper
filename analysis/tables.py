@@ -483,7 +483,8 @@ def table_estimator_forecast() -> None:
     if len(by_estimator) < 2:
         raise SystemExit("no cross-estimator sweep")
     lines = [
-        r"\setlength{\tabcolsep}{4pt}",
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{3pt}",
         r"\begin{tabular}{@{}lcccc@{}}",
         r"\toprule",
         r"estimator & settings & median & worst & inside 95\% \\",
