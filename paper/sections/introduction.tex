@@ -61,6 +61,12 @@ the reported metric instead of being formed.
   gradients a trainer already accumulates. The same decomposition fixes the compute-optimal group
   size (Theorem~\ref{thm:split}).
 
+  \item \textbf{A metric can go blind before the seeds agree.} At $7$B on a task the base model
+  already mostly passes, twenty updates collapse the response distribution: every held-out prompt
+  scores exactly $0$ or $1$, two seeds report the same number to the last decimal, and their
+  policies still differ by up to $8\times10^{-2}$ in KL. A zero measured spread on a saturated
+  benchmark is not evidence of a reproducible procedure.
+
   \item \textbf{An explicit account of what does not hold.} A single contraction timescale fails by
   two orders of magnitude. A predicted square-root relation between policy divergence and outcome
   spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
