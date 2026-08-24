@@ -177,7 +177,7 @@ batch (Section~\ref{sec:estimation}), so $G^{\star}$ is an observable rather tha
 Part (iii) is where the economics enter, and it is the reason published recipes are not obviously
 wrong. Prefill sharing pushes $G^{\star}$ up, and so does a larger rollout budget: a run with long
 prompts, short responses and a large batch can have an optimum in the tens even when the purely
-statistical optimum is three. Section~\ref{sec:experiments} measures $\alpha$ on real hardware and
+statistical optimum is three. Section~\ref{sec:hardware} measures $\alpha$ on real hardware and
 finds it ranging from $0.04$ to $10.9$ depending only on the prompt-to-response length ratio, which
 moves $G^{\star}$ over an order of magnitude. The approximation \eqref{eq:gstar-cost} that we quote
 alongside is the small-batch limit and understates $G^{\star}$ badly when $R$ is large; the root of
@@ -186,7 +186,7 @@ alongside is the small-batch limit and understates $G^{\star}$ badly when $R$ is
 \paragraph{The optimum moves during a run.} Both $\tau_w$ and $\tau_b$ change as the policy
 improves. $\E_x[p(1-p)]$ falls once a task is largely solved, while prompt-to-prompt gradient
 heterogeneity falls as a model acquires a shared algorithm. Which of the two dominates is an
-empirical question, and Section~\ref{sec:experiments} finds both directions in different settings.
+empirical question, and the sweeps below find both directions in different settings.
 
 \subsection{The step size is a drift target}
 
@@ -195,7 +195,7 @@ specified by a target drift rather than a learning rate. Learning rate, clip ran
 coefficient are three controls acting on the single quantity $D$, which is why they interact and why
 none of them transfers between settings on its own. Drift is measured in nats per token and is a
 property of the policy's behaviour rather than of its parameterisation. Whether that makes it
-transfer is tested in Section~\ref{sec:experiments}, and the answer has a boundary.
+transfer is tested in Section~\ref{sec:recipe}, and the answer has a boundary.
 
 \subsection{What the hardware is worth}
 \label{sec:hardware}
@@ -267,8 +267,8 @@ optimum while a learning rate fixed in advance cannot.
 
 \subsection{The drift model, and the efficiency curve on enumerable policies}
 
-The same enumerable policies used in Section~\ref{sec:experiments} carry the allocation results,
-where what is being predicted is not a spread but a rate of progress.
+The same enumerable policies that carried the forecast in Section~\ref{sec:experiments} carry
+the allocation results, where what is being predicted is not a spread but a rate of progress.
 
 \paragraph{The curvature model fails, the drift model does not.} Taking a real update and computing
 the resulting improvement and KL exactly, the second-order model of the objective places its optimal
