@@ -59,6 +59,23 @@ What the forecast costs is two gradient evaluations per update for the backward 
 scalar per update for the injected term. It never forms $S_T$, and by
 Proposition~\ref{prop:potential} it never needs a transpose.
 
+\paragraph{The whole estimator family, not one of them.} The grid above uses RLOO. Repeating a
+common sub-grid under the mean-baseline and standardised GRPO estimators gives the same picture
+(Table~\ref{tab:estimator-forecast}). This matters more than a robustness check usually would,
+because Proposition~\ref{prop:potential} is what makes the backward pass affordable and it is a
+claim about the whole count-based family: if it held only for the estimator whose difficulty weight
+is constant, the result would be a curiosity rather than a method.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/estimator_forecast}
+  \caption{The forecast under each estimator in the family. The RLOO row is the full grid; the two
+  GRPO rows are a common sub-grid of twelve settings at matched difficulty bands, run lengths and
+  group sizes.}
+  \label{tab:estimator-forecast}
+\end{table}
+
 \paragraph{Where the uncertainty comes from.} Restricting $\Sigma_t$ to $\Sigma_b$ or to
 $\Sigma_w$ splits the same forecast by origin. The two shares are exact and sum to one, and across
 $288$ settings the rollout share has a median of $78\%$: which responses were sampled matters more

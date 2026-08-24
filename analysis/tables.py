@@ -471,6 +471,42 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+def table_estimator_forecast() -> None:
+    """Forecast accuracy for each estimator in the family, on a common sub-grid."""
+    by_estimator: dict[str, list[dict]] = {}
+    for record in io.load_all("p2_metric_forecast"):
+        cells = record["result"].get("cells", [])
+        config = record["manifest"]["config"]
+        name = config.get("estimator", "rloo")
+        if cells:
+            by_estimator[name] = cells
+    if len(by_estimator) < 2:
+        raise SystemExit("no cross-estimator sweep")
+    lines = [
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}lcccc@{}}",
+        r"\toprule",
+        r"estimator & settings & median & worst & inside 95\% \\",
+        r"\midrule",
+    ]
+    label = {"rloo": "RLOO", "grpo_mean": "GRPO, mean baseline",
+             "grpo_std": "GRPO, standardised"}
+    for name in ("rloo", "grpo_mean", "grpo_std"):
+        cells = by_estimator.get(name)
+        if not cells:
+            continue
+        ratio = np.array([c["predicted_std"] / c["measured_std"] for c in cells])
+        error = np.abs(np.log(ratio))
+        inside = sum(c["measured_lo"] <= c["predicted_std"] <= c["measured_hi"] for c in cells)
+        lines.append(
+            f"{label.get(name, name)} & {len(cells)} & "
+            f"{np.exp(np.median(error)):.2f}$\\times$ & {np.exp(error.max()):.2f}$\\times$ & "
+            f"{inside}/{len(cells)} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("estimator_forecast", "\n".join(lines))
+
+
 def table_propagation() -> None:
     """Candidate models of seed divergence against exact Monte Carlo ground truth."""
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
@@ -515,6 +551,7 @@ def main() -> None:
         ("adam", table_adam),
         ("optimum", table_optimum),
         ("forecast", table_forecast),
+        ("estimator_forecast", table_estimator_forecast),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
