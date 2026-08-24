@@ -83,13 +83,13 @@
   \begin{minipage}{\textwidth}
     \centering
     {\includegraphics[width=\textwidth]{figures/teaser.pdf}}
-    \captionof{figure}{\textbf{Left:} the efficiency $\rho(G)$ predicted from two measured traces
-    with no fitted parameters, against the gain actually obtained by training at that split.
-    Settings differ in run length and task, so both axes are standardised within a setting; what is
-    pooled is the shape. \textbf{Right:} the optimal group size from Theorem~\ref{thm:split} at that
-    measured noise ratio, against the rollout budget, for the prefill ratios $\alpha$ we measure on
-    real hardware. Statistics alone say three; the hardware says the rest, and says something
-    different for long prompts with short answers than for reasoning-length responses.}
+    \captionof{figure}{\textbf{Left:} the across-seed standard deviation of the reported pass
+    rate, forecast from a single frozen run, against the value realised over $64$ independent runs
+    trained afterwards. Bars are bootstrap intervals over runs; the solid line is equality and the
+    dotted lines a factor of $1.5$. \textbf{Right:} predicted against measured policy divergence
+    for three models of where training noise goes. Propagating the covariance tracks it; treating
+    noise as accumulating is wrong by up to $3.9\times$; compressing the contraction to one
+    timescale is wrong by two orders of magnitude.}
     \label{fig:teaser}
   \end{minipage}
   \vspace{10pt}

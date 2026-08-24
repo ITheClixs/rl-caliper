@@ -222,7 +222,54 @@ def figure_real_model() -> None:
 
 
 def figure_teaser() -> None:
-    """Page-one figure: the prediction tracks measured gains, and it reconciles 3 with 8-64."""
+    """Page one: the forecast works, and the model it replaces does not."""
+    cells = latest("p2_metric_forecast", "predicted_std")
+    models = latest("p1_propagation", "propagated_kl")
+    fig, axes = plt.subplots(1, 2, figsize=(7.1, 2.65))
+
+    ax = axes[0]
+    measured = np.array([c["measured_std"] for c in cells])
+    predicted = np.array([c["predicted_std"] for c in cells])
+    lo = measured - np.array([c["measured_lo"] for c in cells])
+    hi = np.array([c["measured_hi"] for c in cells]) - measured
+    ax.errorbar(measured, predicted, xerr=[lo, hi], fmt="o", ms=3.6, lw=0.7, capsize=1.4,
+                color=PALETTE[0], alpha=0.85)
+    limits = np.array([measured.min() * 0.7, measured.max() * 1.4])
+    ax.plot(limits, limits, color="0.25", lw=1.1, zorder=0)
+    ax.plot(limits, limits * 1.5, color="0.6", lw=0.8, ls=":", zorder=0)
+    ax.plot(limits, limits / 1.5, color="0.6", lw=0.8, ls=":", zorder=0)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    error = np.abs(np.log(predicted / measured))
+    ax.set_title(
+        f"one run predicts {len(cells)} spreads "
+        f"(median {np.exp(np.median(error)):.2f}$\\times$)", fontsize=8.5
+    )
+    style(ax, "measured s.d. over 64 seeds", "forecast, made before they ran")
+
+    ax = axes[1]
+    truth = np.array([c["measured_kl"] for c in models])
+    for key, label, colour, marker in [
+        ("propagated_kl", "propagated", PALETTE[0], "o"),
+        ("walk_kl", "accumulated", PALETTE[1], "s"),
+        ("scalar_kl", "single timescale", PALETTE[2], "^"),
+    ]:
+        ax.scatter(truth, np.array([c[key] for c in models]), s=20, marker=marker,
+                   color=colour, alpha=0.85, label=label)
+    span = np.array([truth.min() * 0.5, truth.max() * 2.0])
+    ax.plot(span, span, color="0.25", lw=1.1, zorder=0)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.legend(fontsize=7, frameon=False, loc="upper left")
+    style(ax, "measured divergence", "predicted divergence",
+          "the model this replaces, on the same settings")
+    fig.tight_layout()
+    save(fig, "teaser.pdf")
+    plt.close(fig)
+
+
+def figure_allocation() -> None:
+    """The allocation result: predictions track measured gains, and reconcile 3 with 8-64."""
     from scipy.optimize import brentq
 
     transformer = latest("b1_group_size", "predicted_efficiency")
@@ -307,7 +354,7 @@ def figure_teaser() -> None:
     style(ax, "rollouts per step $R$", r"optimal group size $G^{\star}$")
 
     fig.tight_layout()
-    save(fig, "teaser.pdf")
+    save(fig, "allocation.pdf")
     plt.close(fig)
 
 
@@ -534,6 +581,7 @@ def main() -> None:
         ("reconvergence", figure_reconvergence),
         ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),
+        ("allocation", figure_allocation),
         ("exact_curves", figure_exact_curves),
         ("estimator_accuracy", figure_estimator_accuracy),
         ("transformer_curves", figure_transformer_curves),

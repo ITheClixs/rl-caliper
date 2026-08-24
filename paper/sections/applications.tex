@@ -85,6 +85,19 @@ appears under the square root.
 
 \subsection{The optimal split}
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/allocation.pdf}
+  \caption{\textbf{Left:} the efficiency $\rho(G)$ predicted from two measured traces with no
+  fitted parameters, against the gain actually obtained by training at that split. Settings differ
+  in run length and task, so both axes are standardised within a setting; what is pooled is the
+  shape. \textbf{Right:} the optimal group size from Theorem~\ref{thm:split} at that measured noise
+  ratio, against the rollout budget, for the prefill ratios $\alpha$ we measure on real hardware.
+  Statistics alone say three; the hardware says the rest, and says something different for long
+  prompts with short answers than for reasoning-length responses.}
+  \label{fig:allocation}
+\end{figure*}
+
 Hardware fixes the rollouts per step $R = PG$; the question is how to divide them. When a group
 shares its prompt's prefill, prefill is paid once per prompt and decode once per response, so a step
 costs $P(c_{\mathrm{pre}} + G\,c_{\mathrm{dec}})$. Write $\alpha := c_{\mathrm{pre}}/c_{\mathrm{dec}}$

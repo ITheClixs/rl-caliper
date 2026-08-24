@@ -23,12 +23,19 @@ from caliper.real.probe import ProbeConfig, RealNoiseProbe
 class RealRLConfig(ProbeConfig):
     steps: int = 40
     learning_rate: float = 1e-5
+    optimiser: str = "adam"
 
 
 class RealRLTrainer(RealNoiseProbe):
     def __init__(self, model, tokenizer, config: RealRLConfig):
         super().__init__(model, tokenizer, config)
-        self.optimiser = optim.Adam(learning_rate=config.learning_rate)
+        if config.optimiser == "adam":
+            self.optimiser = optim.Adam(learning_rate=config.learning_rate)
+        elif config.optimiser == "sgd":
+            # plain ascent is the update the propagation theory is written for
+            self.optimiser = optim.SGD(learning_rate=config.learning_rate)
+        else:
+            raise KeyError(config.optimiser)
         self.full_weights = weight_table(config.estimator, config.group_size)
 
     def _gradient(self, sequences, masks, advantages):
