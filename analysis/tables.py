@@ -383,7 +383,11 @@ def table_numbers() -> None:
             "ForecastSeeds": f"{cells[0]['seeds']}",
         }
 
-    null = [r for r in io.load_all("s8_null") if r["result"].get("growth")]
+    null = [
+        r
+        for r in io.load_all("s8_null")
+        if len(r["result"].get("conditions", {}).get("verifier", {}).get("step", [])) >= 5
+    ]
     if null:
         result = null[-1]["result"]
         left = result["conditions"]["verifier"]
@@ -411,7 +415,9 @@ def table_numbers() -> None:
             "SpectrumFastest": f"{np.nanmin(fastest):.3f}",
         }
 
-    memory = [r for r in io.load_all("p3_memory_sources") if r["result"].get("cells")]
+    memory = [
+        r for r in io.load_all("p3_memory_sources") if len(r["result"].get("cells", [])) >= 100
+    ]
     if memory:
         cells = memory[-1]["result"]["cells"]
         fraction = np.array([c["horizon_95"] / c["steps"] for c in cells])
@@ -448,9 +454,13 @@ def _sci(value: float) -> str:
 
 def table_null() -> None:
     """The learning condition against the condition with the signal removed."""
-    runs = [r for r in io.load_all("s8_null") if r["result"].get("conditions")]
+    runs = [
+        r
+        for r in io.load_all("s8_null")
+        if len(r["result"].get("conditions", {}).get("verifier", {}).get("step", [])) >= 5
+    ]
     if not runs:
-        raise SystemExit("no null experiment")
+        raise SystemExit("no null experiment of usable length")
     result = runs[-1]["result"]
     left, right = result["conditions"]["verifier"], result["conditions"]["coin"]
     lines = [

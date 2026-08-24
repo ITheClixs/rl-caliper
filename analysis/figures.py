@@ -46,6 +46,24 @@ def latest(name: str, key: str, container: str = "cells") -> list[dict]:
     return runs[-1]["result"][container]
 
 
+def largest(name: str, key: str, minimum: int = 1) -> list[dict]:
+    """The most recent run of `name` carrying `key` in at least `minimum` cells.
+
+    Several experiments write to the same store under different configurations -- the forecast
+    grid is also run per estimator on a small sub-grid -- so taking the last record is not enough
+    to identify the sweep a figure is about.
+    """
+    runs = [
+        r
+        for r in io.load_all(name)
+        if len(r["result"].get("cells", [])) >= minimum
+        and key in r["result"]["cells"][0]
+    ]
+    if not runs:
+        raise SystemExit(f"no run of {name!r} carries {key!r} with {minimum}+ cells")
+    return runs[-1]["result"]["cells"]
+
+
 def figure_exact_curves() -> None:
     """Predicted efficiency against measured gain, enumerable policies."""
     cells = latest("a4_law", "predicted_efficiency")
@@ -223,7 +241,7 @@ def figure_real_model() -> None:
 
 def figure_teaser() -> None:
     """Page one: the forecast works, and the model it replaces does not."""
-    cells = latest("p2_metric_forecast", "predicted_std")
+    cells = largest("p2_metric_forecast", "predicted_std", minimum=100)
     models = latest("p1_propagation", "propagated_kl")
     fig, axes = plt.subplots(1, 2, figsize=(7.1, 2.65))
 
@@ -507,7 +525,7 @@ def figure_real_seeds() -> None:
 
 def figure_forecast() -> None:
     """Forecast against realised spread, and where each update's share of it was injected."""
-    cells = latest("p2_metric_forecast", "predicted_std")
+    cells = largest("p2_metric_forecast", "predicted_std", minimum=100)
     bands = sorted({c["band"] for c in cells})
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.1))
 
@@ -552,7 +570,7 @@ def figure_forecast() -> None:
 
 def figure_sources() -> None:
     """Which randomness the reported number remembers, against group size."""
-    cells = latest("p3_memory_sources", "rollout_share")
+    cells = largest("p3_memory_sources", "rollout_share", minimum=100)
     groups = sorted({c["group_size"] for c in cells})
     fig, ax = plt.subplots(figsize=(3.6, 2.8))
     bands = sorted({c["band"] for c in cells})
@@ -575,9 +593,13 @@ def figure_sources() -> None:
 
 def figure_null() -> None:
     """The learning condition against the same run with the reward replaced by a coin."""
-    runs = [r for r in io.load_all("s8_null") if r["result"].get("conditions")]
+    runs = [
+        r
+        for r in io.load_all("s8_null")
+        if len(r["result"].get("conditions", {}).get("verifier", {}).get("step", [])) >= 5
+    ]
     if not runs:
-        raise SystemExit("no null experiment")
+        raise SystemExit("no null experiment of usable length")
     result = runs[-1]["result"]
     fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7), sharex=True)
     labels = {"verifier": "verifier reward", "coin": "reward replaced by a coin"}
