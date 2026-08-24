@@ -29,9 +29,10 @@ be carried against the gradient of the reported metric instead of being formed.
   update, with no covariance matrix formed. The transpose the backward pass would need is free,
   because the mean update of any count-based estimator is the gradient of a scalar potential
   $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
-  pass rate itself. Tested prospectively, one run trained and frozen and the forecast recorded
-  before the remaining seeds were trained, its median absolute error against the realised spread is
-  $\numForecastMedian\times$ across $\numForecastSettings$ settings --- two policy shapes, two prompt-pool diversities, and a
+  pass rate itself. It costs two to three times the compute of the run it
+  reads, against $N$ full runs for replication. Tested prospectively --- one run trained and frozen
+  and the forecast recorded before the remaining seeds were trained --- its median absolute error
+  against the realised spread is $\numForecastMedian\times$ across $\numForecastSettings$ settings --- two policy shapes, two prompt-pool diversities, and a
   $\numForecastSpreadRange\times$ range of spreads --- its worst is $\numForecastWorst\times$, and it falls inside the measured $95\%$
   interval in $\numForecastInside$ of them.
 

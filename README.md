@@ -49,6 +49,9 @@ result.kernel             # each update's share of the variance
 result.memory()           # how many final updates hold 95% of it
 ```
 
+The backward pass costs about three passes per stored update -- roughly three times the training
+run, or twice if the rollouts were stored -- against `N` full runs for replication.
+
 Two implementations of that protocol ship here: `caliper.exact.adjoint` for enumerable policies,
 where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX -- two
 gradient evaluations per stored update, with common random numbers so the finite difference is a
