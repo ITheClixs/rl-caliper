@@ -10,6 +10,16 @@ gradient field. The practical readings are that run length does not enter the an
 composition does with square-root returns, and that rollout sampling rather than prompt selection
 is what the reported number mostly remembers.
 
+\paragraph{What ``filtered'' does and does not mean.} It would be tidier if the transfer operator
+were a contraction. It is not: its spectral radius exceeds one throughout a run, only a third to a
+half of directions contract, and the contracting timescales differ among themselves by more than an
+order of magnitude. Divergence stays bounded over the horizons anyone trains because expansion is
+slow relative to run length --- a factor of about $1.6$ over twenty-five updates --- and not because
+perturbations are destroyed. A run long enough would leave this regime, and we cannot say from here
+how long that is. The recursion is indifferent to the distinction, which is the argument for
+carrying the operator rather than a summary of it; the prose is not, which is why we say filtered
+and not contracted.
+
 \paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
 and the injected covariance are all exact. On a real model each becomes an estimate, and the
 composition of three estimates is not something our measurements bound. We report the ingredients
