@@ -25,6 +25,16 @@ in the setting the original analysis assumes, and the consequence for reproducib
 spread across seeds does not grow with the length of a run -- does not appear to have been stated
 or measured.
 
+\paragraph{Entropy collapse.} That RLVR drives policy entropy down sharply, often within the first
+updates, is documented and actively worked on \citep{cui2025entropy}; the literature treats it as an
+optimisation pathology, since a policy that has stopped exploring has stopped learning. It has a
+second consequence that follows from \eqref{eq:adjoint} and does not appear to have been drawn. A
+count-based advantage is identically zero on a unanimous group, so a collapsed policy injects
+$\Sigma_t = 0$: the run stops accumulating seed uncertainty at all, and any measurement of its
+reproducibility from that point forward is measuring nothing. Section~\ref{sec:exp-scale} reports
+both halves of this on real models --- a run that reaches it in a single update, and an evaluation
+that cannot see the difference between two runs that have.
+
 \paragraph{Adjoint sensitivity.} Carrying a scalar backwards through a trajectory to avoid
 forming a large intermediate is the adjoint method, standard in optimal control
 \citep{pontryagin1962mathematical} and reintroduced to machine learning for continuous-depth models
