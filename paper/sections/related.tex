@@ -22,6 +22,24 @@ in the setting the original analysis assumes, and the consequence for reproducib
 spread across seeds does not grow with the length of a run -- does not appear to have been stated
 or measured.
 
+\paragraph{Adjoint sensitivity.} Carrying a scalar backwards through a trajectory to avoid
+forming a large intermediate is the adjoint method, standard in optimal control
+\citep{pontryagin1962mathematical} and reintroduced to machine learning for continuous-depth models
+\citep{chen2018neural}. Theorem~\ref{thm:adjoint} is that construction applied to a covariance
+rather than a loss: the backward variable is the metric gradient and what accumulates along the way
+is variance rather than gradient. The step that makes it cheap here is
+Proposition~\ref{prop:potential}, which is specific to the estimators RLVR uses and removes the
+transpose an adjoint would otherwise need.
+
+\paragraph{Uncertainty in a reported number.} Practice for benchmark error bars is to treat the
+evaluation set as the only source of randomness and report a binomial or bootstrap interval over
+questions \citep{miller2024adding}. That is the right interval for a fixed model and the wrong one
+for a training procedure: it says nothing about what retraining would do. \citet{bouthillier2021accounting}
+make the case that the training pipeline's own randomness belongs in the interval and estimate it by
+replication. Theorem~\ref{thm:adjoint} estimates the same quantity without replicating, and the two
+components are separable rather than competing --- our real-model measurements subtract the binomial
+term explicitly to recover the seed term.
+
 \paragraph{Batch size and gradient noise.} The gradient noise scale predicts the batch size beyond
 which data parallelism stops buying speed, and does so from statistics measurable during training
 \citep{mccandlish2018empirical}; the empirical picture across tasks and optimisers is mapped in

@@ -121,9 +121,11 @@ which needs $S_T$ --- a matrix nobody can form for a real model. It is not neede
   Then, under the assumptions of Theorem~\ref{thm:propagation},
   \begin{equation}
     \label{eq:adjoint}
-    \Var_{\text{seed}}\big[M(\theta_T)\big]
-    \;=\; \sum_{t=0}^{T-1} b_{t+1}^{\!\top} Q_t\, b_{t+1}
-    \;=\; \frac{\eta^2}{P}\sum_{t=0}^{T-1} \Var\!\big(b_{t+1}^{\!\top}\hat{g}_t\big),
+    \begin{aligned}
+      \Var_{\text{seed}}\big[M(\theta_T)\big]
+      &\;=\; \sum_{t=0}^{T-1} b_{t+1}^{\!\top} Q_t\, b_{t+1} \\
+      &\;=\; \frac{\eta^2}{P}\sum_{t=0}^{T-1} \Var\!\big(b_{t+1}^{\!\top}\hat{g}_t\big),
+    \end{aligned}
   \end{equation}
   where the variance on the right is over one batch at $\theta_t$.
 \end{theorem}
