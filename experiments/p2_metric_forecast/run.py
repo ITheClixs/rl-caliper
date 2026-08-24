@@ -78,6 +78,11 @@ def main() -> None:
         prediction = forecast(
             policy, accepts, args.estimator, group, prompts, eta, steps, states=states
         )
+        # the ablation: keep the injected term, discard what the trajectory does to it
+        untransported = forecast(
+            policy, accepts, args.estimator, group, prompts, eta, steps, states=states,
+            transport=False,
+        )
 
         # (2) only now, the independent seeds
         scores = [first_score]
@@ -98,6 +103,7 @@ def main() -> None:
                 "group_size": group,
                 "step_size": eta,
                 "predicted_std": prediction.std,
+                "untransported_std": untransported.std,
                 "measured_std": measured["std"],
                 "measured_lo": measured["lo"],
                 "measured_hi": measured["hi"],
@@ -118,6 +124,13 @@ def main() -> None:
     print(f"\nratio predicted/measured: median {np.median(ratios):.2f}x  "
           f"range {ratios.min():.2f}--{ratios.max():.2f}")
     print(f"forecast inside the measured 95% interval in {sum(covered)}/{len(covered)} settings")
+    for key, label in (("predicted_std", "with transport"), ("untransported_std", "without")):
+        error = np.abs(np.log(np.array([c[key] / c["measured_std"] for c in cells])))
+        inside = sum(
+            c["measured_lo"] <= c[key] <= c["measured_hi"] for c in cells
+        )
+        print(f"  {label:>15s}: median {np.exp(np.median(error)):.2f}x  "
+              f"worst {np.exp(error.max()):.2f}x  inside {inside}/{len(cells)}")
     io.save("p2_metric_forecast", vars(args), {"cells": cells})
 
 

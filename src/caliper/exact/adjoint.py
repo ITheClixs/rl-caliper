@@ -121,6 +121,7 @@ def forecast(
     states: list[TabularPolicy] | None = None,
     matrix_free: bool = True,
     source: str = "all",
+    transport: bool = True,
 ) -> MetricForecast:
     """Carry the metric gradient backwards along one trajectory.
 
@@ -128,6 +129,10 @@ def forecast(
     used. Only that one trajectory enters, which is what makes this a forecast rather than a
     description of an ensemble. `source` restricts the injected covariance to one origin of
     randomness, which attributes the final spread to prompt sampling or to rollout sampling.
+
+    `transport=False` holds the adjoint at `grad M` instead of carrying it back, which is the
+    ablation that says what the backward pass is worth: it keeps the injected term and discards
+    everything the trajectory does to it.
     """
     weights = weight_table(estimator, group_size)
     if states is None:
@@ -145,7 +150,8 @@ def forecast(
         injected = injected_covariance(states[t], accepts, weights, n_prompts, source)
         kernel[t] = float(step_size**2 * adjoint @ injected @ adjoint)
         norms[t] = float(np.linalg.norm(adjoint))
-        adjoint = adjoint + step_size * carry(states[t], accepts, weights, adjoint)
+        if transport:
+            adjoint = adjoint + step_size * carry(states[t], accepts, weights, adjoint)
 
     variance = float(sum(kernel))
     return MetricForecast(
