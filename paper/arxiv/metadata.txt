@@ -8,28 +8,28 @@ Abstract (plain text, as pasted into the submission form):
   Reinforcement learning post-training is reported from single runs, and how much a rerun
   would move the number is established the only way it currently can be: by repeating the
   training. We show that a run already contains enough information to forecast its own
-  spread. The correction that makes this possible is to stop treating training noise as
+  spread.
+
+  The correction that makes this possible is to stop treating training noise as
   accumulating. A perturbation entering at one update is passed through every later update
   and reweighted by them, so the covariance of a run about its mean obeys
-  S_{t+1} = A_t S_t A_t^T + Q_t. Measuring the spectrum of A_t shows what that reweighting
-  is and what it is not: only a third to a half of directions contract, the leading
-  direction expands rather than contracts, and among the contracting directions the
-  timescales run from tens of updates to effectively unbounded. It is a filter, not a
-  contraction, and no single number stands in for it. Carrying the gradient of the reported
-  metric backwards along one stored trajectory then gives the across-seed variance of that
-  metric as a sum of scalars, one per update, with no covariance matrix formed. The
-  transpose the backward pass needs is free: the mean update of a count-based estimator is
-  the gradient of a scalar potential, so its Jacobian is symmetric. We test the forecast
-  prospectively -- one run trained and frozen, the prediction recorded, and only then the
-  remaining seeds trained. Across 48 settings spanning a 30x range of spreads its median
-  absolute error is 1.08x and it lands inside the measured 95% interval in 36 of them. The
-  filtering is caused by learning, not by proximity: replacing every reward with a coin flip
-  leaves noise, batches and step sizes untouched and divergence then grows 10.7x over eighty
-  updates instead of staying flat. A caution comes out of the same framework: at 7B on a
-  task the base model already mostly passes, twenty updates collapse the response
-  distribution, two seeds report the same number to the last decimal, and their policies
-  still differ. A zero measured spread on a saturated benchmark says the metric has stopped
-  resolving the procedure, not that the procedure is reproducible.
+  S_{t+1} = A_t S_t A_t^T + Q_t. Measuring the spectrum of A_t shows this is a filter and
+  not a contraction: only a third to a half of directions contract, the leading direction
+  expands, and the contracting timescales span tens of updates to effectively unbounded.
+  Carrying the gradient of the reported metric backwards along one stored trajectory then
+  gives the across-seed variance of that metric as a sum of scalars, one per update, with no
+  covariance matrix formed. The transpose the backward pass needs is free: the mean update
+  of a count-based estimator is the gradient of a scalar potential, so its Jacobian is
+  symmetric.
+
+  Tested prospectively -- one run trained and frozen, the prediction recorded, and only then
+  the remaining seeds trained -- the forecast has a median absolute error of 1.08x across 48
+  settings spanning a 30x range of spreads. The filtering is caused by learning: replacing
+  every reward with a coin flip leaves noise, batches and step sizes untouched and
+  divergence then grows 10.7x over eighty updates. A caution comes out of the same
+  framework: at 7B on a task the base model already mostly passes, twenty updates collapse
+  the response distribution and two seeds report the same number to the last decimal while
+  their policies still differ.
 
 Primary category:
   cs.LG   (Machine Learning)

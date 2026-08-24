@@ -60,38 +60,31 @@
   The correction that makes this possible is to stop treating training noise as accumulating. A
   perturbation entering at one update is passed through every later update and reweighted by them,
   so the covariance of a run about its mean obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Measuring
-  the spectrum of $A_t$ shows what that reweighting is and what it is not: only a third to a half of
-  directions contract, the leading direction expands rather than contracts --- by up to two percent
-  per update early in training, decaying towards zero as the policy improves --- and among the
-  contracting directions the timescales run from tens of updates to effectively unbounded. It is a
-  filter, not a contraction, and no single number stands in for it. Carrying the gradient of the reported metric
-  backwards along one stored trajectory then gives the across-seed variance of that metric as a sum
-  of scalars, one per update, with no covariance matrix formed. The transpose the backward pass
-  needs is free: the mean update of a count-based estimator is the gradient of a scalar potential,
-  so its Jacobian is symmetric.
+  the spectrum of $A_t$ shows this is a filter and not a contraction: only a third to a half of
+  directions contract, the leading direction expands, and the contracting timescales span tens of
+  updates to effectively unbounded, so no single number stands in for it. Carrying the gradient of
+  the reported metric backwards along one stored trajectory then gives the across-seed variance of
+  that metric as a sum of scalars, one per update, with no covariance matrix formed. The transpose
+  the backward pass needs is free: the mean update of a count-based estimator is the gradient of a
+  scalar potential, so its Jacobian is symmetric.
 
   We test the forecast prospectively --- one run trained and frozen, the prediction recorded, and
-  only then the remaining seeds trained. Across $48$ settings spanning a $30\times$ range of
-  spreads its median absolute error against the realised standard deviation is $1.08\times$, its worst
-  is $1.67\times$, and it lands inside the measured $95\%$ interval in $36$ of them. The underlying covariance law predicts policy
-  divergence to $9\%$ at the median where it can be checked exactly; ignoring the filter is wrong
-  by up to $3.9\times$ and compressing it to a single timescale by two orders of magnitude. The
-  filtering is caused by learning, not by proximity: replacing every reward with a coin flip
-  leaves noise, batches and step sizes untouched and divergence then grows $10.7\times$ over eighty
-  updates instead of staying flat.
+  only then the remaining seeds trained. Across $48$ settings spanning a $30\times$ range of spreads
+  its median absolute error against the realised standard deviation is $1.08\times$ and it lands
+  inside the measured $95\%$ interval in $36$ of them; the covariance law underneath predicts policy
+  divergence to $9\%$ at the median, against $3.9\times$ for ignoring the filter and two orders of
+  magnitude for compressing it to one timescale. The filtering is caused by learning, not by
+  proximity: replacing every reward with a coin flip leaves noise, batches and step sizes untouched
+  and divergence then grows $10.7\times$ over eighty updates instead of staying flat.
 
-  A caution comes out of the same framework. At $7$B on a task the base model already mostly
-  passes, twenty updates collapse the response distribution: every held-out prompt then scores
-  exactly $0$ or $1$, two seeds report the same number to the last decimal, and their policies still
-  differ. A zero measured spread on a saturated benchmark says the metric has stopped resolving the
-  procedure, not that the procedure is reproducible.
-
-  Two readings follow. Since $Q_t \propto \Sigma_t/P$, run length does not enter and batch
-  composition is the lever, with square-root returns. And restricting $\Sigma_t$ to one of its
-  terms attributes the spread by origin: which responses were sampled dominates which prompts were
-  drawn at every group size we measure. Supporting all of it is an exact finite-$G$ covariance for
-  the advantage estimators in current use, which is what makes the injected noise measurable and
-  which separately fixes the compute-optimal group size.
+  Two consequences and one caution. Since $Q_t \propto \Sigma_t/P$, run length does not enter and
+  batch composition is the lever, with square-root returns; restricting $\Sigma_t$ to one of its
+  terms attributes the spread by origin, and which responses were sampled dominates which prompts
+  were drawn at every group size we measure. The caution is that at $7$B on a task the base model
+  already mostly passes, twenty updates collapse the response distribution: every held-out prompt
+  then scores exactly $0$ or $1$, two seeds report the same number to the last decimal, and their
+  policies still differ. A zero measured spread on a saturated benchmark says the metric has stopped
+  resolving the procedure, not that the procedure is reproducible.
     \end{quote}
   \end{minipage}
   \vspace{8pt}
