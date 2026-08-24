@@ -17,8 +17,9 @@ Let `D_t = theta_t^A - theta_t^B`. With updates `theta <- theta + eta g_hat` and
 
     D_{t+1} = A_t D_t + eta nu_t,      A_t = I + eta J_t,   Cov(nu) = 2 Sigma / P        (S1)
 
-Where the objective is locally concave `A_t` contracts, so a perturbation injected at one update
-decays over the ones that follow. The covariance of a run about its mean therefore satisfies
+`A_t` reweights a perturbation by the local curvature of the estimator potential rather than
+passing it through. That reweighting is not a contraction -- see section 3b -- but it is enough to
+stop noise accumulating. The covariance of a run about its mean satisfies
 
     S_{t+1} = A_t S_t A_t^T + Q_t,     Q_t = eta^2 Sigma_t / P,   S_0 = 0                (S2)
 
