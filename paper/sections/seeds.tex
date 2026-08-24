@@ -9,17 +9,17 @@ far apart the numbers they report end up --- using only one of the runs.
 \subsection{Noise is filtered, not accumulated}
 
 Write $\Delta_t := \theta^A_t - \theta^B_t$. With updates $\theta \leftarrow \theta + \eta\ghat$
-and $J_t := \partial\gbar/\partial\theta$ the Jacobian of the mean update,
+and $\mathcal{J}_t := \partial\gbar/\partial\theta$ the Jacobian of the mean update,
 \begin{equation}
   \label{eq:seed-recursion}
   \Delta_{t+1} = A_t \Delta_t + \eta\,\nu_t,
-  \qquad A_t := I + \eta J_t,
+  \qquad A_t := I + \eta \mathcal{J}_t,
 \end{equation}
 to first order in $\Delta$, with $\Cov(\nu_t) = 2\Sigma_t/P$. The batch noise $\Sigma_t$ is left abstract here and made
 explicit in Section~\ref{sec:theory}, where it is computed exactly at finite group size; nothing
 in this section depends on which estimator produced it.
 
-If the objective were flat, $J = 0$, this would be a random walk: divergence would accumulate,
+If the objective were flat, $\mathcal{J} = 0$, this would be a random walk: divergence would accumulate,
 $\E\|\Delta_t\|^2 \propto t$, and a longer run would be strictly less reproducible than a short one.
 That is the implicit model behind treating run-to-run variance as something to be measured by
 brute force. But two RLVR runs are climbing the same objective, and where it is locally concave
@@ -87,7 +87,7 @@ the scalar law only as the comparator it turned out to be.
 \subsection{What the recursion predicts}
 
 \paragraph{Divergence stops growing when, and because, the run is learning.} Contraction requires
-$J_t$ to be meaningfully negative definite, which requires a signal. With no learning signal
+$\mathcal{J}_t$ to be meaningfully negative definite, which requires a signal. With no learning signal
 \eqref{eq:seed-recursion} degenerates to a random walk. This is testable directly by removing the
 signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does.
 
@@ -145,7 +145,7 @@ family pays for itself.
 \begin{proposition}[The mean update is a gradient field]
   \label{prop:potential}
   For any count-based estimator, $\gbar(\theta) = \nabla_\theta\,\Psi(\theta)$ with
-  $\Psi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$. Hence $J = \nabla^2\Psi$ is
+  $\Psi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$. Hence $\mathcal{J} = \nabla^2\Psi$ is
   symmetric and $A_s^{\!\top} = A_s$.
 \end{proposition}
 
@@ -157,10 +157,11 @@ family pays for itself.
   gradient.
 \end{proof}
 
-We call $\Psi$ the \emph{estimator potential}; it is not the objective $J$ unless
-$\lambda \equiv 1$, and the gap between them is exactly the difficulty reweighting of
-Section~\ref{sec:theory}. The backward pass is therefore a Hessian-vector product, which finite differences deliver from two
-gradient evaluations and reverse mode from one double backward. Neither $J$ nor $S_T$ is ever
+We call $\Psi$ the \emph{estimator potential}. It is not the objective $J$ of
+Section~\ref{sec:setup} unless $\lambda \equiv 1$; the gap between them is exactly the difficulty
+reweighting that Section~\ref{sec:theory} makes explicit. The backward pass is therefore a
+Hessian-vector product, which finite differences deliver from two gradient evaluations and reverse
+mode from one double backward. Neither $\mathcal{J}$ nor $S_T$ is ever
 formed. For RLOO, where $\lambda \equiv 1$, the potential is the pass rate itself: the mean update
 ascends exactly the quantity being reported.
 
@@ -195,7 +196,7 @@ responses were sampled --- and the two shares are exact and sum to one.
 
 Everything above linearises the update around the shared trajectory, which requires the two runs to
 stay close enough for $\gbar$ to be locally linear between them, and requires
-$\eta\|J_t\| \ll 1$. Both fail when the step grows relative to the curvature, and RLVR supplies a
+$\eta\|\mathcal{J}_t\| \ll 1$. Both fail when the step grows relative to the curvature, and RLVR supplies a
 concrete way for that to happen: a controller holding drift at a fixed target must raise $\eta$ as
 the signal decays, and $\E_x[p(1-p)] \to 0$ as a task is solved takes the signal with it.
 Section~\ref{sec:exp-seeds} shows runs crossing out of the regime exactly this way.

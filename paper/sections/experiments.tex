@@ -187,7 +187,7 @@ within $0.835 \pm 0.044$ of each other in pass rate.
 \paragraph{Bounded, not proven stationary.} Across the settings in which a run is still learning,
 the log-log slope of divergence against update count runs from $-1.15$ to $+0.26$, against the
 $+1$ that accumulation requires. That rejects accumulation. It does not establish stationarity in
-the strict sense: $J_t$, $\Sigma_t$ and $\eta_t$ all move during training, so the level that
+the strict sense: $\mathcal{J}_t$, $\Sigma_t$ and $\eta_t$ all move during training, so the level that
 \eqref{eq:unrolled} converges to is itself slowly varying, and we describe the divergence as
 bounded rather than stationary throughout.
 
@@ -222,7 +222,7 @@ pair of runs at $\theta^A$ and $\theta^B$ with $\Delta = \theta^B - \theta^A$, d
 \begin{equation}
   \label{eq:residual}
   \varepsilon \;:=\;
-  \frac{\big\|\,\gbar(\theta^B) - \gbar(\theta^A) - J(\theta^A)\Delta\,\big\|}
+  \frac{\big\|\,\gbar(\theta^B) - \gbar(\theta^A) - \mathcal{J}(\theta^A)\Delta\,\big\|}
        {\big\|\,\gbar(\theta^B) - \gbar(\theta^A)\,\big\|},
 \end{equation}
 zero where the field is linear between them. We measure its median along $36$ pairs of runs and

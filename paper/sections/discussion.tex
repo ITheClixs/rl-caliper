@@ -38,8 +38,8 @@ reporting the median alone.
 
 \paragraph{Limits of the linearisation, with a diagnostic.} \eqref{eq:seed-recursion} requires the
 two runs to stay close enough that the mean gradient field is locally linear between them, and
-$\eta\|J_t\| \ll 1$. Section~\ref{sec:exp-linearity} measures the residual
-$\|\gbar(\theta^B) - \gbar(\theta^A) - J(\theta^A)\Delta\| / \|\gbar(\theta^B) - \gbar(\theta^A)\|$
+$\eta\|\mathcal{J}_t\| \ll 1$. Section~\ref{sec:exp-linearity} measures the residual
+$\|\gbar(\theta^B) - \gbar(\theta^A) - \mathcal{J}(\theta^A)\Delta\| / \|\gbar(\theta^B) - \gbar(\theta^A)\|$
 along real pairs of runs and reports the forecast error against it. The residual is computable
 during training without knowing the answer, which is what makes it useful: a run can say whether
 its own forecast is inside the regime that produced it.
