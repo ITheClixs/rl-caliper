@@ -7,7 +7,81 @@ from scratch, where a population of independent runs executes as one batched ker
 carry standard errors rather than anecdotes. And a pretrained model, where the same measurement is
 made on a real policy and a real verifier. Everything ran on a single Apple M4 laptop.
 
-\subsection{How training noise reaches the end of a run}
+\subsection{Forecasting the spread of a reported number}
+\label{sec:exp-forecast}
+
+This is the experiment the paper is for, and its protocol is prospective by construction. In each
+of $48$ settings one run is trained and frozen; the states it passed through are carried backwards
+through \eqref{eq:adjoint} to produce a forecast of the across-seed standard deviation of the final
+pass rate; the forecast is recorded; and only then are $63$ further seeds trained and their spread
+measured. Nothing about the outcome is available when the prediction is made.
+
+The enumerable policy is used because there the reported number is the exact pass rate rather than
+an estimate of it, so the measured spread is the spread of the quantity itself and not of a finite
+evaluation set. Settings vary the prompt pool's difficulty band, the run length $T$, the prompt
+count $P$ and the step size $\eta$, which between them move the realised spread over a factor of
+$30$.
+
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/forecast.pdf}
+  \caption{\textbf{Left:} the forecast made from one run against the standard deviation realised
+  over $64$. Horizontal bars are bootstrap intervals over runs. The solid line is equality and the
+  dotted lines are a factor of $1.5$. \textbf{Right:} the share of the final variance injected at
+  each point in the run, normalised so that a flat line at $1$ is a uniform kernel. It is nearly
+  flat, which is the answer to the memory-horizon question and not the one we expected.}
+  \label{fig:forecast}
+\end{figure*}
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/forecast}
+  \caption{Forecast against realised spread. The error is $|\log(\text{predicted}/\text{measured})|$
+  exponentiated; coverage counts settings where the forecast falls inside the bootstrap interval of
+  the measured standard deviation over $64$ runs.}
+  \label{tab:forecast}
+\end{table}
+
+Table~\ref{tab:forecast} reports a median absolute error of $1.08\times$ and a worst case of
+$1.67\times$. The forecast lands inside the measured $95\%$ interval in $36$ of $48$ settings,
+which is below the nominal rate and worth being plain about: with $64$ seeds the measured interval
+is narrow enough that a systematic modelling error of tens of percent shows up as a miss. The
+accuracy does not degrade with run length --- $1.07\times$ at ten updates against $1.09\times$ at
+twenty-five --- and degrades slightly with step size, which is what Section~\ref{sec:exp-linearity}
+attributes to the linearisation.
+
+What the forecast costs is two gradient evaluations per update for the backward pass and one
+scalar per update for the injected term. It never forms $S_T$, and by
+Proposition~\ref{prop:potential} it never needs a transpose.
+
+\paragraph{Where the uncertainty comes from.} Restricting $\Sigma_t$ to $\Sigma_b$ or to
+$\Sigma_w$ splits the same forecast by origin. The two shares are exact and sum to one, and across
+$288$ settings the rollout share has a median of $78\%$: which responses were sampled matters more
+than which prompts were drawn. It is monotone in group size --- $93\%$ at $G=2$, $82\%$ at $G=4$,
+$65\%$ at $G=8$, $46\%$ at $G=16$ --- and, because $\Sigma_b$ and $\Sigma_w$ are both divided by
+$P$, entirely independent of the number of prompts. Adding prompts buys a smaller error bar; only
+larger groups change what the error bar is made of.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.82\linewidth]{figures/sources.pdf}
+  \caption{The share of the forecast variance attributable to rollout sampling rather than prompt
+  selection, against group size. Each point is the median over run lengths and prompt counts, which
+  do not move it.}
+  \label{fig:sources}
+\end{figure}
+
+\paragraph{No memory horizon.} If contraction were strong, the kernel $k_t$ of \eqref{eq:kernel}
+would concentrate near the end of the run and reproducing a result would mean reproducing only its
+tail. We looked for that and did not find it. Over $288$ settings, the number of final updates
+holding $95\%$ of the forecast variance is a median of $1.00$ of the run, against $0.95$ for an
+exactly uniform kernel, and it does not move when the step size is raised sixteen-fold or when the
+run is started from a policy already trained for $1200$ updates. Filtering lowers the level of the
+spread; over the horizons we can measure it does not localise where the spread was made. The right
+reading is that reproducing a run means reproducing all of it.
+
+\subsection{Why the forecast rests on filtering, not accumulation}
 \label{sec:exp-seeds}
 
 \paragraph{The recursion predicts divergence; a single timescale does not.} The enumerable policy
@@ -267,115 +341,3 @@ predicts is the score scale $\sigma_s^2$, and a family whose answer is one numbe
 score scale with one whose answer is four. This bounds how the corollary should be used. It
 converts a reward histogram into a noise estimate within a task distribution, after one calibration
 measurement, and it does not transport that calibration to a task of a different shape.
-
-\subsection{What the hardware is worth}
-\label{sec:hardware}
-
-Theorem~\ref{thm:split} turns the split into a question about the serving stack as much as about
-the learning problem, through the prefill ratio $\alpha = c_{\mathrm{pre}}/c_{\mathrm{dec}}$. We
-measured both costs for a $0.5$B model in bfloat16 on the machine everything else ran on. The ratio
-is governed almost entirely by the prompt-to-response length ratio, running from $0.04$ when a
-short prompt is followed by a thousand tokens of response to $10.9$ when a thousand-token prompt is
-followed by a short answer.
-
-\begin{table*}[t]
-  \centering
-  \small
-  \input{tables/optimum}
-  \caption{The optimum $G^{\star}$ from Theorem~\ref{thm:split}, at the noise ratio measured on our
-  transformers, across measured prefill ratios and rollout budgets. Entries are the root of
-  \eqref{eq:stationary}, which agrees with direct numerical minimisation of \eqref{eq:objective} to
-  one part in $10^{7}$. The last row shows the small-batch limit, which is what one would quote
-  from \eqref{eq:gstar-cost} alone and which understates the optimum badly at large $R$.}
-  \label{tab:optimum}
-\end{table*}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=\linewidth]{figures/cost_model.pdf}
-  \caption{Measured prefill-to-decode economics on an Apple M4, as the group-size inflation implied
-  in the small-batch limit. Long responses make prefill sharing almost worthless; short answers
-  behind long prompts make it decisive.}
-  \label{fig:cost-model}
-\end{figure}
-
-Table~\ref{tab:optimum} is the reconciliation the paper has been building towards. A purely
-statistical reading of the split says three; the settings in which published recipes were developed
-say otherwise, and the theorem says how much of that is justified. Long prompts with short answers
-at a large batch put the optimum in the tens, which is where the recipes are. Reasoning-length
-responses, where the response dwarfs the prompt, put it back at three to four, and there a group of
-sixteen is spending most of its budget on responses that a second prompt would have used better.
-The disagreement between a recipe and this analysis is therefore not evidence against either: it
-identifies the regime the recipe came from.
-
-\subsection{What transfers when the batch size changes}
-
-The sharpest consequence of the drift model is a statement about transfer. A run tuned by learning
-rate is tuned in a unit that depends on the batch through $\mathcal{G} + N/P$; a run tuned by drift
-is not. Table~\ref{tab:transfer} sweeps both parameterisations at four batch sizes and reports what
-it costs to carry the value tuned at the smallest batch to the others.
-
-\begin{table*}[t]
-  \centering
-  \input{tables/transfer}
-  \caption{Transfer across batch size. The learning rate that is optimal at $P = 8$ loses a fifth of
-  the achievable gain by $P = 64$; the drift target that is optimal at $P = 8$ remains optimal.}
-  \label{tab:transfer}
-\end{table*}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/transfer.pdf}
-  \caption{Left: the optimum of each parameterisation relative to its value at $P = 8$. Centre and
-  right: the sweeps themselves. The learning-rate optimum moves; the drift optimum does not.}
-  \label{fig:transfer}
-\end{figure*}
-
-The single-step drift model accounts for part of the movement in $\eta^{*}$ and not all of it: the
-coefficient $\mathcal{G} + N/P$ measured at the initial policy predicts a smaller shift than the one
-observed over a full run. The coefficient keeps moving as the policy improves, so a controller that re-reads it tracks the
-optimum while a learning rate fixed in advance cannot.
-
-\subsection{A prospective test, and where the drift target stops transferring}
-\label{sec:recipe}
-
-Everything so far tunes one quantity at a time on the setting it is measured on. The stronger test
-is prospective: fix a setting the method has never seen, let the probe choose $G$ before any
-training happens, and check afterwards whether it chose well. We moved to a held-out setting with
-four times the rollout budget, eight times the corpus and a different seed. The probe reported
-$G^{\star} = 3.1$, so the recipe took $G = 4$; the comparison is against $G = 16$, which is what a
-default recipe would use.
-
-\begin{table}[t]
-  \centering
-  \small
-  \input{tables/diagnosis}
-  \caption{Best achievable gain at the held-out setting, crossing the group size the probe selected
-  against the group size a default recipe would use, under both ways of setting the step. Starred
-  entries sit at the edge of their grid and are lower bounds. The probe's choice wins under both.}
-  \label{tab:diagnosis}
-\end{table}
-
-\textbf{The prospective choice was right.} $G = 4$ beats $G = 16$ under both parameterisations.
-Under drift control, where the step size is held to the same behavioural budget in both arms and so
-cannot confound the comparison, it wins by $11.1\%$ against a predicted
-$\sqrt{\rho_4/\rho_{16}} - 1 = 10\%$.
-
-\textbf{The drift target transfers across the group size exactly.} Both group sizes put their
-optimum at the same drift target, $1.45 \times 10^{-3}$. Changing how the budget is split does not
-change how far the policy should move per update, which is what a behavioural unit ought to do.
-
-\textbf{It does not transfer across this change of budget.} The tuning setting's optimum was
-$3.19 \times 10^{-3}$, a factor of $2.2$ away, and carrying it over costs $20\%$ of the achievable
-gain. Earlier the same target held to within $5\%$ across a fourfold change in batch size and
-$21\%$ across an eightfold one. A sixteenfold change in prompts per step, combined with a fourfold
-change in rollout budget, is past where a single number holds. We found this the hard way: packaging
-the two together and carrying both to the held-out setting lost to the default by $28.9\%$ (paired
-$t = -3.01$ over $32$ runs), and Table~\ref{tab:diagnosis} is what attributes that loss to the drift
-target rather than to the group size.
-
-\textbf{A constant drift target is not the right schedule.} At both group sizes a tuned constant
-learning rate beat the best constant drift, with its optimum at the edge of the grid. A fixed
-learning rate produces a drift that changes over a run as the gradient statistics change, and that
-this wins says the optimal drift trajectory is not flat. The unit appears to be right and the
-schedule is not, which is the most concrete thing this paper leaves open.

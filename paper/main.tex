@@ -35,8 +35,8 @@
 \begin{document}
 
 \twocolumn[
-  \ruledtitle{Training Noise Is Filtered, Not Accumulated:\\
-  Predicting Run-to-Run Divergence in RL Post-Training}
+  \ruledtitle{Predicting the Spread of an RL Post-Training Result\\
+  from a Single Run}
   \vspace{6pt}
   {\centering
     \normalsize Mehmet Demir G\"uven$^{\dagger}$\par\vspace{2pt}
@@ -48,32 +48,35 @@
   \begin{center}\textbf{Abstract}\end{center}
   \vspace{-4pt}
   \begin{quote}
-  Improvements from reinforcement learning post-training are reported from single runs, and the
-  field establishes how much a rerun would move the number the only way it currently can: by
-  repeating the training. We show that the variation has structure, and that the structure is
-  predictable.
+  Reinforcement learning post-training is reported from single runs, and how much a rerun would
+  move the number is established the only way it currently can be: by repeating the training. We
+  show that a run already contains enough information to forecast its own spread.
 
-  Two runs starting from the same policy and differing only in rollout randomness do not drift
-  apart. The reason is not that noise is small but that it is filtered: a perturbation entering at
-  one update is passed through every later update, and where the shared objective is locally
-  concave those updates contract it. The covariance of a run about its mean trajectory therefore
-  obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$, so what survives to the end is the noise injected at
-  each update weighted by how strongly the remaining trajectory preserves it. In an exactly solvable
-  policy, where the recursion, the Fisher information and unlimited independent trajectories are all
-  available, this predicts measured divergence to $9\%$ at the median across twelve settings.
-  Ignoring contraction is wrong by up to $3.9\times$, and compressing the contraction to a single
-  timescale is wrong by two orders of magnitude, which is what a spectrum of decay rates does to a
-  one-parameter fit.
+  The correction that makes this possible is to stop treating training noise as accumulating. A
+  perturbation entering at one update is passed through every later update, and where the shared
+  objective is locally concave those updates contract it, so the covariance of a run about its mean
+  obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric
+  backwards along one stored trajectory then gives the across-seed variance of that metric as a sum
+  of scalars, one per update, with no covariance matrix formed. The transpose the backward pass
+  needs is free: the mean update of a count-based estimator is the gradient of a scalar potential,
+  so its Jacobian is symmetric.
 
-  The contraction is caused by learning, not by proximity. Replacing every reward with a coin flip
-  leaves the noise, the batches and the step sizes untouched, and divergence then grows by a factor
-  of $10.7$ over eighty updates instead of staying flat. The practical consequences follow from
-  $Q_t \propto \Sigma_t/P$: run length does not enter, and batch composition is the lever, though
-  with square-root returns.
+  We test the forecast prospectively --- one run trained and frozen, the prediction recorded, and
+  only then the remaining seeds trained. Across $48$ settings spanning a $30\times$ range of
+  spreads its median absolute error against the realised standard deviation is $1.08\times$, its worst
+  is $1.67\times$, and it lands inside the measured $95\%$ interval in $36$ of them. The underlying covariance law predicts policy
+  divergence to $9\%$ at the median where it can be checked exactly; ignoring contraction is wrong
+  by up to $3.9\times$ and compressing it to a single timescale by two orders of magnitude. The
+  contraction is caused by learning, not by proximity: replacing every reward with a coin flip
+  leaves noise, batches and step sizes untouched and divergence then grows $10.7\times$ over eighty
+  updates instead of staying flat.
 
-  Supporting this is an exact finite-$G$ covariance for the advantage estimators in current use,
-  which is what makes the injected noise measurable, and which separately fixes the compute-optimal
-  group size and shows that those estimators differ only by a weight on prompt difficulty.
+  Two readings follow. Since $Q_t \propto \Sigma_t/P$, run length does not enter and batch
+  composition is the lever, with square-root returns. And restricting $\Sigma_t$ to one of its
+  terms attributes the spread by origin: which responses were sampled dominates which prompts were
+  drawn at every group size we measure. Supporting all of it is an exact finite-$G$ covariance for
+  the advantage estimators in current use, which is what makes the injected noise measurable and
+  which separately fixes the compute-optimal group size.
     \end{quote}
   \end{minipage}
   \vspace{8pt}
@@ -100,10 +103,11 @@ Science student throughout this research, which is the source of the affiliation
 
 \input{sections/introduction}
 \input{sections/setup}
-\input{sections/theory}
 \input{sections/seeds}
+\input{sections/theory}
 \input{sections/estimation}
 \input{sections/experiments}
+\input{sections/applications}
 \input{sections/related}
 \input{sections/discussion}
 

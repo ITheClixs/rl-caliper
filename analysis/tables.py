@@ -257,6 +257,40 @@ def table_optimum() -> None:
     write("optimum", "\n".join(lines))
 
 
+def table_forecast() -> None:
+    """Forecast accuracy, broken out by the run length and the batch it was made at."""
+    runs = [r for r in io.load_all("p2_metric_forecast") if r["result"].get("cells")]
+    if not runs:
+        raise SystemExit("no forecast validation run")
+    cells = runs[-1]["result"]["cells"]
+    lines = [
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}lcccc@{}}",
+        r"\toprule",
+        r"grouped by & settings & median & worst & inside 95\% \\",
+        r"\midrule",
+    ]
+
+    def block(label, rows):
+        ratio = np.array([c["predicted_std"] / c["measured_std"] for c in rows])
+        error = np.abs(np.log(ratio))
+        inside = sum(c["measured_lo"] <= c["predicted_std"] <= c["measured_hi"] for c in rows)
+        lines.append(
+            f"{label} & {len(rows)} & {np.exp(np.median(error)):.2f}$\\times$ & "
+            f"{np.exp(error.max()):.2f}$\\times$ & {inside}/{len(rows)} \\\\"
+        )
+
+    block("all settings", cells)
+    for steps in sorted({c["steps"] for c in cells}):
+        block(f"\\quad $T = {steps}$", [c for c in cells if c["steps"] == steps])
+    for prompts in sorted({c["prompts"] for c in cells}):
+        block(f"\\quad $P = {prompts}$", [c for c in cells if c["prompts"] == prompts])
+    for eta in sorted({c["step_size"] for c in cells}):
+        block(f"\\quad $\\eta = {eta:g}$", [c for c in cells if c["step_size"] == eta])
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("forecast", "\n".join(lines))
+
+
 def table_propagation() -> None:
     """Candidate models of seed divergence against exact Monte Carlo ground truth."""
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
@@ -300,6 +334,7 @@ def main() -> None:
         ("diagnosis", table_diagnosis),
         ("adam", table_adam),
         ("optimum", table_optimum),
+        ("forecast", table_forecast),
         ("propagation", table_propagation),
     ):
         try:

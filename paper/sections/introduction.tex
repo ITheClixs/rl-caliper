@@ -5,21 +5,38 @@ A paper reports that reinforcement learning post-training moved a benchmark by t
 that is a result depends on a number nobody has: how much the same recipe would have moved it with
 a different seed. The problem is documented \citep{henderson2018matters, hochlehnert2025sober} and
 the only instrument the field has is replication, which at current RL compute is close to
-unaffordable. So the number usually goes unmeasured.
+unaffordable. So the number usually goes unmeasured, and single-run improvements are read as
+though the training procedure were deterministic.
 
-Start from the obvious model. Gradient noise perturbs each update, perturbations accumulate, two
-runs execute a random walk away from each other, and reproducibility decays with run length. That
-picture is implicit in how run-to-run variance is discussed, and it is what a noisy gradient
-suggests.
+This paper gives a different instrument. The claim is that a run contains enough information to
+forecast its own spread, so an error bar can be produced from the run that was already going to be
+trained.
 
-It is wrong, and the way it is wrong is the subject of this paper. Noise from one update does not
-survive to the end of training unchanged. It is passed through every update that follows, and where
-the shared objective is locally concave those updates shrink it. What reaches the end is a
-convolution of injected noise with the sensitivity of the remaining trajectory, and that object is
-computable.
+Getting there means first correcting the model of where the spread comes from. The obvious picture
+is that gradient noise perturbs each update, perturbations accumulate, two runs execute a random
+walk away from each other, and reproducibility decays with run length. That picture is implicit in
+how run-to-run variance is discussed, and it is what a noisy gradient suggests. It is wrong. Noise
+from one update does not survive to the end of training unchanged: it is passed through every
+update that follows, and where the shared objective is locally concave those updates shrink it.
+What reaches the end is a convolution of injected noise with the sensitivity of the remaining
+trajectory --- an object that obeys a recursion, and that can be carried against the gradient of
+the reported metric instead of being formed.
 
 \paragraph{Contributions.}
 \begin{itemize}
+  \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint}). Carrying the metric
+  gradient backwards along a single stored trajectory gives the across-seed variance of the
+  reported score as a sum of scalars, one per update, with no covariance matrix formed. Tested
+  prospectively --- one run trained and frozen, the forecast recorded, and only then $63$ further
+  seeds trained --- its median absolute error against the realised spread is $1.08\times$ across $48$
+  settings spanning a $30\times$ range of spreads, its worst is $1.67\times$, and it falls inside
+  the measured $95\%$ interval in $36$ of them.
+
+  \item \textbf{The transpose is free} (Proposition~\ref{prop:potential}). The mean update of any
+  count-based estimator is the gradient of a scalar potential $\E_x[\Lambda(p_x)]$, so its Jacobian
+  is symmetric and the backward pass is a Hessian-vector product. For RLOO the potential is the
+  pass rate itself.
+
   \item \textbf{A finite-time covariance law} (Theorem~\ref{thm:propagation}).
   $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$, giving expected divergence between seeds as
   $\tr(F_T S_T)$ and attributing it to individual updates through a per-update kernel. In an
@@ -32,19 +49,25 @@ computable.
   $10.7\times$ over eighty updates. This separates the result from a claim that seeds merely end up
   nearby.
 
+  \item \textbf{Where the uncertainty comes from.} Restricting the injected covariance to one of
+  its terms attributes the forecast by origin. Which responses were sampled dominates which prompts
+  were drawn at every group size we measure, from $93\%$ of the variance at $G=2$ to $46\%$ at
+  $G=16$; the number of prompts scales both equally and cannot change the mix.
+
   \item \textbf{The machinery that makes the injected noise measurable}: an exact finite-$G$ mean
   and covariance for the count-based advantage estimators under binary rewards
   (Propositions~\ref{prop:mean} and \ref{prop:cov}), a decomposition of the gradient noise into
   between-prompt and within-prompt terms, and an estimator that recovers both from the microbatch
   gradients a trainer already accumulates. The same decomposition fixes the compute-optimal group
-  size (Theorem~\ref{thm:split}), which we validate prospectively.
+  size (Theorem~\ref{thm:split}).
 
   \item \textbf{An explicit account of what does not hold.} A single contraction timescale fails by
-  two orders of magnitude, and we report it as the comparator rather than the law. A predicted
-  square-root relation between policy divergence and outcome spread is not supported by our data
-  and is withdrawn. Drift-targeted control, which Section~\ref{sec:drift} otherwise recommends,
-  destroys runs at saturation. The largest model we measure is $0.5$B, which bounds what any of
-  this establishes about frontier-scale RLVR.
+  two orders of magnitude. A predicted square-root relation between policy divergence and outcome
+  spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
+  long run whose spread is generated only near its end --- and did not find one. Lifting the
+  recursion to Adam's optimiser state improves on ignoring that state by a factor of two at the
+  median but is unreliable where the pass rate saturates. The largest model we measure is $7$B with
+  eight seeds, which bounds what any of this establishes about frontier-scale RLVR.
 \end{itemize}
 
 Every experiment here runs on one laptop, which sets the ceiling on the last point and is stated

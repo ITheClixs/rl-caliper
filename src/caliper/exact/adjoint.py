@@ -120,12 +120,14 @@ def forecast(
     steps: int,
     states: list[TabularPolicy] | None = None,
     matrix_free: bool = True,
+    source: str = "all",
 ) -> MetricForecast:
     """Carry the metric gradient backwards along one trajectory.
 
     `states` are the policies a single run actually visited; when omitted the mean trajectory is
     used. Only that one trajectory enters, which is what makes this a forecast rather than a
-    description of an ensemble.
+    description of an ensemble. `source` restricts the injected covariance to one origin of
+    randomness, which attributes the final spread to prompt sampling or to rollout sampling.
     """
     weights = weight_table(estimator, group_size)
     if states is None:
@@ -140,7 +142,7 @@ def forecast(
     kernel = [0.0] * steps
     norms = [0.0] * steps
     for t in range(steps - 1, -1, -1):
-        injected = injected_covariance(states[t], accepts, weights, n_prompts)
+        injected = injected_covariance(states[t], accepts, weights, n_prompts, source)
         kernel[t] = float(step_size**2 * adjoint @ injected @ adjoint)
         norms[t] = float(np.linalg.norm(adjoint))
         adjoint = adjoint + step_size * carry(states[t], accepts, weights, adjoint)

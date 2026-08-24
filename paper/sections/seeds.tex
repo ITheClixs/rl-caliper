@@ -1,9 +1,10 @@
-\section{What happens to two runs that differ only in their seed}
+\section{From one run to the spread of its result}
 \label{sec:seeds}
 
 Fix a policy $\theta_0$ and start two runs from it. They see the same prompts and the same
 objective, and differ only in the randomness of their rollouts. This is the comparison a
-practitioner makes when they change a seed and rerun.
+practitioner makes when they change a seed and rerun, and the question this section answers is how
+far apart the numbers they report end up --- using only one of the runs.
 
 \subsection{Noise is filtered, not accumulated}
 
@@ -14,8 +15,9 @@ and $J_t := \partial\gbar/\partial\theta$ the Jacobian of the mean update,
   \Delta_{t+1} = A_t \Delta_t + \eta\,\nu_t,
   \qquad A_t := I + \eta J_t,
 \end{equation}
-to first order in $\Delta$, with $\Cov(\nu_t) = 2\Sigma_t/P$ for the batch noise $\Sigma$ of
-Section~\ref{sec:theory}.
+to first order in $\Delta$, with $\Cov(\nu_t) = 2\Sigma_t/P$. The batch noise $\Sigma_t$ is left abstract here and made
+explicit in Section~\ref{sec:theory}, where it is computed exactly at finite group size; nothing
+in this section depends on which estimator produced it.
 
 If the objective were flat, $J = 0$, this would be a random walk: divergence would accumulate,
 $\E\|\Delta_t\|^2 \propto t$, and a longer run would be strictly less reproducible than a short one.
@@ -93,10 +95,76 @@ signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does
 injected noise requires quadrupling the batch, and nothing in \eqref{eq:unrolled} depends on the
 number of updates once the sum has converged.
 
-\paragraph{Seed memory is finite where contraction is strong.} If $\Phi_{T,t+1}$ decays with
-$T - t$, the sum in \eqref{eq:unrolled} is dominated by its last terms, and the fraction of final
-divergence attributable to the final $h$ updates approaches one for $h \ll T$. Where contraction is
-weak, $k_t$ is flat and every update matters equally. Both regimes appear in our measurements.
+\paragraph{A memory horizon, if contraction is strong enough to make one.} If $\Phi_{T,t+1}$
+decays with $T - t$, the sum in \eqref{eq:unrolled} is dominated by its last terms and the final
+$h \ll T$ updates account for nearly all of the spread; reproducing a result would then mean
+reproducing its end. Where contraction is weak, $k_t$ is flat and every update counts the same.
+Section~\ref{sec:exp-seeds} asks which of these holds and finds the second, over every setting we
+can reach.
+
+\subsection{Carrying it to the number that gets reported}
+\label{sec:metric}
+
+Equation \eqref{eq:predicted-kl} is a statement about policies. What a paper reports is a score:
+pass rate, exact match, win rate, mean reward. Write $M(\theta)$ for that score as a function of
+the parameters. Linearising it about the endpoint the run reached,
+\begin{equation}
+  \label{eq:metric-variance}
+  \Var_{\text{seed}}\big[M(\theta_T)\big] \;\approx\; \nabla M(\theta_T)^{\!\top} S_T\, \nabla M(\theta_T),
+\end{equation}
+which needs $S_T$ --- a matrix nobody can form for a real model. It is not needed. Substituting
+\eqref{eq:unrolled} turns the quadratic form into a sum of scalars.
+
+\begin{theorem}[Adjoint form of the reported spread]
+  \label{thm:adjoint}
+  Define $b_T := \nabla M(\theta_T)$ and $b_s := A_s^{\!\top} b_{s+1}$ for $s = T-1, \dots, 0$.
+  Then, under the assumptions of Theorem~\ref{thm:propagation},
+  \begin{equation}
+    \label{eq:adjoint}
+    \Var_{\text{seed}}\big[M(\theta_T)\big]
+    \;=\; \sum_{t=0}^{T-1} b_{t+1}^{\!\top} Q_t\, b_{t+1}
+    \;=\; \frac{\eta^2}{P}\sum_{t=0}^{T-1} \Var\!\big(b_{t+1}^{\!\top}\hat{g}_t\big),
+  \end{equation}
+  where the variance on the right is over one batch at $\theta_t$.
+\end{theorem}
+
+\begin{proof}
+  $b_s = \Phi_{T,s}^{\!\top}\nabla M$ by induction. Substituting \eqref{eq:unrolled} into
+  \eqref{eq:metric-variance} gives $\sum_t (\Phi_{T,t+1}^{\!\top}\nabla M)^{\!\top} Q_t
+  (\Phi_{T,t+1}^{\!\top}\nabla M)$. The second equality is $Q_t = \eta^2\Sigma_t/P$ and
+  $b^{\!\top}\Sigma b = \Var(b^{\!\top}\hat{g})$.
+\end{proof}
+
+Every term of \eqref{eq:adjoint} is the variance of a batch gradient projected onto a single
+direction --- one scalar per update, which a trainer can accumulate alongside the update it is
+already making. What the backward pass costs depends on $A_s^{\!\top}$, and here the estimator
+family pays for itself.
+
+\begin{proposition}[The mean update is a gradient field]
+  \label{prop:potential}
+  For any count-based estimator, $\gbar(\theta) = \nabla_\theta\,\Phi(\theta)$ with
+  $\Phi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$. Hence $J = \nabla^2\Phi$ is
+  symmetric and $A_s^{\!\top} = A_s$.
+\end{proposition}
+
+\begin{proof}
+  By Proposition~\ref{prop:mean}, proved in Section~\ref{sec:theory}, the per-prompt mean is
+  $\lambda(p_x, G)\,\nabla_\theta p_x$, and
+  $\lambda$ depends on $\theta$ only through $p_x$. So
+  $\lambda(p_x)\nabla p_x = \nabla \Lambda(p_x)$, and averaging over $x$ commutes with the
+  gradient.
+\end{proof}
+
+The backward pass is therefore a Hessian-vector product, which finite differences deliver from two
+gradient evaluations and reverse mode from one double backward. Neither $J$ nor $S_T$ is ever
+formed. For RLOO, where $\lambda \equiv 1$, the potential is the pass rate itself: the mean update
+ascends exactly the quantity being reported.
+
+Two consequences worth stating plainly. First, this is a \emph{forecast}: \eqref{eq:adjoint} reads
+only the states one run visited, so it can be computed before any second run exists, which is how
+Section~\ref{sec:exp-seeds} tests it. Second, restricting $\Sigma_t$ to one of its two terms
+attributes the answer by origin --- $\Sigma_b$ is which prompts were drawn, $\Sigma_w$ is which
+responses were sampled --- and the two shares are exact and sum to one.
 
 \subsection{Where the argument stops}
 

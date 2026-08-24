@@ -458,9 +458,79 @@ def figure_real_seeds() -> None:
     plt.close(fig)
 
 
+def figure_forecast() -> None:
+    """Forecast against realised spread, and where each update's share of it was injected."""
+    cells = latest("p2_metric_forecast", "predicted_std")
+    bands = sorted({c["band"] for c in cells})
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.1))
+
+    ax = axes[0]
+    for band, colour, marker in zip(bands, PALETTE, "os^D", strict=False):
+        rows = [c for c in cells if c["band"] == band]
+        measured = np.array([c["measured_std"] for c in rows])
+        predicted = np.array([c["predicted_std"] for c in rows])
+        lo = measured - np.array([c["measured_lo"] for c in rows])
+        hi = np.array([c["measured_hi"] for c in rows]) - measured
+        ax.errorbar(measured, predicted, xerr=[lo, hi], fmt=marker, ms=4, lw=0.8,
+                    capsize=1.5, color=colour, label=band, alpha=0.85)
+    limits = np.array([
+        min(c["measured_std"] for c in cells) * 0.7,
+        max(c["measured_std"] for c in cells) * 1.4,
+    ])
+    ax.plot(limits, limits, color="0.25", lw=1.1, zorder=0)
+    for factor, style_ in ((1.5, ":"), (1 / 1.5, ":")):
+        ax.plot(limits, limits * factor, color="0.6", lw=0.8, ls=style_, zorder=0)
+    ax.set_xscale("log")
+    ax.set_yscale("log")
+    ax.legend(fontsize=7, frameon=False, loc="upper left")
+    style(ax, "measured s.d. over 64 seeds", "forecast from one run",
+          "identity, with the $1.5\\times$ band")
+
+    ax = axes[1]
+    chosen = sorted(cells, key=lambda c: (-c["steps"], c["prompts"]))[:4]
+    for cell, colour in zip(chosen, PALETTE, strict=False):
+        kernel = np.array(cell["kernel"])
+        share = kernel / kernel.sum()
+        ax.plot(np.arange(1, share.size + 1) / share.size, share * share.size,
+                color=colour, lw=1.4,
+                label=f"{cell['band']}, $P={cell['prompts']}$")
+    ax.axhline(1.0, color="0.4", lw=0.9, ls="--")
+    ax.legend(fontsize=7, frameon=False)
+    style(ax, "position in the run", "share of the final variance\n(relative to uniform)",
+          "where the surviving noise entered")
+    fig.tight_layout()
+    save(fig, "forecast.pdf")
+    plt.close(fig)
+
+
+def figure_sources() -> None:
+    """Which randomness the reported number remembers, against group size."""
+    cells = latest("p3_memory_sources", "rollout_share")
+    groups = sorted({c["group_size"] for c in cells})
+    fig, ax = plt.subplots(figsize=(3.6, 2.8))
+    bands = sorted({c["band"] for c in cells})
+    for band, colour, marker in zip(bands, PALETTE, "os^", strict=False):
+        rows = [c for c in cells if c["band"] == band]
+        shares = [
+            np.median([c["rollout_share"] for c in rows if c["group_size"] == g]) for g in groups
+        ]
+        ax.plot(groups, shares, marker=marker, ms=4, lw=1.3, color=colour, label=band)
+    ax.axhline(0.5, color="0.5", lw=0.8, ls=":")
+    ax.set_xscale("log", base=2)
+    ax.set_ylim(0, 1)
+    ax.legend(fontsize=7, frameon=False, loc="lower left")
+    style(ax, "group size $G$", "share from rollout sampling",
+          "the rest is which prompts were drawn")
+    fig.tight_layout()
+    save(fig, "sources.pdf")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
+        ("forecast", figure_forecast),
+        ("sources", figure_sources),
         ("reconvergence", figure_reconvergence),
         ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),

@@ -52,11 +52,28 @@ def update_jacobian(
 
 
 def injected_covariance(
-    policy: TabularPolicy, accepts: np.ndarray, weights: np.ndarray, n_prompts: int
+    policy: TabularPolicy,
+    accepts: np.ndarray,
+    weights: np.ndarray,
+    n_prompts: int,
+    source: str = "all",
 ) -> np.ndarray:
-    """Cov(g_hat) for one batch at the current policy."""
+    """Cov(g_hat) for one batch at the current policy.
+
+    The two terms are the two places randomness enters a batch: which prompts were drawn, and
+    which responses were sampled from them. Restricting to one of them answers what share of the
+    final uncertainty that source is responsible for.
+    """
     model = batch_model(policy, accepts)
-    return (model.sigma_b(weights) + model.sigma_w(weights)) / n_prompts
+    if source == "prompts":
+        matrix = model.sigma_b(weights)
+    elif source == "rollouts":
+        matrix = model.sigma_w(weights)
+    elif source == "all":
+        matrix = model.sigma_b(weights) + model.sigma_w(weights)
+    else:
+        raise KeyError(source)
+    return matrix / n_prompts
 
 
 @dataclass
