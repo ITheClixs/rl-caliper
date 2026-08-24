@@ -10,7 +10,9 @@ though the training procedure were deterministic.
 
 This paper gives a different instrument. The claim is that a run contains enough information to
 forecast its own spread, so an error bar can be produced from the run that was already going to be
-trained.
+trained. We derive it, and test it where the comparison can be made exactly; carrying it to a
+frontier-scale run is engineering we did not have the hardware for, and
+Section~\ref{sec:discussion} says exactly what that would take.
 
 Getting there means first correcting the model of where the spread comes from. The obvious picture
 is that gradient noise perturbs each update, perturbations accumulate, two runs execute a random
