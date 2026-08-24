@@ -23,32 +23,26 @@ be carried against the gradient of the reported metric instead of being formed.
 
 \paragraph{Contributions.}
 \begin{itemize}
-  \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint}). Carrying the metric
-  gradient backwards along a single stored trajectory gives the across-seed variance of the
-  reported score as a sum of scalars, one per update, with no covariance matrix formed. Tested
-  prospectively --- one run trained and frozen, the forecast recorded, and only then $63$ further
-  seeds trained --- its median absolute error against the realised spread is $1.08\times$ across $48$
-  settings spanning a $30\times$ range of spreads, its worst is $1.67\times$, and it falls inside
-  the measured $95\%$ interval in $36$ of them.
+  \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint} and
+  Proposition~\ref{prop:potential}). Carrying the metric gradient backwards along a single stored
+  trajectory gives the across-seed variance of the reported score as a sum of scalars, one per
+  update, with no covariance matrix formed. The transpose the backward pass would need is free,
+  because the mean update of any count-based estimator is the gradient of a scalar potential
+  $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
+  pass rate itself. Tested prospectively, one run trained and frozen and the forecast recorded
+  before $63$ further seeds were trained, its median absolute error against the realised spread is
+  $1.08\times$ across $48$ settings spanning a $30\times$ range of spreads, its worst is
+  $1.67\times$, and it falls inside the measured $95\%$ interval in $36$ of them.
 
-  \item \textbf{The transpose is free} (Proposition~\ref{prop:potential}). The mean update of any
-  count-based estimator is the gradient of a scalar potential $\E_x[\Lambda(p_x)]$, so its Jacobian
-  is symmetric and the backward pass is a Hessian-vector product. For RLOO the potential is the
-  pass rate itself.
-
-  \item \textbf{A finite-time covariance law} (Theorem~\ref{thm:propagation}).
-  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$, giving expected divergence between seeds as
-  $\tr(F_T S_T)$ and attributing it to individual updates through a per-update kernel. In an
-  exactly solvable policy it predicts measured divergence to $9\%$ at the median over twelve
-  settings, against $2.0\times$ for accumulation and two orders of magnitude for a single-timescale
-  approximation.
-
-  \item \textbf{What the filter actually is} (Section~\ref{sec:exp-spectrum}). Measuring the
-  spectrum of $A_t$ along a run: the spectral radius exceeds one throughout, by up to $2\%$ early and
-  decaying towards zero as the policy improves; only $31$--$51\%$ of directions contract, a share
-  that grows during the run; and among those the decay timescales span tens of updates to
-  effectively unbounded. Divergence stays bounded because expansion is slow relative to run length, not because
-  every direction shrinks --- and this is why one effective timescale cannot work.
+  \item \textbf{A finite-time covariance law, and what its operator really does}
+  (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
+  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$ predicts measured seed divergence to $9\%$ at the median
+  over twelve settings, against $2.0\times$ for accumulation and two orders of magnitude for a
+  single-timescale approximation. Measuring the spectrum of $A_t$ says why: it is not a contraction.
+  The spectral radius exceeds one throughout, by up to $2\%$ early and decaying as the policy
+  improves; only $31$--$51\%$ of directions contract, a share that grows during the run; and the
+  contracting timescales span tens of updates to effectively unbounded. Divergence stays bounded
+  because expansion is slow relative to run length, not because every direction shrinks.
 
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
   leaves noise and batch composition untouched, turns a flat divergence trace into one that grows
@@ -60,25 +54,27 @@ be carried against the gradient of the reported metric instead of being formed.
   were drawn at every group size we measure, from $93\%$ of the variance at $G=2$ to $46\%$ at
   $G=16$; the number of prompts scales both equally and cannot change the mix.
 
-  \item \textbf{The machinery that makes the injected noise measurable}: an exact finite-$G$ mean
-  and covariance for the count-based advantage estimators under binary rewards
-  (Propositions~\ref{prop:mean} and \ref{prop:cov}), a decomposition of the gradient noise into
-  between-prompt and within-prompt terms, and an estimator that recovers both from the microbatch
-  gradients a trainer already accumulates. The same decomposition fixes the compute-optimal group
-  size (Theorem~\ref{thm:split}).
-
   \item \textbf{A metric can go blind before the seeds agree.} At $7$B on a task the base model
   already mostly passes, twenty updates collapse the response distribution: every held-out prompt
   scores exactly $0$ or $1$, two seeds report the same number to the last decimal, and their
   policies still differ by up to $8\times10^{-2}$ in KL. A zero measured spread on a saturated
   benchmark is not evidence of a reproducible procedure.
 
-  \item \textbf{An explicit account of what does not hold.} A single effective timescale fails by two orders of magnitude. A predicted square-root relation between policy divergence and outcome
+  \item \textbf{The machinery that makes the injected noise measurable}: an exact finite-$G$ mean
+  and covariance for the count-based advantage estimators under binary rewards
+  (Propositions~\ref{prop:mean} and \ref{prop:cov}), a decomposition of the gradient noise into
+  between-prompt and within-prompt terms, and an estimator that recovers both from the microbatch
+  gradients a trainer already accumulates. The same decomposition fixes the compute-optimal group
+  size (Theorem~\ref{thm:split}), which Section~\ref{sec:applications} develops as an application.
+
+  \item \textbf{An explicit account of what does not hold.} A single effective timescale fails by
+  two orders of magnitude. A predicted square-root relation between policy divergence and outcome
   spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
   long run whose spread is generated only near its end --- and did not find one. Lifting the
   recursion to Adam's optimiser state improves on ignoring that state by a factor of two at the
   median but is unreliable where the pass rate saturates. The largest model we measure is $7$B with
   eight seeds, which bounds what any of this establishes about frontier-scale RLVR.
+
 \end{itemize}
 
 Every experiment here runs on one laptop, which sets the ceiling on the last point and is stated
