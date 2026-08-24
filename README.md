@@ -64,8 +64,10 @@ spreads, a worst case of `1.67x`, and lands inside the measured 95% interval in 
 **Why it works.** Run-to-run variance in RLVR does not accumulate. Across nine settings the log-log
 slope of policy divergence against update count runs from `-1.15` to `+0.26`, where a random walk
 requires `+1`, and the same holds on Qwen2.5-0.5B. The cause is the learning signal: replacing every
-reward with an independent coin flip, leaving the noise otherwise untouched, turns a flat trace into
-one that grows 10.7x over eighty updates.
+reward with an independent coin flip, leaving the rollouts, batches and step sizes otherwise
+untouched, turns a trace that ends at `0.14x` of where it started into one that grows `90.5x` over
+eighty updates -- a gap of `671x`. The learning condition moves *further* per update, so what brings
+those runs back together is not smaller steps.
 
 **Why it is cheap.** The mean update of a count-based estimator is the gradient of a scalar
 potential `E_x[Lambda(p_x)]`, so its Jacobian is symmetric (measured asymmetry 3e-10) and the

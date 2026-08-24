@@ -45,9 +45,10 @@ be carried against the gradient of the reported metric instead of being formed.
   because expansion is slow relative to run length, not because every direction shrinks.
 
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
-  leaves noise and batch composition untouched, turns a flat divergence trace into one that grows
-  $10.7\times$ over eighty updates. This separates the result from a claim that seeds merely end up
-  nearby.
+  leaves the rollouts, the batch composition and the step sizes untouched, turns a divergence trace
+  that ends at $0.14$ of where it started into one that grows by a factor of $90$ over eighty
+  updates --- a gap of $671\times$ at the end of the run. The learning condition also moves
+  \emph{further} per update, so what brings those runs back together is not smaller steps.
 
   \item \textbf{Where the uncertainty comes from.} Restricting the injected covariance to one of
   its terms attributes the forecast by origin. Which responses were sampled dominates which prompts

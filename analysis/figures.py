@@ -573,11 +573,41 @@ def figure_sources() -> None:
     plt.close(fig)
 
 
+def figure_null() -> None:
+    """The learning condition against the same run with the reward replaced by a coin."""
+    runs = [r for r in io.load_all("s8_null") if r["result"].get("conditions")]
+    if not runs:
+        raise SystemExit("no null experiment")
+    result = runs[-1]["result"]
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7), sharex=True)
+    labels = {"verifier": "verifier reward", "coin": "reward replaced by a coin"}
+    for name, colour, marker in zip(("verifier", "coin"), PALETTE, "o^", strict=False):
+        history = result["conditions"][name]
+        steps = np.array(history["step"], dtype=float)
+        axes[0].plot(steps, history["pairwise_kl"], marker=marker, ms=4, lw=1.4,
+                     color=colour, label=labels[name])
+        axes[1].plot(steps, history["pass_rate"], marker=marker, ms=4, lw=1.4, color=colour)
+    first = result["conditions"]["verifier"]["pairwise_kl"][0]
+    grid = np.array([1.0, max(result["conditions"]["verifier"]["step"])])
+    axes[0].plot(grid, first * grid, "--", color="0.45", lw=1.1)
+    axes[0].text(grid[1] * 0.25, first * grid[1] * 0.45, "random walk", fontsize=7,
+                 color="0.4", rotation=32)
+    axes[0].set_xscale("log")
+    axes[0].set_yscale("log")
+    axes[0].legend(fontsize=7, frameon=False, loc="lower left")
+    style(axes[0], "updates", "divergence between seeds", "same noise, same steps")
+    style(axes[1], "updates", "pass rate on the task", "only one of them is learning")
+    fig.tight_layout()
+    save(fig, "null.pdf")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
         ("forecast", figure_forecast),
         ("sources", figure_sources),
+        ("null", figure_null),
         ("reconvergence", figure_reconvergence),
         ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),

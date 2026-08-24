@@ -63,9 +63,10 @@ The word used throughout is *filtered*, not *contracted*, and this is what it me
 ## 4. The filtering comes from learning
 
 Removing the learning signal while leaving the noise intact -- every reward replaced by an
-independent coin flip -- turns a flat divergence trace into one that grows 10.7x over eighty
-updates. Same batches, same step sizes, same gradient magnitudes. This is what separates the result
-from a claim that seeds happen to end up nearby.
+independent coin flip -- turns a divergence trace that ends at 0.14x of where it started into one
+that grows 90.5x over eighty updates, a gap of 671x at the end. Same rollouts, same batches, same
+step sizes. The learning condition's mean drift per update is *larger* (6.10e-3 against 5.17e-3),
+so what brings those runs back together is not smaller steps. See `experiments/s8_null`.
 
 The tabular policy at small drift is the other side of the same coin: its gradient field is nearly
 flat, `J ~ 0`, and there divergence accumulates exactly as (S1) says it should.

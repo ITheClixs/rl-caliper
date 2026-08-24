@@ -113,37 +113,43 @@ indistinguishable from the truth. The single-timescale law is wrong by two order
 That failure is informative rather than embarrassing: it is what \eqref{eq:unrolled} predicts when
 a spectrum of contraction rates is compressed to one number.
 
-\paragraph{The filtering requires a learning signal.} If divergence stops growing because the shared
-objective pulls two runs together, then removing the objective while leaving the noise in place
-should restore accumulation. We ran a population of transformers twice from identical parameters:
-once normally, and once with every reward replaced by an independent coin flip, which leaves the
-rollout sampling, the batch composition and the gradient magnitudes intact while destroying the
-learning signal.
+\paragraph{The filtering requires a learning signal.} If divergence stops growing because the
+shared objective pulls two runs together, then removing the objective while leaving the noise in
+place should restore accumulation. We ran a population of transformers twice from identical warmed
+parameters: once normally, and once with every reward replaced by an independent coin flip. The
+rollouts, the prompt draws, the group size and the step size are the same in both, and so is the
+estimator; only the reward differs, and a count-based advantage depends on the pattern of rewards
+within a group rather than on whether that pattern is deserved.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/null.pdf}
+  \caption{The same run with and without a learning signal. Left, divergence between seeds against
+  the slope a random walk requires; right, pass rate on the actual task, which is what the coin
+  condition is not optimising.}
+  \label{fig:null}
+\end{figure}
 
 \begin{table}[t]
   \centering
   \small
-  \setlength{\tabcolsep}{3.5pt}
-  \begin{tabular}{@{}lcccc@{}}
-    \toprule
-    & \multicolumn{2}{c}{learning} & \multicolumn{2}{c}{signal removed} \\
-    \cmidrule(lr){2-3}\cmidrule(lr){4-5}
-    updates & diverg. & pass & diverg. & pass \\
-    \midrule
-    1  & $1.15\times10^{-3}$ & 0.191 & $3.99\times10^{-3}$ & 0.184 \\
-    20 & $1.26\times10^{-3}$ & 0.267 & $1.11\times10^{-2}$ & 0.177 \\
-    40 & $1.35\times10^{-3}$ & 0.341 & $1.71\times10^{-2}$ & 0.185 \\
-    80 & $0.94\times10^{-3}$ & 0.513 & $4.28\times10^{-2}$ & 0.184 \\
-    \bottomrule
-  \end{tabular}
+  \input{tables/null}
   \caption{Divergence between runs that differ only in rollout randomness, with and without a
-  learning signal. Same noise, same batches, same step sizes; only the rewards differ.}
+  learning signal. Same noise, same batches, same step sizes; only the rewards differ. The pass
+  rate column is the verifier's in both conditions, so the coin column shows what the run is
+  actually achieving while it optimises noise.}
   \label{tab:signal}
 \end{table}
 
-With a signal, divergence is flat while the pass rate climbs from $0.19$ to $0.51$. Without one it
-grows by a factor of $10.7$ over the same eighty updates. The filtering is caused by the objective, which is what \eqref{eq:seed-recursion} says and what separates this from a claim that
-seeds happen to end up nearby.
+The two conditions separate completely. With a signal, divergence rises for ten updates, turns
+over, and ends at $0.14$ of where it started while the pass rate climbs from $0.31$ to $0.91$.
+Without one it grows by a factor of $90.5$ over the same eighty updates and the pass rate does not
+move. At the end of the run the two differ by a factor of $671$.
+
+The control that matters is the step size. Mean realised drift per update is
+$6.10\times10^{-3}$ in the learning condition against $5.17\times10^{-3}$ in the null: the runs that
+end up closer together are the ones that moved \emph{further} per update. Whatever brings them back
+is not smaller steps.
 
 \paragraph{On a pretrained model.} The transformers above are small and their task is synthetic.
 We repeated the measurement on Qwen2.5-0.5B-Instruct with LoRA adapters, six runs differing only in
