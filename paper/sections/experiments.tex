@@ -282,45 +282,15 @@ because it is the quantity that separates the regime where the forecast has a wo
 $1.2\times$ from the regime where it has one of $1.6\times$, and computing it costs one extra
 gradient evaluation on a checkpoint a run already has.
 
-\subsection{Exactly enumerable policies}
+\subsection{The exact moments the forecast is built on}
 
-The policy is a tabular autoregressive model over a small vocabulary, so its distribution over
-sequences, its score at every sequence, and the conditional moments $(p, u_1, S_0, S_1)$ are
-available exactly. Propositions~\ref{prop:mean} and~\ref{prop:cov} were checked against
+Every term the forecast injects comes from Propositions~\ref{prop:mean} and~\ref{prop:cov}, so
+those are checked first. The policy is a tabular autoregressive model over a small vocabulary, so
+its distribution over sequences, its score at every sequence, and the conditional moments
+$(p, u_1, S_0, S_1)$ are available exactly. Propositions~\ref{prop:mean} and~\ref{prop:cov} were checked against
 brute-force enumeration over all $|\mathcal{Y}|^{G}$ group outcomes for five estimators and
 $G \in \{2,3,4\}$: agreement to $10^{-12}$. The scaled within-prompt term $(G-1)\tr\Sw$, which the
 theory treats as $G$-independent, varies by $6\%$ over $G = 2$ to $32$.
-
-\paragraph{The curvature model fails, the drift model does not.} Taking a real update and computing
-the resulting improvement and KL exactly, the second-order model of the objective places its optimal
-step at least four times below the step that actually maximises improvement, which is where the
-sweep ended, because $J = \E[r]$ is
-not a log-likelihood and a log-linear policy keeps improving past the turnover of a quadratic model.
-The drift model \eqref{eq:drift} predicts the measured KL to between $2.6\%$ and $3.9\%$ across a thousandfold range of step sizes. The theory in Section~\ref{sec:drift} is built on the second of these, not
-the first.
-
-\paragraph{Splitting a rollout budget.} For each prompt pool the parameter-free efficiency curve
-$\rho(G)$ is compared against the improvement obtained by training at every split of a fixed budget,
-holding total rollouts, total drift and step count fixed. Table~\ref{tab:exact-agreement} groups
-pools by how much $\rho$ varies across the splits on offer.
-
-\begin{table*}[t]
-  \centering
-  \input{tables/exact_agreement}
-  \caption{Agreement between the predicted efficiency and the measured gain in the enumerable
-  testbed, as a function of how strongly the prediction discriminates between splits. The prediction
-  has no free parameters. Pools where it predicts that the split hardly matters are the pools where
-  the measured curves are flat to within their standard errors.}
-  \label{tab:exact-agreement}
-\end{table*}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=0.95\textwidth]{figures/exact_curves.pdf}
-  \caption{Measured gain against $\sqrt{\rho(G)}$ for the four pools whose predictions discriminate
-  most strongly. Error bars are standard errors over seeds.}
-  \label{fig:exact-curves}
-\end{figure*}
 
 \subsection{The estimator}
 
@@ -336,34 +306,6 @@ individual traces are recovered to $2.1\%$ ($\tau_w$) and $3.4\%$ ($\tau_b$) at 
   \caption{Measured against exact optimal group size across prompt pools.}
   \label{fig:estimator-accuracy}
 \end{figure}
-
-\subsection{Transformers trained from scratch}
-
-A population of independent transformers is warmed up on a verifiable running-sum task until each
-member reaches a common pass rate, the noise terms are measured at that frozen policy, and every
-member is then trained from the same starting point at each split of a fixed rollout budget. The
-corpus size is the knob: sampling without replacement from a corpus of $N$ scales the between-prompt
-term by $1 - (P-1)/(N-1)$, so shrinking the corpus toward the batch raises $G^{\star}$ without touching
-the task.
-
-\begin{table*}[t]
-  \centering
-  \input{tables/transformer}
-  \caption{Predicted and measured optimum on transformers trained from scratch. The sweep visits
-  $G \in \{2, 4, 8, 16, 32, 64\}$, so a predicted optimum near three can only appear as a peak at
-  two or four; those two are within one standard error of each other in four of the five corpora,
-  and every corpus shows the predicted decline beyond $G = 8$. Spearman and $R^2$ are computed
-  against the parameter-free prediction across the whole sweep.}
-  \label{tab:transformer}
-\end{table*}
-
-\begin{figure*}[t]
-  \centering
-  \includegraphics[width=\textwidth]{figures/transformer_curves.pdf}
-  \caption{Gain against group size at a fixed rollout budget, with the parameter-free prediction
-  overlaid and the predicted $G^{\star}$ marked.}
-  \label{fig:transformer-curves}
-\end{figure*}
 
 \subsection{When the optimiser carries state}
 \label{sec:exp-adam}
