@@ -57,7 +57,14 @@ def metric_gradient(trainer, items, rng, key) -> tuple[np.ndarray, float, mx.arr
 
 
 def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
-    """Var over prompts of the projected per-prompt gradient, and the batch's pass rate."""
+    """Var over prompts of the projected per-prompt gradient, the pass rate, and the live share.
+
+    The live share is the fraction of prompts whose group is not unanimous. A count-based
+    advantage is identically zero on a unanimous group, so once the policy has become
+    deterministic on the corpus no rollout noise enters at all and the injected term is exactly
+    zero. That is a real property of the run, not a failure of the estimate, and reporting it
+    separately is what tells the two apart.
+    """
     cfg = trainer.config
     picks = rng.choice(len(corpus), size=cfg.prompts, replace=False)
     items = [corpus[i] for i in picks]
@@ -65,11 +72,19 @@ def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
     counts = rewards.sum(axis=1).astype(int)
     weights = weight_table(cfg.estimator, cfg.group_size)
     projections = []
+    live = 0
     for i in range(len(items)):
         advantage = weights[counts[i], rewards[i].astype(int)]
+        if np.any(advantage != 0.0):
+            live += 1
         _, grads = trainer._gradient([sequences[i]], [masks[i]], [advantage])
         projections.append(float(direction @ flatten(grads)))
-    return float(np.var(projections, ddof=1)), float(rewards.mean()), key
+    return (
+        float(np.var(projections, ddof=1)),
+        float(rewards.mean()),
+        live / max(len(items), 1),
+        key,
+    )
 
 
 def mean_update(trainer, corpus, rng_seed: int, key, batches: int = 1) -> np.ndarray:
@@ -121,6 +136,7 @@ class RealForecast:
     adjoint_norm: list[float]
     metric_value: float
     jvp_agreement: list[float]  # cosine between two independent estimates of J b
+    live_share: list[float]  # fraction of prompts still sampling more than one answer
 
 
 def forecast(
@@ -153,13 +169,15 @@ def forecast(
 
     kernel = [0.0] * steps
     norms = [0.0] * steps
+    live_share = [0.0] * steps
     agreement = []
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
-        projected, _, key = projected_batch_variance(
+        projected, _, live, key = projected_batch_variance(
             trainer, corpus, np.random.default_rng(seed + 100 + t), key, adjoint
         )
         kernel[t] = step_size**2 * projected / n_prompts
+        live_share[t] = live
         norms[t] = float(np.linalg.norm(adjoint))
         product = hessian_vector(
             trainer, states[t], corpus, adjoint, key, seed + 500 + t, epsilon, batches
@@ -179,4 +197,5 @@ def forecast(
         adjoint_norm=norms,
         metric_value=metric,
         jvp_agreement=agreement,
+        live_share=live_share,
     )

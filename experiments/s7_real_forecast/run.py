@@ -84,7 +84,7 @@ def main() -> None:
     ap.add_argument("--prompts", type=int, default=8)
     ap.add_argument("--group-size", type=int, default=8)
     ap.add_argument("--max-tokens", type=int, default=20)
-    ap.add_argument("--learning-rate", type=float, default=2e-3)
+    ap.add_argument("--learning-rate", type=float, default=2e-4)
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--epsilon", type=float, default=1e-3)
     ap.add_argument("--adjoint-batches", type=int, default=2)
@@ -143,6 +143,8 @@ def main() -> None:
           f"estimates from the same run the sd of that number is {spread_of_forecasts:.5f}",
           flush=True)
     print(f"kernel {np.round(prediction.kernel, 8).tolist()}", flush=True)
+    print(f"prompts still sampling more than one answer, per update: "
+          f"{np.round(prediction.live_share, 2).tolist()}", flush=True)
     if prediction.jvp_agreement:
         agree = np.array(prediction.jvp_agreement)
         print(f"Hessian-vector product agreement across independent draws: "
@@ -150,7 +152,7 @@ def main() -> None:
     (store / "forecast.json").write_text(json.dumps({
         "variance": prediction.variance, "std": prediction.std,
         "kernel": prediction.kernel, "adjoint_norm": prediction.adjoint_norm,
-        "jvp_agreement": prediction.jvp_agreement,
+        "jvp_agreement": prediction.jvp_agreement, "live_share": prediction.live_share,
     }))
     del trainer
 
@@ -186,6 +188,7 @@ def main() -> None:
         "kernel": prediction.kernel,
         "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement,
+        "live_share": prediction.live_share,
         "repeat_stds": [r.std for r in repeats],
         "forecast_estimation_sd": spread_of_forecasts,
         "held_out_scores": scores,
