@@ -41,7 +41,7 @@ trajectory, at three pool difficulties.
 * Spectral radius **exceeds one everywhere**: `10^3(rho - 1)` runs from about 20 early to 0.1 late.
 * Only **31%-51%** of directions contract, a share that grows as the run proceeds.
 * Among the contracting directions, eigenvalues run from about 0.98 to 1.0000 -- decay timescales
-  from roughly 45 updates to effectively unbounded.
+  from roughly fifty updates to effectively unbounded.
 
 So it is a filter, not a contraction. Divergence stays bounded over the horizons anyone trains
 because expansion is slow relative to run length (1.02^25 is about 1.6), and a run long enough would

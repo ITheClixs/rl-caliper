@@ -51,7 +51,7 @@ difficulties:
 * the spectral radius exceeds one everywhere -- `10^3(rho - 1)` runs from about 20 early to 0.1 late;
 * only 31%-51% of directions contract at all, and that share rises as the run proceeds;
 * among the contracting directions the fastest has eigenvalue about 0.98 and the slowest is 1.0000
-  to four places -- decay timescales from roughly 45 updates to effectively unbounded.
+  to four places -- decay timescales from roughly fifty updates to effectively unbounded.
 
 Three consequences. Divergence stays bounded over the horizons measured because expansion is slow
 relative to run length (1.02^25 is about 1.6), not because perturbations are destroyed. One
