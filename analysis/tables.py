@@ -357,6 +357,37 @@ def table_spectrum() -> None:
     write("spectrum", "\n".join(lines))
 
 
+def _sci(value: float) -> str:
+    """Scientific notation the way the paper writes it."""
+    mantissa, exponent = f"{value:.2e}".split("e")
+    return f"${mantissa}\\times10^{{{int(exponent)}}}$"
+
+
+def table_null() -> None:
+    """The learning condition against the condition with the signal removed."""
+    runs = [r for r in io.load_all("s8_null") if r["result"].get("conditions")]
+    if not runs:
+        raise SystemExit("no null experiment")
+    result = runs[-1]["result"]
+    left, right = result["conditions"]["verifier"], result["conditions"]["coin"]
+    lines = [
+        r"\setlength{\tabcolsep}{3.5pt}",
+        r"\begin{tabular}{@{}lcccc@{}}",
+        r"\toprule",
+        r"& \multicolumn{2}{c}{learning} & \multicolumn{2}{c}{signal removed} \\",
+        r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}",
+        r"updates & diverg. & pass & diverg. & pass \\",
+        r"\midrule",
+    ]
+    for index, step in enumerate(left["step"]):
+        lines.append(
+            f"{step} & {_sci(left['pairwise_kl'][index])} & {left['pass_rate'][index]:.3f} & "
+            f"{_sci(right['pairwise_kl'][index])} & {right['pass_rate'][index]:.3f} \\\\"
+        )
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("null", "\n".join(lines))
+
+
 def table_propagation() -> None:
     """Candidate models of seed divergence against exact Monte Carlo ground truth."""
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
@@ -404,6 +435,7 @@ def main() -> None:
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
+        ("null", table_null),
     ):
         try:
             fn()

@@ -39,8 +39,9 @@ def train_one(policy, accepts, cfg, seed):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--vocab", type=int, default=3)
-    ap.add_argument("--length", type=int, default=3)
+    ap.add_argument("--shapes", nargs="+", default=["3x3"],
+                    help="policy shapes as vocab x length, e.g. 3x3 4x2")
+    ap.add_argument("--diversity", nargs="+", type=float, default=[1.0])
     ap.add_argument("--pool", type=int, default=24)
     ap.add_argument("--seeds", type=int, default=64)
     ap.add_argument("--steps", nargs="+", type=int, default=[10, 25])
@@ -52,12 +53,16 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
+    shapes = [tuple(int(v) for v in shape.split("x")) for shape in args.shapes]
     cells = []
-    grid = itertools.product(args.bands, args.steps, args.prompts, args.group_size, args.step_size)
-    print(f"{'band':>6s} {'T':>4s} {'P':>4s} {'G':>3s} {'eta':>5s} "
+    grid = itertools.product(
+        shapes, args.diversity, args.bands, args.steps, args.prompts,
+        args.group_size, args.step_size,
+    )
+    print(f"{'shape':>6s} {'div':>4s} {'band':>6s} {'T':>4s} {'P':>4s} {'G':>3s} {'eta':>5s} "
           f"{'predicted':>10s} {'measured':>10s} {'95% interval':>22s}")
-    for band, steps, prompts, group, eta in grid:
-        policy, accepts = build(args.vocab, args.length, args.pool, BANDS[band], 1.0, args.seed)
+    for (vocab, length), diversity, band, steps, prompts, group, eta in grid:
+        policy, accepts = build(vocab, length, args.pool, BANDS[band], diversity, args.seed)
         cfg = RunConfig(
             estimator=args.estimator,
             n_prompts=prompts,
@@ -84,6 +89,9 @@ def main() -> None:
 
         cells.append(
             {
+                "vocab": vocab,
+                "length": length,
+                "diversity": diversity,
                 "band": band,
                 "steps": steps,
                 "prompts": prompts,
@@ -100,8 +108,9 @@ def main() -> None:
                 "seeds": int(scores.size),
             }
         )
-        print(f"{band:>6s} {steps:4d} {prompts:4d} {group:3d} {eta:5.2f} "
-              f"{prediction.std:10.3e} {measured['std']:10.3e} "
+        shape = f"{vocab}x{length}"
+        print(f"{shape:>6s} {diversity:4.1f} {band:>6s} {steps:4d} {prompts:4d} "
+              f"{group:3d} {eta:5.2f} {prediction.std:10.3e} {measured['std']:10.3e} "
               f"[{measured['lo']:.3e}, {measured['hi']:.3e}]", flush=True)
 
     ratios = np.array([c["predicted_std"] / c["measured_std"] for c in cells])
