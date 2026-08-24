@@ -360,17 +360,22 @@ anyway, and every seed shares the warmed state so the covariance still starts at
 
 The optimiser state matters and the lift is worth taking: ignoring it underpredicts by
 $5.5\times$ at the median, and the lift brings that to $2.6\times$. Freezing the second moment
-rather than propagating it makes matters worse, not better, which says the second moment is
-genuinely carrying seed information rather than merely complicating the algebra.
+rather than propagating it makes matters much worse --- $15.9\times$ --- which says the second
+moment is genuinely carrying seed information rather than merely complicating the algebra.
 
-But the lift is not reliable, and where it fails is systematic. On pools with a live learning
-signal every setting lands within about a factor of two. On pools where the pass rate is saturated
-at either end the linearised map has a spectral radius above one and the prediction runs away, by
-up to two orders of magnitude in the worst case. This is Adam's normalisation acting as the
-nonlinearity that bounds the real spread --- a bound a linear recursion does not contain. The
-practical statement is that the forecast should be taken under gradient ascent, or under Adam only
-while $\E_x[p(1-p)]$ is well away from zero, and that a linear treatment of Adam over long horizons
-is an open problem rather than a solved one.
+But the lift is not reliable, and where it fails is systematic. Splitting by pool: on the
+intermediate band, where the mean pass rate is $0.58$ and the learning signal is live, the lift has
+a median error of $1.48\times$ and a worst case of $2.26\times$, while ignoring the optimiser state
+is wrong by $14\times$. On the easy band, where the pass rate reaches $0.72$ and
+$\E_x[p(1-p)]$ is collapsing, the median is $8.0\times$ and the worst case two orders of magnitude.
+The linearised map acquires a spectral radius above one and the prediction runs away, because
+Adam's normalisation is the nonlinearity that bounds the real spread and a linear recursion does not
+contain that bound.
+
+The practical statement is that the forecast should be taken under gradient ascent, or under Adam
+only while $\E_x[p(1-p)]$ is well away from zero --- which is the same condition
+Section~\ref{sec:exp-scale} arrives at for a different reason --- and that a linear treatment of
+Adam over long horizons is an open problem rather than a solved one.
 
 \subsection{Two ways a run stops being measurable}
 \label{sec:exp-scale}

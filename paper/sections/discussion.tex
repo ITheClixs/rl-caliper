@@ -60,11 +60,11 @@ unanimous during training, and $\E_x[p(1-p)]$ on the evaluation set at the end. 
 so is the error bar, and it means nothing.
 
 \paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
-only partly works in practice. It halves the error of ignoring the optimiser state, and the
-optimiser state clearly does carry seed information --- freezing the second moment makes the
-prediction worse, not better. But where the pass rate saturates at either end, Adam's normalisation
-is the nonlinearity that bounds the spread, and a linear recursion cannot see a bound it does not
-contain. Section~\ref{sec:exp-adam} reports where it holds and where it does not, rather than
+only partly works in practice. It halves the error of ignoring the optimiser state --- $2.6\times$ against $5.5\times$ ---
+and the optimiser state clearly does carry seed information, since freezing the second moment takes
+the error to $15.9\times$. Where the learning signal is live the lift is good to $1.48\times$ at
+the median. Where the pass rate saturates at either end, Adam's normalisation is the nonlinearity
+that bounds the spread, and a linear recursion cannot see a bound it does not contain. Section~\ref{sec:exp-adam} reports where it holds and where it does not, rather than
 reporting the median alone.
 
 \paragraph{Limits of the linearisation, with a diagnostic.} \eqref{eq:seed-recursion} requires the
