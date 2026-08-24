@@ -30,16 +30,27 @@ docs/           theory notes and result notes
 
 ## What it does
 
-```python
-from caliper.exact.adjoint import forecast
+`caliper.forecast` is framework-agnostic. Supply one object per update that can answer two
+questions about the trajectory you stored, and it accumulates the error bar:
 
-prediction = forecast(policy, accepts, "rloo", group_size=8, n_prompts=16,
-                      step_size=0.5, steps=25, states=states_of_one_run)
-prediction.std          # forecast s.d. of the reported score across seeds
-prediction.kernel       # each update's share of it
+```python
+from caliper.forecast import run_backward
+
+class MyUpdate:                  # step_size, n_prompts as attributes
+    def projected_variance(self, b):   # Var over prompts of b . per-prompt gradient
+        ...
+    def jacobian_vector(self, b):      # J b, one Hessian-vector product
+        ...
+
+result = run_backward(metric_gradient, updates)
+result.std                # forecast s.d. of the reported score across seeds
+result.interval(0.784)    # a normal interval around the number you are reporting
+result.kernel             # each update's share of the variance
+result.memory()           # how many final updates hold 95% of it
 ```
 
-`src/caliper/real/adjoint.py` is the same backward pass for a pretrained model through MLX: two
+Two implementations of that protocol ship here: `caliper.exact.adjoint` for enumerable policies,
+where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX -- two
 gradient evaluations per stored update, with common random numbers so the finite difference is a
 directional derivative rather than a difference of two noise draws.
 
