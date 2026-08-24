@@ -168,6 +168,19 @@ apparent peak-and-fall is not resolved at six seeds. What the experiment support
 statement that divergence does not accumulate on a pretrained model either. The six runs finish
 within $0.835 \pm 0.044$ of each other in pass rate.
 
+\begin{figure*}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/reconvergence.pdf}
+  \caption{\textbf{Left:} divergence between seeds against update count on transformers trained
+  from scratch, with the slope a random walk would require. It settles instead. \textbf{Centre:}
+  the level against the number of prompts, compared at matched pass rate rather than matched step
+  count, with the drift target controlled for. \textbf{Right:} the level against the drift target.
+  Fitted exponents are $-0.61$ and $+0.59$ against the $-1/2$ and $+1/2$ that
+  $Q_t \propto \eta^2\Sigma/P$ requires; both intervals contain those values and the first also
+  contains zero.}
+  \label{fig:reconvergence}
+\end{figure*}
+
 \paragraph{Bounded, not proven stationary.} Across the settings in which a run is still learning,
 the log-log slope of divergence against update count runs from $-1.15$ to $+0.26$, against the
 $+1$ that accumulation requires. That rejects accumulation. It does not establish stationarity in

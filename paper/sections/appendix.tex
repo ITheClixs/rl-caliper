@@ -30,7 +30,33 @@ code was at, and the interpreter and platform it ran on.
 
 The exactness tests in \texttt{tests/} check every analytic result in Section~\ref{sec:theory}
 against brute-force enumeration, and check the batched estimator against the reference
-implementation term by term.
+implementation term by term. Theorem~\ref{thm:adjoint} is additionally checked against the same
+quantity assembled the expensive way --- building $S_T$ explicitly and forming
+$\nabla M^{\!\top} S_T \nabla M$ --- and Proposition~\ref{prop:potential} against the measured
+asymmetry of $J$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
+floor.
+
+\paragraph{Which experiment produces what.}
+\begin{itemize}\itemsep1pt
+  \item \texttt{p1\_propagation}: the covariance recursion against Monte Carlo
+    (Table~\ref{tab:propagation}, Figure~\ref{fig:teaser} right).
+  \item \texttt{p2\_metric\_forecast}: the prospective forecast
+    (Table~\ref{tab:forecast}, Figures~\ref{fig:teaser} left and \ref{fig:forecast}).
+  \item \texttt{p3\_memory\_sources}: attribution and the memory horizon
+    (Figure~\ref{fig:sources}, Section~\ref{sec:exp-forecast}).
+  \item \texttt{p4\_linearity}: the linearisation residual (Section~\ref{sec:exp-linearity}).
+  \item \texttt{p5\_adam\_lift}: the lifted recursion (Table~\ref{tab:adam-lift}).
+  \item \texttt{s1}, \texttt{s3}, \texttt{s5}: seed divergence on transformers and on a pretrained
+    model (Figures~\ref{fig:reconvergence} and \ref{fig:real-seeds}).
+  \item \texttt{s6\_scale}: the seven-billion-parameter measurements
+    (Section~\ref{sec:exp-scale}).
+  \item \texttt{a}, \texttt{b}, \texttt{c}, \texttt{d}, \texttt{t}: the estimator, allocation and
+    cost-model results of Section~\ref{sec:applications}.
+\end{itemize}
+
+The exact-tier experiments run in minutes on a laptop CPU. The pretrained-model experiments need
+Apple Silicon and MLX; the seven-billion-parameter runs need about $24$\,GB of unified memory, and
+the eight-seed sweep takes several hours.
 
 \section{The estimator family as a table}
 \label{app:family}
