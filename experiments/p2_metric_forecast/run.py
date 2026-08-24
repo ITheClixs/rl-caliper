@@ -8,6 +8,10 @@ forecast never sees them.
 Because the policy is enumerable the reported number is the exact pass rate rather than an
 estimate of it, so the measured spread is the spread of the quantity itself and not of a
 finite evaluation set.
+
+Each setting is also forecast with the adjoint held fixed at grad M, which keeps the injected term
+and discards everything the trajectory does to it. That ablation is what says whether the backward
+pass is earning its cost.
 """
 
 from __future__ import annotations
