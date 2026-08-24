@@ -50,13 +50,15 @@ Retrospective agreement is cheap and unconvincing. Everything reported here is p
 
 ## 5. What was measured
 
-* **48 settings**, enumerable policy, 64 seeds each, varying difficulty band, run length, prompt
-  count and step size; realised spreads span a factor of 30.
-* Median absolute error **1.08x**, worst **1.67x**; forecast inside the measured 95% interval in
-  **36 of 48**. Coverage below the nominal rate is expected: with 64 seeds the measured interval is
-  narrow enough that a systematic error of tens of percent registers as a miss.
-* Accuracy is flat in run length (1.07x at T=10, 1.09x at T=25) and degrades slightly with step
-  size (1.07x at eta=0.5, 1.13x at eta=1.5).
+* **192 settings**, enumerable policies, 48 seeds each. Two policy shapes (vocab 3 over 3
+  positions, vocab 4 over 2), two prompt-pool diversities, three difficulty bands, two run lengths,
+  two prompt counts, two group sizes, two step sizes. Realised spreads span a factor of 47.
+* Median absolute error **1.11x**, worst **1.58x**; forecast inside the measured 95% interval in
+  **162 of 192**.
+* The two policy shapes agree (1.11x against 1.10x), so the result is not a property of one
+  tabular family.
+* Coverage tracks the step size: 90/96 at eta=0.5 against 72/96 at eta=1.5. The median barely
+  moves (1.09x against 1.13x); it is the tail that the linearisation costs.
 
 ## 6. Attribution and memory
 

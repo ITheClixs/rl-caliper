@@ -14,16 +14,17 @@ a single Apple M4 laptop with $24$\,GB of memory.
 \label{sec:exp-forecast}
 
 This is the experiment the paper is for, and its protocol is prospective by construction. In each
-of $48$ settings one run is trained and frozen; the states it passed through are carried backwards
+of $192$ settings one run is trained and frozen; the states it passed through are carried backwards
 through \eqref{eq:adjoint} to produce a forecast of the across-seed standard deviation of the final
-pass rate; the forecast is recorded; and only then are $63$ further seeds trained and their spread
+pass rate; the forecast is recorded; and only then are $47$ further seeds trained and their spread
 measured. Nothing about the outcome is available when the prediction is made.
 
 The enumerable policy is used because there the reported number is the exact pass rate rather than
 an estimate of it, so the measured spread is the spread of the quantity itself and not of a finite
-evaluation set. Settings vary the prompt pool's difficulty band, the run length $T$, the prompt
+evaluation set. Settings vary two policy shapes (a vocabulary of three over three positions, and of
+four over two), two prompt-pool diversities, three difficulty bands, the run length $T$, the prompt
 count $P$ and the step size $\eta$, which between them move the realised spread over a factor of
-$30$.
+$47$.
 
 \begin{figure*}[t]
   \centering
@@ -46,13 +47,13 @@ $30$.
   \label{tab:forecast}
 \end{table}
 
-Table~\ref{tab:forecast} reports a median absolute error of $1.08\times$ and a worst case of
-$1.67\times$. The forecast lands inside the measured $95\%$ interval in $36$ of $48$ settings,
-which is below the nominal rate and worth being plain about: with $64$ seeds the measured interval
-is narrow enough that a systematic modelling error of tens of percent shows up as a miss. The
-accuracy does not degrade with run length --- $1.07\times$ at ten updates against $1.09\times$ at
-twenty-five --- and degrades slightly with step size, which is what Section~\ref{sec:exp-linearity}
-attributes to the linearisation.
+Table~\ref{tab:forecast} reports a median absolute error of $1.11\times$ and a worst case of
+$1.58\times$, and the forecast lands inside the measured $95\%$ interval in $162$ of $192$
+settings. Two things in the breakdown are worth noting. The two policy shapes agree with each other
+--- $1.11\times$ against $1.10\times$ --- so the result is not a property of one tabular family.
+And accuracy is flat in run length at the median but its coverage is not: $90$ of $96$ settings at
+$\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
+where Section~\ref{sec:exp-linearity} says it should.
 
 What the forecast costs is two gradient evaluations per update for the backward pass and one
 scalar per update for the injected term. It never forms $S_T$, and by

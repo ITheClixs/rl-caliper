@@ -69,9 +69,10 @@
   scalar potential, so its Jacobian is symmetric.
 
   We test the forecast prospectively --- one run trained and frozen, the prediction recorded, and
-  only then the remaining seeds trained. Across $48$ settings spanning a $30\times$ range of spreads
-  its median absolute error against the realised standard deviation is $1.08\times$ and it lands
-  inside the measured $95\%$ interval in $36$ of them; the covariance law underneath predicts policy
+  only then the remaining seeds trained. Across $192$ settings spanning two policy shapes, two
+  prompt-pool diversities and a $47\times$ range of spreads, its median absolute error against the
+  realised standard deviation is $1.11\times$, its worst is $1.58\times$, and it lands inside the
+  measured $95\%$ interval in $162$ of them; the covariance law underneath predicts policy
   divergence to $9\%$ at the median, against $3.9\times$ for ignoring the filter and two orders of
   magnitude for compressing it to one timescale. The filtering is caused by learning, not by
   proximity: replacing every reward with a coin flip leaves the rollouts, the batches and the step

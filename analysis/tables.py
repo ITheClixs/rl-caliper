@@ -281,6 +281,10 @@ def table_forecast() -> None:
         )
 
     block("all settings", cells)
+    if any("vocab" in c for c in cells):
+        for shape in sorted({(c["vocab"], c["length"]) for c in cells if "vocab" in c}):
+            rows = [c for c in cells if (c.get("vocab"), c.get("length")) == shape]
+            block(f"\\quad policy ${shape[0]}^{{{shape[1]}}}$", rows)
     for steps in sorted({c["steps"] for c in cells}):
         block(f"\\quad $T = {steps}$", [c for c in cells if c["steps"] == steps])
     for prompts in sorted({c["prompts"] for c in cells}):

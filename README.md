@@ -58,8 +58,9 @@ directional derivative rather than a difference of two noise draws.
 
 **The forecast.** Tested prospectively -- one run trained and frozen, the prediction recorded, and
 only then 63 more seeds trained -- the forecast of the across-seed standard deviation of the
-reported pass rate has a median absolute error of `1.08x` over 48 settings spanning a 30x range of
-spreads, a worst case of `1.67x`, and lands inside the measured 95% interval in 36 of them.
+reported pass rate has a median absolute error of `1.11x` over 192 settings -- two policy shapes, two prompt-pool
+diversities, and a 47x range of spreads -- a worst case of `1.58x`, and lands inside the measured
+95% interval in 162 of them.
 
 **Why it works.** Run-to-run variance in RLVR does not accumulate. Across nine settings the log-log
 slope of policy divergence against update count runs from `-1.15` to `+0.26`, where a random walk

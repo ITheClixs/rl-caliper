@@ -30,9 +30,10 @@ be carried against the gradient of the reported metric instead of being formed.
   because the mean update of any count-based estimator is the gradient of a scalar potential
   $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
   pass rate itself. Tested prospectively, one run trained and frozen and the forecast recorded
-  before $63$ further seeds were trained, its median absolute error against the realised spread is
-  $1.08\times$ across $48$ settings spanning a $30\times$ range of spreads, its worst is
-  $1.67\times$, and it falls inside the measured $95\%$ interval in $36$ of them.
+  before the remaining seeds were trained, its median absolute error against the realised spread is
+  $1.11\times$ across $192$ settings --- two policy shapes, two prompt-pool diversities, and a
+  $47\times$ range of spreads --- its worst is $1.58\times$, and it falls inside the measured $95\%$
+  interval in $162$ of them.
 
   \item \textbf{A finite-time covariance law, and what its operator really does}
   (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
