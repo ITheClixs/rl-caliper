@@ -32,7 +32,16 @@ directions of $S_T$ differently, and one of the two weightings can be identicall
 
 \paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
 and the injected covariance are all exact. On a real model each becomes an estimate, and the
-composition of three estimates is not something our measurements bound. We report the ingredients
+composition of three estimates is not something our measurements bound. One of the three is biased
+in a direction we can name. Writing the estimated metric gradient as $\hat{b} = \nabla M + \epsilon$
+with $\epsilon$ the sampling error of one rollout on the evaluation set,
+\begin{equation}
+  \label{eq:bias}
+  \E\big[\Var(\hat{b}^{\!\top}\hat{g})\big]
+  = \Var(\nabla M^{\!\top}\hat{g}) + \E\big[\Var(\epsilon^{\!\top}\hat{g})\big],
+\end{equation}
+so a noisy metric gradient makes the forecast too large, never too small. The second term shrinks
+with the size of the evaluation rollout and can be estimated by splitting it, which we did not do. We report the ingredients
 separately at $7$B --- the realised spread over eight seeds, and the divergence between them --- but
 not the forecast itself, because we could not validate the backward pass at that scale within this
 machine's budget. That gap is the single most valuable thing to close next, and
