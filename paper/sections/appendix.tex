@@ -36,6 +36,14 @@ $\nabla M^{\!\top} S_T \nabla M$ --- and Proposition~\ref{prop:potential} agains
 asymmetry of $\mathcal{J}$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
 floor.
 
+\paragraph{Using the backward pass elsewhere.} Algorithm~\ref{alg:forecast} needs two things from
+a training run and nothing else: the variance across prompts of the batch gradient projected onto a
+direction, and a Jacobian-vector product of the mean update field with that direction. The released
+code states that as a protocol rather than a class hierarchy, so a trainer in another framework
+implements two methods and reuses the recursion. Two implementations ship with it, one for
+enumerable policies where every term is exact and one for a pretrained model through MLX, and the
+protocol is tested against linear systems whose answer is available in closed form.
+
 \paragraph{Which experiment produces what.}
 \begin{itemize}\itemsep1pt
   \item \texttt{p1\_propagation}: the covariance recursion against Monte Carlo
