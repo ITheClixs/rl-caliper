@@ -114,3 +114,37 @@ def test_an_unknown_source_is_rejected(pool):
     policy, accepts = pool
     with pytest.raises(KeyError):
         forecast(policy, accepts, "rloo", 8, 16, 0.5, 3, source="cosmic rays")
+
+
+def test_the_injected_term_is_the_variance_of_a_projected_batch_gradient(pool):
+    """Theorem 2's second equality, against sampled batches rather than against the algebra.
+
+    b^T Cov(g_hat) b has to be the variance of b . g_hat over batches. Everything else in the
+    forecast is exact given this term, so it is the one worth checking by simulation.
+    """
+    policy, accepts = pool
+    weights = weight_table("rloo", 8)
+    n_prompts, group_size, draws = 12, 8, 20_000
+    rng = np.random.default_rng(0)
+    direction = rng.normal(size=policy.dim)
+    direction /= np.linalg.norm(direction)
+
+    probs, scores = policy.enumerate()
+    cdf = np.cumsum(probs)
+    cdf[-1] = 1.0
+    projected_scores = scores @ direction  # only the projection is ever needed
+
+    sampled = np.empty(draws)
+    for i in range(draws):
+        prompt_ids = rng.integers(0, accepts.shape[0], size=n_prompts)
+        outcomes = np.searchsorted(cdf, rng.random((n_prompts, group_size)))
+        rewards = accepts[prompt_ids[:, None], outcomes].astype(int)
+        advantage = weights[rewards.sum(axis=1)[:, None], rewards]
+        sampled[i] = (advantage * projected_scores[outcomes]).sum() / (n_prompts * group_size)
+
+    predicted = float(
+        direction @ injected_covariance(policy, accepts, weights, n_prompts) @ direction
+    )
+    measured = float(sampled.var(ddof=1))
+    # 20k draws give the sample variance a relative standard error of about 1%
+    assert measured == pytest.approx(predicted, rel=0.06)
