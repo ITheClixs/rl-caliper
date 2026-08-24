@@ -60,6 +60,32 @@ Retrospective agreement is cheap and unconvincing. Everything reported here is p
 * Coverage tracks the step size: 90/96 at eta=0.5 against 72/96 at eta=1.5. The median barely
   moves (1.09x against 1.13x); it is the tail that the linearisation costs.
 
+## 5b. What the backward pass is worth
+
+Holding `b` at `grad M(theta_T)` instead of carrying it back keeps the injected term and discards
+the transport. Over the same 192 settings:
+
+| | median error | worst |
+|---|---|---|
+| adjoint carried back | 1.11x | 1.58x |
+| adjoint held at grad M | 1.11x | 1.75x |
+
+The two forecasts agree to a median of 2% (extremes 0.72x to 1.05x) and land inside the measured
+interval in the same 162 settings. Carrying it back buys the tail, and only where the run is long
+and the step large: at T=25, eta=1.5 the worst case is 1.58x carried against 1.75x held.
+
+Why: `theory-seeds.md` section 3b measures most of the spectrum of `A_t` within 1e-4 of one, and
+`grad M` points into that part of it, so the transfer operator is close to the identity along the
+one direction the forecast uses.
+
+**Recommended default:** the cheap form,
+
+    Var[M] ~= sum_t (eta_t^2 / P) Var_i( grad M . g_hat_{t,i} )
+
+which is one extra pass per update and no Hessian-vector products. Use the full recursion when the
+spectrum of `A_t` moves away from one, or when the run is long enough that a per-update discrepancy
+of a percent compounds. The recursion is what tells you which regime you are in.
+
 ## 6. Attribution and memory
 
 Restricting `Sigma_t` to `Sigma_b` or `Sigma_w` splits the forecast by origin; the shares are exact
