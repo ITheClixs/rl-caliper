@@ -185,13 +185,19 @@ ascends exactly the quantity being reported.
     \State draw a batch at $\theta_t$; let $\hat{g}_{t,i}$ be its per-prompt gradients
     \State $v \gets v + (\eta_t^2/P)\,\widehat{\Var}_i\big(b^{\!\top}\hat{g}_{t,i}\big)$
       \Comment{one scalar}
-    \State $\delta \gets \epsilon\, b/\|b\|$
-    \State $b \gets b + \dfrac{\eta_t}{2}\cdot\dfrac{\|b\|}{\epsilon}
-      \big(\gbar(\theta_t + \delta) - \gbar(\theta_t - \delta)\big)$
-      \Comment{common random numbers}
+    \If{transport is needed}
+      \State $\delta \gets \epsilon\, b/\|b\|$
+      \State $b \gets b + \dfrac{\eta_t}{2}\cdot\dfrac{\|b\|}{\epsilon}
+        \big(\gbar(\theta_t + \delta) - \gbar(\theta_t - \delta)\big)$
+        \Comment{common random numbers}
+    \EndIf
   \EndFor
   \State \Return $\sqrt{v}$ \Comment{forecast s.d.\ of $M$ across seeds; $\sqrt{2v}$ for a gap}
 \end{algorithmic}
+\vspace{2pt}
+{\footnotesize Lines 7--10 are what the recursion asks for and what
+Section~\ref{sec:exp-forecast} finds costs three times as much for a $2\%$ correction over runs of
+this length. Omitting them gives \eqref{eq:cheap}.}
 \end{algorithm}
 
 \paragraph{What a practitioner would do with this.} Three things during the run, none of which
@@ -204,10 +210,23 @@ gradient evaluations per stored update and one vector of parameter size held in 
 \paragraph{What it costs, plainly.} As written, the backward pass makes three passes per stored
 update: one batch for the injected term, and two for the Hessian-vector product. That is about
 three times the compute of the training run itself, not a rounding error, and we would rather state
-it than let a reader discover it. Two things reduce it. The injected term can reuse the rollouts the
-run already made, if they were stored, which removes one of the three. And the kernel is smooth in
-$t$ (Figure~\ref{fig:forecast}, right), so the backward pass can be run on a subsample of updates
-and interpolated, at a cost in accuracy we have not characterised.
+it than let a reader discover it.
+
+It is also usually unnecessary. Section~\ref{sec:exp-forecast} ablates the transport --- holding
+$b$ at $\nabla M(\theta_T)$ instead of carrying it back --- and finds the forecast changes by a
+median of $2\%$ and the median error not at all, over runs of ten and twenty-five updates. The
+reason is in the spectrum: most of $A_t$ sits within $10^{-4}$ of one and $\nabla M$ points into
+that part of it, so $\Phi_{T,t}$ is close to the identity along the one direction the forecast
+needs. What we recommend, then, is the cheap estimator ---
+\begin{equation}
+  \label{eq:cheap}
+  \Var_{\text{seed}}\big[M(\theta_T)\big] \;\approx\;
+  \sum_{t} \frac{\eta_t^2}{P}\,\widehat{\Var}_i\!\big(\nabla M(\theta_T)^{\!\top}\hat{g}_{t,i}\big),
+\end{equation}
+one extra pass per update and no Hessian-vector products --- with the full recursion held in
+reserve for runs long enough, or curvature strong enough, that a per-update discrepancy of a percent
+compounds. Knowing which regime one is in is what the recursion is for, and the spectrum of $A_t$ is
+what says it.
 
 The comparison that matters is not against zero. Estimating the same quantity by replication costs
 $N$ full runs and returns an $N$-seed estimate whose own interval is wide --- at six seeds, wide

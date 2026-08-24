@@ -263,7 +263,8 @@ def figure_teaser() -> None:
         f"one run predicts {len(cells)} spreads "
         f"(median {np.exp(np.median(error)):.2f}$\\times$)", fontsize=8.5
     )
-    style(ax, "measured s.d. over 64 seeds", "forecast, made before they ran")
+    seeds = cells[0].get("seeds", 0)
+    style(ax, f"measured s.d. over {seeds} seeds", "forecast, made before they ran")
 
     ax = axes[1]
     truth = np.array([c["measured_kl"] for c in models])
@@ -548,7 +549,8 @@ def figure_forecast() -> None:
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.legend(fontsize=7, frameon=False, loc="upper left")
-    style(ax, "measured s.d. over 64 seeds", "forecast from one run",
+    seeds = cells[0].get("seeds", 0)
+    style(ax, f"measured s.d. over {seeds} seeds", "forecast from one run",
           "identity, with the $1.5\\times$ band")
 
     ax = axes[1]

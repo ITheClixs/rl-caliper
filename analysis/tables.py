@@ -481,6 +481,46 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+def table_transport() -> None:
+    """What carrying the adjoint back is worth, against holding it at grad M."""
+    runs = [
+        r
+        for r in io.load_all("p2_metric_forecast")
+        if len(r["result"].get("cells", [])) >= 100
+        and "untransported_std" in r["result"]["cells"][0]
+    ]
+    if not runs:
+        raise SystemExit("no transport ablation")
+    cells = runs[-1]["result"]["cells"]
+    lines = [
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\begin{tabular}{@{}lcccc@{}}",
+        r"\toprule",
+        r"& \multicolumn{2}{c}{median} & \multicolumn{2}{c}{worst} \\",
+        r"\cmidrule(lr){2-3}\cmidrule(lr){4-5}",
+        r"settings & carried & held & carried & held \\",
+        r"\midrule",
+    ]
+
+    def row(label, rows):
+        out = []
+        for key in ("predicted_std", "untransported_std"):
+            out.append(np.abs(np.log(np.array([c[key] / c["measured_std"] for c in rows]))))
+        lines.append(
+            f"{label} & {np.exp(np.median(out[0])):.2f} & {np.exp(np.median(out[1])):.2f} & "
+            f"{np.exp(out[0].max()):.2f} & {np.exp(out[1].max()):.2f} \\\\"
+        )
+
+    row(f"all {len(cells)}", cells)
+    for steps in sorted({c["steps"] for c in cells}):
+        row(f"\\quad $T = {steps}$", [c for c in cells if c["steps"] == steps])
+    for eta in sorted({c["step_size"] for c in cells}):
+        row(f"\\quad $\\eta = {eta:g}$", [c for c in cells if c["step_size"] == eta])
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("transport", "\n".join(lines))
+
+
 def table_estimator_forecast() -> None:
     """Forecast accuracy for each estimator in the family, on a common sub-grid."""
     by_estimator: dict[str, list[dict]] = {}
@@ -563,6 +603,7 @@ def main() -> None:
         ("optimum", table_optimum),
         ("forecast", table_forecast),
         ("estimator_forecast", table_estimator_forecast),
+        ("transport", table_transport),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),

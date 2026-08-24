@@ -66,6 +66,34 @@ What the forecast costs is two gradient evaluations per update for the backward 
 scalar per update for the injected term. It never forms $S_T$, and by
 Proposition~\ref{prop:potential} it never needs a transpose.
 
+\paragraph{What the backward pass is worth.} The expensive part of
+Algorithm~\ref{alg:forecast} is carrying the adjoint back, two gradient evaluations per update. The
+ablation that says whether it earns them is to hold $b$ at $\nabla M(\theta_T)$ throughout, keeping
+the injected term and discarding everything the trajectory does to it.
+
+\begin{table}[t]
+  \centering
+  \input{tables/transport}
+  \caption{Forecast error with the adjoint carried back against held at $\nabla M$. Carrying it
+  changes the forecast by a median of $2\%$ and buys only the worst case, and only where the run is
+  long and the step large.}
+  \label{tab:transport}
+\end{table}
+
+It does not, at these horizons. The two agree to a median of $2\%$ in the forecast itself (extremes
+$0.72$ to $1.05$), the median error is identical to two decimal places, and both land inside the
+measured interval in the same $\numForecastInside$ settings. What carrying it back buys is the tail:
+at $T=25$ and $\eta = 1.5$ the worst case is $1.58\times$ carried against $1.75\times$ held.
+
+This is not a defect in the theory; it is the theory being informative about its own cost.
+Section~\ref{sec:exp-spectrum} measures most of the spectrum of $A_t$ sitting within $10^{-4}$ of
+one, and $\nabla M$ points into the slow part of it, so over tens of updates $\Phi_{T,t}$ is close
+to the identity along that one direction. The practical reading is that a run of this length should
+use the cheap estimator --- one extra pass per update, no Hessian-vector products, no dependence on
+the noisy directional derivative Section~\ref{sec:exp-real} reports --- and that the recursion is
+what tells you when to stop: when the spectrum of $A_t$ moves away from one, or the run is long
+enough that a $1\%$ per-update discrepancy compounds.
+
 \paragraph{The whole estimator family, not one of them.} The grid above uses RLOO. Repeating a
 common sub-grid under the mean-baseline and standardised GRPO estimators gives the same picture
 (Table~\ref{tab:estimator-forecast}). This matters more than a robustness check usually would,
@@ -386,6 +414,7 @@ Adam over long horizons is an open problem rather than a solved one.
 
 \subsection{Two ways a run stops being measurable}
 \label{sec:exp-scale}
+\label{sec:exp-real}
 
 The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
 LoRA adapters and AdamW on exactly verifiable short-answer problems. Running it turned up two
