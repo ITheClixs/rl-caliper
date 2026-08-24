@@ -62,6 +62,15 @@ variance enters $\Cov(\ghat)$ multiplied by $1 - (P-1)/(N-1)$, so
 and a run that covers its whole corpus every step should use larger groups than one that samples
 from a large corpus.
 
+\paragraph{What the forecast needs is simpler than this.} Equations \eqref{eq:estimators} recover
+two traces of $\Sigma_t$ against a metric. Theorem~\ref{thm:adjoint} needs less: a single scalar
+$b^{\!\top}\Sigma_t b$ per update, which is the sample variance across prompts of the per-prompt
+gradient projected onto $b$. A trainer accumulating microbatches already holds those per-prompt
+gradients for the length of one step; projecting each onto a fixed vector and taking their variance
+costs one dot product per microbatch and no extra memory beyond $b$ itself. The machinery above is
+what the batch-allocation results of Section~\ref{sec:applications} need, and is more than the
+error bar requires.
+
 \paragraph{Preconditioners.} An update is $\eta\,\Pi\,\ghat$ for a preconditioner $\Pi$, and Adam
 is scale invariant, so both the drift model and the estimators must be read in the metric the
 update actually moves in. In practice this means instrumenting the preconditioned gradient: the
