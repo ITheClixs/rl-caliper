@@ -204,3 +204,14 @@ $\eta\|\mathcal{J}_t\| \ll 1$. Both fail when the step grows relative to the cur
 concrete way for that to happen: a controller holding drift at a fixed target must raise $\eta$ as
 the signal decays, and $\E_x[p(1-p)] \to 0$ as a task is solved takes the signal with it.
 Section~\ref{sec:exp-seeds} shows runs crossing out of the regime exactly this way.
+
+A second boundary is not a failure of the linearisation but a property of the run, and the kernel
+makes it visible. A count-based advantage is identically zero on a group whose responses all earn
+the same reward, so once a policy has become deterministic on the corpus, $\Sigma_t = 0$ and
+\emph{no noise enters at all}. The forecast then reports that every later update contributes
+nothing, which is correct: two seeds from that point on are the same run. Whether this is good news
+depends on why the policy stopped sampling. Section~\ref{sec:exp-scale} shows an RLVR run reaching
+it in a single update at a step size a practitioner might well choose, and the diagnostic that
+separates it from an estimation failure is the fraction of prompts whose group is not unanimous,
+which costs nothing to log.
+
