@@ -144,8 +144,8 @@ family pays for itself.
 
 \begin{proposition}[The mean update is a gradient field]
   \label{prop:potential}
-  For any count-based estimator, $\gbar(\theta) = \nabla_\theta\,\Phi(\theta)$ with
-  $\Phi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$. Hence $J = \nabla^2\Phi$ is
+  For any count-based estimator, $\gbar(\theta) = \nabla_\theta\,\Psi(\theta)$ with
+  $\Psi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$. Hence $J = \nabla^2\Psi$ is
   symmetric and $A_s^{\!\top} = A_s$.
 \end{proposition}
 
@@ -157,7 +157,9 @@ family pays for itself.
   gradient.
 \end{proof}
 
-The backward pass is therefore a Hessian-vector product, which finite differences deliver from two
+We call $\Psi$ the \emph{estimator potential}; it is not the objective $J$ unless
+$\lambda \equiv 1$, and the gap between them is exactly the difficulty reweighting of
+Section~\ref{sec:theory}. The backward pass is therefore a Hessian-vector product, which finite differences deliver from two
 gradient evaluations and reverse mode from one double backward. Neither $J$ nor $S_T$ is ever
 formed. For RLOO, where $\lambda \equiv 1$, the potential is the pass rate itself: the mean update
 ascends exactly the quantity being reported.
