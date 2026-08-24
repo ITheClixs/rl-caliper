@@ -373,3 +373,29 @@ predicts is the score scale $\sigma_s^2$, and a family whose answer is one numbe
 score scale with one whose answer is four. This bounds how the corollary should be used. It
 converts a reward histogram into a noise estimate within a task distribution, after one calibration
 measurement, and it does not transport that calibration to a task of a different shape.
+
+\subsection{At seven billion parameters, and a metric that cannot see}
+\label{sec:exp-scale}
+
+The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
+LoRA adapters and AdamW on exactly verifiable short-answer problems. The first configuration we ran
+produced a result we did not plan for and which is worth reporting before the one we did.
+
+\paragraph{The reported number went blind.} On counting a letter in a word --- a task the base model
+already passes at $0.41$ --- twenty updates take the held-out pass rate to $0.875$ and collapse the
+response distribution. Every one of the $32$ held-out prompts then has a per-prompt rate of exactly
+$0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout randomness report
+\emph{the same number to the last decimal} and agree on every prompt individually, while their
+policies differ by between $1.8\times10^{-5}$ and $7.7\times10^{-2}$ in KL and that difference does
+not accumulate over the run.
+
+This is worth being precise about, because the two readings are opposite. It is not that the seeds
+converged. It is that the metric stopped resolving them: $\E_x[p(1-p)] = 0$ on the evaluation set,
+so a score built from those samples has no variance to report, whatever the policies do. The
+practical consequence is that a zero measured spread on a saturated benchmark is not evidence of a
+reproducible procedure, and the theoretical consequence is the one
+Section~\ref{sec:metric} is built on: the spread of a reported number is
+$\nabla M^{\!\top} S_T \nabla M$, and when $\nabla M$ is zero on the evaluated distribution no amount
+of $S_T$ reaches it. It is also, in retrospect, why the route through $\sqrt{\KL}$ that an earlier
+version of this work took could not have worked in general.
+
