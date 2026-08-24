@@ -48,6 +48,7 @@ class RLConfig:
     controller_gain: float = 0.5
     max_step_ratio: float = 1.5
     control: bool = True
+    reward_mode: str = "verifier"  # "verifier", or "coin" to replace rewards with fair coins
     history: dict = field(default_factory=dict)
 
 
@@ -287,6 +288,16 @@ class RLVRTrainer:
 
     def step(self, instrument: bool) -> dict:
         tokens, rewards = self.rollout()
+        verified = rewards
+        if self.config.reward_mode == "coin":
+            # the null: same rollouts, same batch, same step sizes, rewards carrying no
+            # information about the response that earned them
+            rewards = (
+                torch.rand(rewards.shape, generator=self.generator, device=rewards.device)
+                < 0.5
+            ).to(rewards.dtype)
+        elif self.config.reward_mode != "verifier":
+            raise KeyError(self.config.reward_mode)
         old_logits = self._response_logits(tokens)
 
         cells = self._instrument(tokens, rewards) if instrument else None
@@ -310,6 +321,7 @@ class RLVRTrainer:
             "drift": drift.tolist(),
             "step_size": step_sizes.tolist(),
             "mean_reward": rewards.mean(dim=(1, 2)).tolist(),
+            "pass_rate": verified.mean(dim=(1, 2)).tolist(),
             "pass_rate_spread": rewards.mean(dim=2).std(dim=1).tolist(),
         }
         if cells is not None:
