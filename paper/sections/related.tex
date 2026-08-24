@@ -5,9 +5,12 @@
 news in deep RL \citep{henderson2018matters} and has been documented again for language-model
 reasoning, where sampling parameters, prompt formatting and hardware all shift reported numbers
 \citep{hochlehnert2025sober}. Those papers establish the size of the problem by replication, which
-is the only instrument available without a model of where the variance comes from. This paper
-supplies such a model, and the practical difference is between paying $N$ runs and paying one run
-plus a short fork.
+is the only instrument available without a model of where the variance comes from. \citet{agarwal2021precipice} go a step further and prescribe how the resulting samples should be
+summarised --- interquartile means, stratified bootstrap intervals, performance profiles --- and
+their prescription is what a practitioner should use once the runs exist. All of it presumes the
+runs exist. This paper supplies a model of where the variance comes from, so that a single run can
+be asked what its own spread would have been; the two are complementary, and where several runs are
+affordable their statistics remain the right ones.
 
 \paragraph{Stochastic dynamics of training.} Treating stochastic optimisation as a process
 whose covariance is set by the balance of gradient noise against curvature is standard
