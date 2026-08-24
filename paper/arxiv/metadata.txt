@@ -1,30 +1,35 @@
 Title:
-  Training Noise Is Filtered, Not Accumulated: Predicting Run-to-Run
-  Divergence in RL Post-Training
+  Predicting the Spread of an RL Post-Training Result from a Single Run
 
 Authors:
   Mehmet Demir Guven (ETH Zurich)
 
 Abstract (plain text, as pasted into the submission form):
-  Improvements from reinforcement learning post-training are reported from single runs, and
-  the field establishes how much a rerun would move the number the only way it currently can:
-  by repeating the training. We show that the variation has structure, and that the structure
-  is predictable. Two runs starting from the same policy and differing only in rollout
-  randomness do not drift apart. The reason is not that noise is small but that it is
-  filtered: a perturbation entering at one update is passed through every later update, and
-  where the shared objective is locally concave those updates contract it. The covariance of a
-  run about its mean trajectory therefore obeys S_{t+1} = A_t S_t A_t^T + Q_t, so what
-  survives to the end is the noise injected at each update weighted by how strongly the
-  remaining trajectory preserves it. In an exactly solvable policy this predicts measured
-  divergence to 9% at the median across twelve settings; ignoring contraction is wrong by up
-  to 3.9x, and compressing the contraction to a single timescale is wrong by two orders of
-  magnitude. The contraction is caused by learning, not by proximity: replacing every reward
-  with a coin flip leaves the noise, the batches and the step sizes untouched, and divergence
-  then grows by a factor of 10.7 over eighty updates instead of staying flat. Since
-  Q_t is proportional to Sigma_t/P, run length does not enter and batch composition is the
-  lever, with square-root returns. Supporting this is an exact finite-G covariance for the
-  advantage estimators in current use, which makes the injected noise measurable and fixes the
-  compute-optimal group size.
+  Reinforcement learning post-training is reported from single runs, and how much a rerun
+  would move the number is established the only way it currently can be: by repeating the
+  training. We show that a run already contains enough information to forecast its own
+  spread. The correction that makes this possible is to stop treating training noise as
+  accumulating. A perturbation entering at one update is passed through every later update
+  and reweighted by them, so the covariance of a run about its mean obeys
+  S_{t+1} = A_t S_t A_t^T + Q_t. Measuring the spectrum of A_t shows what that reweighting
+  is and what it is not: only a third to a half of directions contract, the leading
+  direction expands rather than contracts, and among the contracting directions the
+  timescales run from tens of updates to effectively unbounded. It is a filter, not a
+  contraction, and no single number stands in for it. Carrying the gradient of the reported
+  metric backwards along one stored trajectory then gives the across-seed variance of that
+  metric as a sum of scalars, one per update, with no covariance matrix formed. The
+  transpose the backward pass needs is free: the mean update of a count-based estimator is
+  the gradient of a scalar potential, so its Jacobian is symmetric. We test the forecast
+  prospectively -- one run trained and frozen, the prediction recorded, and only then the
+  remaining seeds trained. Across 48 settings spanning a 30x range of spreads its median
+  absolute error is 1.08x and it lands inside the measured 95% interval in 36 of them. The
+  filtering is caused by learning, not by proximity: replacing every reward with a coin flip
+  leaves noise, batches and step sizes untouched and divergence then grows 10.7x over eighty
+  updates instead of staying flat. A caution comes out of the same framework: at 7B on a
+  task the base model already mostly passes, twenty updates collapse the response
+  distribution, two seeds report the same number to the last decimal, and their policies
+  still differ. A zero measured spread on a saturated benchmark says the metric has stopped
+  resolving the procedure, not that the procedure is reproducible.
 
 Primary category:
   cs.LG   (Machine Learning)
@@ -48,4 +53,12 @@ Submission checklist:
   - figures are PDF; no external font or image dependencies
   - main.bbl is included so the bibliography builds without a bibtex pass
   - no absolute paths; every \input and \includegraphics is relative to the source root
-  - zero overfull boxes; no unresolved references or citations
+  - zero overfull hboxes; no unresolved references or citations
+  - three overfull vbox warnings remain: they are vertical-list warnings absorbed by the
+    bottom margin, and body text never comes within 15pt of the folio (checked by measuring
+    glyph extents in the rendered PDF)
+
+Note on length:
+  This is the long-form version. A conference-length version would keep Sections 1-6 and move
+  the batch-allocation application, the cost model and the estimator-measurement details to
+  supplementary material.
