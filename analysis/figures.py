@@ -23,6 +23,11 @@ BETA_B = 40.07 / 1.144  # tau_b / signal, measured on the transformer tier
 PALETTE = ["#1b3a5c", "#c1502e", "#2e7d5b", "#7a5195", "#b58900"]
 
 
+def save(fig, name: str) -> None:
+    """Write a figure without the embedded timestamp, so reruns are byte-identical."""
+    fig.savefig(FIGURES / name, bbox_inches="tight", metadata={"CreationDate": None})
+
+
 def style(ax, xlabel: str, ylabel: str, title: str | None = None) -> None:
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -65,7 +70,7 @@ def figure_exact_curves() -> None:
         r"prediction $\propto\sqrt{\rho(G)}$ (line) against measured gain (points)", fontsize=10
     )
     fig.tight_layout()
-    fig.savefig(FIGURES / "exact_curves.pdf", bbox_inches="tight")
+    save(fig, "exact_curves.pdf")
     plt.close(fig)
 
 
@@ -83,7 +88,7 @@ def figure_estimator_accuracy() -> None:
     ax.set_ylim(limits)
     style(ax, "exact $G^{*}$", "measured $G^{*}$")
     fig.tight_layout()
-    fig.savefig(FIGURES / "estimator_accuracy.pdf", bbox_inches="tight")
+    save(fig, "estimator_accuracy.pdf")
     plt.close(fig)
 
 
@@ -109,7 +114,7 @@ def figure_transformer_curves() -> None:
             f"corpus {label},  $G^{{*}}={cell['g_star']:.1f}$",
         )
     fig.tight_layout()
-    fig.savefig(FIGURES / "transformer_curves.pdf", bbox_inches="tight")
+    save(fig, "transformer_curves.pdf")
     plt.close(fig)
 
 
@@ -147,7 +152,7 @@ def figure_transfer() -> None:
     style(ax, "drift target (nats/token)", "", "tuned as a drift budget")
 
     fig.tight_layout()
-    fig.savefig(FIGURES / "transfer.pdf", bbox_inches="tight")
+    save(fig, "transfer.pdf")
     plt.close(fig)
 
 
@@ -182,7 +187,7 @@ def figure_cost_model() -> None:
         "inflation of $G^{*}$ from prefill sharing",
     )
     fig.tight_layout()
-    fig.savefig(FIGURES / "cost_model.pdf", bbox_inches="tight")
+    save(fig, "cost_model.pdf")
     plt.close(fig)
 
 
@@ -212,7 +217,7 @@ def figure_real_model() -> None:
     ax.set_ylim(bottom=0)
     style(ax, r"$\mathbb{E}[p(1-p)]$", r"$\tau_w$")
     fig.tight_layout()
-    fig.savefig(FIGURES / "real_model.pdf", bbox_inches="tight")
+    save(fig, "real_model.pdf")
     plt.close(fig)
 
 
@@ -302,7 +307,7 @@ def figure_teaser() -> None:
     style(ax, "rollouts per step $R$", r"optimal group size $G^{\star}$")
 
     fig.tight_layout()
-    fig.savefig(FIGURES / "teaser.pdf", bbox_inches="tight")
+    save(fig, "teaser.pdf")
     plt.close(fig)
 
 
@@ -418,7 +423,7 @@ def figure_reconvergence() -> None:
     ax.set_title("outcome spread follows", fontsize=8.5)
 
     fig.tight_layout()
-    fig.savefig(FIGURES / "reconvergence.pdf", bbox_inches="tight")
+    save(fig, "reconvergence.pdf")
     plt.close(fig)
 
 
@@ -449,7 +454,7 @@ def figure_real_seeds() -> None:
     )
     ax.set_ylim(bottom=max(np.nanmin(lo) * 0.6, 1e-3))
     fig.tight_layout()
-    fig.savefig(FIGURES / "real_seeds.pdf", bbox_inches="tight")
+    save(fig, "real_seeds.pdf")
     plt.close(fig)
 
 
@@ -476,7 +481,7 @@ def main() -> None:
                 fig, ax = plt.subplots(figsize=(3, 2))
                 ax.text(0.5, 0.5, "pending", ha="center", va="center", color="0.5")
                 ax.axis("off")
-                fig.savefig(target, bbox_inches="tight")
+                fig.savefig(target, bbox_inches="tight", metadata={"CreationDate": None})
                 plt.close(fig)
 
 
