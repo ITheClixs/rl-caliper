@@ -190,6 +190,21 @@ ascends exactly the quantity being reported.
 \end{algorithmic}
 \end{algorithm}
 
+\paragraph{What a practitioner would do with this.} Three things during the run, none of which
+changes the run: store $\theta_t$ and $\eta_t$ at each update, accumulate the scalar
+$\widehat{\Var}_i(b^{\!\top}\hat{g}_{t,i})$ once $b$ is known, and log the fraction of prompts whose
+group is not unanimous. Then one rollout and backward pass on the evaluation set for
+$\nabla M(\theta_T)$, and the backward sweep of Algorithm~\ref{alg:forecast}. The extra cost is two
+gradient evaluations per stored update and one vector of parameter size held in memory.
+
+The number that comes out is the seed component only. A reported score also carries the randomness
+of the evaluation set, which is the binomial term the eval literature already estimates
+\citep{miller2024adding}. The two are independent by construction --- one is over training seeds at
+a fixed evaluation, the other over evaluation draws at a fixed model --- so they add in quadrature,
+and the practical recommendation is to report both terms rather than either alone. On a saturated
+benchmark the second is small and the first is invisible, which is exactly the situation
+Section~\ref{sec:exp-scale} runs into.
+
 Two consequences worth stating plainly. First, this is a \emph{forecast}: \eqref{eq:adjoint} reads
 only the states one run visited, so it can be computed before any second run exists, which is how
 Section~\ref{sec:exp-seeds} tests it. Second, restricting $\Sigma_t$ to one of its two terms
