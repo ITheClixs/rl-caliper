@@ -1,14 +1,17 @@
 # caliper
 
-Forecasting how far the result of an RL post-training run would move under reseeding, from the run
-itself.
+Where run-to-run spread in RL post-training comes from, and when one run can predict it.
 
 A reported score is the output of a stochastic procedure, and the only instrument the field has for
-its spread is replication. This repository implements a cheaper one. Gradient noise injected at one
-update is filtered by the updates that follow rather than accumulated, so the covariance of a run
-about its mean obeys a recursion; carrying the gradient of the reported metric backwards along a
-single stored trajectory turns that recursion into an error bar, as a sum of scalars with no
-covariance matrix formed.
+its spread is replication. This repository implements a cheaper one, and measures where it works.
+Gradient noise injected at one update is filtered by the updates that follow rather than
+accumulated, so the covariance of a run about its mean obeys a recursion; carrying the gradient of
+the reported metric backwards along a single stored trajectory turns that recursion into an error
+bar, as a sum of scalars with no covariance matrix formed.
+
+Where the comparison can be made exactly the forecast holds to `1.11x` over 192 settings. On a
+pretrained model it is short by a factor of twelve, because the runs end in two groups rather than
+scattered around one. Both halves are here.
 
 ## What is here
 
