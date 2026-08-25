@@ -228,11 +228,15 @@ reserve for runs long enough, or curvature strong enough, that a per-update disc
 compounds. Knowing which regime one is in is what the recursion is for, and the spectrum of $A_t$ is
 what says it.
 
+Equation \eqref{eq:cheap} is \eqref{eq:adjoint} with $\Phi_{T,t} \approx I$ along $\nabla M$; it is
+not a different method but the same one, evaluated where the operator is measured to be close to
+the identity.
+
 The comparison that matters is not against zero. Estimating the same quantity by replication costs
 $N$ full runs and returns an $N$-seed estimate whose own interval is wide --- at six seeds, wide
-enough to leave the shape of a divergence trace unresolved (Section~\ref{sec:exp-seeds}). Two to
-three times one run is cheaper than that for any $N$ above three, and it is available on a run that
-has already finished.
+enough to leave the shape of a divergence trace unresolved (Section~\ref{sec:exp-seeds}). One extra
+pass per update is about the cost of a second run, and it is available on a run that has already
+finished.
 
 The number that comes out is the seed component only. A reported score also carries the randomness
 of the evaluation set, which is the binomial term the eval literature already estimates
