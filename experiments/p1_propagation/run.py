@@ -91,7 +91,7 @@ def main() -> None:
 
     cells = []
     header = f"{'div':>5s} {'G':>3s} {'P':>4s} {'eta':>5s} {'measured':>10s} {'propagated':>11s}"
-    print(header + f" {'scalar':>10s} {'walk':>10s} {'H95':>4s}")
+    print(header + f" {'scalar':>10s} {'walk':>10s} {'H95':>4s}", flush=True)
     for diversity, group_size, prompts, step_size in itertools.product(
         args.diversities, args.group_sizes, args.prompt_counts, args.step_sizes
     ):
@@ -144,7 +144,8 @@ def main() -> None:
         print(
             f"{diversity:5.2f} {group_size:3d} {prompts:4d} {step_size:5.2f} {measured:10.3e} "
             f"{result.predicted_kl:11.3e} {scalar:10.3e} {walk:10.3e} "
-            f"{cells[-1]['seed_memory_95']:4d}"
+            f"{cells[-1]['seed_memory_95']:4d}",
+            flush=True,
         )
 
     measured = np.array([c["measured_kl"] for c in cells])
