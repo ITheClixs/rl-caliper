@@ -654,7 +654,9 @@ def figure_real_forecast() -> None:
 
     fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7))
     ax = axes[0]
-    ax.bar(steps, kernel, color=PALETTE[0], width=0.7)
+    share = kernel / kernel.sum() if kernel.sum() > 0 else kernel
+    ax.bar(steps, share, color=PALETTE[0], width=0.7)
+    ax.set_ylim(0, max(share.max() * 1.15, 1e-3))
     style(ax, "update", "share of the forecast variance", "where the spread was made")
 
     ax = axes[1]
