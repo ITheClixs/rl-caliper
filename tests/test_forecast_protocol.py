@@ -80,8 +80,8 @@ def test_the_seed_gap_is_larger_by_root_two():
 
 
 def test_the_interval_widens_with_the_forecast():
-    narrow = Forecast(variance=1e-4).interval(0.8)
-    wide = Forecast(variance=4e-4).interval(0.8)
+    narrow = Forecast(variance=1e-4).normal_approx_interval(0.8)
+    wide = Forecast(variance=4e-4).normal_approx_interval(0.8)
     assert wide[0] < narrow[0] < 0.8 < narrow[1] < wide[1]
 
 

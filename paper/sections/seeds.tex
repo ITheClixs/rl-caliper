@@ -192,7 +192,8 @@ ascends exactly the quantity being reported.
         \Comment{common random numbers}
     \EndIf
   \EndFor
-  \State \Return $\sqrt{v}$ \Comment{forecast s.d.\ of $M$ across seeds; $\sqrt{2v}$ for a gap}
+  \State \Return $\sqrt{v}$ \Comment{forecast s.d.\ of $M$ across seeds; $\sqrt{2v}$ is the s.d.\ of
+  the signed difference between two runs}
 \end{algorithmic}
 \vspace{2pt}
 {\footnotesize Lines 7--10 are what the recursion asks for and what

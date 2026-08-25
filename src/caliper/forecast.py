@@ -59,11 +59,21 @@ class Forecast:
 
     @property
     def seed_gap_std(self) -> float:
-        """Scale of the difference between two independent runs, which is larger by sqrt(2)."""
+        """S.d. of the signed difference between two independent runs, larger by sqrt(2).
+
+        This is the spread of `M_A - M_B`, equivalently its root-mean-square when the two runs
+        share a mean. It is not the expected absolute gap, which for a normal seed distribution
+        is the smaller quantity `2 sqrt(V / pi)`.
+        """
         return float(np.sqrt(max(2.0 * self.variance, 0.0)))
 
-    def interval(self, value: float, level: float = 0.95) -> tuple[float, float]:
-        """A normal interval around a reported `value`, at the forecast spread."""
+    def normal_approx_interval(self, value: float, level: float = 0.95) -> tuple[float, float]:
+        """A normal interval around a reported `value`, at the forecast spread.
+
+        The normal shape is an assumption about the seed distribution, not something the forecast
+        establishes. Where runs end in separated groups, as they do on the pretrained model of
+        Section 6, the seed distribution is not normal and this interval does not describe it.
+        """
         from scipy.stats import norm
 
         half = float(norm.ppf(0.5 + level / 2.0)) * self.std
