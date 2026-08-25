@@ -52,15 +52,15 @@ set,
 so a noisy metric gradient makes the forecast too large, never too small. The second term shrinks
 with the size of the evaluation rollout and can be estimated by splitting it, which we did not do.
 
-\paragraph{And on a real model it underpredicts.} Section~\ref{sec:exp-real} runs the whole thing on
-Qwen2.5-0.5B and the forecast comes out at a third of the measured spread. The eight-run interval
-contains the forecast, so the disagreement is not resolved, but the point estimate errs in the
-direction a local model should and the reason is not subtle: the runs end in two groups rather than
-scattered around one, which is the linearisation failing rather than the arithmetic. What survives
-the failure is the mechanism. The first three batches of a run correlate with its final score at
-$0.88$, and the per-update kernel puts $92\%$ of the forecast variance in the first half of the run:
-the uncertainty really is made early and then amplified, exactly as the spectrum says it should be.
-What does not survive is the assumption that the amplification stays linear.
+\paragraph{And on a real model it underpredicts, by a lot.} Section~\ref{sec:exp-real} runs the
+whole thing on Qwen2.5-0.5B and the forecast comes out a factor of twelve short. The reason is not
+subtle: the eight runs end in two groups rather than scattered around one, and a linearised model
+predicts the spread of a unimodal perturbation. What survives the failure is the mechanism. The
+first three batches of a run correlate with its final score at $0.88$, and the per-update kernel
+puts $92\%$ of the forecast variance in the first half of the run: the uncertainty really is made
+early and then amplified, exactly as the spectrum says it should be. What does not survive is the
+assumption that the amplification stays linear --- and at a step size small enough to keep it
+linear, the seed term drops below what eight runs can resolve at all.
 
 We would rather report this than a number from a setting chosen to make it work. It also sets the
 next experiment precisely: the linearity residual of Section~\ref{sec:exp-linearity} is cheap on a

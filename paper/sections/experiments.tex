@@ -485,21 +485,25 @@ but name, and the quantity that is badly estimated is one the forecast barely us
   \label{tab:real-forecast}
 \end{table}
 
-\paragraph{What the comparison says.} The forecast made from one run is a standard deviation of
-$0.0225$. The eight runs realise $0.0694$, of which $0.0077$ is the evaluation's own binomial noise,
-leaving a seed term of $0.0689$ (Table~\ref{tab:real-forecast}). The forecast is a third of it.
+\paragraph{What the comparison says.} The eight runs realise a spread of $0.0694$, of which
+$0.0077$ is the evaluation's own binomial noise, leaving a seed term of $0.0689$ with an interval of
+$[0.0033,\ 0.0737]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run --- the
+cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what the
+noisy directional derivative leaves available --- is $0.0056$. It is short by a factor of twelve.
 
-Two things have to be said about that number before anything else. The interval on the measured
-term is $[0.0033,\ 0.0737]$ and contains the forecast, so at eight runs the disagreement is not
-resolved --- Appendix~\ref{app:power} gives the simulation that says how wide this interval has to
-be. And the point estimate is nonetheless three times the forecast, in the direction a local model
-should err.
+Taking the transport anyway gives $0.0225$, four times larger. That is not a better estimate. The
+transport is worth $2\%$ where it can be computed exactly, and here it is being estimated from
+vectors whose cosine with an independent estimate is $0.21$; multiplying twelve such corrections
+together inflates $\|b\|$ with noise rather than curvature. The gap between the two numbers is a
+measure of how much noise the backward pass accumulated, not of how much the trajectory bends.
 
-The reason is visible without any statistics. The eight held-out scores are not scattered around a
-centre; they fall in two groups, three near $0.35$ and five near $0.22$ (Figure~\ref{fig:real-forecast},
-right). A linearised model predicts the spread of a unimodal perturbation about one trajectory. It
-has no way to represent runs that end in different places, and eight runs that end in two places is
-the assumption failing, not the arithmetic.
+The reason for the shortfall is visible without any statistics. The eight held-out scores are not
+scattered around a centre: three sit at $0.350$ and five at $0.217$, with a within-group spread of
+under $0.01$ against a between-group gap of $0.133$ (Figure~\ref{fig:real-forecast}, right). A
+linearised model predicts the spread of a unimodal perturbation about one trajectory. Eight runs
+that end in two places is the assumption failing, and it is worth saying that a standard deviation
+is the wrong summary of this outcome for anyone, forecast or not: the honest description of this
+recipe is that it returns $0.35$ or $0.22$.
 
 \paragraph{And what decided which group a run landed in.} The pass rate a run achieved on its first
 three batches correlates with its final held-out score at $r = 0.88$; the correlation with its last
