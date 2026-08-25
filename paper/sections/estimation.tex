@@ -38,6 +38,19 @@ values over pools whose noise ratio spans a factor of $26$, \eqref{eq:estimators
 to a median error of $1.3\%$ and a worst case of $6.2\%$, while the subtractive form reports
 $6.1$ where the truth is $9.4$ and $6.9$ where the truth is $15.2$.
 
+\paragraph{The probe measures a half-sized estimator.} One calibration batch supplies two
+independent estimates per prompt by splitting the group in two, so the advantages inside each half
+are computed among $G/2$ responses and what the probe measures is the $G/2$ estimator, not the one
+the run trains with. It is rescaled to full $G$ by the $1/(G-1)$ law that
+Corollary~\ref{cor:bernoulli} implies. That extrapolation is worth checking, and it is only safe
+for some estimators. Against the exact $\tr\Sw$ at full $G$ it is accurate to $+2.9\%$ at $G=4$ and
+$+0.4\%$ at $G=32$ for RLOO, whose within-prompt term follows the law almost exactly. For the
+mean-baseline and standardised GRPO variants the same extrapolation is low by $54\%$ and $61\%$ at
+$G=4$, and still by $25\%$ and $29\%$ at $G=8$, because their weight tables make the within-prompt
+term depend on $G$ in a way the law does not capture. Every measurement reported here uses RLOO.
+A practitioner probing a GRPO variant should draw two full groups per prompt on the calibration
+batch instead, at twice the rollout cost on those batches only.
+
 \paragraph{Sampling with replacement needs no correction.} Two blocks of a batch drawn with
 replacement are independent draws from the prompt distribution, so the different-block inner
 product is unbiased for $\gbar^{\!\top} M \gbar$ whether or not a prompt happens to appear twice.
