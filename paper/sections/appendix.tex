@@ -37,6 +37,16 @@ $\nabla M^{\!\top} S_T \nabla M$, and Proposition~\ref{prop:potential} against t
 asymmetry of $\mathcal{J}$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
 floor.
 
+\paragraph{What each thing costs.} Everything here ran on one Apple M4 laptop with $24$\,GB of
+unified memory, and the costs are worth stating because they bound what a reader can repeat. The
+enumerable-policy experiments are CPU work and finish in minutes; the $\numForecastSettings$-setting
+forecast grid, which trains $\numForecastSeeds$ runs in each of them, takes about half an hour. The
+populations of small transformers take a few hours each. On the pretrained models the arithmetic
+changes: a single Qwen2.5-0.5B run of twelve updates takes about three minutes and its backward
+pass about ten, while one Qwen2.5-7B run of twenty updates takes around an hour, so the eight-seed
+measurement at $7$B is most of a day. That last figure is the reason this paper stops where it
+does.
+
 \paragraph{Using the backward pass elsewhere.} Algorithm~\ref{alg:forecast} needs two things from
 a training run and nothing else: the variance across prompts of the batch gradient projected onto a
 direction, and a Jacobian-vector product of the mean update field with that direction. The released
