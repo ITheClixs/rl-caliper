@@ -418,24 +418,32 @@ anyway, and every seed shares the warmed state so the covariance still starts at
   \label{tab:adam-lift}
 \end{table}
 
-The optimiser state matters and the lift is worth taking: ignoring it underpredicts by
-$5.5\times$ at the median, and the lift brings that to $2.6\times$. Freezing the second moment
-rather than propagating it makes matters much worse, at $15.9\times$, which says the second
-moment is genuinely carrying seed information rather than merely complicating the algebra.
+The optimiser state is where almost all of the difficulty lives. Ignoring it underpredicts by
+$24.6\times$ at the median, which is barely better than assuming noise accumulates without any
+filtering at all ($24.2\times$): a recursion on $\theta$ alone cannot see that a perturbation to
+one gradient is still moving the parameters twenty updates later through $m$ and $v$. Carrying the
+full state brings that to $1.10\times$ at the median and $1.8\times$ at worst, and freezing the
+second moment at its mean trajectory rather than propagating it costs little, $1.21\times$.
 
-But the lift is not reliable, and where it fails is systematic. Splitting by pool: on the
-intermediate band, where the mean pass rate is $0.58$ and the learning signal is live, the lift has
-a median error of $1.48\times$ and a worst case of $2.26\times$, while ignoring the optimiser state
-is wrong by $14\times$. On the easy band, where the pass rate reaches $0.72$ and
-$\E_x[p(1-p)]$ is collapsing, the median is $8.0\times$ and the worst case two orders of magnitude.
-The linearised map acquires a spectral radius above one and the prediction runs away, because
-Adam's normalisation is the nonlinearity that bounds the real spread and a linear recursion does not
-contain that bound.
+What matters more is that the lift no longer degrades where the metric saturates. Splitting by
+pool, the median error is $1.06\times$ on the hard band, $1.13\times$ on the intermediate band
+where the learning signal is live, and $1.10\times$ on the easy band where the pass rate reaches
+$0.72$ and $\E_x[p(1-p)]$ is collapsing. The worst case on that easy band is $1.8\times$.
 
-The practical statement is that the forecast should be taken under gradient ascent, or under Adam
-only while $\E_x[p(1-p)]$ is well away from zero, which is the same condition
-Section~\ref{sec:exp-scale} arrives at for a different reason, and that a linear treatment of
-Adam over long horizons is an open problem rather than a solved one.
+An earlier version of this work reported the opposite, a median of $8.0\times$ on the easy band and
+a worst case two orders of magnitude out, and attributed it to Adam's normalisation being a
+nonlinearity that a linear recursion cannot contain. That diagnosis was wrong, and the cause was
+ours. Adam is handed a stochastic gradient, so the mean of its second-moment update is
+$\beta_2 v + (1-\beta_2)\E[\hat{g}^2]$ with $\E[\hat{g}^2] = \gbar^2 + \operatorname{diag}\Sigma$.
+Squaring the mean gradient instead, which is what we did, discards the gradient variance. On these
+pools that variance is between $6.5$ and $15$ times the term that was kept, so $v$ was far too
+small along the whole mean trajectory and every step taken from it was correspondingly too large.
+The error was largest exactly where $\gbar \to 0$ and the variance is all that remains, which is
+why it looked like a saturation effect. Correcting the mean map removes it.
+
+The practical statement is therefore stronger than we could previously make: the recursion survives
+an optimiser that carries state, at the same accuracy it has under plain ascent, provided the mean
+map is the mean of the stochastic map and not the map evaluated at the mean gradient.
 
 \subsection{The backward pass on a pretrained model}
 \label{sec:exp-real}

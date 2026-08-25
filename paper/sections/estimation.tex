@@ -38,22 +38,29 @@ values over pools whose noise ratio spans a factor of $26$, \eqref{eq:estimators
 to a median error of $1.3\%$ and a worst case of $6.2\%$, while the subtractive form reports
 $6.1$ where the truth is $9.4$ and $6.9$ where the truth is $15.2$.
 
-\paragraph{A repeated prompt lands in two blocks.} Sampling prompts with replacement puts the same
-prompt in two blocks, so the different-block inner product picks up a same-prompt term and
-$\tau_b$ is biased down -- by $45\%$ on the most homogeneous pool tested. Drawing distinct prompts
-within a batch, which iterating a dataset does anyway, removes it.
+\paragraph{Sampling with replacement needs no correction.} Two blocks of a batch drawn with
+replacement are independent draws from the prompt distribution, so the different-block inner
+product is unbiased for $\gbar^{\!\top} M \gbar$ whether or not a prompt happens to appear twice.
+A coincidence between two independent indices does not make them dependent. Measured against the
+exact pool value the estimator returns $1.001$ and $1.006$ of it on pools of $160$ and $32$
+prompts. An earlier version of this work claimed the opposite, that a repeated prompt biases
+$\tau_b$ down; it does not, and what we had measured was the bias of the other scheme.
 
-\paragraph{A finite corpus makes blocks anticorrelated.} Drawing without replacement from a corpus
-of $N$ has the opposite effect on the other term: two blocks hold distinct prompts, so
+\paragraph{A finite corpus makes blocks anticorrelated.} Drawing \emph{without} replacement from a
+corpus of $N$ is what needs correcting: two blocks hold distinct prompts, so
 \begin{equation}
   \label{eq:finite-corpus}
   \E\big[ g_{a1}^{\!\top} M\, g_{a'2} \big]_{a \neq a'}
   \;=\; \gbar^{\!\top} M \gbar \;-\; \frac{\tr(M\Sb)}{N-1},
 \end{equation}
-which is exact and which the estimator corrects using the $\tau_b$ it already has. The correction
-matters whenever $\tau_b$ is large relative to the signal -- that is, whenever the run is far below
-its critical batch size, which is the usual case. Uncorrected, the signal estimate on one pool came
-out negative. The same factor appears in the theory: with a finite corpus the between-prompt
+which is exact. Combining it with the same-block expectation gives
+$W - A = N\,\tr(M\Sb) / \big(n(N-1)\big)$ for blocks of $n$ prompts, so the raw estimator
+$n(W-A)$ overstates $\tau_b$ by $N/(N-1)$ and the unbiased form carries the extra factor
+$(N-1)/N$. On a corpus of $32$ that is a $3\%$ correction, and the uncorrected estimator returns
+$1.031$ of the exact value where the corrected one returns $1.00$. The signal is then recovered as
+$A + \tau_b/(N-1)$, which matters whenever $\tau_b$ is large relative to it, that is whenever the
+run is far below its critical batch size. Uncorrected, the signal estimate on one pool came out
+negative. The same factor appears in the theory: with a finite corpus the between-prompt
 variance enters $\Cov(\ghat)$ multiplied by $1 - (P-1)/(N-1)$, so
 \begin{equation}
   \label{eq:gstar-corpus}

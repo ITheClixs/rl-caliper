@@ -15,8 +15,8 @@ keep returning to $\E_x[p(1-p)]$, the mean within-prompt reward variance. It set
 sets how much seed noise a batch injects. It sets the learning signal, so it sets how much of that
 noise the following updates filter. It is largest before a policy has learned anything, which is
 why the per-update kernel tilts towards the start of a run. And when it reaches zero the injection
-stops, the metric stops resolving the policy, and the linearisation of Adam's normalisation stops
-holding, so three of the four boundaries below are the same boundary. A practitioner who logs one
+stops and the metric stops resolving the policy, so two of the boundaries below are the same
+boundary. A practitioner who logs one
 number from this paper should log that one.
 
 \paragraph{What ``filtered'' does and does not mean.} It would be tidier if the transfer operator
@@ -96,14 +96,16 @@ saturation. Comparing a forecast to that spread would mean training eight fresh 
 ascent at $7$B, which on this machine is about nine hours of continuous compute. We chose to spend
 the budget on the measurement that needed no such assumption.
 
-\paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
-only partly works in practice. It halves the error of ignoring the optimiser state, $2.6\times$
-against $5.5\times$, and the optimiser state clearly does carry seed information, since freezing
-the second moment takes
-the error to $15.9\times$. Where the learning signal is live the lift is good to $1.48\times$ at
-the median. Where the pass rate saturates at either end, Adam's normalisation is the nonlinearity
-that bounds the spread, and a linear recursion cannot see a bound it does not contain. Section~\ref{sec:exp-adam} reports where it holds and where it does not, rather than
-reporting the median alone.
+\paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ works, at $1.10\times$ at the
+median and $1.8\times$ at worst, and the optimiser state is most of the problem: a recursion on
+$\theta$ alone is wrong by $24.6\times$, which is almost exactly what assuming no filtering at all
+gives. We report this as a correction. An earlier version of this work found the lift failing by
+$8\times$ wherever the pass rate saturated and read that as Adam's normalisation being a
+nonlinearity a linear recursion cannot contain. The cause was instead that our mean map squared the
+mean gradient where the mean of the stochastic map carries $\E[\hat{g}^2]$, discarding a variance
+term worth six to fifteen times the term kept. It vanishes last where the mean gradient vanishes
+first, which is what made it look like a property of saturation.
+Section~\ref{sec:exp-adam} gives the corrected numbers by band.
 
 \paragraph{Limits of the linearisation, with a diagnostic.} \eqref{eq:seed-recursion} requires the
 two runs to stay close enough that the mean gradient field is locally linear between them, and

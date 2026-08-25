@@ -43,6 +43,8 @@ def decompose_batched(
     tau_w = tau_w_scaled / (group_size - 1)
 
     if corpus_size is not None:
+        # matches splits.decompose: the raw n (W - A) overstates tau_b by N / (N - 1)
+        tau_b = tau_b * (corpus_size - 1) / corpus_size
         across = across + tau_b / (corpus_size - 1)
 
     return {

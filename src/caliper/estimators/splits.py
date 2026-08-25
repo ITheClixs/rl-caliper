@@ -117,6 +117,11 @@ def decompose(
     if corpus_size is not None:
         if corpus_size < 2:
             raise ValueError("corpus_size must be at least 2")
+        # Without replacement two blocks hold distinct prompts, so
+        #   W - A = N B / (n (N-1)),
+        # and the raw n (W - A) overstates the between-prompt term by N / (N - 1). Correct it
+        # before it is used to put the signal back, or the correction inherits the same bias.
+        tau_b = tau_b * (corpus_size - 1) / corpus_size
         across = across + tau_b / (corpus_size - 1)
 
     if reference_cells is not None:
