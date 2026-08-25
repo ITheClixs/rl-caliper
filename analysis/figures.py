@@ -636,12 +636,38 @@ def figure_null() -> None:
     plt.close(fig)
 
 
+def figure_real_forecast() -> None:
+    """The forecast on a pretrained model: where it was injected, and whether it lands."""
+    runs = [r for r in io.load_all("s7_real_forecast") if r["result"].get("kernel")]
+    if not runs:
+        raise SystemExit("no real-model forecast")
+    result = runs[-1]["result"]
+    kernel = np.array(result["kernel"])
+    live = np.array(result.get("live_share", []))
+    steps = np.arange(1, kernel.size + 1)
+
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7))
+    ax = axes[0]
+    ax.bar(steps, kernel, color=PALETTE[0], width=0.7)
+    style(ax, "update", "share of the forecast variance", "where the spread was made")
+
+    ax = axes[1]
+    if live.size:
+        ax.plot(steps, live, "o-", ms=4, lw=1.4, color=PALETTE[1])
+    ax.set_ylim(-0.05, 1.05)
+    style(ax, "update", "prompts with a mixed group", "and when the run stopped making any")
+    fig.tight_layout()
+    save(fig, "real_forecast.pdf")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
         ("forecast", figure_forecast),
         ("sources", figure_sources),
         ("null", figure_null),
+        ("real_forecast", figure_real_forecast),
         ("reconvergence", figure_reconvergence),
         ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),
