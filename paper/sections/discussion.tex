@@ -40,22 +40,31 @@ policy divergence and metric spread come apart in Section~\ref{sec:exp-scale}: t
 directions of $S_T$ differently, and one of the two weightings can be identically zero.
 
 \paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
-and the injected covariance are all exact. On a real model each becomes an estimate, and the
-composition of three estimates is not something our measurements bound. One of the three is biased
-in a direction we can name. Writing the estimated metric gradient as $\hat{b} = \nabla M + \epsilon$
-with $\epsilon$ the sampling error of one rollout on the evaluation set,
+and the injected covariance are all exact. On a real model each becomes an estimate, and one of the
+three is biased in a direction we can name. Writing the estimated metric gradient as
+$\hat{b} = \nabla M + \epsilon$ with $\epsilon$ the sampling error of one rollout on the evaluation
+set,
 \begin{equation}
   \label{eq:bias}
   \E\big[\Var(\hat{b}^{\!\top}\hat{g})\big]
   = \Var(\nabla M^{\!\top}\hat{g}) + \E\big[\Var(\epsilon^{\!\top}\hat{g})\big],
 \end{equation}
 so a noisy metric gradient makes the forecast too large, never too small. The second term shrinks
-with the size of the evaluation rollout and can be estimated by splitting it, which we did not do. We report the ingredients
-separately at $7$B --- the realised spread over eight seeds, and the divergence between them --- but
-not the forecast itself, because we could not validate the backward pass at that scale within this
-machine's budget. That gap is the single most valuable thing to close next, and
-Section~\ref{sec:exp-forecast} states exactly what it would take: two gradient evaluations per
-stored update, with common random numbers so the difference is not swamped.
+with the size of the evaluation rollout and can be estimated by splitting it, which we did not do.
+
+\paragraph{And on a real model it underpredicts.} Section~\ref{sec:exp-real} runs the whole thing on
+Qwen2.5-0.5B and the forecast comes out at a third of the measured spread. The eight-run interval
+contains the forecast, so the disagreement is not resolved, but the point estimate errs in the
+direction a local model should and the reason is not subtle: the runs end in two groups rather than
+scattered around one, which is the linearisation failing rather than the arithmetic. What survives
+the failure is the mechanism. The first three batches of a run correlate with its final score at
+$0.88$, and the per-update kernel puts $92\%$ of the forecast variance in the first half of the run:
+the uncertainty really is made early and then amplified, exactly as the spectrum says it should be.
+What does not survive is the assumption that the amplification stays linear.
+
+We would rather report this than a number from a setting chosen to make it work. It also sets the
+next experiment precisely: the linearity residual of Section~\ref{sec:exp-linearity} is cheap on a
+real model and would have flagged this run before the seeds were trained.
 
 \paragraph{On the size of the models.} The largest measurement here is Qwen2.5-7B with eight seeds
 over twenty updates. That is enough to say that a $7$B model's reported number moves under
@@ -102,9 +111,11 @@ Any drift-targeted schedule needs a floor on the signal or a cap on the step; ou
 defensible claim is that behavioural drift is a more invariant coordinate for update magnitude, not
 that a constant value of it is a good schedule.
 
-\paragraph{What we would do next, in order.} Validate the backward pass on a real model, which is
-an engineering task rather than a scientific one and which turns Section~\ref{sec:exp-forecast}
-into a tool. Then ask whether the forecast survives a run long enough for the kernel to have
-structure, since over the horizons reachable here it does not. Then treat the estimation error in
-$\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
-thing a practitioner will actually be handed.
+\paragraph{What we would do next, in order.} Measure the linearity residual on a real run, which
+is one extra gradient evaluation per stored checkpoint and would say in advance whether the forecast
+applies to it. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
+and stays inside the regime --- our best guess is that it needs a larger model, where the same
+relative improvement is a smaller relative move in parameter space. Then treat the estimation error
+in $\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
+thing a practitioner will actually be handed. Only then is what we have a tool rather than a
+mechanism with a validated special case.
