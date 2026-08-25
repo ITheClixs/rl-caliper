@@ -75,6 +75,38 @@ The exact-tier experiments run in minutes on a laptop CPU. The pretrained-model 
 Apple Silicon and MLX; the seven-billion-parameter runs need about $24$\,GB of unified memory, and
 the eight-seed sweep takes several hours.
 
+\section{What the real-model design can resolve}
+\label{app:power}
+
+The seed spread of a score estimated from a finite evaluation is recovered by subtracting the
+evaluation's own binomial variance from the observed spread across runs. That is a difference of
+two noisy quantities, and below some true spread it is not distinguishable from zero. Reporting a
+number from it without knowing where that boundary lies would be reporting noise.
+
+\begin{table}[t]
+  \centering
+  \input{tables/power}
+  \caption{Simulating the design as run --- $48$ held-out questions, $16$ samples each, pass rate
+  near $0.35$ --- at a range of true seed spreads. \emph{Resolved} is the fraction of trials in
+  which the subtraction returns something positive; \emph{estimate} is the median of what it
+  returns.}
+  \label{tab:power}
+\end{table}
+
+Three readings, and the first is a warning about the method rather than about the data. At a true
+spread of zero the subtraction still returns a positive number in about half of trials, because a
+difference of two noisy variances is positive half the time. A non-zero reading is therefore not by
+itself evidence of a seed spread; the interval is.
+
+Second, the design resolves what it needs to. At a true spread of $0.02$ the subtraction recovers
+something in $88\%$ of trials at eight runs and lands at a median of $0.018$; at $0.04$ it succeeds
+essentially always. Those bracket the forecast we make.
+
+Third, the bootstrap interval is anti-conservative here: its coverage of the true value runs from
+$68\%$ to $88\%$ rather than the nominal $95\%$, which is the percentile bootstrap applied to a
+variance difference at small $n$. We report the intervals because they are far more informative
+than a point estimate, and note that they are narrower than they should be.
+
 \section{The estimator family as a table}
 \label{app:family}
 

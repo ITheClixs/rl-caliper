@@ -506,6 +506,37 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+def table_power() -> None:
+    """What the real-model design can resolve, simulated at the design actually used."""
+    runs = [r for r in io.load_all("s7_power") if r["result"].get("rows")]
+    if not runs:
+        raise SystemExit("no power simulation")
+    rows = runs[-1]["result"]["rows"]
+    counts = sorted({row["runs"] for row in rows})
+    lines = [
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}l" + "cc" * len(counts) + r"@{}}",
+        r"\toprule",
+        "& " + " & ".join(rf"\multicolumn{{2}}{{c}}{{{n} runs}}" for n in counts) + r" \\",
+        " ".join(rf"\cmidrule(lr){{{2 * i + 2}-{2 * i + 3}}}" for i in range(len(counts))),
+        "true s.d. & " + " & ".join(["resolved & estimate"] * len(counts)) + r" \\",
+        r"\midrule",
+    ]
+    for true_sd in sorted({row["true_sd"] for row in rows}):
+        cells = []
+        for count in counts:
+            match = [r for r in rows if r["true_sd"] == true_sd and r["runs"] == count]
+            if match:
+                cells.append(f"{100 * match[0]['nonzero_rate']:.0f}\\% & "
+                             f"{match[0]['median_estimate']:.3f}")
+            else:
+                cells.append("-- & --")
+        lines.append(f"{true_sd:.3f} & " + " & ".join(cells) + r" \\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("power", "\n".join(lines))
+
+
 def table_real_forecast() -> None:
     """The forecast on a pretrained model, against the spread it was made before seeing."""
     runs = [
@@ -680,6 +711,7 @@ def main() -> None:
         ("estimator_forecast", table_estimator_forecast),
         ("transport", table_transport),
         ("real_forecast", table_real_forecast),
+        ("power", table_power),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
