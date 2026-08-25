@@ -512,7 +512,7 @@ def table_power() -> None:
     if not runs:
         raise SystemExit("no power simulation")
     rows = runs[-1]["result"]["rows"]
-    counts = sorted({row["runs"] for row in rows})
+    counts = sorted({row["runs"] for row in rows})[:2]  # two columns fit; three do not
     lines = [
         r"\footnotesize",
         r"\setlength{\tabcolsep}{4pt}",
@@ -520,7 +520,9 @@ def table_power() -> None:
         r"\toprule",
         "& " + " & ".join(rf"\multicolumn{{2}}{{c}}{{{n} runs}}" for n in counts) + r" \\",
         " ".join(rf"\cmidrule(lr){{{2 * i + 2}-{2 * i + 3}}}" for i in range(len(counts))),
-        "true s.d. & " + " & ".join(["resolved & estimate"] * len(counts)) + r" \\",
+        "true s.d. & "
+        + " & ".join(["resolved & estimate"] * len(counts))
+        + r" \\",
         r"\midrule",
     ]
     for true_sd in sorted({row["true_sd"] for row in rows}):
