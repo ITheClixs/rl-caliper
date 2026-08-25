@@ -22,7 +22,7 @@ import numpy as np
 from mlx.utils import tree_flatten, tree_unflatten
 from mlx_lm import load
 
-from caliper.analysis.uncertainty import spread_interval
+from caliper.analysis.uncertainty import resolved_spread_interval, spread_interval
 from caliper.real.adjoint import forecast
 from caliper.real.generate import sample_group
 from caliper.real.tasks import FAMILIES
@@ -192,14 +192,16 @@ def main() -> None:
         })
         return
     observed = spread_interval(np.array(scores), n_boot=4000, seed=args.seed)
-    binomial = float(
-        np.mean(np.array(per_prompt) * (1.0 - np.array(per_prompt)))
-        / (args.eval_samples * args.eval_prompts)
+    interval = resolved_spread_interval(
+        np.array(per_prompt), args.eval_samples, n_boot=4000, seed=args.seed
     )
-    resolved = float(np.sqrt(max(observed["std"] ** 2 - binomial, 0.0)))
+    binomial = interval["binomial"] ** 2
+    resolved = interval["resolved"]
     print(f"\nheld-out score {observed['mean']:.4f}")
     print(f"observed sd {observed['std']:.5f} [{observed['lo']:.5f}, {observed['hi']:.5f}]")
-    print(f"binomial component sd {np.sqrt(binomial):.5f}; resolved seed sd {resolved:.5f}")
+    print(f"binomial component sd {interval['binomial']:.5f}; resolved seed sd {resolved:.5f} "
+          f"[{interval['lo']:.5f}, {interval['hi']:.5f}]")
+    print(f"bootstrap draws landing at zero: {interval['at_zero']:.0%}")
     print(f"forecast {prediction.std:.5f}  ratio to resolved "
           f"{prediction.std / max(resolved, 1e-12):.2f}x")
 
@@ -218,6 +220,7 @@ def main() -> None:
         "observed_spread": observed,
         "binomial_variance": binomial,
         "resolved_std": resolved,
+        "resolved_interval": interval,
         "base_pass_rate": float(base_rates.mean()),
     })
 

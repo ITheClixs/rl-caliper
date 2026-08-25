@@ -79,3 +79,38 @@ def test_loglog_fit_recovers_a_known_exponent():
     fit = loglog_fit({"P": p}, response, n_boot=1000)
     assert compatible(fit["P"], -0.5)
     assert fit["_fit"]["r2"] > 0.98
+
+
+def test_the_resolved_spread_subtracts_the_evaluation_noise():
+    """With no seed spread at all, what survives the subtraction must be zero."""
+    from caliper.analysis.uncertainty import resolved_spread_interval
+
+    rng = np.random.default_rng(0)
+    runs, questions, samples = 8, 48, 16
+    identical = np.full(runs, 0.35)
+    per_prompt = rng.binomial(samples, identical[:, None] * np.ones((1, questions))) / samples
+    result = resolved_spread_interval(per_prompt, samples, n_boot=800, seed=1)
+    assert result["resolved"] < 0.01
+    assert result["binomial"] > 0.0
+
+
+def test_the_resolved_spread_recovers_a_real_one():
+    """A seed spread well above the evaluation noise must come back close to its true size."""
+    from caliper.analysis.uncertainty import resolved_spread_interval
+
+    rng = np.random.default_rng(3)
+    runs, questions, samples, true_sd = 12, 48, 16, 0.08
+    centres = 0.35 + rng.normal(0.0, true_sd, size=runs)
+    per_prompt = (
+        rng.binomial(samples, np.clip(centres[:, None] * np.ones((1, questions)), 0, 1)) / samples
+    )
+    result = resolved_spread_interval(per_prompt, samples, n_boot=800, seed=2)
+    assert result["lo"] <= true_sd <= result["hi"]
+    assert result["resolved"] < result["observed"]
+
+
+def test_the_resolved_spread_needs_more_than_one_run():
+    from caliper.analysis.uncertainty import resolved_spread_interval
+
+    with pytest.raises(ValueError):
+        resolved_spread_interval(np.full((1, 4), 0.3), 8)

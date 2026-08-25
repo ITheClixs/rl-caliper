@@ -131,6 +131,52 @@ def spread_interval(
     }
 
 
+def resolved_spread_interval(
+    per_prompt: np.ndarray,
+    samples: int,
+    n_boot: int = 4000,
+    seed: int = 0,
+    level: float = 0.95,
+) -> dict[str, float]:
+    """Across-run spread of a reported score with the evaluation's own noise removed.
+
+    `per_prompt[r, q]` is run r's pass rate on evaluation question q, estimated from `samples`
+    responses. The spread across runs contains a binomial term that has nothing to do with the
+    seed; it is subtracted in variance. The subtraction is only valid when each run drew its own
+    evaluation randomness, since it assumes that noise is independent between runs.
+
+    The interval is a bootstrap over runs, recomputing both terms inside each resample, because
+    the point estimate is a difference of two noisy quantities and at the run counts anyone
+    trains it can land at zero.
+    """
+    values = np.asarray(per_prompt, dtype=float)
+    if values.ndim != 2 or values.shape[0] < 2:
+        raise ValueError("need at least two runs, each scored on the same questions")
+    runs, questions = values.shape
+
+    def resolved(rows: np.ndarray) -> float:
+        observed = rows.mean(axis=1).var(ddof=1)
+        binomial = float(np.mean(rows * (1.0 - rows)) / (samples * questions))
+        return float(np.sqrt(max(observed - binomial, 0.0)))
+
+    rng = np.random.default_rng(seed)
+    draws = np.empty(n_boot)
+    for i in range(n_boot):
+        draws[i] = resolved(values[rng.integers(0, runs, size=runs)])
+    tail = (1.0 - level) / 2.0
+    lo, hi = np.percentile(draws, [100 * tail, 100 * (1.0 - tail)])
+    binomial = float(np.mean(values * (1.0 - values)) / (samples * questions))
+    return {
+        "resolved": resolved(values),
+        "lo": float(lo),
+        "hi": float(hi),
+        "observed": float(values.mean(axis=1).std(ddof=1)),
+        "binomial": float(np.sqrt(binomial)),
+        "at_zero": float(np.mean(draws == 0.0)),
+        "n_runs": int(runs),
+    }
+
+
 def loglog_fit(
     predictors: dict[str, np.ndarray],
     response: np.ndarray,

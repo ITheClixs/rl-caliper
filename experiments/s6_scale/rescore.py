@@ -22,7 +22,7 @@ import numpy as np
 from mlx.utils import tree_unflatten
 from mlx_lm import load
 
-from caliper.analysis.uncertainty import spread_interval
+from caliper.analysis.uncertainty import resolved_spread_interval, spread_interval
 from caliper.real.generate import sample_group
 from caliper.real.tasks import FAMILIES
 from caliper.real.tasks import reward as exact_match
@@ -92,14 +92,14 @@ def main() -> None:
     per_prompt = np.array(rows)
     scores = per_prompt.mean(axis=1)
     observed = spread_interval(scores, n_boot=4000, seed=0)
-    binomial = float(
-        np.mean(per_prompt * (1.0 - per_prompt)) / (args.eval_samples * args.eval_prompts)
-    )
-    resolved = float(np.sqrt(max(observed["std"] ** 2 - binomial, 0.0)))
+    interval = resolved_spread_interval(per_prompt, args.eval_samples, n_boot=4000, seed=0)
+    binomial = interval["binomial"] ** 2
+    resolved = interval["resolved"]
     print(f"\n{len(scores)} seeds, {args.eval_prompts} x {args.eval_samples} samples each")
     print(f"held-out score {observed['mean']:.4f}")
     print(f"observed sd {observed['std']:.5f} [{observed['lo']:.5f}, {observed['hi']:.5f}]")
-    print(f"binomial component sd {np.sqrt(binomial):.5f}; resolved seed sd {resolved:.5f}")
+    print(f"binomial component sd {interval['binomial']:.5f}; resolved seed sd {resolved:.5f} "
+          f"[{interval['lo']:.5f}, {interval['hi']:.5f}]")
 
     io.save("s6_rescore", vars(args), {
         "label": args.label,
@@ -108,6 +108,7 @@ def main() -> None:
         "observed_spread": observed,
         "binomial_variance": binomial,
         "resolved_std": resolved,
+        "resolved_interval": interval,
         "base_pass_rate": float(base.mean()),
     })
     (store / "rescore.json").write_text(json.dumps({
