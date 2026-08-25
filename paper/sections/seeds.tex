@@ -207,6 +207,12 @@ group is not unanimous. Then one rollout and backward pass on the evaluation set
 $\nabla M(\theta_T)$, and the backward sweep of Algorithm~\ref{alg:forecast}. The extra cost is two
 gradient evaluations per stored update and one vector of parameter size held in memory.
 
+And one thing before believing the answer: check that the runs it describes are small perturbations
+of each other. The residual of Section~\ref{sec:exp-linearity} measures that directly, and
+Section~\ref{sec:exp-real} is what happens when nobody checks --- a real run whose seeds separate
+into two outcomes, where the forecast is short by a factor of twelve and no amount of care in
+computing it would have helped.
+
 \paragraph{What it costs, plainly.} As written, the backward pass makes three passes per stored
 update: one batch for the injected term, and two for the Hessian-vector product. That is about
 three times the compute of the training run itself, not a rounding error, and we would rather state
