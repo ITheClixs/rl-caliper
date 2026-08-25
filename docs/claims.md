@@ -61,7 +61,7 @@ Legend for strength:
 | that shortfall is not an estimation artefact | `s7`: Sigma from 64 prompts gives 0.0052, and the live share still collapses | measured |
 | the transport is not reproducible on a real model | `s7`: two runs give 0.0225 and 0.0040 with transport, 5.7x apart, against 0.0056 and 0.0052 without | measured |
 | real RLVR runs separate into discrete outcome modes | `s7` at 0.5B: 3 runs at 0.350, 5 at 0.217, within-group spread under 0.01 | measured |
-| which mode a run lands in is decided early | `s7`: first-three-batch pass rate correlates 0.65 with the final score, interval [0.05, 0.95] over 8 runs | observed |
+| ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.07 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 
 ## Withdrawn or superseded
