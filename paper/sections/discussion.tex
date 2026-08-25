@@ -68,8 +68,10 @@ real model and would have flagged this run before the seeds were trained.
 
 \paragraph{On the size of the models.} The largest measurement here is Qwen2.5-7B with eight seeds
 over twenty updates. That is enough to say that a $7$B model's reported number moves under
-reseeding by an amount we can measure and that its policy divergence does not accumulate; it is not
-enough to say anything about a run of several hundred updates on a reasoning model. We did not run
+reseeding by an amount we can measure, and that its policy divergence rises over the first ten
+updates and then stops, with a tail slope of $\numScaleTailSlope$ against the $+1$ accumulation
+requires; it is not enough to say anything about a run of several hundred updates on a reasoning
+model. We did not run
 that, and not because it was overlooked: every experiment in this paper was executed on a single
 laptop, which is enough for exact validation on solvable systems, for populations of small
 transformers, and for eight seeds at $7$B, and is not enough for that. We would rather state the

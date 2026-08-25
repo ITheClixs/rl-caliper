@@ -605,29 +605,15 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
-# The commit that gave every run its own evaluation draw. Records written before it share one
-# draw between seeds, which makes the binomial subtraction over-correct; records written after
-# it carry `eval_key_per_seed` and say so themselves.
-EVAL_KEY_FIX = "69ce8c3"
-
-
-@functools.lru_cache(maxsize=None)
-def _descends_from_fix(sha: str) -> bool:
-    if not sha:
-        return False
-    done = subprocess.run(
-        ["git", "merge-base", "--is-ancestor", EVAL_KEY_FIX, sha],
-        capture_output=True,
-    )
-    return done.returncode == 0
-
-
 def per_seed_evaluation(record) -> bool:
-    """Did each run in this record draw its own evaluation randomness?"""
-    stated = record["result"].get("eval_key_per_seed")
-    if stated is not None:
-        return bool(stated)
-    return _descends_from_fix(record["manifest"].get("git_sha", ""))
+    """Did each run in this record draw its own evaluation randomness?
+
+    Only the record itself can say. A run that predates the field cannot be dated from its
+    manifest, because a long run outlives commits and the stored SHA describes the tree at save
+    time. Absent an explicit statement we assume the draw was shared, which is the conservative
+    reading: it reports the seed term as a bracket rather than a subtraction that may over-correct.
+    """
+    return bool(record["result"].get("eval_key_per_seed", False))
 
 
 def table_scale() -> None:

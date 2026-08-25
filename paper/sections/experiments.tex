@@ -561,11 +561,12 @@ says what that would cost to fix.
 
 \begin{table}[t]
   \centering
-  \small
+  \footnotesize
   \input{tables/scale}
-  \caption{The same measurement at two model sizes. The seed term at $7$B is given as a bracket
-  rather than a subtraction, because those runs shared one evaluation draw and the subtraction
-  would over-correct; Section~\ref{sec:exp-forecast} gives the bracket.}
+  \caption{The same measurement at two model sizes. The seed term is given as the bracket of
+  Section~\ref{sec:exp-forecast} rather than by subtracting the binomial term, which is the
+  conservative reading where a run's record does not establish that its seeds drew independent
+  evaluations. Both brackets are narrow, so little turns on the choice here.}
   \label{tab:scale}
 \end{table}
 

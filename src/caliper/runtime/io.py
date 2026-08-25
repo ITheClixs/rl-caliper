@@ -32,13 +32,21 @@ def config_hash(config: dict[str, Any]) -> str:
     return hashlib.sha256(blob).hexdigest()[:12]
 
 
+# Captured when the process starts, not when it saves. A long run can outlive many commits, and
+# a SHA read at save time describes the working tree then rather than the code that produced the
+# result, which is the opposite of what a manifest is for.
+_STARTED_AT = time.time()
+_STARTED_SHA = git_sha()
+
+
 def manifest(config: dict[str, Any]) -> dict[str, Any]:
     return {
-        "git_sha": git_sha(),
+        "git_sha": _STARTED_SHA,
         "config_hash": config_hash(config),
         "config": config,
         "python": platform.python_version(),
         "platform": platform.platform(),
+        "started_at": _STARTED_AT,
         "wall_clock": time.time(),
     }
 

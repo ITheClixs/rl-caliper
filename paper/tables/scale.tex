@@ -1,1 +1,16 @@
-\emph{pending: this table is generated from a run that has not been stored yet.}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+quantity & Qwen2.5-0.5B & Qwen2.5-7B \\
+\midrule
+runs & 8 & 8 \\
+updates & 12 & 20 \\
+held-out pass rate, base & 0.163 & 0.203 \\
+held-out pass rate, after & 0.283 & 0.313 \\
+\midrule
+spread across runs & 0.0636 & 0.0925 \\
+\quad evaluation part & 0.0077 & 0.0055 \\
+\quad seed part & [0.0631, 0.0636] & [0.0923, 0.0925] \\
+split at the largest gap & 5 / 3 & 3 / 5 \\
+\bottomrule
+\end{tabular}
