@@ -77,7 +77,9 @@ radius matched to one update, and we have not done that.
 
 \paragraph{On the size of the models.} The largest measurement here is Qwen2.5-7B with eight seeds
 over twenty updates. That is enough to say that a $7$B model's reported number moves under
-reseeding by an amount we can measure, and that its policy divergence rises over the first ten
+reseeding by an amount we can measure, and that the KL between its policies, measured per response
+token on one fixed batch of contexts rather than sampled along each policy's own trajectories,
+rises over the first ten
 updates and then stops, with a tail slope of $\numScaleTailSlope$ against the $+1$ accumulation
 requires; it is not enough to say anything about a run of several hundred updates on a reasoning
 model. We did not run
@@ -94,8 +96,10 @@ saturate, in which case $\nabla M = 0$ on the evaluated distribution and no seed
 detected. Section~\ref{sec:exp-scale} exhibits both on real models, the first within a single update
 at a step size a practitioner might well pick. Neither is evidence that the training procedure is
 reproducible, and both are cheap to rule out: log the fraction of prompts whose group is not
-unanimous during training, and $\E_x[p(1-p)]$ on the evaluation set at the end. If either is zero,
-so is the error bar, and it means nothing.
+unanimous during training, and $\E_x[\hat{p}(1-\hat{p})]$ on the evaluation set at the end. If
+either is zero, so is the error bar, and it means nothing. Neither reading needs the true pass
+rates: it is enough that the measured ones have stopped varying, since that alone is what makes
+the reported number uninformative.
 
 \paragraph{Why there is no forecast at seven billion.} The measurement we report at $7$B is the
 spread itself and the divergence between runs, not a forecast of either, and the reason is a

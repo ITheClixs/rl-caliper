@@ -595,16 +595,21 @@ says what that would cost to fix.
 
 \paragraph{The metric went blind.} On counting a letter in a word, a task the base model already
 passes at $0.41$, twenty updates take the held-out pass rate to $\numSatScore$ and
-collapse the response distribution. All $\numSatPrompts$ held-out prompts then have a per-prompt
-rate of exactly $0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout
-randomness report \emph{the same number to the last decimal} and agree on
+drive every held-out prompt to a unanimous sample. All $\numSatPrompts$ of them return a measured
+rate $\hat{p}$ of exactly $0$ or exactly $1$: eight samples, one answer. Eight samples cannot
+distinguish $\hat{p} = 1$ from a true rate of, say, $0.9$, which is unanimous $43\%$ of the time,
+so what is established is that the evaluation has stopped separating the runs, not that the
+response distribution has collapsed to a point. Two runs differing only in rollout randomness
+report \emph{the same number to the last decimal} and agree on
 $\numSatPrompts$ of $\numSatPrompts$ prompts individually, while their policies differ by between
 $1.8\times10^{-5}$ and $7.7\times10^{-2}$ in KL and that difference does not accumulate over the
 run.
 
 This is worth being precise about, because the two readings are opposite. It is not that the seeds
-converged. It is that the metric stopped resolving them: $\E_x[p(1-p)] = 0$ on the evaluation set,
-so a score built from those samples has no variance to report, whatever the policies do. The
+converged. It is that the metric stopped resolving them: the measured $\E_x[\hat{p}(1-\hat{p})]$
+is zero on the evaluation set, so a score built from those samples has no variance to report,
+whatever the policies do. The two readings are separated by the KL between the policies, which is
+not zero, rather than by the scores, which are identical. The
 practical consequence is that a zero measured spread on a saturated benchmark is not evidence of a
 reproducible procedure, and the theoretical consequence is the one
 Section~\ref{sec:metric} is built on: the spread of a reported number is
