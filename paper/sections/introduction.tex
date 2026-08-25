@@ -10,11 +10,12 @@ the only instrument the field has is replication, which at current RL compute is
 unaffordable. So the number usually goes unmeasured, and single-run improvements are read as
 though the training procedure were deterministic.
 
-This paper gives a different instrument. The claim is that a run contains enough information to
-forecast its own spread, so an error bar can be produced from the run that was already going to be
-trained. We derive it, and test it where the comparison can be made exactly; carrying it to a
-frontier-scale run is engineering we did not have the hardware for, and
-Section~\ref{sec:discussion} says exactly what that would take.
+This paper asks what a single run can be made to say about that number. The answer has two halves.
+Where the comparison can be made exactly, a run does contain enough information to forecast its own
+spread, and we derive the estimator that extracts it and test it prospectively. Carried to a
+pretrained model it underpredicts by a factor of twelve, for a reason the same framework identifies:
+the runs stop being small perturbations of each other. Both halves are reported, because a method
+that is presented without its boundary is not a method.
 
 Getting there means first correcting the model of where the spread comes from. The obvious picture
 is that gradient noise perturbs each update, perturbations accumulate, two runs execute a random
