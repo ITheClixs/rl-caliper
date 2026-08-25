@@ -464,6 +464,25 @@ def table_numbers() -> None:
         summary["PropagatedPercent"] = f"{100 * (float(summary['PropagatedMedian']) - 1):.0f}"
         macros |= summary
 
+    traced = [
+        r
+        for r in io.load_all("s7_real_forecast")
+        if r["result"].get("train_traces") and len(r["result"].get("held_out_scores", [])) >= 4
+    ]
+    if traced:
+        outcome = traced[-1]["result"]
+        traces = np.array(outcome["train_traces"], dtype=float)
+        scores = np.array(outcome["held_out_scores"], dtype=float)
+        window = min(3, traces.shape[1])
+        early = traces[:, :window].mean(axis=1)
+        late = traces[:, -window:].mean(axis=1)
+        macros |= {
+            "EarlyCorrelation": f"{np.corrcoef(early, scores)[0, 1]:+.2f}",
+            "LateCorrelation": f"{np.corrcoef(late, scores)[0, 1]:+.2f}",
+            "TraceRuns": f"{scores.size}",
+            "TraceWindow": f"{window}",
+        }
+
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
         result = saturation[-1]["result"]
