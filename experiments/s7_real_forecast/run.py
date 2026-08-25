@@ -123,7 +123,7 @@ def main() -> None:
     # every run is scored with its own evaluation randomness. Sharing one key across seeds would
     # correlate the evaluation noise between them, and the binomial term subtracted below assumes
     # that noise is independent across runs; sharing it would make the subtraction over-correct.
-    first_rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555))
+    first_rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555 + 0))
     print(f"seed 0: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "
           f"held out {first_rates.mean():.4f} | {(time.time() - started) / 60:.1f} min", flush=True)
 
@@ -221,6 +221,8 @@ def main() -> None:
         "binomial_variance": binomial,
         "resolved_std": resolved,
         "resolved_interval": interval,
+        "per_prompt": per_prompt,  # kept so the interval can be recomputed without retraining
+        "eval_samples": args.eval_samples,
         "base_pass_rate": float(base_rates.mean()),
     })
 
