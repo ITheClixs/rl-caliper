@@ -433,23 +433,14 @@ only while $\E_x[p(1-p)]$ is well away from zero, which is the same condition
 Section~\ref{sec:exp-scale} arrives at for a different reason, and that a linear treatment of
 Adam over long horizons is an open problem rather than a solved one.
 
-\subsection{Two ways a run stops being measurable}
-\label{sec:exp-scale}
+\subsection{The backward pass on a pretrained model}
 \label{sec:exp-real}
 
-The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
-LoRA adapters and AdamW on exactly verifiable short-answer problems. Running it turned up two
-failure modes we did not plan for, and both are worth reporting because they are the same
-phenomenon at two different places in \eqref{eq:adjoint}: one kills $\Sigma_t$, the other kills
-$\nabla M$, and a practitioner who sees either will read a zero and conclude their pipeline is
-reproducible.
-
-\paragraph{Carrying the backward pass to a pretrained model.} Before the failure modes, the
-attempt they came out of. We ran the forecast end to end on Qwen2.5-0.5B-Instruct with LoRA
-adapters, twelve updates of plain gradient ascent, which is the update the recursion is written
-for, on a task the base model passes at $0.16$, and afterwards trained seven more seeds and measured
-what they did. The backward pass is the one in Algorithm~\ref{alg:forecast}, with the mean update
-field estimated from fresh rollouts under common random numbers.
+We ran the forecast end to end on Qwen2.5-0.5B-Instruct with LoRA adapters, twelve updates of plain
+gradient ascent, which is the update the recursion is written for, on a task the base model passes
+at $0.16$, and afterwards trained seven more seeds and measured what they did. The backward pass is
+the one in Algorithm~\ref{alg:forecast}, with the mean update field estimated from fresh rollouts
+under common random numbers.
 
 Two diagnostics came back before the comparison did, and both matter more than the comparison.
 
@@ -528,6 +519,15 @@ term drops below what eight runs can resolve at all (Appendix~\ref{app:power}: b
 the subtraction returns nothing usable). The window where the runs both learn and stay in the
 linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
 is a statement about the experiment we could afford rather than about the method.
+
+\subsection{Two ways a run stops being measurable}
+\label{sec:exp-scale}
+
+The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
+LoRA adapters and AdamW. Running it turned up two failure modes we did not plan for, and both are
+worth reporting because they are the same phenomenon at two different places in
+\eqref{eq:adjoint}: one kills $\Sigma_t$, the other kills $\nabla M$, and a practitioner who sees
+either will read a zero and conclude their pipeline is reproducible.
 
 \paragraph{The metric went blind.} On counting a letter in a word, a task the base model already
 passes at $0.41$, twenty updates take the held-out pass rate to $\numSatScore$ and
