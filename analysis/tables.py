@@ -602,12 +602,20 @@ def table_real_forecast() -> None:
             r"\midrule"
         )
         lines.append(
-            f"agreement of two $Jb$ estimates & {np.median(agreement):.2f} \\\\"
+            f"agreement of two $Jb$ estimates & {np.nanmedian(agreement):.2f} \\\\"
         )
     live = result.get("live_share") or []
     if live:
         alive = sum(1 for value in live if value > 0)
-        lines.append(f"updates injecting anything & {alive} of {len(live)} \\\\")
+        lines.append(f"updates with a mixed group & {alive} of {len(live)} \\\\")
+    kernel = np.array(result.get("kernel") or [])
+    if kernel.size and kernel.sum() > 0:
+        share = kernel / kernel.sum()
+        half = share.size // 2
+        lines.append(
+            f"share of it made in the first half & "
+            f"{100 * share[:half].sum():.0f}\\% \\\\"
+        )
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("real_forecast", "\n".join(lines))
 
