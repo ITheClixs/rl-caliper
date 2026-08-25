@@ -54,12 +54,11 @@ with the size of the evaluation rollout and can be estimated by splitting it, wh
 
 \paragraph{And on a real model it underpredicts, by a lot.} Section~\ref{sec:exp-real} runs the
 whole thing on Qwen2.5-0.5B and the forecast comes out a factor of twelve short. The reason is not
-subtle: the eight runs end in two groups rather than scattered around one, and a linearised model
-predicts the spread of a unimodal perturbation. What survives the failure is the mechanism. The
-first three batches of a run correlate with its final score at $\numEarlyCorrelation$ on the half-billion-parameter
-model, and the per-update kernel
-puts $92\%$ of the forecast variance in the first half of the run: the uncertainty really is made
-early and then amplified, exactly as the spectrum says it should be. What does not survive is the
+subtle: the eight runs end in groups rather than scattered around one, and a linearised model
+predicts the spread of a unimodal perturbation. What survives the failure is the localisation.
+The per-update kernel puts $90\%$ of the forecast variance in the first half of the run and the
+run stops injecting any after the fifth update, so the uncertainty is made early and then
+amplified, as the spectrum says it should be.
 assumption that the amplification stays linear. At a step size small enough to keep it
 linear, the seed term drops below what eight runs can resolve at all.
 
@@ -121,15 +120,14 @@ Any drift-targeted schedule needs a floor on the signal or a cap on the step; ou
 defensible claim is that behavioural drift is a more invariant coordinate for update magnitude, not
 that a constant value of it is a good schedule.
 
-\paragraph{A cheap intervention, offered tentatively.} If which of two outcomes a run reaches is
-correlated at $\numEarlyCorrelation$ with its first three batches, as it is on the half-billion-parameter model, then
-it is visible long before the run is over, and
-a practitioner watching that number could abandon a run heading for the worse mode after a few
-updates rather than after all of them. We did not test this, and we are wary of it: the correlation
-comes from eight runs of one configuration, selecting on an early signal is exactly how one
-manufactures an apparent improvement out of noise, and a run abandoned early is a run whose spread
-nobody measured. We record it because it follows directly from what we did measure, and because the
-experiment that would settle it is small.
+\paragraph{A claim we did not make.} An earlier draft of this work reported that the outcome of a
+run is largely settled by its first few batches, on a correlation of $0.88$ between early pass rate
+and final score. Repeating the experiment gave $0.65$, and repeating it again gave
+$\numEarlyCorrelation$; the bootstrap interval at eight runs runs from
+$\numEarlyCorrelationLow$ to $\numEarlyCorrelationHigh$, and at seven billion parameters the same
+correlation is $+0.07$. The number was real each time and the claim was not. We record it because
+the failure is instructive: eight runs make a correlation look like a finding, and only the third
+run of the same experiment made it obvious that it was not.
 
 \paragraph{What we would do next, in order.} Measure the linearity residual on a real run, which
 is one extra gradient evaluation per stored checkpoint and would say in advance whether the forecast

@@ -69,11 +69,10 @@
 
   Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
   rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
-  model it is short by a factor of twelve, because the runs end in two groups rather than scattered
-  around one. The mechanism survives that failure: a run's first three batches correlate with its
-  final score at $\numEarlyCorrelation$ on that model, and the per-update kernel puts $92\%$ of the variance in the
-  first half of
-  the run.
+  model it is short by a factor of eleven, because the runs end in groups rather than
+  scattered around one. What survives is the localisation: the per-update kernel puts $90\%$ of
+  the variance in the first half of the run, and the run stops injecting any after the fifth
+  update.
     \end{quote}
   \end{minipage}
   \vspace{6pt}
