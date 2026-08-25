@@ -638,9 +638,14 @@ def figure_null() -> None:
 
 def figure_real_forecast() -> None:
     """The forecast on a pretrained model: where it was injected, and whether it lands."""
-    runs = [r for r in io.load_all("s7_real_forecast") if r["result"].get("kernel")]
+    runs = [
+        r
+        for r in io.load_all("s7_real_forecast")
+        if r["result"].get("predicted_variance", 0.0) > 0.0
+        and len(r["result"].get("kernel", [])) >= 8
+    ]
     if not runs:
-        raise SystemExit("no real-model forecast")
+        raise SystemExit("no real-model forecast with a non-zero kernel")
     result = runs[-1]["result"]
     kernel = np.array(result["kernel"])
     live = np.array(result.get("live_share", []))
