@@ -567,11 +567,13 @@ def table_real_forecast() -> None:
         raise SystemExit("no real-model forecast with a measured spread")
     result = runs[-1]["result"]
     observed = result["observed_spread"]
-    cheap = [
-        r["result"]
-        for r in io.load_all("s7_real_forecast")
-        if not r["result"].get("transport", True) and len(r["result"].get("kernel", [])) >= 8
-    ]
+    cheap = {}
+    for record in io.load_all("s7_real_forecast"):
+        outcome = record["result"]
+        if outcome.get("transport", True) or len(outcome.get("kernel", [])) < 8:
+            continue
+        prompts = record["manifest"]["config"].get("variance_prompts")
+        cheap[prompts] = outcome
     lines = [
         r"\setlength{\tabcolsep}{4pt}",
         r"\begin{tabular}{@{}lc@{}}",
@@ -594,8 +596,13 @@ def table_real_forecast() -> None:
         r"\midrule",
         f"forecast from one run & {result['predicted_std']:.4f} \\\\",
     ]
-    if cheap:
-        lines.append(f"\\quad without transport & {cheap[-1]['predicted_std']:.4f} \\\\")
+    for prompts in sorted(cheap, key=lambda v: (v is not None, v or 0)):
+        label = (
+            "\\quad held at $\\nabla M$"
+            if prompts is None
+            else f"\\quad held, $\\Sigma$ from {prompts} prompts"
+        )
+        lines.append(f"{label} & {cheap[prompts]['predicted_std']:.4f} \\\\")
     agreement = result.get("jvp_agreement") or []
     if agreement:
         lines.append(
