@@ -56,7 +56,8 @@ with the size of the evaluation rollout and can be estimated by splitting it, wh
 whole thing on Qwen2.5-0.5B and the forecast comes out a factor of twelve short. The reason is not
 subtle: the eight runs end in two groups rather than scattered around one, and a linearised model
 predicts the spread of a unimodal perturbation. What survives the failure is the mechanism. The
-first three batches of a run correlate with its final score at $0.88$, and the per-update kernel
+first three batches of a run correlate with its final score at $0.88$ on the half-billion-parameter
+model, and the per-update kernel
 puts $92\%$ of the forecast variance in the first half of the run: the uncertainty really is made
 early and then amplified, exactly as the spectrum says it should be. What does not survive is the
 assumption that the amplification stays linear. At a step size small enough to keep it
@@ -113,7 +114,8 @@ defensible claim is that behavioural drift is a more invariant coordinate for up
 that a constant value of it is a good schedule.
 
 \paragraph{A cheap intervention, offered tentatively.} If which of two outcomes a run reaches is
-$0.88$-correlated with its first three batches, then it is visible long before the run is over, and
+$0.88$-correlated with its first three batches, as it is on the half-billion-parameter model, then
+it is visible long before the run is over, and
 a practitioner watching that number could abandon a run heading for the worse mode after a few
 updates rather than after all of them. We did not test this, and we are wary of it: the correlation
 comes from eight runs of one configuration, selecting on an early signal is exactly how one
