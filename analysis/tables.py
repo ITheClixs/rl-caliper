@@ -553,14 +553,17 @@ def table_scale() -> None:
     if small:
         outcome = small[-1]["result"]
         rows.append(("Qwen2.5-0.5B", outcome, small[-1]["manifest"]["config"]))
+    # the re-scoring pass is what the seven-billion numbers come from: the training loop scored
+    # as it went, before each run drew its own evaluation randomness
     big = [
         r
-        for r in io.load_all("s6_scale")
+        for store in ("s6_rescore", "s6_scale")
+        for r in io.load_all(store)
         if r["result"].get("resolved_std") is not None
         and len(r["result"].get("held_out_scores", [])) >= 4
     ]
     if big:
-        rows.append(("Qwen2.5-7B", big[-1]["result"], big[-1]["manifest"]["config"]))
+        rows.append(("Qwen2.5-7B", big[0]["result"], big[0]["manifest"]["config"]))
     if len(rows) < 2:
         raise SystemExit("need both model sizes measured")
 
@@ -576,7 +579,7 @@ def table_scale() -> None:
         lines.append(f"{label} & " + " & ".join(values) + r" \\")
 
     line("runs", [f"{len(r['held_out_scores'])}" for _, r, _ in rows])
-    line("updates", [f"{c['steps']}" for _, _, c in rows])
+    line("updates", [f"{c.get('steps', c.get('step', '?'))}" for _, _, c in rows])
     line("held-out pass rate, base", [f"{r['base_pass_rate']:.3f}" for _, r, _ in rows])
     line("held-out pass rate, after", [f"{r['observed_spread']['mean']:.3f}" for _, r, _ in rows])
     lines.append(r"\midrule")
