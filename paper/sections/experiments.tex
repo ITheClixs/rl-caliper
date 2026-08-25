@@ -30,7 +30,7 @@ $47$.
   \centering
   \includegraphics[width=\textwidth]{figures/forecast.pdf}
   \caption{\textbf{Left:} the forecast made from one run against the standard deviation realised
-  over $64$. Horizontal bars are bootstrap intervals over runs. The solid line is equality and the
+  over $\numForecastSeeds$. Horizontal bars are bootstrap intervals over runs. The solid line is equality and the
   dotted lines are a factor of $1.5$. \textbf{Right:} the share of the final variance injected at
   each point in the run, normalised so that a flat line at $1$ is a uniform kernel. It is nearly
   flat, which is the answer to the memory-horizon question and not the one we expected.}
@@ -42,16 +42,20 @@ $47$.
   \small
   \input{tables/forecast}
   \caption{Forecast against realised spread. The error is $|\log(\text{predicted}/\text{measured})|$
-  exponentiated; coverage counts settings where the forecast falls inside the bootstrap interval of
-  the measured standard deviation over $64$ runs.}
+  exponentiated; the last column counts settings where the forecast falls inside the bootstrap interval of
+  the measured standard deviation over $\numForecastSeeds$ runs, which is consistency with that
+  interval rather than the coverage of an interval the forecast itself produces.}
   \label{tab:forecast}
 \end{table}
 
 Table~\ref{tab:forecast} reports a median absolute error of $\numForecastMedian\times$ and a worst case of
 $\numForecastWorst\times$, and the forecast lands inside the measured $95\%$ interval in $\numForecastInside$ of $\numForecastSettings$
-settings. Two things in the breakdown are worth noting. The two policy shapes agree with each other
+settings. That last count says the point forecast is consistent with the interval a finite number
+of seeds puts on the measured spread. It is not the coverage of an interval the forecast itself
+produces, which is a quantity this method does not yet report.
+Two things in the breakdown are worth noting. The two policy shapes agree with each other
 at $\numForecastMedian\times$ against $1.10\times$, so the result is not a property of one tabular family.
-And accuracy is flat in run length at the median but its coverage is not: $90$ of $96$ settings at
+And accuracy is flat in run length at the median but that consistency is not: $90$ of $96$ settings at
 $\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
 where Section~\ref{sec:exp-linearity} says it should.
 

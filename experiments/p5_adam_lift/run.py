@@ -102,7 +102,7 @@ def main() -> None:
         # warm the moments on mean gradients: every run shares this state
         state = initial_state(policy)
         for _ in range(args.warmup):
-            state = advance_state(state, accepts, weights, settings)
+            state = advance_state(state, accepts, weights, settings, prompts)
         start = state
         size = 3 * dim
         covariance = np.zeros((size, size))
@@ -129,7 +129,7 @@ def main() -> None:
             unit = injection[:dim, :dim]
             flat = block @ flat @ block.T + unit
             walk = walk + unit
-            state = advance_state(state, accepts, weights, settings)
+            state = advance_state(state, accepts, weights, settings, prompts)
 
         metric = np.mean([fisher(make_prompt(state.policy, a)) for a in accepts], axis=0)
         lifted_kl = float(np.trace(metric @ covariance[:dim, :dim]))

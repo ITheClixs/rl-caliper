@@ -141,6 +141,11 @@ def resolved_spread_interval(
     """Across-run spread of a reported score with the evaluation's own noise removed.
 
     `per_prompt[r, q]` is run r's pass rate on evaluation question q, estimated from `samples`
+    `p_hat (1 - p_hat)` estimates `p (1 - p)` with a factor `(S-1)/S`, so the variance of a rate
+    measured from `S` responses is recovered by dividing by `S - 1` rather than by `S`. Dividing
+    by `S` understates the evaluation term and leaves a seed term that is correspondingly too
+    large, by 12.5% in variance at eight samples per question.
+
     responses. The spread across runs contains a binomial term that has nothing to do with the
     seed; it is subtracted in variance. The subtraction is only valid when each run drew its own
     evaluation randomness, since it assumes that noise is independent between runs.
@@ -156,7 +161,7 @@ def resolved_spread_interval(
 
     def resolved(rows: np.ndarray) -> float:
         observed = rows.mean(axis=1).var(ddof=1)
-        binomial = float(np.mean(rows * (1.0 - rows)) / (samples * questions))
+        binomial = float(np.mean(rows * (1.0 - rows)) / ((samples - 1) * questions))
         return float(np.sqrt(max(observed - binomial, 0.0)))
 
     rng = np.random.default_rng(seed)
@@ -165,7 +170,7 @@ def resolved_spread_interval(
         draws[i] = resolved(values[rng.integers(0, runs, size=runs)])
     tail = (1.0 - level) / 2.0
     lo, hi = np.percentile(draws, [100 * tail, 100 * (1.0 - tail)])
-    binomial = float(np.mean(values * (1.0 - values)) / (samples * questions))
+    binomial = float(np.mean(values * (1.0 - values)) / ((samples - 1) * questions))
     return {
         "resolved": resolved(values),
         "lo": float(lo),
@@ -196,7 +201,7 @@ def spread_bounds(per_prompt: np.ndarray, samples: int) -> dict[str, float]:
     if values.ndim != 2 or values.shape[0] < 2:
         raise ValueError("need at least two runs, each scored on the same questions")
     observed = float(values.mean(axis=1).std(ddof=1))
-    binomial = float(np.sqrt(np.mean(values * (1.0 - values)) / (samples * values.shape[1])))
+    binomial = float(np.sqrt(np.mean(values * (1.0 - values)) / ((samples - 1) * values.shape[1])))
     lower = float(np.sqrt(max(observed**2 - binomial**2, 0.0)))
     return {
         "lower": lower,

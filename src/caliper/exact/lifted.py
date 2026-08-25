@@ -9,8 +9,13 @@ survives in them long after the step that produced it. The state that closes is
 with the mean map
 
     m' = b1 m + (1 - b1) g_bar(theta)
-    v' = b2 v + (1 - b2) g_bar(theta)^2
+    v' = b2 v + (1 - b2) E[g_hat^2] = b2 v + (1 - b2) (g_bar^2 + diag Cov(g_hat))
     theta' = theta + eta m' / (sqrt(v') + eps)
+
+Adam is handed a stochastic gradient, so the mean of its second-moment update carries the
+gradient variance as well as the square of the mean. Squaring the mean gradient instead
+understates v by that variance, which is most of it once the run approaches saturation and the
+mean gradient goes to zero, and a v that is too small inflates every step that follows.
 
 Writing that map as `z' = Phi(z)`, the transfer operator is `A = dPhi/dz` and the injected
 covariance is `Q = B Cov(g_hat) B^T` with `B = dPhi/dg`, the sensitivity of one update to the
@@ -66,16 +71,25 @@ def _advance(
     settings: AdamSettings,
     step: int,
     gradient: np.ndarray | None = None,
+    n_prompts: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """One mean Adam update from a state displaced by `logits_delta`.
+    """One Adam update from a state displaced by `logits_delta`.
 
-    Returns the displacement of the new parameters, and the new moments. `gradient` overrides the
-    mean gradient, which is how the sensitivity to the injected noise is taken.
+    With `gradient` given this is the stochastic map at that realised gradient, which is what the
+    sensitivity to the injected noise is taken of. With `gradient` None it is the mean map, whose
+    second moment carries `E[g_hat^2]` and therefore needs `n_prompts` to know the variance.
     """
     shifted = policy.perturbed(logits_delta)
-    grad = mean_gradient(shifted, accepts, weights) if gradient is None else gradient
+    if gradient is None:
+        grad = mean_gradient(shifted, accepts, weights)
+        if n_prompts is None:
+            raise ValueError("the mean map needs n_prompts to evaluate E[g^2]")
+        square = grad**2 + np.diag(injected_covariance(shifted, accepts, weights, n_prompts))
+    else:
+        grad = gradient
+        square = grad**2
     new_moment = settings.beta1 * moment + (1.0 - settings.beta1) * grad
-    new_second = settings.beta2 * second + (1.0 - settings.beta2) * grad**2
+    new_second = settings.beta2 * second + (1.0 - settings.beta2) * square
     if settings.bias_correction:
         hat_m = new_moment / (1.0 - settings.beta1 ** (step + 1))
         hat_v = new_second / (1.0 - settings.beta2 ** (step + 1))
@@ -108,7 +122,8 @@ def transfer_and_injection(
     def apply(vector: np.ndarray) -> np.ndarray:
         delta, moment, second = vector[:dim], vector[dim : 2 * dim], vector[2 * dim :]
         out = _advance(
-            delta, moment, second, state.policy, accepts, weights, settings, state.step
+            delta, moment, second, state.policy, accepts, weights, settings, state.step,
+            n_prompts=n_prompts,
         )
         return np.concatenate(out)
 
@@ -153,10 +168,11 @@ def advance_state(
     accepts: np.ndarray,
     weights: np.ndarray,
     settings: AdamSettings,
+    n_prompts: int,
 ) -> LiftedState:
     delta, moment, second = _advance(
         np.zeros(state.policy.dim), state.moment, state.second,
-        state.policy, accepts, weights, settings, state.step,
+        state.policy, accepts, weights, settings, state.step, n_prompts=n_prompts,
     )
     return LiftedState(state.policy.perturbed(delta), moment, second, state.step + 1)
 
