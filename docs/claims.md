@@ -58,6 +58,7 @@ Legend for strength:
 | a saturated metric cannot see a seed difference | `s6_saturation`: 0 of 32 prompts disagree, policies differ by up to 8e-2 | observed |
 | the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.07-0.5 over four runs | observed |
 | the forecast underpredicts on a real model by ~12x | `s7`: cheap form 0.0056 against a measured seed spread of 0.0689 | measured |
+| that shortfall is not an estimation artefact | `s7`: Sigma from 64 prompts gives 0.0052, and the live share still collapses | measured |
 | taking the transport anyway inflates it 4x, with noise not curvature | `s7`: 0.0225 with transport, JVP cosine 0.21 | observed |
 | real RLVR runs separate into discrete outcome modes | `s7` at 0.5B: 3 runs at 0.350, 5 at 0.217, within-group spread under 0.01 | measured |
 | which mode a run lands in is decided early | `s7`: first-three-batch pass rate correlates 0.88 with the final score | observed |

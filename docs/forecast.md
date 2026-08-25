@@ -123,6 +123,7 @@ on a task the base model passes at 0.16.
 | evaluation (binomial) part | 0.0077 |
 | seed part, by subtraction | 0.0689, interval [0.0033, 0.0737] |
 | forecast, cheap form | **0.0056** |
+| forecast, cheap form, `Sigma` from 64 prompts | 0.0052 |
 | forecast, with transport | 0.0225 |
 | cosine between two `J b` estimates | 0.21 |
 | share of the forecast made in the first half | 92% |
@@ -130,6 +131,11 @@ on a task the base model passes at 0.16.
 The cheap form is short by twelve. The transported version is four times larger, and that is noise
 rather than curvature: the transport is worth 2% where it can be computed exactly, and here it is
 built from vectors that barely correlate with an independent estimate of themselves.
+
+Two comfortable explanations are ruled out. Estimating the injected term from 64 prompts instead of
+8 moves the forecast by 7% and in the wrong direction, so it is not biased low by a small batch. The
+live share measured on those 64 prompts still falls to zero by the fifth update, so the collapse is
+not a small-sample artefact. The shortfall is not an estimation problem.
 
 The reason is the outcome distribution. Three runs land at 0.350 and five at 0.217, within-group
 spread under 0.01 against a between-group gap of 0.133. A linearised model predicts the spread of a
