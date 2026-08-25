@@ -4,6 +4,11 @@ The spread across seeds of an estimated pass rate contains a binomial term from 
 evaluation, which is subtracted; the smaller that term is to begin with, the more of the seed term
 survives the subtraction. Training is the expensive part and is already done, so this buys
 resolution cheaply.
+
+Each run is scored with its own evaluation randomness, because the subtraction assumes the
+evaluation noise is independent between runs. This pass is also what makes the numbers reported
+for the seven-billion-parameter run correct on that point: the training loop scored as it went,
+before that was fixed, and this re-scores from the stored adapters.
 """
 
 from __future__ import annotations
