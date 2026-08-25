@@ -36,6 +36,14 @@ class ProbeConfig:
 
 
 def attach_lora(model, config: ProbeConfig):
+    """Attach LoRA adapters, from a seeded initialisation.
+
+    `linear_to_lora_layers` draws the A matrices from MLX's global generator, which is not seeded
+    by default, so without this every process would start from a different parameterisation. The
+    policy is the same either way, since the B matrices start at zero, but the trajectory a run
+    takes is not, and a rerun would not reproduce the numbers.
+    """
+    mx.random.seed(config.seed)
     model.freeze()
     linear_to_lora_layers(
         model,

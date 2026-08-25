@@ -168,3 +168,26 @@ def test_a_unanimous_group_injects_nothing(stub):
         np.ones(DIM),
     )
     assert live == 0.0
+
+
+def test_the_lora_initialisation_is_seeded():
+    """Two attachments at the same seed must give the same parameters, and different seeds not.
+
+    The A matrices come from MLX's global generator. Left unseeded it differs on every process
+    launch, so the same experiment would not reproduce even with every explicit seed fixed.
+    """
+    pytest.importorskip("mlx_lm")
+    from mlx.utils import tree_flatten
+    from mlx_lm import load
+
+    from caliper.real.probe import ProbeConfig, attach_lora
+
+    def checksum(seed):
+        model, _ = load("mlx-community/SmolLM2-135M-Instruct")
+        attach_lora(model, ProbeConfig(lora_layers=1, seed=seed))
+        return float(
+            sum(np.abs(np.asarray(v)).sum() for _, v in tree_flatten(model.trainable_parameters()))
+        )
+
+    assert checksum(0) == checksum(0)
+    assert checksum(0) != checksum(1)
