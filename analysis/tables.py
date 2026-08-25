@@ -541,6 +541,59 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+def table_scale() -> None:
+    """The same measurement at two model sizes, side by side."""
+    rows = []
+    small = [
+        r
+        for r in io.load_all("s7_real_forecast")
+        if r["result"].get("resolved_std") is not None
+        and len(r["result"].get("held_out_scores", [])) >= 4
+    ]
+    if small:
+        outcome = small[-1]["result"]
+        rows.append(("Qwen2.5-0.5B", outcome, small[-1]["manifest"]["config"]))
+    big = [
+        r
+        for r in io.load_all("s6_scale")
+        if r["result"].get("resolved_std") is not None
+        and len(r["result"].get("held_out_scores", [])) >= 4
+    ]
+    if big:
+        rows.append(("Qwen2.5-7B", big[-1]["result"], big[-1]["manifest"]["config"]))
+    if len(rows) < 2:
+        raise SystemExit("need both model sizes measured")
+
+    lines = [
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}l" + "c" * len(rows) + r"@{}}",
+        r"\toprule",
+        "quantity & " + " & ".join(name for name, _, _ in rows) + r" \\",
+        r"\midrule",
+    ]
+
+    def line(label, values):
+        lines.append(f"{label} & " + " & ".join(values) + r" \\")
+
+    line("runs", [f"{len(r['held_out_scores'])}" for _, r, _ in rows])
+    line("updates", [f"{c['steps']}" for _, _, c in rows])
+    line("held-out pass rate, base", [f"{r['base_pass_rate']:.3f}" for _, r, _ in rows])
+    line("held-out pass rate, after", [f"{r['observed_spread']['mean']:.3f}" for _, r, _ in rows])
+    lines.append(r"\midrule")
+    line("spread across runs", [f"{r['observed_spread']['std']:.4f}" for _, r, _ in rows])
+    line(r"\quad evaluation part", [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _ in rows])
+    line(r"\quad seed part", [f"{r['resolved_std']:.4f}" for _, r, _ in rows])
+    spread = []
+    for _, outcome, _ in rows:
+        scores = np.sort(np.array(outcome["held_out_scores"]))
+        gaps = np.diff(scores)
+        cut = int(np.argmax(gaps))
+        spread.append(f"{cut + 1} / {scores.size - cut - 1}")
+    line("split at the largest gap", spread)
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("scale", "\n".join(lines))
+
+
 def table_power() -> None:
     """What the real-model design can resolve, simulated at the design actually used."""
     runs = [r for r in io.load_all("s7_power") if r["result"].get("rows")]
@@ -778,6 +831,7 @@ def main() -> None:
         ("transport", table_transport),
         ("real_forecast", table_real_forecast),
         ("power", table_power),
+        ("scale", table_scale),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
