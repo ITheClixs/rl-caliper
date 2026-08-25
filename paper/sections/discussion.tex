@@ -87,6 +87,14 @@ reproducible, and both are cheap to rule out: log the fraction of prompts whose 
 unanimous during training, and $\E_x[p(1-p)]$ on the evaluation set at the end. If either is zero,
 so is the error bar, and it means nothing.
 
+\paragraph{Why there is no forecast at seven billion.} The measurement we report at $7$B is the
+spread itself and the divergence between runs, not a forecast of either, and the reason is a
+mismatch rather than a cost. Those runs use AdamW, because that is what a practitioner would use,
+while the recursion is derived for plain ascent and the lift to Adam's state is unreliable at
+saturation. Comparing a forecast to that spread would mean training eight fresh runs under plain
+ascent at $7$B, which on this machine is about nine hours of continuous compute. We chose to spend
+the budget on the measurement that needed no such assumption.
+
 \paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
 only partly works in practice. It halves the error of ignoring the optimiser state, $2.6\times$
 against $5.5\times$, and the optimiser state clearly does carry seed information, since freezing
