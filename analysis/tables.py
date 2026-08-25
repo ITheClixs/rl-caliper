@@ -448,6 +448,19 @@ def table_numbers() -> None:
             if name:
                 macros[f"RolloutShareG{name}"] = f"{100 * np.median(values):.0f}"
 
+    saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
+    if saturation:
+        result = saturation[-1]["result"]
+        divergences = [row["divergence"] for row in result["divergence"]]
+        macros |= {
+            "SatScore": f"{result['held_out_scores'][0]:.3f}",
+            "SatPrompts": f"{result['prompts']}",
+            "SatDisagreeing": f"{result['disagreeing_prompts']}",
+            "SatDegenerate": f"{100 * result['degenerate_fraction']:.0f}",
+            "SatKLlow": f"{min(divergences):.1e}".replace("e-0", "e-"),
+            "SatKLhigh": f"{max(divergences):.1e}".replace("e-0", "e-"),
+        }
+
     if not macros:
         raise SystemExit("no records to build paper macros from")
     command = chr(92) + "newcommand"

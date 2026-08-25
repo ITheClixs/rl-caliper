@@ -435,12 +435,13 @@ $\nabla M$, and a practitioner who sees either will read a zero and conclude the
 reproducible.
 
 \paragraph{The metric went blind.} On counting a letter in a word --- a task the base model
-already passes at $0.41$ --- twenty updates take the held-out pass rate to $0.875$ and collapse the
-response distribution. Every one of the $32$ held-out prompts then has a per-prompt rate of exactly
-$0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout randomness report
-\emph{the same number to the last decimal} and agree on every prompt individually, while their
-policies differ by between $1.8\times10^{-5}$ and $7.7\times10^{-2}$ in KL and that difference does
-not accumulate over the run.
+already passes at $0.41$ --- twenty updates take the held-out pass rate to $\numSatScore$ and
+collapse the response distribution. All $\numSatPrompts$ held-out prompts then have a per-prompt
+rate of exactly $0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout
+randomness report \emph{the same number to the last decimal} and agree on
+$\numSatPrompts$ of $\numSatPrompts$ prompts individually, while their policies differ by between
+$1.8\times10^{-5}$ and $7.7\times10^{-2}$ in KL and that difference does not accumulate over the
+run.
 
 This is worth being precise about, because the two readings are opposite. It is not that the seeds
 converged. It is that the metric stopped resolving them: $\E_x[p(1-p)] = 0$ on the evaluation set,
