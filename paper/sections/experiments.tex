@@ -554,12 +554,10 @@ improvement (Table~\ref{tab:scale}). The evaluation's own noise accounts for alm
 The consequence is not that the training failed. On average it worked. It is that a single run of
 this recipe reports a number whose run-to-run uncertainty is nearly as large as the effect being
 claimed, so the ordinary practice of running once and comparing against a baseline cannot separate
-a real improvement from a lucky seed at this scale. This is the case the forecast of
-Section~\ref{sec:metric} is meant for, and it is also the case where we cannot supply one: this run
-used AdamW, the recursion is written for plain gradient ascent, and Section~\ref{sec:exp-adam}
-shows the lifted Adam form is not dependable over twenty updates on a saturating metric. Making the
-comparison honestly would need a fresh set of runs under ascent, which is roughly nine hours on this
-machine and is the first thing we would spend them on.
+a real improvement from a lucky seed at this scale. This is exactly the case the forecast of
+Section~\ref{sec:metric} is meant for, and it is also the case where we cannot supply one, because
+these runs use AdamW and the recursion is written for plain ascent. Section~\ref{sec:discussion}
+says what that would cost to fix.
 
 \begin{table}[t]
   \centering
