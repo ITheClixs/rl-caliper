@@ -142,9 +142,9 @@ spread under 0.01 against a between-group gap of 0.133. A linearised model predi
 unimodal perturbation about one trajectory; a standard deviation is the wrong summary of this
 outcome for anyone.
 
-What survives is the mechanism. A run's first three batches correlate with its final score at 0.88
-(last three: -0.24), and the kernel puts 92% of the variance in the first half of the run, 73% in
-update four alone. The uncertainty is made early and then amplified, which is what a spectral radius
+What survives is the mechanism. A run's first three batches correlate with its final score at 0.65,
+with a bootstrap interval over runs of [0.05, 0.95] (last three: -0.24), and the kernel puts 92% of
+the variance in the first half of the run, 73% in update four alone. The uncertainty is made early and then amplified, which is what a spectral radius
 above one predicts. The amplification is not linear, and that is what the forecast misses.
 
 ## 7. Boundaries
