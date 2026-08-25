@@ -63,10 +63,17 @@ well below the scale on which the gradient field bends.
     (Figure~\ref{fig:sources}, Section~\ref{sec:exp-forecast}).
   \item \texttt{p4\_linearity}: the linearisation residual (Section~\ref{sec:exp-linearity}).
   \item \texttt{p5\_adam\_lift}: the lifted recursion (Table~\ref{tab:adam-lift}).
+  \item \texttt{p6\_spectrum}: the spectrum of the transfer operator (Table~\ref{tab:spectrum}).
   \item \texttt{s1}, \texttt{s3}, \texttt{s5}: seed divergence on transformers and on a pretrained
     model (Figures~\ref{fig:reconvergence} and \ref{fig:real-seeds}).
   \item \texttt{s6\_scale}: the seven-billion-parameter measurements
-    (Section~\ref{sec:exp-scale}).
+    (Section~\ref{sec:exp-scale}); \texttt{rescore.py} is what the reported spread comes from,
+    since the training loop scored before each run had its own evaluation randomness.
+  \item \texttt{s7\_real\_forecast}: the backward pass on a pretrained model, and
+    \texttt{power.py} the simulation of what that design can resolve
+    (Appendix~\ref{app:power}).
+  \item \texttt{s8\_null}: the same run with the reward replaced by a coin
+    (Table~\ref{tab:signal}, Figure~\ref{fig:null}).
   \item \texttt{a}, \texttt{b}, \texttt{c}, \texttt{d}, \texttt{t}: the estimator, allocation and
     cost-model results of Section~\ref{sec:applications}.
 \end{itemize}
