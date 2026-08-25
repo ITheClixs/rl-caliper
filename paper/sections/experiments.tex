@@ -537,10 +537,39 @@ is a statement about the experiment we could afford rather than about the method
 \label{sec:exp-scale}
 
 The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
-LoRA adapters and AdamW. Running it turned up two failure modes we did not plan for, and both are
-worth reporting because they are the same phenomenon at two different places in
-\eqref{eq:adjoint}: one kills $\Sigma_t$, the other kills $\nabla M$, and a practitioner who sees
-either will read a zero and conclude their pipeline is reproducible.
+LoRA adapters and AdamW. Running it turned up two ways for a reported number to stop carrying
+information, and they fail in opposite directions. In one the spread swamps the effect, so a single
+run cannot report the improvement it claims. In the other the metric stops resolving the runs at
+all, so the spread reads zero and a practitioner concludes their pipeline is reproducible. Both are
+visible in \eqref{eq:adjoint}, which sends the spread of a reported number through $\nabla M$: the
+first is that quantity being large next to what the run achieved, the second is $\nabla M$ vanishing
+on the evaluated distribution.
+
+\paragraph{The spread swamped the effect.} On counting a letter in a word, $\numScaleRuns$ runs of
+$20$ updates take the held-out pass rate from $\numScaleBase$ to $\numScaleMean$ on average, an
+improvement of $\numScaleGain$. The individual runs land between $\numScaleLow$ and $\numScaleHigh$,
+a standard deviation of $\numScaleSpread$ across seeds, which is $\numScaleShare\%$ of the mean
+improvement (Table~\ref{tab:scale}). The evaluation's own noise accounts for almost none of it.
+
+The consequence is not that the training failed. On average it worked. It is that a single run of
+this recipe reports a number whose run-to-run uncertainty is nearly as large as the effect being
+claimed, so the ordinary practice of running once and comparing against a baseline cannot separate
+a real improvement from a lucky seed at this scale. This is the case the forecast of
+Section~\ref{sec:metric} is meant for, and it is also the case where we cannot supply one: this run
+used AdamW, the recursion is written for plain gradient ascent, and Section~\ref{sec:exp-adam}
+shows the lifted Adam form is not dependable over twenty updates on a saturating metric. Making the
+comparison honestly would need a fresh set of runs under ascent, which is roughly nine hours on this
+machine and is the first thing we would spend them on.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/scale}
+  \caption{The same measurement at two model sizes. The seed term at $7$B is given as a bracket
+  rather than a subtraction, because those runs shared one evaluation draw and the subtraction
+  would over-correct; Section~\ref{sec:exp-forecast} gives the bracket.}
+  \label{tab:scale}
+\end{table}
 
 \paragraph{The metric went blind.} On counting a letter in a word, a task the base model already
 passes at $0.41$, twenty updates take the held-out pass rate to $\numSatScore$ and
