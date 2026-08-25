@@ -731,18 +731,24 @@ def table_real_forecast() -> None:
     result = runs[-1]["result"]
     observed = result["observed_spread"]
     # Only forecasts that started from the same adapters can be compared. Runs made before the
-    # initialisation was seeded each drew their own, so their checksum is absent and they are
-    # excluded rather than silently pooled with the rest.
-    origin = result.get("init_checksum")
+    # initialisation was recorded are excluded rather than silently pooled with the rest, and the
+    # survivors are required to agree on the checksum, so the comparison between them varies the
+    # one thing it means to vary.
+    variants = [
+        record
+        for record in io.load_all("s7_real_forecast")
+        if not record["result"].get("transport", True)
+        and len(record["result"].get("kernel", [])) >= 8
+        and record["result"].get("init_checksum") is not None
+    ]
     cheap = {}
-    for record in io.load_all("s7_real_forecast"):
-        outcome = record["result"]
-        if outcome.get("transport", True) or len(outcome.get("kernel", [])) < 8:
-            continue
-        if origin is None or outcome.get("init_checksum") != origin:
-            continue
-        prompts = record["manifest"]["config"].get("variance_prompts")
-        cheap[prompts] = outcome
+    if variants:
+        origin = variants[-1]["result"]["init_checksum"]
+        for record in variants:
+            if record["result"]["init_checksum"] != origin:
+                continue
+            prompts = record["manifest"]["config"].get("variance_prompts")
+            cheap[prompts] = record["result"]
     lines = [
         r"\setlength{\tabcolsep}{4pt}",
         r"\begin{tabular}{@{}lc@{}}",
