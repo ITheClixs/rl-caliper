@@ -52,12 +52,22 @@ def displaced(trainer, base_state: dict, direction: np.ndarray, scale: float):
     trainer.model.update(unflatten_like(flat, base_state))
 
 
+def ascent_direction(grads) -> np.ndarray:
+    """The trainer's `_gradient` returns the gradient of a loss; the update is its negative.
+
+    Everything in this module works in the ascent convention, the one the recursion is written
+    in: the update is `theta <- theta + eta g`, so `g` is minus the loss gradient. Getting this
+    backwards would transport the adjoint through `I - eta J` instead of `I + eta J`.
+    """
+    return -flatten(grads)
+
+
 def metric_gradient(trainer, items, rng, key) -> tuple[np.ndarray, float, mx.array]:
     """grad of the held-out pass rate: the reward-weighted score, with no baseline."""
     sequences, masks, rewards, key = trainer.rollout(items, key)
     advantages = [rewards[i].astype(float) for i in range(len(items))]
     _, grads = trainer._gradient(sequences, masks, advantages)
-    return flatten(grads), float(rewards.mean()), key
+    return ascent_direction(grads), float(rewards.mean()), key
 
 
 def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
@@ -82,7 +92,7 @@ def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
         if np.any(advantage != 0.0):
             live += 1
         _, grads = trainer._gradient([sequences[i]], [masks[i]], [advantage])
-        projections.append(float(direction @ flatten(grads)))
+        projections.append(float(direction @ ascent_direction(grads)))
     return (
         float(np.var(projections, ddof=1)),
         float(rewards.mean()),
@@ -106,7 +116,7 @@ def mean_update(trainer, corpus, rng_seed: int, key, batches: int = 1) -> np.nda
             weights[counts[i], rewards[i].astype(int)] for i in range(len(items))
         ]
         _, grads = trainer._gradient(sequences, masks, advantages)
-        flat = flatten(grads)
+        flat = ascent_direction(grads)
         total = flat if total is None else total + flat
     return total / batches
 

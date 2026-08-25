@@ -40,7 +40,12 @@ class StubModel:
 
 
 class StubTrainer:
-    """A trainer whose mean gradient is `jacobian @ theta + bias`, with per-prompt spread."""
+    """A trainer whose mean ascent direction is `jacobian @ theta + bias`.
+
+    `_gradient` returns the gradient of a *loss*, which is the negative of that, exactly as the
+    real trainer does. Getting this convention wrong in the stub would let a sign error in the
+    module under test pass unnoticed, which is what happened before this was written down.
+    """
 
     def __init__(self, jacobian, bias, offsets):
         self.jacobian = jacobian
@@ -67,7 +72,7 @@ class StubTrainer:
         base = self.jacobian @ self._theta() + self.bias
         picked = [int(np.asarray(seq)[0, 0]) % self.offsets.shape[0] for seq in sequences]
         spread = self.offsets[picked].mean(axis=0)
-        return 0.0, {"w": mx.array(share * (base + spread))}
+        return 0.0, {"w": mx.array(-share * (base + spread))}  # a loss gradient
 
 
 @pytest.fixture
@@ -77,6 +82,16 @@ def stub():
     bias = rng.normal(size=DIM) * 0.01
     offsets = rng.normal(size=(4, DIM)) * 0.05
     return StubTrainer(jacobian, bias, offsets)
+
+
+def test_the_gradient_convention_is_flipped_into_ascent(stub):
+    """The module must undo the trainer's loss-gradient sign, or the transport runs backwards."""
+    from caliper.real.adjoint import ascent_direction
+
+    _, grads = stub._gradient([mx.zeros((1, 2), dtype=mx.int32)], [mx.ones((1, 1))], [None])
+    assert float(ascent_direction(grads)[0]) == pytest.approx(
+        -float(np.asarray(grads["w"])[0]), rel=1e-12
+    )
 
 
 def test_the_hessian_vector_product_recovers_the_linear_map(stub):
