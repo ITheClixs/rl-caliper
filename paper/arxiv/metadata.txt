@@ -25,11 +25,9 @@ Abstract (plain text, as pasted into the submission form):
 
   Tested prospectively -- one run trained and frozen, the prediction recorded, and only then
   the remaining seeds trained -- the forecast has a median absolute error of 1.11x across 192
-  settings spanning a 47x range of spreads. Carried to a pretrained model it underpredicts by
-  a factor of twelve, because eight runs end in two distinct groups rather than scattered
-  around one; the mechanism survives even so, since a run's first three batches correlate
-  with its final score at 0.88 and the per-update kernel puts 92% of the variance in the
-  first half. The filtering is caused by learning: replacing every reward with a coin flip
+  settings. Carried to a pretrained model it underpredicts by a factor of twelve, because
+  eight runs end in two distinct groups rather than scattered around one; the mechanism
+  survives even so, since a run's first three batches correlate with its final score at 0.88. The filtering is caused by learning: replacing every reward with a coin flip
   leaves rollouts, batches and step sizes untouched, and divergence then grows 90x over
   eighty updates instead of ending at 0.14x of where it started.
 
