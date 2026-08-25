@@ -7,29 +7,22 @@ Authors:
 
 Abstract (plain text, as pasted into the submission form):
   Reinforcement learning post-training is reported from single runs, and how much a rerun
-  would move the number is established the only way it currently can be: by repeating the
-  training. We show that a run already contains enough information to forecast its own
-  spread.
+  would move the number is established only by repeating the training. We ask what one run
+  can be made to say about it.
 
-  The correction that makes this possible is to stop treating training noise as
-  accumulating. A perturbation entering at one update is passed through every later update
-  and reweighted by them, so the covariance of a run about its mean obeys
-  S_{t+1} = A_t S_t A_t^T + Q_t. Measuring the spectrum of A_t shows this is a filter and
-  not a contraction: only a third to a half of directions contract, the leading direction
-  expands, and the contracting timescales span tens of updates to effectively unbounded.
-  Carrying the gradient of the reported metric backwards along one stored trajectory then
-  gives the across-seed variance of that metric as a sum of scalars, one per update, with no
-  covariance matrix formed. Ablating that backward pass shows it can usually be skipped:
-  holding the adjoint fixed changes the forecast by a median of 2%, leaving an estimator
-  that costs one extra pass per update.
+  Training noise is not accumulated. A perturbation entering at one update is reweighted by
+  every update that follows, so the covariance of a run about its mean obeys
+  S_{t+1} = A_t S_t A_t^T + Q_t. Carrying the gradient of the reported metric backwards along
+  one stored trajectory turns that recursion into the across-seed variance of the metric, as a
+  sum of scalars with no covariance matrix formed. The transpose the backward pass needs is
+  free, because the mean update of a count-based estimator is the gradient of a scalar
+  potential.
 
-  Tested prospectively -- one run trained and frozen, the prediction recorded, and only then
-  the remaining seeds trained -- the forecast has a median absolute error of 1.11x across 192
-  settings. Carried to a pretrained model it underpredicts by a factor of twelve, because
-  eight runs end in two distinct groups rather than scattered around one; the mechanism
-  survives even so, since a run's first three batches correlate with its final score at 0.88. The filtering is caused by learning: replacing every reward with a coin flip
-  leaves rollouts, batches and step sizes untouched, and divergence then grows 90x over
-  eighty updates instead of ending at 0.14x of where it started.
+  Tested prospectively over 192 settings, one run trained and frozen before the rest existed,
+  the forecast has a median error of 1.11x. On a pretrained model it is short by a factor of
+  twelve, because the runs end in two groups rather than scattered around one. The mechanism
+  survives that failure: a run's first three batches correlate with its final score at 0.88,
+  and the per-update kernel puts 92% of the variance in the first half of the run.
 
 Primary category:
   cs.LG   (Machine Learning)

@@ -182,7 +182,7 @@ same total drift. Total progress over a run is therefore
 ### Result 4b (closed-form optimal group size)
 
 Write `tau_b := tr(F Sigma_b)` and `tau_w := (G-1) tr(F Sigma_w(G))`, the latter `G`-independent to
-leading order by (8) -- verified to 6% over G = 2..32 in the exact testbed. Hardware fixes the
+leading order by (8), verified to 6% over G = 2..32 in the exact testbed. Hardware fixes the
 rollouts available per step, `R = P G`; the question is how to split them. Maximising (12) means
 maximising `N rho = R_tot / (G (P + Bcrit(G)))`, i.e. minimising
 
@@ -292,7 +292,7 @@ Result 1 says the per-prompt mean of a count-based estimator is `lambda(p_x, G) 
 so the mean update is a gradient field, its Jacobian `grad^2 Psi` is symmetric, and the transfer
 operator `A = I + eta grad^2 Psi` is self-adjoint. Consequences:
 
-* the backward pass of `forecast.md` needs no transpose -- a Hessian-vector product suffices, which
+* the backward pass of `forecast.md` needs no transpose, since a Hessian-vector product suffices, which
   finite differences give from two gradient evaluations;
 * `Psi` is not the objective `J` unless `lambda == 1`; the gap is exactly the difficulty
   reweighting of Result 1;

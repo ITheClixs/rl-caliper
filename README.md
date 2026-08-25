@@ -53,28 +53,28 @@ result.memory()           # how many final updates hold 95% of it
 
 The full backward pass costs three passes per stored update. An ablation over 192 settings shows
 the transport is worth a median of 2% at these run lengths, so the recommended default is the cheap
-form -- hold `b` at `grad M` and accumulate one scalar per update, one extra pass, no
+form: hold `b` at `grad M` and accumulate one scalar per update, one extra pass, no
 Hessian-vector products. The recursion is what tells you when that stops being enough.
 
 Two implementations of that protocol ship here: `caliper.exact.adjoint` for enumerable policies,
-where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX -- two
+where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX, which takes two
 gradient evaluations per stored update, with common random numbers so the finite difference is a
 directional derivative rather than a difference of two noise draws.
 
 ## Results in one paragraph
 
-**The forecast.** Tested prospectively -- one run trained and frozen, the prediction recorded, and
-only then 63 more seeds trained -- the forecast of the across-seed standard deviation of the
-reported pass rate has a median absolute error of `1.11x` over 192 settings -- two policy shapes, two prompt-pool
-diversities, and a 47x range of spreads -- a worst case of `1.58x`, and lands inside the measured
-95% interval in 162 of them.
+**The forecast.** Tested prospectively, with one run trained and frozen and the prediction
+recorded before the remaining seeds were trained, the forecast of the across-seed standard deviation
+of the reported pass rate has a median absolute error of `1.11x` over 192 settings. Those settings
+span two policy shapes, two prompt-pool diversities and a 47x range of spreads. Its worst case is
+`1.58x`, and it lands inside the measured 95% interval in 162 of them.
 
 **Why it works.** Run-to-run variance in RLVR does not accumulate. Across nine settings the log-log
 slope of policy divergence against update count runs from `-1.15` to `+0.26`, where a random walk
 requires `+1`, and the same holds on Qwen2.5-0.5B. The cause is the learning signal: replacing every
 reward with an independent coin flip, leaving the rollouts, batches and step sizes otherwise
 untouched, turns a trace that ends at `0.14x` of where it started into one that grows `90.5x` over
-eighty updates -- a gap of `671x`. The learning condition moves *further* per update, so what brings
+eighty updates, a gap of `671x`. The learning condition moves *further* per update, so what brings
 those runs back together is not smaller steps.
 
 **Why it is cheap.** The mean update of a count-based estimator is the gradient of a scalar
@@ -83,7 +83,7 @@ backward pass is a Hessian-vector product. For RLOO the potential is the pass ra
 
 **Where the spread comes from.** Restricting the injected covariance to one term attributes the
 forecast by origin. Rollout sampling dominates prompt selection at every group size measured --
-93% at `G=2`, 65% at `G=8`, 46% at `G=16` -- and the prompt count scales both equally, so it cannot
+93% at `G=2`, 65% at `G=8`, 46% at `G=16`. The prompt count scales both equally, so it cannot
 change the mix.
 
 The level is predicted by propagating the update covariance,

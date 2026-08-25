@@ -18,7 +18,7 @@ Let `D_t = theta_t^A - theta_t^B`. With updates `theta <- theta + eta g_hat` and
     D_{t+1} = A_t D_t + eta nu_t,      A_t = I + eta J_t,   Cov(nu) = 2 Sigma / P        (S1)
 
 `A_t` reweights a perturbation by the local curvature of the estimator potential rather than
-passing it through. That reweighting is not a contraction -- see section 3b -- but it is enough to
+passing it through. That reweighting is not a contraction (see section 3b), but it is enough to
 stop noise accumulating. The covariance of a run about its mean satisfies
 
     S_{t+1} = A_t S_t A_t^T + Q_t,     Q_t = eta^2 Sigma_t / P,   S_0 = 0                (S2)
@@ -60,10 +60,10 @@ fitted timescale is pinned by the early rise.
 Measuring the spectrum of `A_t = I + eta J_t` along a 600-update mean trajectory, at three pool
 difficulties:
 
-* the spectral radius exceeds one everywhere -- `10^3(rho - 1)` runs from about 20 early to 0.1 late;
+* the spectral radius exceeds one everywhere, with `10^3(rho - 1)` running from about 20 early to 0.1 late;
 * only 31%-51% of directions contract at all, and that share rises as the run proceeds;
 * among the contracting directions the fastest has eigenvalue about 0.98 and the slowest is 1.0000
-  to four places -- decay timescales from roughly fifty updates to effectively unbounded.
+  to four places, giving decay timescales from roughly fifty updates to effectively unbounded.
 
 Three consequences. Divergence stays bounded over the horizons measured because expansion is slow
 relative to run length (1.02^25 is about 1.6), not because perturbations are destroyed. One
@@ -75,8 +75,8 @@ The word used throughout is *filtered*, not *contracted*, and this is what it me
 
 ## 4. The filtering comes from learning
 
-Removing the learning signal while leaving the noise intact -- every reward replaced by an
-independent coin flip -- turns a divergence trace that ends at 0.14x of where it started into one
+Removing the learning signal while leaving the noise intact, by replacing every reward with an
+independent coin flip, turns a divergence trace that ends at 0.14x of where it started into one
 that grows 90.5x over eighty updates, a gap of 671x at the end. Same rollouts, same batches, same
 step sizes. The learning condition's mean drift per update is *larger* (6.10e-3 against 5.17e-3),
 so what brings those runs back together is not smaller steps. See `experiments/s8_null`.
@@ -114,8 +114,9 @@ moments after the step that produced it. `caliper/exact/lifted.py` takes the tra
 `dPhi/dz` and the injection `B Cov(g_hat) B^T` with `B = dPhi/dg_hat` by central differences on the
 exact mean map, so nothing about the derivation is taken on faith.
 
-Two structural facts. The map is singular at `v = 0` -- the derivative of `1/(sqrt(v) + eps)`
-diverges -- so the moments must be warmed before the covariance is propagated; every seed shares the
+Two structural facts. The map is singular at `v = 0`, because the derivative of
+`1/(sqrt(v) + eps)` diverges there, so the moments must be warmed before the covariance is
+propagated; every seed shares the
 warmed state, so `S_0 = 0` still holds. And the difference steps must be taken relative to each
 coordinate, since `v` is of order `g^2` and an absolute epsilon is meaningless there.
 
@@ -128,7 +129,7 @@ Measured against 48 independent Adam runs over 24 settings (`experiments/p5_adam
 | theta block only | 5.45x | 39.2x | 14.04x |
 | accumulation | 5.50x | 38.4x | 13.93x |
 
-Readings. The optimiser state carries seed information -- freezing `v` is six times worse than
+Readings. The optimiser state carries seed information, since freezing `v` is six times worse than
 propagating it, not better. Where the learning signal is live the lift is accurate to 1.5x. Where
 the pass rate saturates the linearised map acquires a spectral radius above one and the prediction
 runs away, because Adam's normalisation is what bounds the real spread and a linear recursion does
