@@ -37,6 +37,16 @@ $\nabla M^{\!\top} S_T \nabla M$, and Proposition~\ref{prop:potential} against t
 asymmetry of $\mathcal{J}$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
 floor.
 
+\paragraph{One thing that was not reproducible, and now is.} The LoRA adapters are attached by
+\texttt{mlx\_lm}, which draws their $A$ matrices from a generator that is not seeded by default.
+Every process therefore began from a different parameterisation. The policy was the same either way,
+because the $B$ matrices start at zero, and every seed within a run shares one initialisation, so
+the spreads reported here are unaffected: the runs being compared differ only in rollout randomness,
+as claimed. What was affected is repetition. Rerunning the same configuration gave different
+numbers, which we noticed when a rerun of one experiment disagreed with itself. The initialisation
+is now seeded from the run's configuration, and the released tests check that two attachments at one
+seed agree and that two seeds do not.
+
 \paragraph{What each thing costs.} Everything here ran on one Apple M4 laptop with $24$\,GB of
 unified memory, and the costs are worth stating because they bound what a reader can repeat. The
 enumerable-policy experiments are CPU work and finish in minutes; the $\numForecastSettings$-setting
