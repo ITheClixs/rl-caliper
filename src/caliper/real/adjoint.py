@@ -156,6 +156,7 @@ class RealForecast:
     metric_value: float
     jvp_agreement: list[float]  # cosine between two independent estimates of J b
     live_share: list[float]  # fraction of prompts still sampling more than one answer
+    init_checksum: float  # identifies the adapter initialisation this run started from
 
 
 def forecast(
@@ -190,6 +191,9 @@ def forecast(
     knowing before the number it produces is believed.
     """
     steps = len(states) - 1
+    # Two forecasts are only comparable if they started from the same adapters. Recording the
+    # checksum of state zero makes that checkable afterwards instead of assumed.
+    checksum = float(np.abs(flatten(states[0])).sum())
     displaced(trainer, states[-1], np.zeros(flatten(states[-1]).size), 0.0)
     adjoint, metric, key = metric_gradient(
         trainer, held_out, np.random.default_rng(seed), key
@@ -229,4 +233,5 @@ def forecast(
         metric_value=metric,
         jvp_agreement=agreement,
         live_share=live_share,
+        init_checksum=checksum,
     )

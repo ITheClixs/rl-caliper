@@ -152,6 +152,7 @@ def main() -> None:
         prediction = RealForecast(
             variance=0.0, std=0.0, kernel=[], adjoint_norm=[],
             metric_value=float(first_rates.mean()), jvp_agreement=[], live_share=[],
+            init_checksum=float("nan"),
         )
         repeats = [prediction]
     prediction = repeats[0]
@@ -171,6 +172,7 @@ def main() -> None:
         "variance": prediction.variance, "std": prediction.std,
         "kernel": prediction.kernel, "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement, "live_share": prediction.live_share,
+            "init_checksum": prediction.init_checksum,
     }))
     del trainer
 
@@ -200,6 +202,7 @@ def main() -> None:
             "adjoint_norm": prediction.adjoint_norm,
             "jvp_agreement": prediction.jvp_agreement,
             "live_share": prediction.live_share,
+            "init_checksum": prediction.init_checksum,
             "held_out_scores": scores,
             "base_pass_rate": float(base_rates.mean()),
         })
@@ -227,6 +230,7 @@ def main() -> None:
         "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement,
         "live_share": prediction.live_share,
+            "init_checksum": prediction.init_checksum,
         "repeat_stds": [r.std for r in repeats],
         "forecast_estimation_sd": spread_of_forecasts,
         "held_out_scores": scores,
