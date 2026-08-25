@@ -117,11 +117,16 @@ is constant, the result would be a curiosity rather than a method.
 
 \paragraph{Where the uncertainty comes from.} Restricting $\Sigma_t$ to $\Sigma_b$ or to
 $\Sigma_w$ splits the same forecast by origin. The two shares are exact and sum to one, and across
-$\numMemorySettings$ settings the rollout share has a median of $78\%$: which responses were sampled matters more
-than which prompts were drawn. It is monotone in group size, running $93\%$ at $G=2$, $82\%$ at
-$G=4$, $65\%$ at $G=8$ and $46\%$ at $G=16$. Because $\Sigma_b$ and $\Sigma_w$ are both divided by
-$P$, entirely independent of the number of prompts. Adding prompts buys a smaller error bar; only
-larger groups change what the error bar is made of.
+$\numMemorySettings$ settings the rollout share has a median of $78\%$: over the grid as a whole,
+which responses were sampled matters more than which prompts were drawn. It is monotone in group
+size, running $93\%$ at $G=2$, $82\%$ at $G=4$, $65\%$ at $G=8$ and $46\%$ at $G=16$, so the
+majority changes hands somewhere between groups of eight and sixteen rather than rollout sampling
+dominating throughout. With prompts drawn independently, $\Sigma_b$ and $\Sigma_w$ are both divided
+by $P$ and the mix is independent of the number of prompts: adding prompts buys a smaller error
+bar, only larger groups change what the error bar is made of. That equality is a property of
+independent sampling. Drawing distinct prompts from a corpus of $N$ multiplies $\Sigma_b$ alone by
+$1 - (P-1)/(N-1)$, so a run that covers much of its corpus every step does shift the mix towards
+rollout sampling as $P$ grows.
 
 \begin{figure}[t]
   \centering

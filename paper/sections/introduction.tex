@@ -72,9 +72,10 @@ be carried against the gradient of the reported metric instead of being formed.
   \emph{further} per update, so what brings those runs back together is not smaller steps.
 
   \item \textbf{Where the uncertainty comes from.} Restricting the injected covariance to one of
-  its terms attributes the forecast by origin. Which responses were sampled dominates which prompts
-  were drawn at every group size we measure, from $93\%$ of the variance at $G=2$ to $46\%$ at
-  $G=16$; the number of prompts scales both equally and cannot change the mix.
+  its terms attributes the forecast by origin. The share owed to which responses were sampled
+  rather than which prompts were drawn falls from $93\%$ at $G=2$ to $46\%$ at $G=16$, so the
+  majority changes hands over the range we measure; with prompts drawn independently the number of
+  prompts scales both terms equally and does not move it.
 
   \item \textbf{On a real model it underpredicts, and we say why} (Section~\ref{sec:exp-real}).
   Run end to end on Qwen2.5-0.5B, the forecast is a factor of twenty-five short of the measured
