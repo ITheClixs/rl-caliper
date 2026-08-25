@@ -37,6 +37,16 @@ $\nabla M^{\!\top} S_T \nabla M$, and Proposition~\ref{prop:potential} against t
 asymmetry of $\mathcal{J}$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
 floor.
 
+\paragraph{Evaluation randomness, and a bracket instead of a rerun.} Recovering a seed term from
+the spread of an estimated score means subtracting the evaluation's own binomial variance, and that
+subtraction assumes each run drew its own evaluation. The seven-billion runs were scored before we
+noticed this, sharing one draw. Re-scoring them costs hours at that size, and is unnecessary: shared
+evaluation noise is common to every run and so drops out of the variance between them, while
+independent noise adds to it, which brackets the seed term between the observed spread and the
+binomially corrected one whatever was actually shared. At $7$B those two ends differ by $0.3\%$,
+because the binomial term is small against a spread that large. The smaller model was re-run with
+independent draws, where the correction matters more.
+
 \paragraph{One thing that was not reproducible, and now is.} The LoRA adapters are attached by
 \texttt{mlx\_lm}, which draws their $A$ matrices from a generator that is not seeded by default.
 Every process therefore began from a different parameterisation. The policy was the same either way,
@@ -93,8 +103,7 @@ and wants to find its source without reading the code.
   \item \texttt{s1}, \texttt{s3}, \texttt{s5}: seed divergence on transformers and on a pretrained
     model (Figures~\ref{fig:reconvergence} and \ref{fig:real-seeds}).
   \item \texttt{s6\_scale}: the seven-billion-parameter measurements
-    (Section~\ref{sec:exp-scale}); \texttt{rescore.py} is what the reported spread comes from,
-    since the training loop scored before each run had its own evaluation randomness.
+    (Section~\ref{sec:exp-scale}).
   \item \texttt{s7\_real\_forecast}: the backward pass on a pretrained model, and
     \texttt{power.py} the simulation of what that design can resolve
     (Appendix~\ref{app:power}).
