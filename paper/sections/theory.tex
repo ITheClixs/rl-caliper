@@ -80,15 +80,32 @@ that nothing in the literature currently determines.
 
 \begin{corollary}[The reward histogram predicts the response-level noise]
   \label{cor:bernoulli}
-  For RLOO, $p Q_1 + (1-p) Q_0 = p(1-p)\,G/(G-1)$ exactly, for every $G$. If the conditional score
-  covariances are comparable across the two reward classes, $\tr S_0 \approx \tr S_1 \approx
-  \sigma_s^2$, then
+  Exactly, from Proposition~\ref{prop:cov},
+  \begin{equation}
+    \label{eq:sw-exact}
+    \begin{aligned}
+      \tr \Sw \;=\; \E_x\Big[
+        &\tfrac{1}{G}\big( p Q_1 \tr S_1 + (1-p) Q_0 \tr S_0 \big) \\
+        &+\; c_U \|u_1\|^2 \Big].
+    \end{aligned}
+  \end{equation}
+  For RLOO, $p Q_1 + (1-p) Q_0 = p(1-p)\,G/(G-1)$ exactly, for every $G$. If in addition the
+  conditional score covariances are comparable across the two reward classes,
+  $\tr S_0 \approx \tr S_1 \approx \sigma_s^2$, and the outer-product term is small against the
+  first, then
   \begin{equation}
     \label{eq:bernoulli}
     \tr \Sw \;\approx\; \frac{\sigma_s^2}{G-1}\, \E_x\big[ p(x)\,(1 - p(x)) \big].
   \end{equation}
 \end{corollary}
 
-The response-level noise is, up to one slowly varying scalar, the mean Bernoulli variance of the
-pass-rate distribution: a quantity every RLVR trainer already logs, at no cost. The isotropy
-assumption is measured rather than asserted in Section~\ref{sec:experiments}.
+The response-level noise is then, up to one slowly varying scalar, the mean Bernoulli variance of
+the pass-rate distribution: a quantity every RLVR trainer already logs, at no cost.
+
+Both conditions are approximations rather than identities, and we measure both rather than assert
+them. The outer-product term dropped in \eqref{eq:bernoulli} carries between $5.6\%$ and $9.6\%$ of
+$\tr\Sw$ over the pools and group sizes used here, falling as $G$ grows, so \eqref{eq:bernoulli}
+runs that much low; the exact form \eqref{eq:sw-exact} is what the implementation evaluates and what
+every number in Section~\ref{sec:experiments} uses. The comparability of $\tr S_0$ and $\tr S_1$ is
+a statement about conditional score scales, not about the shape of either covariance, and
+Section~\ref{sec:experiments} reports how far it holds across difficulty buckets.
