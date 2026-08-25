@@ -129,8 +129,11 @@ on a task the base model passes at 0.16.
 | share of the forecast made in the first half | 92% |
 
 The cheap form is short by twelve. The transported version is four times larger, and that is noise
-rather than curvature: the transport is worth 2% where it can be computed exactly, and here it is
-built from vectors that barely correlate with an independent estimate of themselves.
+rather than curvature. Repeating the experiment settles it: two runs of the same configuration,
+differing only in adapter initialisation, give transported forecasts 5.7x apart (0.0225 and 0.0040)
+while their cheap forms agree to 8% (0.0056 and 0.0052). On a real model the transport is not a
+small correction badly estimated, it is unusable, and the cheap form is the only one of the two that
+returns the same answer twice.
 
 Two comfortable explanations are ruled out. Estimating the injected term from 64 prompts instead of
 8 moves the forecast by 7% and in the wrong direction, so it is not biased low by a small batch. The
