@@ -2,8 +2,8 @@
 \label{sec:discussion}
 
 \paragraph{What this establishes.} That the across-seed spread of a reported RLVR score can be
-forecast from a single training run, to a median factor of $1.08$ over $48$ settings where the
-comparison can be made exactly; that the mechanism is filtering rather than accumulation, and that
+forecast from a single training run, to a median factor of $\numForecastMedian$ over
+$\numForecastSettings$ settings where the comparison can be made exactly; that the mechanism is filtering rather than accumulation, and that
 the filter is the shared objective and not an artefact of runs starting nearby; and that the
 backward pass the forecast needs is cheap because the mean update of a count-based estimator is a
 gradient field. The practical readings are that run length does not enter the answer, that batch
