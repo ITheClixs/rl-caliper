@@ -483,11 +483,15 @@ $[0.0033,\ 0.0737]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner
 cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what
 the noisy directional derivative leaves available. It is $0.0056$. It is short by a factor of twelve.
 
-Taking the transport anyway gives $0.0225$, four times larger. That is not a better estimate. The
-transport is worth $2\%$ where it can be computed exactly, and here it is being estimated from
-vectors whose cosine with an independent estimate is $0.21$; multiplying twelve such corrections
-together inflates $\|b\|$ with noise rather than curvature. The gap between the two numbers is a
-measure of how much noise the backward pass accumulated, not of how much the trajectory bends.
+Taking the transport anyway gives $0.0225$, four times larger. That is not a better estimate, and
+repeating the whole experiment settles it. Two runs of this configuration, differing only in the
+initialisation of the adapters, produce transported forecasts of $0.0225$ and $0.0040$, a factor of
+$5.7$ apart, while their cheap forms agree to $8\%$ at $0.0056$ and $0.0052$. The transport is worth
+$2\%$ where it can be computed exactly; here it is estimated from vectors whose cosine with an
+independent estimate of themselves is between $0.07$ and $0.21$, and compounding twelve such
+corrections inflates $\|b\|$ by an amount that is not reproducible. On a real model the transport is
+not a small correction badly estimated, it is unusable, and the cheap form is the only one of the
+two that returns the same answer twice.
 
 Two explanations that would have been comfortable are ruled out by the same table. The injected
 term is estimated from a batch of eight prompts, and once most groups are unanimous that sample is
