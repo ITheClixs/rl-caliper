@@ -88,7 +88,7 @@ so is the error bar, and it means nothing.
 
 \paragraph{Why there is no forecast at seven billion.} The measurement we report at $7$B is the
 spread itself and the divergence between runs, not a forecast of either, and the reason is a
-mismatch rather than a cost. Those runs use AdamW, because that is what a practitioner would use,
+mismatch rather than a cost. Those runs use Adam, because that is what a practitioner would use,
 while the recursion is derived for plain ascent and the lift to Adam's state is unreliable at
 saturation. Comparing a forecast to that spread would mean training eight fresh runs under plain
 ascent at $7$B, which on this machine is about nine hours of continuous compute. We chose to spend

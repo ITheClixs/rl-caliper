@@ -537,7 +537,7 @@ is a statement about the experiment we could afford rather than about the method
 \label{sec:exp-scale}
 
 The largest model this machine holds is Qwen2.5-7B-Instruct at four-bit precision, trained with
-LoRA adapters and AdamW. Running it turned up two ways for a reported number to stop carrying
+LoRA adapters and Adam. Running it turned up two ways for a reported number to stop carrying
 information, and they fail in opposite directions. In one the spread swamps the effect, so a single
 run cannot report the improvement it claims. In the other the metric stops resolving the runs at
 all, so the spread reads zero and a practitioner concludes their pipeline is reproducible. Both are
@@ -556,7 +556,7 @@ this recipe reports a number whose run-to-run uncertainty is nearly as large as 
 claimed, so the ordinary practice of running once and comparing against a baseline cannot separate
 a real improvement from a lucky seed at this scale. This is exactly the case the forecast of
 Section~\ref{sec:metric} is meant for, and it is also the case where we cannot supply one, because
-these runs use AdamW and the recursion is written for plain ascent. Section~\ref{sec:discussion}
+these runs use Adam and the recursion is written for plain ascent. Section~\ref{sec:discussion}
 says what that would cost to fix.
 
 \begin{table}[t]
