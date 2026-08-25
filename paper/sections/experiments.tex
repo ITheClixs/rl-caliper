@@ -16,8 +16,8 @@ a single Apple M4 laptop with $24$\,GB of memory.
 This is the experiment the paper is for, and its protocol is prospective by construction. In each
 of $\numForecastSettings$ settings one run is trained and frozen; the states it passed through are carried backwards
 through \eqref{eq:adjoint} to produce a forecast of the across-seed standard deviation of the final
-pass rate; the forecast is recorded; and only then are $47$ further seeds trained and their spread
-measured. Nothing about the outcome is available when the prediction is made.
+pass rate; the forecast is recorded; and only then are the remaining seeds of the
+$\numForecastSeeds$ trained and their spread measured. Nothing about the outcome is available when the prediction is made.
 
 The enumerable policy is used because there the reported number is the exact pass rate rather than
 an estimate of it, so the measured spread is the spread of the quantity itself and not of a finite
