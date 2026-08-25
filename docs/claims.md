@@ -56,7 +56,11 @@ Legend for strength:
 | a collapsed policy injects nothing | count-based advantage is zero on a unanimous group | exact |
 | RLVR collapses sampling within a few updates on a real model | `s7`: live share to zero by update five, twice, at two step sizes | observed |
 | a saturated metric cannot see a seed difference | `s6_saturation`: 0 of 32 prompts disagree, policies differ by up to 8e-2 | observed |
-| the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.07-0.5 | observed |
+| the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.07-0.5 over four runs | observed |
+| the forecast underpredicts on a real model by ~12x | `s7`: cheap form 0.0056 against a measured seed spread of 0.0689 | measured |
+| taking the transport anyway inflates it 4x, with noise not curvature | `s7`: 0.0225 with transport, JVP cosine 0.21 | observed |
+| real RLVR runs separate into discrete outcome modes | `s7` at 0.5B: 3 runs at 0.350, 5 at 0.217, within-group spread under 0.01 | measured |
+| which mode a run lands in is decided early | `s7`: first-three-batch pass rate correlates 0.88 with the final score | observed |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 
 ## Withdrawn or superseded
@@ -71,6 +75,9 @@ Legend for strength:
 ## Not claimed
 
 * an error bar for a frontier-scale run: the largest model measured is 7B, on short-answer tasks
+* that the forecast is usable on a real model as it stands: at a step size that produces learning
+  the runs leave the linear regime, and at one small enough to stay in it the seed term is below
+  what eight runs can resolve
 * that the cheap estimator is safe over long runs: it is exact only where `Phi ~ I` along `grad M`
 * that the bootstrap interval on the real-model spread has nominal coverage: simulated coverage is
   68-88% (see `experiments/s7_real_forecast/power.py`)
