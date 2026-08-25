@@ -540,6 +540,18 @@ def table_real_forecast() -> None:
     ]
     if cheap:
         lines.append(f"\\quad without transport & {cheap[-1]['predicted_std']:.4f} \\\\")
+    agreement = result.get("jvp_agreement") or []
+    if agreement:
+        lines.append(
+            r"\midrule"
+        )
+        lines.append(
+            f"agreement of two $Jb$ estimates & {np.median(agreement):.2f} \\\\"
+        )
+    live = result.get("live_share") or []
+    if live:
+        alive = sum(1 for value in live if value > 0)
+        lines.append(f"updates injecting anything & {alive} of {len(live)} \\\\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("real_forecast", "\n".join(lines))
 
