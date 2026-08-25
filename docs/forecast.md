@@ -112,6 +112,35 @@ Sigma_t / P`, and `Sigma_t` is largest early because `E[p(1-p)]` is largest befo
 learned. Early noise is both bigger and no more forgotten than late noise, so the beginning of a run
 is where a larger batch buys the most.
 
+## 6b. On a real model
+
+`experiments/s7_real_forecast`, Qwen2.5-0.5B, twelve updates of plain gradient ascent, eight seeds,
+on a task the base model passes at 0.16.
+
+| quantity | value |
+|---|---|
+| measured spread across runs | 0.0694 |
+| evaluation (binomial) part | 0.0077 |
+| seed part, by subtraction | 0.0689, interval [0.0033, 0.0737] |
+| forecast, cheap form | **0.0056** |
+| forecast, with transport | 0.0225 |
+| cosine between two `J b` estimates | 0.21 |
+| share of the forecast made in the first half | 92% |
+
+The cheap form is short by twelve. The transported version is four times larger, and that is noise
+rather than curvature: the transport is worth 2% where it can be computed exactly, and here it is
+built from vectors that barely correlate with an independent estimate of themselves.
+
+The reason is the outcome distribution. Three runs land at 0.350 and five at 0.217, within-group
+spread under 0.01 against a between-group gap of 0.133. A linearised model predicts the spread of a
+unimodal perturbation about one trajectory; a standard deviation is the wrong summary of this
+outcome for anyone.
+
+What survives is the mechanism. A run's first three batches correlate with its final score at 0.88
+(last three: -0.24), and the kernel puts 92% of the variance in the first half of the run, 73% in
+update four alone. The uncertainty is made early and then amplified, which is what a spectral radius
+above one predicts. The amplification is not linear, and that is what the forecast misses.
+
 ## 7. Boundaries
 
 * **Linearity.** The residual `||g_bar(B) - g_bar(A) - J(A)(B-A)|| / ||g_bar(B) - g_bar(A)||` rises
