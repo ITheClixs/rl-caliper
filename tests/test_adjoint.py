@@ -148,3 +148,22 @@ def test_the_injected_term_is_the_variance_of_a_projected_batch_gradient(pool):
     measured = float(sampled.var(ddof=1))
     # 20k draws give the sample variance a relative standard error of about 1%
     assert measured == pytest.approx(predicted, rel=0.06)
+
+
+def test_the_forecast_scales_as_one_over_the_prompt_count():
+    """`Var = sum_t (eta^2 / P) Var_i(b' z_i)`, so the forecast is inversely proportional to P.
+
+    This pins down which of the two equivalent forms the implementation uses. Writing the same
+    term as `Var(b' g_hat)` over the batch mean would carry no explicit `P`, and using both
+    conventions at once would be wrong by a factor of `P`.
+    """
+    from caliper.exact.adjoint import forecast
+    from caliper.exact.pool import build
+
+    policy, accepts = build(3, 2, 12, (0.05, 0.95), 1.0, seed=0)
+    counts = [4, 8, 16, 32]
+    variances = [
+        forecast(policy, accepts, "rloo", 8, p, 0.5, 6).variance for p in counts
+    ]
+    products = [v * p for v, p in zip(variances, counts)]
+    assert max(products) / min(products) < 1.02, f"not 1/P: {products}"
