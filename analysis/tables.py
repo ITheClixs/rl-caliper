@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import functools
+import re
 import subprocess
 
 import numpy as np
@@ -920,6 +921,23 @@ def main() -> None:
             if not (TABLES / f"{name}.tex").exists():
                 write(name, PLACEHOLDER)
             print("pending:", exc)
+    report_missing_macros()
+
+
+def report_missing_macros() -> None:
+    """Name the macros the paper cites that no experiment has produced yet.
+
+    A number quoted in the text but never generated is a LaTeX error deep in a log. Saying so
+    here, next to the run that would supply it, is the more useful place to find out.
+    """
+    sections = sorted((TABLES.parent / "sections").glob("*.tex"))
+    used = set()
+    for path in sections + [TABLES.parent / "main.tex"]:
+        used |= set(re.findall(r"\\num[A-Za-z]+", path.read_text()))
+    defined = set(re.findall(r"\\num[A-Za-z]+", (TABLES / "numbers.tex").read_text()))
+    missing = sorted(name.lstrip("\\") for name in used - defined)
+    if missing:
+        print("macros cited but not generated:", ", ".join(missing))
 
 
 if __name__ == "__main__":
