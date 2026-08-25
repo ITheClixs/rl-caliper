@@ -493,6 +493,44 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+def table_real_forecast() -> None:
+    """The forecast on a pretrained model, against the spread it was made before seeing."""
+    runs = [
+        r
+        for r in io.load_all("s7_real_forecast")
+        if r["result"].get("resolved_std") is not None
+        and len(r["result"].get("kernel", [])) >= 8
+    ]
+    if not runs:
+        raise SystemExit("no real-model forecast with a measured spread")
+    result = runs[-1]["result"]
+    observed = result["observed_spread"]
+    cheap = [
+        r["result"]
+        for r in io.load_all("s7_real_forecast")
+        if not r["result"].get("transport", True) and len(r["result"].get("kernel", [])) >= 8
+    ]
+    lines = [
+        r"\setlength{\tabcolsep}{4pt}",
+        r"\begin{tabular}{@{}lc@{}}",
+        r"\toprule",
+        r"quantity & value \\",
+        r"\midrule",
+        f"held-out pass rate, base & {result['base_pass_rate']:.3f} \\\\",
+        f"held-out pass rate, after {observed['n_runs']} runs & {observed['mean']:.3f} \\\\",
+        r"\midrule",
+        f"observed s.d.\\ across runs & {observed['std']:.4f} \\\\",
+        f"\\quad evaluation (binomial) part & {np.sqrt(result['binomial_variance']):.4f} \\\\",
+        f"\\quad seed part, by subtraction & {result['resolved_std']:.4f} \\\\",
+        r"\midrule",
+        f"forecast from one run & {result['predicted_std']:.4f} \\\\",
+    ]
+    if cheap:
+        lines.append(f"\\quad without transport & {cheap[-1]['predicted_std']:.4f} \\\\")
+    lines += [r"\bottomrule", r"\end{tabular}"]
+    write("real_forecast", "\n".join(lines))
+
+
 def table_transport() -> None:
     """What carrying the adjoint back is worth, against holding it at grad M."""
     runs = [
@@ -616,6 +654,7 @@ def main() -> None:
         ("forecast", table_forecast),
         ("estimator_forecast", table_estimator_forecast),
         ("transport", table_transport),
+        ("real_forecast", table_real_forecast),
         ("propagation", table_propagation),
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),

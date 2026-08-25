@@ -643,6 +643,7 @@ def figure_real_forecast() -> None:
         for r in io.load_all("s7_real_forecast")
         if r["result"].get("predicted_variance", 0.0) > 0.0
         and len(r["result"].get("kernel", [])) >= 8
+        and r["result"].get("transport", True)
     ]
     if not runs:
         raise SystemExit("no real-model forecast with a non-zero kernel")
