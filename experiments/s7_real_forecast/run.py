@@ -88,6 +88,8 @@ def main() -> None:
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--epsilon", type=float, default=1e-3)
     ap.add_argument("--adjoint-batches", type=int, default=2)
+    ap.add_argument("--variance-prompts", type=int, default=None,
+                    help="prompts used to estimate the injected term (default: the batch size)")
     ap.add_argument("--no-transport", action="store_true",
                     help="hold the adjoint at grad M: the cheap form, one pass per update")
     ap.add_argument("--forecast-repeats", type=int, default=2,
@@ -137,6 +139,7 @@ def main() -> None:
             mx.random.key(4242 + 31 * repeat), seed=args.seed + 991 * repeat,
             epsilon=args.epsilon, batches=args.adjoint_batches,
             transport=not args.no_transport,
+            variance_prompts=args.variance_prompts,
             # the diagnostic costs a second backward pass, and has nothing to check without one
             check_agreement=(repeat == 0 and not args.no_transport),
         ))

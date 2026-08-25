@@ -70,7 +70,9 @@ def metric_gradient(trainer, items, rng, key) -> tuple[np.ndarray, float, mx.arr
     return ascent_direction(grads), float(rewards.mean()), key
 
 
-def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
+def projected_batch_variance(
+    trainer, corpus, rng, key, direction: np.ndarray, prompts: int | None = None
+):
     """Var over prompts of the projected per-prompt gradient, the pass rate, and the live share.
 
     The live share is the fraction of prompts whose group is not unanimous. A count-based
@@ -80,7 +82,10 @@ def projected_batch_variance(trainer, corpus, rng, key, direction: np.ndarray):
     separately is what tells the two apart.
     """
     cfg = trainer.config
-    picks = rng.choice(len(corpus), size=cfg.prompts, replace=False)
+    # the variance is over the prompt distribution, so it is estimated better with more prompts
+    # than the training batch happens to use; the 1/P that divides it stays the training P
+    count = min(prompts or cfg.prompts, len(corpus))
+    picks = rng.choice(len(corpus), size=count, replace=False)
     items = [corpus[i] for i in picks]
     sequences, masks, rewards, key = trainer.rollout(items, key)
     counts = rewards.sum(axis=1).astype(int)
@@ -166,10 +171,15 @@ def forecast(
     batches: int = 1,
     check_agreement: bool = True,
     transport: bool = True,
+    variance_prompts: int | None = None,
 ) -> RealForecast:
     """Carry the metric gradient back along the stored states of one run.
 
     `states[t]` are the adapters after update t, so `states[-1]` is where the run ended.
+
+    `variance_prompts` sets how many prompts the injected term is estimated from. Once most
+    groups have gone unanimous a small batch mostly contains zeros, and the sample variance over
+    eight prompts is a poor and low-biased estimate of the variance over the corpus.
 
     `transport=False` holds the adjoint at `grad M` and skips the Hessian-vector products
     entirely, which is the cheap form: one pass per update instead of three.
@@ -192,7 +202,8 @@ def forecast(
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
         projected, _, live, key = projected_batch_variance(
-            trainer, corpus, np.random.default_rng(seed + 100 + t), key, adjoint
+            trainer, corpus, np.random.default_rng(seed + 100 + t), key, adjoint,
+            prompts=variance_prompts,
         )
         kernel[t] = step_size**2 * projected / n_prompts
         live_share[t] = live
