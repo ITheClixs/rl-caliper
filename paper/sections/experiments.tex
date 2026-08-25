@@ -505,8 +505,10 @@ is the wrong summary of this outcome for anyone, forecast or not: the honest des
 recipe is that it returns $0.35$ or $0.22$.
 
 \paragraph{And what decided which group a run landed in.} The pass rate a run achieved on its first
-three batches correlates with its final held-out score at $r = 0.88$; the correlation with its last
-three batches is $-0.24$. The outcome is settled early and then amplified, which is what the two
+three batches correlates with its final held-out score at $r = \numEarlyCorrelation$, with a
+bootstrap interval over runs of $[\numEarlyCorrelationLow,\ \numEarlyCorrelationHigh]$ that is
+wide enough at $\numTraceRuns$ runs to belong beside the point estimate; the correlation with its
+last three batches is $\numLateCorrelation$. The outcome is settled early and then amplified, which is what the two
 measurements either side of this predict: the per-update kernel puts $92\%$ of the forecast variance
 in the first half of the run, and Section~\ref{sec:exp-spectrum} finds the leading eigenvalue of
 $A_t$ above one. The mechanism the paper describes is visible on a real model. The magnitude the

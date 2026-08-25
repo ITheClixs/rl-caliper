@@ -476,8 +476,18 @@ def table_numbers() -> None:
         window = min(3, traces.shape[1])
         early = traces[:, :window].mean(axis=1)
         late = traces[:, -window:].mean(axis=1)
+        rng = np.random.default_rng(0)
+        draws = []
+        for _ in range(8000):
+            pick = rng.integers(0, scores.size, size=scores.size)
+            if np.std(early[pick]) == 0 or np.std(scores[pick]) == 0:
+                continue
+            draws.append(np.corrcoef(early[pick], scores[pick])[0, 1])
+        low, high = np.percentile(draws, [2.5, 97.5])
         macros |= {
             "EarlyCorrelation": f"{np.corrcoef(early, scores)[0, 1]:+.2f}",
+            "EarlyCorrelationLow": f"{low:+.2f}",
+            "EarlyCorrelationHigh": f"{high:+.2f}",
             "LateCorrelation": f"{np.corrcoef(late, scores)[0, 1]:+.2f}",
             "TraceRuns": f"{scores.size}",
             "TraceWindow": f"{window}",

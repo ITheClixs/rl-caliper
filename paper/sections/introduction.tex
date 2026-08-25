@@ -79,7 +79,7 @@ be carried against the gradient of the reported metric instead of being formed.
   Run end to end on Qwen2.5-0.5B, the forecast is a factor of twelve short of the measured
   spread, because the eight runs end in two distinct groups rather than scattered around one and a
   linearised model has no way to represent that. What is confirmed is the mechanism rather than the
-  magnitude: on that model a run's first three batches correlate with its final score at $0.88$,
+  magnitude: on that model a run's first three batches correlate with its final score at $\numEarlyCorrelation$,
   and the
   per-update kernel puts $92\%$ of the forecast variance in the first half of the run.
 
