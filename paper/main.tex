@@ -69,11 +69,9 @@
 
   Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
   rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
-  model the estimator we recommend is short by a factor of twenty-five, and the fully transported
-  one by sixteen, because the runs end in groups rather than scattered around one. What survives is
-  narrower: the groups stop disagreeing by the fifth update, so the run measurably stops injecting
-  seed noise, while the failed forecast still places $\numRealFirstHalfShare\%$ of its own
-  predicted variance before that point.
+  model the recommended estimator is short by twenty-five and the transported one by sixteen,
+  because the runs end in groups rather than scattered around one. What survives is narrower:
+  groups stop disagreeing by the fifth update, so the run measurably stops injecting seed noise.
     \end{quote}
   \end{minipage}
   \vspace{6pt}
