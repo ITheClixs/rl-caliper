@@ -16,21 +16,21 @@ sets how much seed noise a batch injects. It sets the learning signal, so it set
 noise the following updates filter. It is largest before a policy has learned anything, which is
 why the per-update kernel tilts towards the start of a run. And when it reaches zero the injection
 stops, the metric stops resolving the policy, and the linearisation of Adam's normalisation stops
-holding --- three of the four boundaries below are the same boundary. A practitioner who logs one
+holding, so three of the four boundaries below are the same boundary. A practitioner who logs one
 number from this paper should log that one.
 
 \paragraph{What ``filtered'' does and does not mean.} It would be tidier if the transfer operator
 were a contraction. It is not: its spectral radius exceeds one throughout a run, only a third to a
 half of directions contract, and the contracting timescales differ among themselves by more than an
 order of magnitude. Divergence stays bounded over the horizons anyone trains because expansion is
-slow relative to run length --- a factor of about $1.6$ over twenty-five updates --- and not because
+slow relative to run length, a factor of about $1.6$ over twenty-five updates, and not because
 perturbations are destroyed. A run long enough would leave this regime, and we cannot say from here
 how long that is. The recursion is indifferent to the distinction, which is the argument for
 carrying the operator rather than a summary of it; the prose is not, which is why we say filtered
 and not contracted.
 
 \paragraph{On parameter space.} $S_T$ lives in parameter space, and a covariance there is not
-obviously about anything a reader of a paper cares about --- a reparameterisation could inflate or
+obviously about anything a reader of a paper cares about, since a reparameterisation could inflate or
 shrink it without changing the policy. That objection is answered by what the forecast predicts
 rather than by an argument. \eqref{eq:adjoint} contracts $S_T$ against $\nabla M$, so what is being
 tested is a functional of the policy: the standard deviation of a pass rate, in the units the pass
@@ -59,7 +59,7 @@ predicts the spread of a unimodal perturbation. What survives the failure is the
 first three batches of a run correlate with its final score at $0.88$, and the per-update kernel
 puts $92\%$ of the forecast variance in the first half of the run: the uncertainty really is made
 early and then amplified, exactly as the spectrum says it should be. What does not survive is the
-assumption that the amplification stays linear --- and at a step size small enough to keep it
+assumption that the amplification stays linear. At a step size small enough to keep it
 linear, the seed term drops below what eight runs can resolve at all.
 
 We would rather report this than a number from a setting chosen to make it work. It also sets the
@@ -87,8 +87,9 @@ unanimous during training, and $\E_x[p(1-p)]$ on the evaluation set at the end. 
 so is the error bar, and it means nothing.
 
 \paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ is the right move in principle and
-only partly works in practice. It halves the error of ignoring the optimiser state --- $2.6\times$ against $5.5\times$ ---
-and the optimiser state clearly does carry seed information, since freezing the second moment takes
+only partly works in practice. It halves the error of ignoring the optimiser state, $2.6\times$
+against $5.5\times$, and the optimiser state clearly does carry seed information, since freezing
+the second moment takes
 the error to $15.9\times$. Where the learning signal is live the lift is good to $1.48\times$ at
 the median. Where the pass rate saturates at either end, Adam's normalisation is the nonlinearity
 that bounds the spread, and a linear recursion cannot see a bound it does not contain. Section~\ref{sec:exp-adam} reports where it holds and where it does not, rather than
@@ -114,7 +115,7 @@ that a constant value of it is a good schedule.
 \paragraph{What we would do next, in order.} Measure the linearity residual on a real run, which
 is one extra gradient evaluation per stored checkpoint and would say in advance whether the forecast
 applies to it. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
-and stays inside the regime --- our best guess is that it needs a larger model, where the same
+and stays inside the regime. Our best guess is that this needs a larger model, where the same
 relative improvement is a smaller relative move in parameter space. Then treat the estimation error
 in $\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
 thing a practitioner will actually be handed. Only then is what we have a tool rather than a

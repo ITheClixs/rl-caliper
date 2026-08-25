@@ -55,56 +55,22 @@
   \vspace{-4pt}
   \begin{quote}
   Reinforcement learning post-training is reported from single runs, and how much a rerun would
-  move the number is established the only way it currently can be: by repeating the training. We
-  ask what a single run can be made to say about that number: we derive an estimator,
-  establish it where the comparison can be made exactly, and report the scale at which it
-  stops working and why.
+  move the number is established only by repeating the training. We ask what one run can be made
+  to say about it.
 
-  The correction the estimator rests on is to stop treating training noise as accumulating. A
-  perturbation entering at one update is passed through every later update and reweighted by them,
-  so the covariance of a run about its mean obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Measuring
-  the spectrum of $A_t$ shows this is a filter and not a contraction: only a third to a half of
-  directions contract, the leading direction expands, and the contracting timescales span tens of
-  updates to effectively unbounded, so no single number stands in for it. Carrying the gradient of
-  the reported metric backwards along one stored trajectory then gives the across-seed variance of
-  that metric as a sum of scalars, one per update, with no covariance matrix formed. The transpose
-  the backward pass needs is free: the mean update of a count-based estimator is the gradient of a
-  scalar potential, so its Jacobian is symmetric. Ablating the backward pass shows it can usually be
-  skipped outright --- holding the adjoint fixed changes the forecast by a median of $2\%$, because
-  the spectrum puts the metric direction where the operator is closest to the identity --- which
-  leaves an estimator costing one extra pass per update.
+  Training noise is not accumulated. A perturbation entering at one update is reweighted by every
+  update that follows, so the covariance of a run about its mean obeys
+  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric backwards
+  along one stored trajectory turns that recursion into the across-seed variance of the metric, as
+  a sum of scalars with no covariance matrix formed. The transpose the backward pass needs is
+  free, because the mean update of a count-based estimator is the gradient of a scalar potential.
 
-  We test the forecast prospectively, in policies small enough that the reported score is exact
-  rather than sampled --- one run trained and frozen, the prediction recorded, and
-  only then the remaining seeds trained. Across $\numForecastSettings$ settings spanning two policy shapes, two
-  prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads, its median absolute error against the
-  realised standard deviation is $\numForecastMedian\times$, its worst is $\numForecastWorst\times$, and it lands inside the
-  measured $95\%$ interval in $\numForecastInside$ of them; the covariance law underneath predicts policy
-  divergence to $\numPropagatedPercent\%$ at the median. Whether the filter matters at all
-  depends on the task: treating noise as accumulating is wrong by a factor of two on homogeneous
-  prompt pools, where the objective supplies the most curvature, and by three percent on
-  heterogeneous ones. Compressing the filter to a single timescale is wrong by two orders of
-  magnitude everywhere. The filtering is caused by learning, not by
-  proximity: replacing every reward with a coin flip leaves the rollouts, the batches and the step
-  sizes untouched, and divergence then grows by a factor of $\numNullCoin$ over eighty updates instead of
-  ending at $\numNullLearning$ of where it started.
-
-  Carried to a pretrained model it underpredicts, and we report that rather than a setting chosen
-  to avoid it: on Qwen2.5-0.5B the forecast is a factor of twelve short, because eight runs end in
-  two distinct groups rather than scattered around one. The mechanism survives even so --- a run's
-  first three batches correlate with its final score at $0.88$, and the kernel puts $92\%$ of the
-  variance in the first half of the run --- but the assumption that the amplification stays linear
-  does not.
-
-  Two consequences and one caution. Since $Q_t \propto \Sigma_t/P$, run length does not enter and
-  batch composition is the lever, with square-root returns --- and it is the beginning of a run that
-  matters most, since the injected covariance is largest before the policy has learned anything; restricting $\Sigma_t$ to one of its
-  terms attributes the spread by origin, and which responses were sampled dominates which prompts
-  were drawn at every group size we measure. The caution is that at $7$B on a task the base model
-  already mostly passes, twenty updates collapse the response distribution: every held-out prompt
-  then scores exactly $0$ or $1$, two seeds report the same number to the last decimal, and their
-  policies still differ. A zero measured spread on a saturated benchmark says the metric has stopped
-  resolving the procedure, not that the procedure is reproducible.
+  Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
+  rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
+  model it is short by a factor of twelve, because the runs end in two groups rather than scattered
+  around one. The mechanism survives that failure: a run's first three batches correlate with its
+  final score at $0.88$, and the per-update kernel puts $92\%$ of the variance in the first half of
+  the run.
     \end{quote}
   \end{minipage}
   \vspace{8pt}
@@ -112,7 +78,8 @@
     \centering
     {\includegraphics[width=\textwidth]{figures/teaser.pdf}}
     \captionof{figure}{\textbf{Left:} the across-seed standard deviation of the reported pass
-    rate, forecast from a single frozen run, against the value realised over $64$ independent runs
+    rate, forecast from a single frozen run, against the value realised over $\numForecastSeeds$
+    independent runs
     trained afterwards. Bars are bootstrap intervals over runs; the solid line is equality and the
     dotted lines a factor of $1.5$. \textbf{Right:} predicted against measured policy divergence
     for three models of where training noise goes. Propagating the covariance tracks it; treating

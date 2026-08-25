@@ -32,8 +32,8 @@ code was at, and the interpreter and platform it ran on.
 The exactness tests in \texttt{tests/} check every analytic result in Section~\ref{sec:theory}
 against brute-force enumeration, and check the batched estimator against the reference
 implementation term by term. Theorem~\ref{thm:adjoint} is additionally checked against the same
-quantity assembled the expensive way --- building $S_T$ explicitly and forming
-$\nabla M^{\!\top} S_T \nabla M$ --- and Proposition~\ref{prop:potential} against the measured
+quantity assembled the expensive way, by building $S_T$ explicitly and forming
+$\nabla M^{\!\top} S_T \nabla M$, and Proposition~\ref{prop:potential} against the measured
 asymmetry of $\mathcal{J}$, which is $3\times10^{-10}$ across the estimator family, at the finite-difference
 floor.
 
@@ -54,7 +54,7 @@ into rounding error rather than into a derivative. We use $10^{-3}$, which sits 
 well below the scale on which the gradient field bends.
 
 \paragraph{A claim index.} The released code carries \texttt{docs/claims.md}, which lists every
-claim in this paper against the experiment that produced it and how strongly it is supported ---
+claim in this paper against the experiment that produced it and how strongly it is supported:
 exact, measured with an interval, observed without one, or a negative result. It also lists what we
 withdrew and what we do not claim. It is written for a reader who distrusts one particular number
 and wants to find its source without reading the code.
@@ -99,8 +99,8 @@ number from it without knowing where that boundary lies would be reporting noise
 \begin{table}[t]
   \centering
   \input{tables/power}
-  \caption{Simulating the design as run --- $48$ held-out questions, $16$ samples each, pass rate
-  near $0.35$ --- at a range of true seed spreads. \emph{Resolved} is the fraction of trials in
+  \caption{Simulating the design as run, with $48$ held-out questions and $16$ samples each at a
+  pass rate near $0.35$, over a range of true seed spreads. \emph{Resolved} is the fraction of trials in
   which the subtraction returns something positive; \emph{estimate} is the median of what it
   returns.}
   \label{tab:power}

@@ -23,7 +23,7 @@ walk away from each other, and reproducibility decays with run length. That pict
 how run-to-run variance is discussed, and it is what a noisy gradient suggests. It is wrong. Noise
 from one update does not survive to the end of training unchanged: it is passed through every
 update that follows, which reweights it. What reaches the end is a convolution of injected noise
-with the sensitivity of the remaining trajectory --- an object that obeys a recursion, and that can
+with the sensitivity of the remaining trajectory, an object that obeys a recursion and that can
 be carried against the gradient of the reported metric instead of being formed.
 
 \paragraph{Contributions.}
@@ -33,13 +33,15 @@ be carried against the gradient of the reported metric instead of being formed.
   trajectory gives the across-seed variance of the reported score as a sum of scalars, one per
   update, with no covariance matrix formed. The transpose the backward pass would need is free,
   because the mean update of any count-based estimator is the gradient of a scalar potential
-  $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric --- for RLOO the potential is the
-  pass rate itself. In its cheap form --- which an ablation shows loses nothing at
-  these run lengths --- it costs one extra pass per update, against $N$ full runs for replication. Tested prospectively --- one run trained and frozen
-  and the forecast recorded before the remaining seeds were trained --- its median absolute error
-  against the realised spread is $\numForecastMedian\times$ across $\numForecastSettings$ settings --- two policy shapes, two prompt-pool diversities, and a
-  $\numForecastSpreadRange\times$ range of spreads --- its worst is $\numForecastWorst\times$, and it falls inside the measured $95\%$
-  interval in $\numForecastInside$ of them.
+  $\E_x[\Lambda(p_x)]$ and its Jacobian is therefore symmetric. For RLOO the potential is the
+  pass rate itself. In its cheap form, which an ablation shows loses nothing at these run lengths,
+  it costs one extra pass per update, against $N$ full runs for replication. We test it
+  prospectively, training one run and freezing it and recording the forecast before the remaining
+  seeds were trained. Its median absolute error against the realised spread is
+  $\numForecastMedian\times$ across $\numForecastSettings$ settings spanning two policy shapes, two
+  prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads. Its worst is
+  $\numForecastWorst\times$, and it falls inside the measured $95\%$ interval in
+  $\numForecastInside$ of them.
 
   \item \textbf{A finite-time covariance law, and what its operator really does}
   (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
@@ -57,7 +59,7 @@ be carried against the gradient of the reported metric instead of being formed.
 
   \item \textbf{An honest accounting of what the backward pass buys.} Holding the adjoint at
   $\nabla M$ instead of carrying it back changes the forecast by a median of $2\%$ and the median
-  error not at all, so the Hessian-vector products --- two of the three passes per update --- are
+  error not at all, so the Hessian-vector products, two of the three passes per update, are
   unnecessary over runs of this length. The recursion explains why: most of the spectrum of $A_t$
   sits within $10^{-4}$ of one and $\nabla M$ points into that part of it. We recommend the cheap
   estimator and say what would make the full one necessary.
@@ -65,7 +67,7 @@ be carried against the gradient of the reported metric instead of being formed.
   \item \textbf{The filtering is caused by learning.} Replacing rewards with coin flips, which
   leaves the rollouts, the batch composition and the step sizes untouched, turns a divergence trace
   that ends at $\numNullLearning$ of where it started into one that grows by a factor of $\numNullCoin$ over eighty
-  updates --- a gap of $\numNullGap\times$ at the end of the run. The learning condition also moves
+  updates, a gap of $\numNullGap\times$ at the end of the run. The learning condition also moves
   \emph{further} per update, so what brings those runs back together is not smaller steps.
 
   \item \textbf{Where the uncertainty comes from.} Restricting the injected covariance to one of
@@ -96,8 +98,8 @@ be carried against the gradient of the reported metric instead of being formed.
 
   \item \textbf{An explicit account of what does not hold.} A single effective timescale fails by
   two orders of magnitude. A predicted square-root relation between policy divergence and outcome
-  spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
-  long run whose spread is generated only near its end --- and found the opposite: in
+  spread is not supported by our data and is withdrawn. We looked for a short memory horizon, a
+  long run whose spread is generated only near its end, and found the opposite: in
   $\numTiltedEarly$ of $\numMemorySettings$ settings more of the final variance was injected in the
   first half of the run than the second, because the injected covariance is largest before the
   policy has learned anything. Lifting the

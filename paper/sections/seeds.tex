@@ -4,7 +4,7 @@
 Fix a policy $\theta_0$ and start two runs from it. They see the same prompts and the same
 objective, and differ only in the randomness of their rollouts. This is the comparison a
 practitioner makes when they change a seed and rerun, and the question this section answers is how
-far apart the numbers they report end up --- using only one of the runs.
+far apart the numbers they report end up, using only one of the runs.
 
 \subsection{Noise is filtered, not accumulated}
 
@@ -120,7 +120,7 @@ the parameters. Linearising it about the endpoint the run reached,
   \label{eq:metric-variance}
   \Var_{\text{seed}}\big[M(\theta_T)\big] \;\approx\; \nabla M(\theta_T)^{\!\top} S_T\, \nabla M(\theta_T),
 \end{equation}
-which needs $S_T$ --- a matrix nobody can form for a real model. It is not needed. Substituting
+which needs $S_T$, a matrix nobody can form for a real model. It is not needed. Substituting
 \eqref{eq:unrolled} turns the quadratic form into a sum of scalars.
 
 \begin{theorem}[Adjoint form of the reported spread]
@@ -146,7 +146,7 @@ which needs $S_T$ --- a matrix nobody can form for a real model. It is not neede
 \end{proof}
 
 Every term of \eqref{eq:adjoint} is the variance of a batch gradient projected onto a single
-direction --- one scalar per update, which a trainer can accumulate alongside the update it is
+direction: one scalar per update, which a trainer can accumulate alongside the update it is
 already making. What the backward pass costs depends on $A_s^{\!\top}$, and here the estimator
 family pays for itself.
 
@@ -209,7 +209,7 @@ gradient evaluations per stored update and one vector of parameter size held in 
 
 And one thing before believing the answer: check that the runs it describes are small perturbations
 of each other. The residual of Section~\ref{sec:exp-linearity} measures that directly, and
-Section~\ref{sec:exp-real} is what happens when nobody checks --- a real run whose seeds separate
+Section~\ref{sec:exp-real} is what happens when nobody checks, on a real run whose seeds separate
 into two outcomes, where the forecast is short by a factor of twelve and no amount of care in
 computing it would have helped.
 
@@ -218,18 +218,18 @@ update: one batch for the injected term, and two for the Hessian-vector product.
 three times the compute of the training run itself, not a rounding error, and we would rather state
 it than let a reader discover it.
 
-It is also usually unnecessary. Section~\ref{sec:exp-forecast} ablates the transport --- holding
-$b$ at $\nabla M(\theta_T)$ instead of carrying it back --- and finds the forecast changes by a
+It is also usually unnecessary. Section~\ref{sec:exp-forecast} ablates the transport, holding
+$b$ at $\nabla M(\theta_T)$ instead of carrying it back, and finds the forecast changes by a
 median of $2\%$ and the median error not at all, over runs of ten and twenty-five updates. The
 reason is in the spectrum: most of $A_t$ sits within $10^{-4}$ of one and $\nabla M$ points into
 that part of it, so $\Phi_{T,t}$ is close to the identity along the one direction the forecast
-needs. What we recommend, then, is the cheap estimator ---
+needs. What we recommend, then, is the cheap estimator,
 \begin{equation}
   \label{eq:cheap}
   \Var_{\text{seed}}\big[M(\theta_T)\big] \;\approx\;
   \sum_{t} \frac{\eta_t^2}{P}\,\widehat{\Var}_i\!\big(\nabla M(\theta_T)^{\!\top}\hat{g}_{t,i}\big),
 \end{equation}
-one extra pass per update and no Hessian-vector products --- with the full recursion held in
+one extra pass per update and no Hessian-vector products, with the full recursion held in
 reserve for runs long enough, or curvature strong enough, that a per-update discrepancy of a percent
 compounds. Knowing which regime one is in is what the recursion is for, and the spectrum of $A_t$ is
 what says it.
@@ -239,15 +239,15 @@ not a different method but the same one, evaluated where the operator is measure
 the identity.
 
 The comparison that matters is not against zero. Estimating the same quantity by replication costs
-$N$ full runs and returns an $N$-seed estimate whose own interval is wide --- at six seeds, wide
+$N$ full runs and returns an $N$-seed estimate whose own interval is wide. At six seeds it is wide
 enough to leave the shape of a divergence trace unresolved (Section~\ref{sec:exp-seeds}). One extra
 pass per update is about the cost of a second run, and it is available on a run that has already
 finished.
 
 The number that comes out is the seed component only. A reported score also carries the randomness
 of the evaluation set, which is the binomial term the eval literature already estimates
-\citep{miller2024adding}. The two are independent by construction --- one is over training seeds at
-a fixed evaluation, the other over evaluation draws at a fixed model --- so they add in quadrature,
+\citep{miller2024adding}. The two are independent by construction, one being over training seeds at
+a fixed evaluation and the other over evaluation draws at a fixed model, so they add in quadrature,
 and the practical recommendation is to report both terms rather than either alone. On a saturated
 benchmark the second is small and the first is invisible, which is exactly the situation
 Section~\ref{sec:exp-scale} runs into.
@@ -255,8 +255,8 @@ Section~\ref{sec:exp-scale} runs into.
 Two consequences worth stating plainly. First, this is a \emph{forecast}: \eqref{eq:adjoint} reads
 only the states one run visited, so it can be computed before any second run exists, which is how
 Section~\ref{sec:exp-seeds} tests it. Second, restricting $\Sigma_t$ to one of its two terms
-attributes the answer by origin --- $\Sigma_b$ is which prompts were drawn, $\Sigma_w$ is which
-responses were sampled --- and the two shares are exact and sum to one.
+attributes the answer by origin, since $\Sigma_b$ is which prompts were drawn and $\Sigma_w$ is
+which responses were sampled. The two shares are exact and sum to one.
 
 \subsection{Where the argument stops}
 

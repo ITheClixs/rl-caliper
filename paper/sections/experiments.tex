@@ -50,13 +50,13 @@ $47$.
 Table~\ref{tab:forecast} reports a median absolute error of $\numForecastMedian\times$ and a worst case of
 $\numForecastWorst\times$, and the forecast lands inside the measured $95\%$ interval in $\numForecastInside$ of $\numForecastSettings$
 settings. Two things in the breakdown are worth noting. The two policy shapes agree with each other
---- $\numForecastMedian\times$ against $1.10\times$ --- so the result is not a property of one tabular family.
+at $\numForecastMedian\times$ against $1.10\times$, so the result is not a property of one tabular family.
 And accuracy is flat in run length at the median but its coverage is not: $90$ of $96$ settings at
 $\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
 where Section~\ref{sec:exp-linearity} says it should.
 
-To make the deliverable concrete: one setting in the middle of the grid --- twenty-five updates,
-thirty-two prompts, groups of eight, mixed difficulty --- reports a pass rate of $0.502$. The
+To make the deliverable concrete: one setting in the middle of the grid, at twenty-five updates,
+thirty-two prompts, groups of eight and mixed difficulty, reports a pass rate of $0.502$. The
 forecast made from that single run is a standard deviation of $1.11\times10^{-3}$; the value
 realised over forty-eight independent runs is $1.07\times10^{-3}$, with a bootstrap interval of
 $[8.6\times10^{-4},\, 1.3\times10^{-3}]$. What a reader would be handed is $0.502 \pm 0.002$ from
@@ -89,8 +89,9 @@ This is not a defect in the theory; it is the theory being informative about its
 Section~\ref{sec:exp-spectrum} measures most of the spectrum of $A_t$ sitting within $10^{-4}$ of
 one, and $\nabla M$ points into the slow part of it, so over tens of updates $\Phi_{T,t}$ is close
 to the identity along that one direction. The practical reading is that a run of this length should
-use the cheap estimator --- one extra pass per update, no Hessian-vector products, no dependence on
-the noisy directional derivative Section~\ref{sec:exp-real} reports --- and that the recursion is
+use the cheap estimator, which costs one extra pass per update, needs no Hessian-vector products
+and does not depend on the noisy directional derivative Section~\ref{sec:exp-real} reports. The
+recursion is
 what tells you when to stop: when the spectrum of $A_t$ moves away from one, or the run is long
 enough that a $1\%$ per-update discrepancy compounds.
 
@@ -113,8 +114,8 @@ is constant, the result would be a curiosity rather than a method.
 \paragraph{Where the uncertainty comes from.} Restricting $\Sigma_t$ to $\Sigma_b$ or to
 $\Sigma_w$ splits the same forecast by origin. The two shares are exact and sum to one, and across
 $\numMemorySettings$ settings the rollout share has a median of $78\%$: which responses were sampled matters more
-than which prompts were drawn. It is monotone in group size --- $93\%$ at $G=2$, $82\%$ at $G=4$,
-$65\%$ at $G=8$, $46\%$ at $G=16$ --- and, because $\Sigma_b$ and $\Sigma_w$ are both divided by
+than which prompts were drawn. It is monotone in group size, running $93\%$ at $G=2$, $82\%$ at
+$G=4$, $65\%$ at $G=8$ and $46\%$ at $G=16$. Because $\Sigma_b$ and $\Sigma_w$ are both divided by
 $P$, entirely independent of the number of prompts. Adding prompts buys a smaller error bar; only
 larger groups change what the error bar is made of.
 
@@ -144,7 +145,7 @@ because $\E_x[p(1-p)]$ is largest before the policy has learned anything. Early 
 bigger and no more forgotten than late noise.
 
 The practical reading is the reverse of the one we went looking for. Reproducing a run means
-reproducing all of it, and if anything the beginning matters more --- which is also where a larger
+reproducing all of it, and if anything the beginning matters more, which is also where a larger
 batch would buy the most.
 
 \subsection{Why the forecast rests on filtering, not accumulation}
@@ -171,7 +172,7 @@ the single-timescale law an earlier version of this work relied on.
 The propagated recursion is accurate to $\numPropagatedPercent\%$ at the median and $1.2\times$ at
 worst, everywhere in the grid. The interesting column is not the first one.
 
-Accumulation --- the model that says noise is added rather than filtered --- is wrong by a factor
+Accumulation, the model that says noise is added rather than filtered, is wrong by a factor
 of $2.06$ on homogeneous prompt pools and by $3\%$ on heterogeneous ones, with a worst case of
 $3.8\times$. That is not a caveat on the result; it is the result. Filtering is done by the
 curvature of the estimator potential, and a pool of similar prompts is where that curvature is
@@ -286,7 +287,7 @@ we withdraw it.
 The reason is structural rather than statistical, and Section~\ref{sec:exp-scale} shows it in its
 extreme form. $\KL$ weights every direction the policy can move in by the Fisher information; a
 task metric weights them by $\nabla M$, which is a single direction and can be nearly orthogonal to
-where the variance is --- or, on a saturated evaluation, zero. No scalar function of $\KL$ can
+where the variance is, or, on a saturated evaluation, zero. No scalar function of $\KL$ can
 recover that. Theorem~\ref{thm:adjoint} takes the direct route instead, and
 Section~\ref{sec:exp-forecast} is what it delivers.
 
@@ -316,7 +317,7 @@ the spread finite here is that expansion is slow relative to run length, not tha
 shrinks.
 
 The share of directions that contract at all is between $31\%$ and $51\%$, and it rises as the run
-proceeds --- $36\%$ to $51\%$ on the mixed pool. The filter changes shape during training. This is
+proceeds, from $36\%$ to $51\%$ on the mixed pool. The filter changes shape during training. This is
 the non-stationarity that Theorem~\ref{thm:propagation} handles by construction, since it carries
 $A_t$ rather than an average of it.
 
@@ -324,7 +325,7 @@ Among the directions that do contract, the fastest has an eigenvalue of
 $\numSpectrumFastest$ and the slowest is $1.0000$ to four places. That is a range of decay
 timescales from roughly fifty updates to effectively unbounded, in the same operator, at the same moment. It is the direct explanation of two
 results reported above: why replacing the spectrum by one effective timescale is wrong by two orders
-of magnitude, and why the per-update kernel has no horizon --- the slow end of the spectrum has not
+of magnitude, and why the per-update kernel has no horizon: the slow end of the spectrum has not
 forgotten anything by the end of an eighty-update run.
 
 We therefore say that noise is \emph{filtered} rather than contracted, and mean by it that
@@ -353,8 +354,8 @@ above that, with a rank correlation of $0.17$ between residual and error across 
 track the residual is the tail: the worst case is $1.21\times$ below $5\%$ and around $1.57\times$
 above it.
 
-Two things follow. The derivation asks for more than the result needs --- a $16\%$ departure from
-linearity costs nothing at the median --- so the honest statement of the assumption is that it
+Two things follow. The derivation asks for more than the result needs, since a $16\%$ departure
+from linearity costs nothing at the median, so the honest statement of the assumption is that it
 bounds the worst case rather than setting the accuracy. And $\varepsilon$ is worth logging anyway,
 because it is the quantity that separates the regime where the forecast has a worst case of
 $1.2\times$ from the regime where it has one of $1.6\times$, and computing it costs one extra
@@ -415,7 +416,7 @@ anyway, and every seed shares the warmed state so the covariance still starts at
 
 The optimiser state matters and the lift is worth taking: ignoring it underpredicts by
 $5.5\times$ at the median, and the lift brings that to $2.6\times$. Freezing the second moment
-rather than propagating it makes matters much worse --- $15.9\times$ --- which says the second
+rather than propagating it makes matters much worse, at $15.9\times$, which says the second
 moment is genuinely carrying seed information rather than merely complicating the algebra.
 
 But the lift is not reliable, and where it fails is systematic. Splitting by pool: on the
@@ -428,8 +429,8 @@ Adam's normalisation is the nonlinearity that bounds the real spread and a linea
 contain that bound.
 
 The practical statement is that the forecast should be taken under gradient ascent, or under Adam
-only while $\E_x[p(1-p)]$ is well away from zero --- which is the same condition
-Section~\ref{sec:exp-scale} arrives at for a different reason --- and that a linear treatment of
+only while $\E_x[p(1-p)]$ is well away from zero, which is the same condition
+Section~\ref{sec:exp-scale} arrives at for a different reason, and that a linear treatment of
 Adam over long horizons is an open problem rather than a solved one.
 
 \subsection{Two ways a run stops being measurable}
@@ -445,8 +446,8 @@ reproducible.
 
 \paragraph{Carrying the backward pass to a pretrained model.} Before the failure modes, the
 attempt they came out of. We ran the forecast end to end on Qwen2.5-0.5B-Instruct with LoRA
-adapters, twelve updates of plain gradient ascent --- the update the recursion is written for ---
-on a task the base model passes at $0.16$, and afterwards trained seven more seeds and measured
+adapters, twelve updates of plain gradient ascent, which is the update the recursion is written
+for, on a task the base model passes at $0.16$, and afterwards trained seven more seeds and measured
 what they did. The backward pass is the one in Algorithm~\ref{alg:forecast}, with the mean update
 field estimated from fresh rollouts under common random numbers.
 
@@ -461,7 +462,7 @@ be hard for the model.
 
 The second is that the directional derivative is not reliably estimated. Taking $J b$ twice from
 independent draws of prompts gives two vectors whose cosine has a median between $0.07$ and $0.5$
-depending on the run --- that is, mostly noise at this batch size. On its own that would sink the
+depending on the run: mostly noise at this batch size. On its own that would sink the
 method. It does not, because Section~\ref{sec:exp-forecast} has already established that the
 transport is worth about $2\%$: what we report is the cheap estimator of \eqref{eq:cheap} in all
 but name, and the quantity that is badly estimated is one the forecast barely uses.
@@ -487,9 +488,9 @@ but name, and the quantity that is badly estimated is one the forecast barely us
 
 \paragraph{What the comparison says.} The eight runs realise a spread of $0.0694$, of which
 $0.0077$ is the evaluation's own binomial noise, leaving a seed term of $0.0689$ with an interval of
-$[0.0033,\ 0.0737]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run --- the
-cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what the
-noisy directional derivative leaves available --- is $0.0056$. It is short by a factor of twelve.
+$[0.0033,\ 0.0737]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run is the
+cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what
+the noisy directional derivative leaves available. It is $0.0056$. It is short by a factor of twelve.
 
 Taking the transport anyway gives $0.0225$, four times larger. That is not a better estimate. The
 transport is worth $2\%$ where it can be computed exactly, and here it is being estimated from
@@ -521,8 +522,8 @@ the subtraction returns nothing usable). The window where the runs both learn an
 linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
 is a statement about the experiment we could afford rather than about the method.
 
-\paragraph{The metric went blind.} On counting a letter in a word --- a task the base model
-already passes at $0.41$ --- twenty updates take the held-out pass rate to $\numSatScore$ and
+\paragraph{The metric went blind.} On counting a letter in a word, a task the base model already
+passes at $0.41$, twenty updates take the held-out pass rate to $\numSatScore$ and
 collapse the response distribution. All $\numSatPrompts$ held-out prompts then have a per-prompt
 rate of exactly $0$ or exactly $1$: eight samples, one answer. Two runs differing only in rollout
 randomness report \emph{the same number to the last decimal} and agree on
