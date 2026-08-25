@@ -53,6 +53,12 @@ precision the weights are held in: below roughly $10^{-4}$ in float32 the two ev
 into rounding error rather than into a derivative. We use $10^{-3}$, which sits above that floor and
 well below the scale on which the gradient field bends.
 
+\paragraph{A claim index.} The released code carries \texttt{docs/claims.md}, which lists every
+claim in this paper against the experiment that produced it and how strongly it is supported ---
+exact, measured with an interval, observed without one, or a negative result. It also lists what we
+withdrew and what we do not claim. It is written for a reader who distrusts one particular number
+and wants to find its source without reading the code.
+
 \paragraph{Which experiment produces what.}
 \begin{itemize}\itemsep1pt
   \item \texttt{p1\_propagation}: the covariance recursion against Monte Carlo
