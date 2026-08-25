@@ -512,6 +512,20 @@ def table_numbers() -> None:
         window = min(3, traces.shape[1])
         early = traces[:, :window].mean(axis=1)
         macros["EarlyCorrelationBig"] = f"{np.corrcoef(early, scores)[0, 1]:+.2f}"
+        base = outcome["base_pass_rate"]
+        spread = outcome["observed_spread"]["std"]
+        gain = outcome["observed_spread"]["mean"] - base
+        macros |= {
+            "ScaleRuns": f"{scores.size}",
+            "ScaleBase": f"{base:.3f}",
+            "ScaleMean": f"{outcome['observed_spread']['mean']:.3f}",
+            "ScaleLow": f"{min(outcome['held_out_scores']):.3f}",
+            "ScaleHigh": f"{max(outcome['held_out_scores']):.3f}",
+            "ScaleSpread": f"{spread:.4f}",
+            "ScaleGain": f"{gain:.3f}",
+            # what one run can say about the effect: the spread as a share of the mean improvement
+            "ScaleShare": f"{100 * spread / gain:.0f}",
+        }
 
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
