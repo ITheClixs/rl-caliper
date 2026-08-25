@@ -485,6 +485,38 @@ but name, and the quantity that is badly estimated is one the forecast barely us
   \label{tab:real-forecast}
 \end{table}
 
+\paragraph{What the comparison says.} The forecast made from one run is a standard deviation of
+$0.0225$. The eight runs realise $0.0694$, of which $0.0077$ is the evaluation's own binomial noise,
+leaving a seed term of $0.0689$ (Table~\ref{tab:real-forecast}). The forecast is a third of it.
+
+Two things have to be said about that number before anything else. The interval on the measured
+term is $[0.0033,\ 0.0737]$ and contains the forecast, so at eight runs the disagreement is not
+resolved --- Appendix~\ref{app:power} gives the simulation that says how wide this interval has to
+be. And the point estimate is nonetheless three times the forecast, in the direction a local model
+should err.
+
+The reason is visible without any statistics. The eight held-out scores are not scattered around a
+centre; they fall in two groups, three near $0.35$ and five near $0.22$ (Figure~\ref{fig:real-forecast},
+right). A linearised model predicts the spread of a unimodal perturbation about one trajectory. It
+has no way to represent runs that end in different places, and eight runs that end in two places is
+the assumption failing, not the arithmetic.
+
+\paragraph{And what decided which group a run landed in.} The pass rate a run achieved on its first
+three batches correlates with its final held-out score at $r = 0.88$; the correlation with its last
+three batches is $-0.24$. The outcome is settled early and then amplified, which is what the two
+measurements either side of this predict: the per-update kernel puts $92\%$ of the forecast variance
+in the first half of the run, and Section~\ref{sec:exp-spectrum} finds the leading eigenvalue of
+$A_t$ above one. The mechanism the paper describes is visible on a real model. The magnitude the
+linearisation assigns to it is not right, because the amplification carries the runs out of the
+regime where a linear model applies.
+
+\paragraph{Whether a better-behaved step size exists.} Not obviously, at this scale. A smaller step
+keeps the runs closer and the linearisation valid, but then the metric barely moves and the seed
+term drops below what eight runs can resolve at all (Appendix~\ref{app:power}: below about $0.01$
+the subtraction returns nothing usable). The window where the runs both learn and stay in the
+linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
+is a statement about the experiment we could afford rather than about the method.
+
 \paragraph{The metric went blind.} On counting a letter in a word --- a task the base model
 already passes at $0.41$ --- twenty updates take the held-out pass rate to $\numSatScore$ and
 collapse the response distribution. All $\numSatPrompts$ held-out prompts then have a per-prompt
