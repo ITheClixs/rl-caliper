@@ -54,15 +54,17 @@ Legend for strength:
 | lifting to Adam's state halves the error of ignoring it | `p5_adam_lift`, 24 settings | measured |
 | the Adam lift is unreliable where the pass rate saturates | same, split by band: 1.48x live against 8.0x easy | measured |
 | a collapsed policy injects nothing | count-based advantage is zero on a unanimous group | exact |
-| RLVR collapses sampling within a few updates on a real model | `s7`: live share to zero by update five, twice, at two step sizes | observed |
+| RLVR collapses sampling within a few updates on a real model | `s7`: live share reaches zero at update five and stays under 5% after, at 8 and at 64 prompts | measured |
 | a saturated metric cannot see a seed difference | `s6_saturation`: 0 of 32 prompts disagree, policies differ by up to 8e-2 | observed |
 | the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.07-0.5 over four runs | observed |
-| the forecast underpredicts on a real model by ~12x | `s7`: cheap form 0.0056 against a measured seed spread of 0.0689 | measured |
-| that shortfall is not an estimation artefact | `s7`: Sigma from 64 prompts gives 0.0052, and the live share still collapses | measured |
-| the transport is not reproducible on a real model | `s7`: two runs give 0.0225 and 0.0040 with transport, 5.7x apart, against 0.0056 and 0.0052 without | measured |
-| real RLVR runs separate into discrete outcome modes | `s7` at 0.5B: 3 runs at 0.350, 5 at 0.217, within-group spread under 0.01 | measured |
+| the forecast underpredicts on a real model by ~25x | `s7`: cheap form 0.0025 against a measured seed term of 0.0631 [0.0350, 0.0735] | measured |
+| the transport is not reproducible on a real model | `s7`: two initialisations give 0.0225 and 0.0040 with transport (5.7x apart), 0.0056 and 0.0025 without (2.2x) | measured |
+| real RLVR runs end in groups, not scattered | `s7` at 0.5B: 3 runs within 0.008 of each other near 0.35, 5 spread over 0.204-0.300 | observed |
 | ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
+| at 7B the spread is 84% of the effect | `s6`: 8 runs, 0.203 -> 0.313, spread 0.0925, evaluation part 0.0055 | measured |
+| divergence does not accumulate at 7B either | `s6`: tail slope +0.09 against +1, over updates 10 to 20 | measured |
+| the shortfall is not an estimation problem | `s7`: same initialisation, 8 vs 64 prompts moves the forecast 0.0025 -> 0.0026 | measured |
 
 ## Withdrawn or superseded
 
@@ -74,10 +76,6 @@ Legend for strength:
 | divergence is stationary | bounded over the horizons measured; the spectral radius exceeds one |
 
 ## Not claimed
-
-| at 7B the spread is 84% of the effect | `s6`: 8 runs, 0.203 -> 0.313, spread 0.0925, evaluation part 0.0055 | measured |
-| divergence does not accumulate at 7B either | `s6`: tail slope +0.09 against +1, over updates 10 to 20 | measured |
-| the shortfall is not an estimation problem | `s7`: same initialisation, 8 vs 64 prompts moves the forecast 0.0025 -> 0.0026 | measured |
 
 * an error bar for a frontier-scale run: the largest model measured is 7B, on short-answer tasks
 * that the forecast is usable on a real model as it stands: at a step size that produces learning
