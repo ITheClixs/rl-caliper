@@ -80,9 +80,9 @@ the injected term and discarding everything the trajectory does to it.
   \label{tab:transport}
 \end{table}
 
-It does not, at these horizons. The two agree to a median of $2\%$ in the forecast itself (extremes
-$0.72$ to $1.05$), the median error is identical to two decimal places, and both land inside the
-measured interval in the same $\numForecastInside$ settings. What carrying it back buys is the tail:
+It does not, at these horizons (Table~\ref{tab:transport}). The two agree to a median of $2\%$ in
+the forecast itself (extremes $0.72$ to $1.05$), the median error is identical to two decimal
+places, and both land inside the measured interval in the same $\numForecastInside$ settings. What carrying it back buys is the tail:
 at $T=25$ and $\eta = 1.5$ the worst case is $1.58\times$ carried against $1.75\times$ held.
 
 This is not a defect in the theory; it is the theory being informative about its own cost.
@@ -518,13 +518,18 @@ first three batches correlates with its final held-out score at $r = \numEarlyCo
 against $\numLateCorrelation$ for its last three. The bootstrap interval over runs is
 $[\numEarlyCorrelationLow,\ \numEarlyCorrelationHigh]$, repeating the whole experiment moves the
 point estimate between $+0.44$ and $+0.88$, and at seven billion parameters the same correlation is
-$+0.07$, which is to say absent. We report the numbers and draw nothing from them. Eight runs of
-one configuration cannot support a claim this shape, and we came close to making one. The outcome is settled early and then amplified, which is what the two
-measurements either side of this predict: the per-update kernel puts $92\%$ of the forecast variance
-in the first half of the run, and Section~\ref{sec:exp-spectrum} finds the leading eigenvalue of
-$A_t$ above one. The mechanism the paper describes is visible on a real model. The magnitude the
-linearisation assigns to it is not right, because the amplification carries the runs out of the
-regime where a linear model applies.
+$\numEarlyCorrelationBig$, which is to say absent. We report the numbers and draw nothing from
+them. Eight runs of one configuration cannot support a claim of this shape, and we came close to
+making one.
+
+What the measurements either side of it do support is narrower. The per-update kernel puts
+$\numRealFirstHalfShare\%$ of the forecast variance in the first half of the run, and
+Section~\ref{sec:exp-spectrum} finds the leading eigenvalue of $A_t$ above one, so variance is
+injected early and then amplified. Whether that is what decides which group a run ends in is the
+step we cannot take, and it is the one that would have made the observation useful. The mechanism
+the paper describes is visible on a real model; the magnitude the linearisation assigns to it is
+not right, because the amplification carries the runs out of the regime where a linear model
+applies.
 
 \paragraph{Whether a better-behaved step size exists.} Not obviously, at this scale. A smaller step
 keeps the runs closer and the linearisation valid, but then the metric barely moves and the seed

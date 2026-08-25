@@ -100,6 +100,7 @@ appears under the square root.
   \label{fig:allocation}
 \end{figure*}
 
+Figure~\ref{fig:allocation} is the result this subsection builds to.
 Hardware fixes the rollouts per step $R = PG$; the question is how to divide them. When a group
 shares its prompt's prefill, prefill is paid once per prompt and decode once per response, so a step
 costs $P(c_{\mathrm{pre}} + G\,c_{\mathrm{dec}})$. Write $\alpha := c_{\mathrm{pre}}/c_{\mathrm{dec}}$
@@ -236,7 +237,8 @@ followed by a short answer.
   \label{fig:cost-model}
 \end{figure}
 
-Table~\ref{tab:optimum} is the reconciliation the paper has been building towards. A purely
+Figure~\ref{fig:cost-model} is what the hardware contributes, and Table~\ref{tab:optimum} is the
+reconciliation the paper has been building towards. A purely
 statistical reading of the split says three; the settings in which published recipes were developed
 say otherwise, and the theorem says how much of that is justified. Long prompts with short answers
 at a large batch put the optimum in the tens, which is where the recipes are. Reasoning-length
@@ -268,6 +270,7 @@ it costs to carry the value tuned at the smallest batch to the others.
   \label{fig:transfer}
 \end{figure*}
 
+Figure~\ref{fig:transfer} shows both sweeps and the optima they imply.
 The single-step drift model accounts for part of the movement in $\eta^{*}$ and not all of it: the
 coefficient $\mathcal{G} + N/P$ measured at the initial policy predicts a smaller shift than the one
 observed over a full run. The coefficient keeps moving as the policy improves, so a controller that re-reads it tracks the
@@ -289,7 +292,8 @@ the first.
 \paragraph{Splitting a rollout budget.} For each prompt pool the parameter-free efficiency curve
 $\rho(G)$ is compared against the improvement obtained by training at every split of a fixed budget,
 holding total rollouts, total drift and step count fixed. Table~\ref{tab:exact-agreement} groups
-pools by how much $\rho$ varies across the splits on offer.
+pools by how much $\rho$ varies across the splits on offer, and Figure~\ref{fig:exact-curves} shows
+the four whose predictions discriminate most strongly.
 
 \begin{table*}[t]
   \centering
@@ -317,7 +321,8 @@ member reaches a common pass rate, the noise terms are measured at that frozen p
 member is then trained from the same starting point at each split of a fixed rollout budget. The
 corpus size is the knob: sampling without replacement from a corpus of $N$ scales the between-prompt
 term by $1 - (P-1)/(N-1)$, so shrinking the corpus toward the batch raises $G^{\star}$ without touching
-the task.
+the task. Table~\ref{tab:transformer} reports the predicted and measured optimum for each corpus,
+and Figure~\ref{fig:transformer-curves} the sweeps behind it.
 
 \begin{table*}[t]
   \centering
