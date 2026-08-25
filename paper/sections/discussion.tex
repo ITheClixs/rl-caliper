@@ -56,10 +56,15 @@ with the size of the evaluation rollout and can be estimated by splitting it, wh
 whole thing on Qwen2.5-0.5B and the estimator we recommend comes out a factor of twenty-five
 short, the transported one sixteen. The reason is not
 subtle: the eight runs end in groups rather than scattered around one, and a linearised model
-predicts the spread of a unimodal perturbation. What survives the failure is the localisation.
-The per-update kernel puts $\numRealFirstHalfShare\%$ of the forecast variance in the first half of the run and the
-run stops injecting any after the fifth update, so the uncertainty is made early and then
-amplified, as the spectrum says it should be.
+predicts the spread of a unimodal perturbation. What survives the failure is narrower than we
+first wrote. The share of prompts whose group is not unanimous falls from about a half to under
+$5\%$ by the fifth update, and a unanimous group carries no count-based advantage at all, so the
+run stops injecting seed noise there. That is measured directly and does not depend on the
+forecast. The forecast's own kernel puts $\numRealFirstHalfShare\%$ of its predicted variance
+before the same point, which is consistent with it, but the kernel belongs to the model whose
+magnitude is wrong by twenty-five, so we do not read it as establishing where the actual seed
+variance was created. Doing that needs an experiment that randomises one block of updates at a
+time, which we did not run.
 assumption that the amplification stays linear. At a step size small enough to keep it
 linear, the seed term drops below what eight runs can resolve at all.
 

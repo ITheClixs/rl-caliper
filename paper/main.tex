@@ -70,9 +70,10 @@
   Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
   rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
   model the estimator we recommend is short by a factor of twenty-five, and the fully transported
-  one by sixteen, because the runs end in groups rather than scattered around one. What survives is the localisation: the per-update kernel puts
-  $\numRealFirstHalfShare\%$ of the variance in the first half of the run, and the run stops injecting
-  any after the fifth update.
+  one by sixteen, because the runs end in groups rather than scattered around one. What survives is
+  narrower: the groups stop disagreeing by the fifth update, so the run measurably stops injecting
+  seed noise, while the failed forecast still places $\numRealFirstHalfShare\%$ of its own
+  predicted variance before that point.
     \end{quote}
   \end{minipage}
   \vspace{6pt}
