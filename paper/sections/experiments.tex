@@ -498,6 +498,13 @@ vectors whose cosine with an independent estimate is $0.21$; multiplying twelve 
 together inflates $\|b\|$ with noise rather than curvature. The gap between the two numbers is a
 measure of how much noise the backward pass accumulated, not of how much the trajectory bends.
 
+Two explanations that would have been comfortable are ruled out by the same table. The injected
+term is estimated from a batch of eight prompts, and once most groups are unanimous that sample is
+mostly zeros, so it could be biased low. Re-estimating it from sixty-four prompts moves the forecast
+from $0.0056$ to $0.0052$, seven percent and in the wrong direction. Measured on those sixty-four
+prompts the live share still falls to zero by the fifth update, so the collapse is not a small-batch
+artefact either. The shortfall is not an estimation problem.
+
 The reason for the shortfall is visible without any statistics. The eight held-out scores are not
 scattered around a centre: three sit at $0.350$ and five at $0.217$, with a within-group spread of
 under $0.01$ against a between-group gap of $0.133$ (Figure~\ref{fig:real-forecast}, right). A
