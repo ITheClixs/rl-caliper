@@ -34,3 +34,4 @@ paper/arxiv/submission.tar.gz
 .idea/
 .vscode/
 scratch/
+*.bak
