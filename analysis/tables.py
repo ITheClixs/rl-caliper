@@ -488,6 +488,12 @@ def table_numbers() -> None:
                 continue
             draws.append(np.corrcoef(early[pick], scores[pick])[0, 1])
         low, high = np.percentile(draws, [2.5, 97.5])
+        kernel = np.array(outcome.get("kernel") or [])
+        if kernel.size and kernel.sum() > 0:
+            # the same share as FirstHalfShare, but on the pretrained model rather than the
+            # exact tier, where the kernel is far more concentrated
+            share = kernel / kernel.sum()
+            macros["RealFirstHalfShare"] = f"{100 * share[: share.size // 2].sum():.0f}"
         macros |= {
             "EarlyCorrelation": f"{np.corrcoef(early, scores)[0, 1]:+.2f}",
             "EarlyCorrelationLow": f"{low:+.2f}",

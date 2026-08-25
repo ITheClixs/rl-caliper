@@ -69,10 +69,10 @@
 
   Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
   rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
-  model it is short by a factor of eleven, because the runs end in groups rather than
-  scattered around one. What survives is the localisation: the per-update kernel puts $90\%$ of
-  the variance in the first half of the run, and the run stops injecting any after the fifth
-  update.
+  model it is short by a factor of twenty-five, because the runs end in groups rather than
+  scattered around one. What survives is the localisation: the per-update kernel puts
+  $\numRealFirstHalfShare\%$ of the variance in the first half of the run, and the run stops injecting
+  any after the fifth update.
     \end{quote}
   \end{minipage}
   \vspace{6pt}
