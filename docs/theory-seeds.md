@@ -34,10 +34,22 @@ surviving noise was injected.
 ## 3. What replaced what
 
 An earlier version of these notes compressed the spectrum of `A_t` into one effective eigenvalue and
-claimed `KL_inf = tau_c * D_noise`. Measured against exact Monte Carlo in the enumerable policy, that
-scalar law is wrong by a median factor of **195x**. The recursion (S3) is accurate to **1.09x** at
-the median and 1.17x at worst over twelve settings; ignoring contraction entirely is wrong by up to
-3.9x. The scalar law is kept only as a comparator.
+claimed `KL_inf = tau_c * D_noise`. Measured against exact Monte Carlo over 54 settings, that scalar
+law is wrong by a median factor of **58x** and up to 791x. The recursion (S3) is accurate to
+**1.03x** at the median and 1.2x at worst.
+
+Whether ignoring the filter matters depends on the prompt pool, and this is the more useful finding:
+
+| pool diversity | propagated | accumulated | worst accumulated |
+|---|---|---|---|
+| 0.15 (similar prompts) | 1.04x | **2.06x** | 3.82x |
+| 1.0 | 1.02x | 1.03x | 1.33x |
+| 2.5 | 1.02x | 1.03x | 1.33x |
+
+Filtering is done by the curvature of the estimator potential, and a pool of similar prompts is
+where that curvature is consistent enough to matter. Where prompts disagree with each other the mean
+field is nearly flat, `A_t ~ I`, and a run genuinely does accumulate its noise. On a narrow task
+distribution the recursion is necessary; on a broad one accumulation is fine.
 
 The failure is what (S3) predicts when a spectrum of decay rates is fitted with one exponential:
 fast directions equilibrate within a few updates and slow ones set the final level, so a single

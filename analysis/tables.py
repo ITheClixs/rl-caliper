@@ -690,34 +690,41 @@ def table_estimator_forecast() -> None:
 
 
 def table_propagation() -> None:
-    """Candidate models of seed divergence against exact Monte Carlo ground truth."""
+    """Each model of seed divergence against Monte Carlo, broken out by pool homogeneity.
+
+    A single median hides the result. Accumulation is adequate where the prompt pool is
+    heterogeneous and the mean gradient field nearly flat, and wrong by a factor of two where the
+    pool is homogeneous and the objective supplies real curvature. That is what the recursion
+    predicts, so the breakdown is the finding rather than a caveat on it.
+    """
     runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
     if not runs:
         raise SystemExit("no propagation validation run")
     cells = runs[-1]["result"]["cells"]
     measured = np.array([c["measured_kl"] for c in cells])
+    diversities = sorted({c["diversity"] for c in cells})
     lines = [
         r"\footnotesize",
         r"\setlength{\tabcolsep}{3.5pt}",
-        r"\begin{tabular}{@{}lccc@{}}",
+        r"\begin{tabular}{@{}l" + "c" * (len(diversities) + 2) + r"@{}}",
         r"\toprule",
-        r"model of seed divergence & median & worst & ratio \\",
+        "model & all & "
+        + " & ".join(rf"$d = {d:g}$" for d in diversities)
+        + r" & worst \\",
         r"\midrule",
     ]
-    names = [
+    for key, label in (
         ("propagated_kl", r"propagated, \eqref{eq:unrolled}"),
         ("walk_kl", "accumulation"),
         ("scalar_kl", "single timescale"),
-    ]
-    for key, label in names:
-        predicted = np.array([c[key] for c in cells])
-        ratio = predicted / measured
-        error = np.abs(np.log(ratio))
-        lines.append(
-            f"{label} & {np.exp(np.median(error)):.2f}$\\times$ & "
-            f"{np.exp(error.max()):.1f}$\\times$ & "
-            f"{ratio.min():.2f}--{ratio.max():.2f} \\\\"
-        )
+    ):
+        error = np.abs(np.log(np.array([c[key] for c in cells]) / measured))
+        cols = [f"{np.exp(np.median(error)):.2f}"]
+        for value in diversities:
+            mask = np.array([c["diversity"] == value for c in cells])
+            cols.append(f"{np.exp(np.median(error[mask])):.2f}")
+        cols.append(f"{np.exp(error.max()):.1f}")
+        lines.append(f"{label} & " + " & ".join(cols) + r" \\")
     lines += [r"\bottomrule", r"\end{tabular}"]
     write("propagation", "\n".join(lines))
 

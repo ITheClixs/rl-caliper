@@ -44,8 +44,11 @@ be carried against the gradient of the reported metric instead of being formed.
   (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
   $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$ predicts measured seed divergence to
   $\numPropagatedPercent\%$ at the median over $\numPropagationSettings$ settings, against
-  $\numWalkMedian\times$ for accumulation and two orders of magnitude for a single-timescale
-  approximation. Measuring the spectrum of $A_t$ says why: it is not a contraction.
+  $\numWalkWorst\times$ at worst for accumulation and two orders of magnitude for a
+  single-timescale approximation. Whether the filter matters is itself a measurement: accumulation
+  is wrong by a factor of two on homogeneous prompt pools and by three percent on heterogeneous
+  ones, which is what the recursion predicts, since a pool of similar prompts is where the
+  objective's curvature is consistent. Measuring the spectrum of $A_t$ says why: it is not a contraction.
   The spectral radius exceeds one throughout, by up to $2\%$ early and decaying as the policy
   improves; only $\numSpectrumShareLow$--$\numSpectrumShareHigh\%$ of directions contract, a share that grows during the run; and the
   contracting timescales span tens of updates to effectively unbounded. Divergence stays bounded

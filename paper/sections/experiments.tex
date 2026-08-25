@@ -160,21 +160,30 @@ the single-timescale law an earlier version of this work relied on.
 
 \begin{table}[t]
   \centering
-  \small
   \input{tables/propagation}
-  \caption{Predicted against measured divergence between independent runs in the enumerable policy,
-  with $300$ trajectories per setting. Error is the ratio of predicted to measured, summarised as
-  $\exp$ of the median absolute log ratio.}
+  \caption{Predicted against measured divergence between independent runs in the enumerable
+  policy, with $400$ trajectories per setting. Error is the ratio of predicted to measured,
+  summarised as $\exp$ of the median absolute log ratio. $d$ is the diversity of the prompt pool:
+  low $d$ means the prompts are alike, which is where the objective supplies the most curvature.}
   \label{tab:propagation}
 \end{table}
 
-The propagated recursion is accurate to $\numPropagatedPercent\%$ at the median. Ignoring
-contraction overshoots by up to $\numWalkWorst\times$, and does so exactly where the policy is learning:
-on the most homogeneous prompt pools, where the objective supplies the most curvature, it is wrong
-by a factor of two and a half, while on heterogeneous pools where little learning happens it is
-indistinguishable from the truth. The single-timescale law is wrong by two orders of magnitude.
-That failure is informative rather than embarrassing: it is what \eqref{eq:unrolled} predicts when
-a spectrum of contraction rates is compressed to one number.
+The propagated recursion is accurate to $\numPropagatedPercent\%$ at the median and $1.2\times$ at
+worst, everywhere in the grid. The interesting column is not the first one.
+
+Accumulation --- the model that says noise is added rather than filtered --- is wrong by a factor
+of $2.06$ on homogeneous prompt pools and by $3\%$ on heterogeneous ones, with a worst case of
+$3.8\times$. That is not a caveat on the result; it is the result. Filtering is done by the
+curvature of the estimator potential, and a pool of similar prompts is where that curvature is
+consistent enough to matter. Where the prompts disagree with each other the mean field is nearly
+flat, $A_t$ is nearly the identity, and a run genuinely does accumulate its noise. A reader who
+trains on a narrow task distribution is in the first column; a reader who trains on a broad one is
+in the second, and for them the simpler model is fine.
+
+The single-timescale law is wrong by two orders of magnitude wherever there is a spectrum to
+compress, and its one respectable column ($3.24\times$ at $d = 0.15$) is the case where contraction
+is strong enough that one rate almost describes it. Section~\ref{sec:exp-spectrum} measures the
+spectrum directly and says why the general case is hopeless for it.
 
 \paragraph{The filtering requires a learning signal.} If divergence stops growing because the
 shared objective pulls two runs together, then removing the objective while leaving the noise in

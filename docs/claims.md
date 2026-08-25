@@ -26,9 +26,9 @@ Legend for strength:
 | claim | evidence | strength |
 |---|---|---|
 | `S_{t+1} = A_t S_t A_t' + Q_t` | Theorem 1 | exact |
-| propagated covariance predicts divergence to 9% median | `p1_propagation` against Monte Carlo | measured |
-| accumulation is wrong by up to 3.9x | same | measured |
-| a single timescale is wrong by two orders of magnitude | same | measured |
+| propagated covariance predicts divergence to 3% median, 1.2x worst | `p1_propagation`, 54 settings against Monte Carlo | measured |
+| accumulation is wrong by 2.06x on homogeneous pools, 1.03x on heterogeneous ones | same, split by diversity | measured |
+| a single timescale is wrong by 58x median, 791x worst | same | measured |
 | the mean update is a gradient field, so `J` is symmetric | Proposition 3; measured asymmetry 3e-10 across three estimators | exact |
 | `A_t` is not a contraction: radius > 1 throughout | `p6_spectrum`, three difficulty bands, 600 updates | measured |
 | 31-51% of directions contract, share grows during the run | same | measured |

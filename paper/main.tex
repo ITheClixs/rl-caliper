@@ -78,8 +78,11 @@
   prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads, its median absolute error against the
   realised standard deviation is $\numForecastMedian\times$, its worst is $\numForecastWorst\times$, and it lands inside the
   measured $95\%$ interval in $\numForecastInside$ of them; the covariance law underneath predicts policy
-  divergence to $\numPropagatedPercent\%$ at the median, against $\numWalkWorst\times$ for ignoring
-  the filter and two orders of magnitude for compressing it to one timescale. The filtering is caused by learning, not by
+  divergence to $\numPropagatedPercent\%$ at the median. Whether the filter matters at all
+  depends on the task: treating noise as accumulating is wrong by a factor of two on homogeneous
+  prompt pools, where the objective supplies the most curvature, and by three percent on
+  heterogeneous ones. Compressing the filter to a single timescale is wrong by two orders of
+  magnitude everywhere. The filtering is caused by learning, not by
   proximity: replacing every reward with a coin flip leaves the rollouts, the batches and the step
   sizes untouched, and divergence then grows by a factor of $\numNullCoin$ over eighty updates instead of
   ending at $\numNullLearning$ of where it started.
@@ -104,8 +107,9 @@
     trained afterwards. Bars are bootstrap intervals over runs; the solid line is equality and the
     dotted lines a factor of $1.5$. \textbf{Right:} predicted against measured policy divergence
     for three models of where training noise goes. Propagating the covariance tracks it; treating
-    noise as accumulating is wrong by up to $3.9\times$; compressing the filter to one
-    timescale is wrong by two orders of magnitude.}
+    noise as accumulating is wrong by up to $\numWalkWorst\times$, and by a factor of two at the
+    median on homogeneous prompt pools; compressing the filter to one timescale is wrong by two
+    orders of magnitude.}
     \label{fig:teaser}
   \end{minipage}
   \vspace{8pt}
