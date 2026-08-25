@@ -120,6 +120,9 @@ def main() -> None:
     trainer, states, rates, key = train_run(
         args.model, config, corpus, initial, 0, store=store
     )
+    # every run is scored with its own evaluation randomness. Sharing one key across seeds would
+    # correlate the evaluation noise between them, and the binomial term subtracted below assumes
+    # that noise is independent across runs; sharing it would make the subtraction over-correct.
     first_rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555))
     print(f"seed 0: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "
           f"held out {first_rates.mean():.4f} | {(time.time() - started) / 60:.1f} min", flush=True)
@@ -166,7 +169,7 @@ def main() -> None:
     for seed in range(1, args.seeds):
         started = time.time()
         trainer, _, rates, _ = train_run(args.model, config, corpus, initial, seed)
-        held, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555))
+        held, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555 + 101 * seed))
         scores.append(float(held.mean()))
         per_prompt.append(held.tolist())
         print(f"seed {seed}: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "

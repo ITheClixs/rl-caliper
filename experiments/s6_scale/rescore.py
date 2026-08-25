@@ -79,7 +79,8 @@ def main() -> None:
             print(f"missing {path}, stopping at {seed} seeds", flush=True)
             break
         load_adapter(trainer.model, dict(np.load(path)))
-        rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(777))
+        # independent evaluation randomness per run, so the binomial subtraction is the right one
+        rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(777 + 101 * seed))
         rows.append(rates.tolist())
         print(f"seed {seed}: held out {rates.mean():.4f}", flush=True)
 

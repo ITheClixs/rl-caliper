@@ -118,7 +118,11 @@ def main() -> None:
             if t + 1 in checkpoints:
                 np.savez(store / f"seed{seed}_step{t + 1}.npz", **adapter_state(trainer.model))
         # every run is scored on the same held-out set with the same evaluation randomness
-        held_rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555))
+        # own evaluation randomness per run: the binomial term subtracted below assumes the
+        # evaluation noise is independent across runs
+        held_rates, _ = evaluate(
+            trainer, held_out, args.eval_samples, mx.random.key(555 + 101 * seed)
+        )
         records[str(seed)] = {"train": rates, "held_out": held_rates.tolist()}
         eval_path.write_text(json.dumps(records))
         print(f"seed {seed}: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "
