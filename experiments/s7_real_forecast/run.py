@@ -88,6 +88,8 @@ def main() -> None:
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--epsilon", type=float, default=1e-3)
     ap.add_argument("--adjoint-batches", type=int, default=2)
+    ap.add_argument("--no-transport", action="store_true",
+                    help="hold the adjoint at grad M: the cheap form, one pass per update")
     ap.add_argument("--forecast-repeats", type=int, default=2,
                     help="independent forecasts from one run, to see how much the estimate moves")
     ap.add_argument("--seed", type=int, default=0)
@@ -131,7 +133,9 @@ def main() -> None:
             trainer, states, corpus, held_out, args.learning_rate, args.prompts,
             mx.random.key(4242 + 31 * repeat), seed=args.seed + 991 * repeat,
             epsilon=args.epsilon, batches=args.adjoint_batches,
-            check_agreement=(repeat == 0),  # the diagnostic costs a second backward pass
+            transport=not args.no_transport,
+            # the diagnostic costs a second backward pass, and has nothing to check without one
+            check_agreement=(repeat == 0 and not args.no_transport),
         ))
         print(f"forecast {repeat}: sd {repeats[-1].std:.5f} "
               f"(variance {repeats[-1].variance:.3e}) in {(time.time() - started) / 60:.1f} min",
@@ -173,6 +177,7 @@ def main() -> None:
         print("\nonly one seed: no spread to compare the forecast against")
         io.save("s7_real_forecast", vars(args), {
             "label": args.label,
+            "transport": not args.no_transport,
             "predicted_std": prediction.std,
             "predicted_variance": prediction.variance,
             "kernel": prediction.kernel,
@@ -197,6 +202,7 @@ def main() -> None:
 
     io.save("s7_real_forecast", vars(args), {
         "label": args.label,
+        "transport": not args.no_transport,
         "predicted_std": prediction.std,
         "predicted_variance": prediction.variance,
         "kernel": prediction.kernel,

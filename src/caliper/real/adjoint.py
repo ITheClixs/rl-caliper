@@ -155,10 +155,14 @@ def forecast(
     epsilon: float = 1e-3,
     batches: int = 1,
     check_agreement: bool = True,
+    transport: bool = True,
 ) -> RealForecast:
     """Carry the metric gradient back along the stored states of one run.
 
     `states[t]` are the adapters after update t, so `states[-1]` is where the run ended.
+
+    `transport=False` holds the adjoint at `grad M` and skips the Hessian-vector products
+    entirely, which is the cheap form: one pass per update instead of three.
 
     With `check_agreement`, each Hessian-vector product is estimated a second time from an
     independent draw of prompts and the cosine between the two is recorded. A forecast whose
@@ -183,6 +187,8 @@ def forecast(
         kernel[t] = step_size**2 * projected / n_prompts
         live_share[t] = live
         norms[t] = float(np.linalg.norm(adjoint))
+        if not transport:
+            continue
         product = hessian_vector(
             trainer, states[t], corpus, adjoint, key, seed + 500 + t, epsilon, batches
         )
