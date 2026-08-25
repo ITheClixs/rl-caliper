@@ -669,14 +669,15 @@ def figure_real_forecast() -> None:
 
     ax = axes[2]
     if scores.size:
-        jitter = np.linspace(-0.12, 0.12, scores.size)
+        jitter = np.linspace(-0.16, 0.02, scores.size)
         ax.scatter(jitter, scores, s=26, color=PALETTE[2], zorder=3)
         forecast_sd = result.get("predicted_std", 0.0)
         centre = float(scores.mean())
-        ax.errorbar([0.0], [centre], yerr=[forecast_sd], fmt="_", ms=18, lw=1.6,
-                    color="0.25", capsize=5, zorder=2, label="forecast s.d.")
-        ax.legend(fontsize=7, frameon=False, loc="lower right")
-        ax.set_xlim(-0.35, 0.35)
+        ax.errorbar([0.22], [centre], yerr=[forecast_sd], fmt="_", ms=16, lw=1.6,
+                    color="0.25", capsize=5, zorder=2)
+        ax.annotate("forecast\ns.d.", xy=(0.22, centre), xytext=(0.30, centre),
+                    fontsize=7, color="0.3", va="center", ha="left")
+        ax.set_xlim(-0.30, 0.52)
         ax.set_xticks([])
     style(ax, "", "held-out pass rate", "what the runs actually did")
     fig.tight_layout()
