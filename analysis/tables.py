@@ -496,6 +496,22 @@ def table_numbers() -> None:
             "TraceWindow": f"{window}",
         }
 
+    # the same correlation at seven billion parameters, from the training trace the run logged
+    big = [
+        r
+        for r in io.load_all("s6_scale")
+        if r["result"].get("train_history") and len(r["result"].get("held_out_scores", [])) >= 4
+    ]
+    if big:
+        outcome = big[0]["result"]
+        history = outcome["train_history"]
+        order = sorted(history, key=lambda k: int(k))
+        traces = np.array([history[k] for k in order], dtype=float)
+        scores = np.array(outcome["held_out_scores"], dtype=float)[: traces.shape[0]]
+        window = min(3, traces.shape[1])
+        early = traces[:, :window].mean(axis=1)
+        macros["EarlyCorrelationBig"] = f"{np.corrcoef(early, scores)[0, 1]:+.2f}"
+
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
         result = saturation[-1]["result"]
