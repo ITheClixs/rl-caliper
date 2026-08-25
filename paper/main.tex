@@ -67,7 +67,10 @@
   the reported metric backwards along one stored trajectory then gives the across-seed variance of
   that metric as a sum of scalars, one per update, with no covariance matrix formed. The transpose
   the backward pass needs is free: the mean update of a count-based estimator is the gradient of a
-  scalar potential, so its Jacobian is symmetric.
+  scalar potential, so its Jacobian is symmetric. Ablating the backward pass shows it can usually be
+  skipped outright --- holding the adjoint fixed changes the forecast by a median of $2\%$, because
+  the spectrum puts the metric direction where the operator is closest to the identity --- which
+  leaves an estimator costing one extra pass per update.
 
   We test the forecast prospectively, in policies small enough that the reported score is exact
   rather than sampled --- one run trained and frozen, the prediction recorded, and

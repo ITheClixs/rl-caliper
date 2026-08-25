@@ -18,9 +18,9 @@ Abstract (plain text, as pasted into the submission form):
   expands, and the contracting timescales span tens of updates to effectively unbounded.
   Carrying the gradient of the reported metric backwards along one stored trajectory then
   gives the across-seed variance of that metric as a sum of scalars, one per update, with no
-  covariance matrix formed. The transpose the backward pass needs is free: the mean update
-  of a count-based estimator is the gradient of a scalar potential, so its Jacobian is
-  symmetric.
+  covariance matrix formed. Ablating that backward pass shows it can usually be skipped:
+  holding the adjoint fixed changes the forecast by a median of 2%, leaving an estimator
+  that costs one extra pass per update.
 
   Tested prospectively -- one run trained and frozen, the prediction recorded, and only then
   the remaining seeds trained -- the forecast has a median absolute error of 1.08x across 48
