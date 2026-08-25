@@ -448,6 +448,22 @@ def table_numbers() -> None:
             if name:
                 macros[f"RolloutShareG{name}"] = f"{100 * np.median(values):.0f}"
 
+    propagation = [
+        r for r in io.load_all("p1_propagation") if len(r["result"].get("cells", [])) >= 8
+    ]
+    if propagation:
+        cells = propagation[-1]["result"]["cells"]
+        measured = np.array([c["measured_kl"] for c in cells])
+        summary = {}
+        for key, name in (("propagated_kl", "Propagated"), ("walk_kl", "Walk"),
+                          ("scalar_kl", "Scalar")):
+            error = np.abs(np.log(np.array([c[key] for c in cells]) / measured))
+            summary[f"{name}Median"] = f"{np.exp(np.median(error)):.2f}"
+            summary[f"{name}Worst"] = f"{np.exp(error.max()):.1f}"
+        summary["PropagationSettings"] = f"{len(cells)}"
+        summary["PropagatedPercent"] = f"{100 * (float(summary['PropagatedMedian']) - 1):.0f}"
+        macros |= summary
+
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
         result = saturation[-1]["result"]

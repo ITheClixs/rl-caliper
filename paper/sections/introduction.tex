@@ -42,9 +42,10 @@ be carried against the gradient of the reported metric instead of being formed.
 
   \item \textbf{A finite-time covariance law, and what its operator really does}
   (Theorem~\ref{thm:propagation}, Section~\ref{sec:exp-spectrum}).
-  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$ predicts measured seed divergence to $9\%$ at the median
-  over twelve settings, against $2.0\times$ for accumulation and two orders of magnitude for a
-  single-timescale approximation. Measuring the spectrum of $A_t$ says why: it is not a contraction.
+  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$ predicts measured seed divergence to
+  $\numPropagatedPercent\%$ at the median over $\numPropagationSettings$ settings, against
+  $\numWalkMedian\times$ for accumulation and two orders of magnitude for a single-timescale
+  approximation. Measuring the spectrum of $A_t$ says why: it is not a contraction.
   The spectral radius exceeds one throughout, by up to $2\%$ early and decaying as the policy
   improves; only $\numSpectrumShareLow$--$\numSpectrumShareHigh\%$ of directions contract, a share that grows during the run; and the
   contracting timescales span tens of updates to effectively unbounded. Divergence stays bounded

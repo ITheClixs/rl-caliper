@@ -154,8 +154,8 @@ batch would buy the most.
 admits three things at once: the exact linearised recursion \eqref{eq:lyapunov}, the exact Fisher
 information, and as many independent stochastic trajectories as we care to run. That allows
 candidate models of seed divergence to be scored against ground truth rather than against each
-other. Over twelve settings spanning prompt diversity, group size, batch size and step size, we
-compare the propagated covariance against two alternatives: accumulation with no contraction, and
+other. Over $\numPropagationSettings$ settings spanning prompt diversity, group size, batch size and
+step size, we compare the propagated covariance against two alternatives: accumulation with no contraction, and
 the single-timescale law an earlier version of this work relied on.
 
 \begin{table}[t]
@@ -168,8 +168,8 @@ the single-timescale law an earlier version of this work relied on.
   \label{tab:propagation}
 \end{table}
 
-The propagated recursion is accurate to $9\%$ at the median and $17\%$ at worst. Ignoring
-contraction overshoots by up to $3.9\times$, and does so exactly where the policy is learning:
+The propagated recursion is accurate to $\numPropagatedPercent\%$ at the median. Ignoring
+contraction overshoots by up to $\numWalkWorst\times$, and does so exactly where the policy is learning:
 on the most homogeneous prompt pools, where the objective supplies the most curvature, it is wrong
 by a factor of two and a half, while on heterogeneous pools where little learning happens it is
 indistinguishable from the truth. The single-timescale law is wrong by two orders of magnitude.
