@@ -23,7 +23,7 @@ from mlx.utils import tree_flatten, tree_unflatten
 from mlx_lm import load
 
 from caliper.analysis.uncertainty import resolved_spread_interval, spread_interval
-from caliper.real.adjoint import forecast
+from caliper.real.adjoint import RealForecast, forecast
 from caliper.real.generate import sample_group
 from caliper.real.tasks import FAMILIES
 from caliper.real.tasks import reward as exact_match
@@ -88,6 +88,8 @@ def main() -> None:
     ap.add_argument("--lora-layers", type=int, default=8)
     ap.add_argument("--epsilon", type=float, default=1e-3)
     ap.add_argument("--adjoint-batches", type=int, default=2)
+    ap.add_argument("--skip-forecast", action="store_true",
+                    help="train the seeds and record their traces without the backward pass")
     ap.add_argument("--variance-prompts", type=int, default=None,
                     help="prompts used to estimate the injected term (default: the batch size)")
     ap.add_argument("--no-transport", action="store_true",
@@ -132,7 +134,7 @@ def main() -> None:
     # (2) the forecast, from that run alone. Repeating it with independent batches says how
     # much of what it reports is the run and how much is the estimate.
     repeats = []
-    for repeat in range(max(args.forecast_repeats, 1)):
+    for repeat in range(0 if args.skip_forecast else max(args.forecast_repeats, 1)):
         started = time.time()
         repeats.append(forecast(
             trainer, states, corpus, held_out, args.learning_rate, args.prompts,
@@ -146,6 +148,12 @@ def main() -> None:
         print(f"forecast {repeat}: sd {repeats[-1].std:.5f} "
               f"(variance {repeats[-1].variance:.3e}) in {(time.time() - started) / 60:.1f} min",
               flush=True)
+    if not repeats:
+        prediction = RealForecast(
+            variance=0.0, std=0.0, kernel=[], adjoint_norm=[],
+            metric_value=float(first_rates.mean()), jvp_agreement=[], live_share=[],
+        )
+        repeats = [prediction]
     prediction = repeats[0]
     spread_of_forecasts = float(np.std([r.std for r in repeats], ddof=1)) if len(repeats) > 1 \
         else float("nan")
@@ -169,12 +177,14 @@ def main() -> None:
     # (3) only now, the other seeds
     scores = [float(first_rates.mean())]
     per_prompt = [first_rates.tolist()]
+    traces = [rates]
     for seed in range(1, args.seeds):
         started = time.time()
         trainer, _, rates, _ = train_run(args.model, config, corpus, initial, seed)
         held, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555 + 101 * seed))
         scores.append(float(held.mean()))
         per_prompt.append(held.tolist())
+        traces.append(rates)
         print(f"seed {seed}: train {np.mean(rates[:3]):.3f} -> {np.mean(rates[-3:]):.3f} | "
               f"held out {held.mean():.4f} | {(time.time() - started) / 60:.1f} min", flush=True)
         del trainer
@@ -225,6 +235,7 @@ def main() -> None:
         "resolved_std": resolved,
         "resolved_interval": interval,
         "per_prompt": per_prompt,  # kept so the interval can be recomputed without retraining
+        "train_traces": traces,
         "eval_samples": args.eval_samples,
         "base_pass_rate": float(base_rates.mean()),
     })
