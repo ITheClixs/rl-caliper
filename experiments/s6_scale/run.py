@@ -176,6 +176,9 @@ def main() -> None:
             "observed_spread": observed,
             "binomial_variance": binomial,
             "resolved_std": resolved,
+            # runs scored before this was true shared one evaluation draw between seeds, which
+            # makes the binomial subtraction over-correct; their records omit the field
+            "eval_key_per_seed": True,
             "base_pass_rate": float(base_rates.mean()),
             "train_history": {k: v["train"] for k, v in records.items()},
         },

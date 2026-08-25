@@ -595,7 +595,18 @@ def table_scale() -> None:
     lines.append(r"\midrule")
     line("spread across runs", [f"{r['observed_spread']['std']:.4f}" for _, r, _ in rows])
     line(r"\quad evaluation part", [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _ in rows])
-    line(r"\quad seed part", [f"{r['resolved_std']:.4f}" for _, r, _ in rows])
+    # Subtracting the binomial term assumes each run drew its own evaluation. Where that is not
+    # recorded the draw was shared, the subtraction would over-correct, and all the data support
+    # is the bracket of Section 5: the seed term lies between the subtraction and the spread.
+    seed_part = []
+    for _, outcome, _ in rows:
+        observed = outcome["observed_spread"]["std"]
+        if outcome.get("eval_key_per_seed"):
+            seed_part.append(f"{outcome['resolved_std']:.4f}")
+        else:
+            lower = np.sqrt(max(observed**2 - outcome["binomial_variance"], 0.0))
+            seed_part.append(f"[{lower:.4f}, {observed:.4f}]")
+    line(r"\quad seed part", seed_part)
     spread = []
     for _, outcome, _ in rows:
         scores = np.sort(np.array(outcome["held_out_scores"]))
