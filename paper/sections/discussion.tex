@@ -10,6 +10,15 @@ gradient field. The practical readings are that run length does not enter the an
 composition does with square-root returns, and that rollout sampling rather than prompt selection
 is what the reported number mostly remembers.
 
+\paragraph{One quantity runs through all of it.} Read together, the measurements in this paper
+keep returning to $\E_x[p(1-p)]$, the mean within-prompt reward variance. It sets $\Sigma_t$, so it
+sets how much seed noise a batch injects. It sets the learning signal, so it sets how much of that
+noise the following updates filter. It is largest before a policy has learned anything, which is
+why the per-update kernel tilts towards the start of a run. And when it reaches zero the injection
+stops, the metric stops resolving the policy, and the linearisation of Adam's normalisation stops
+holding --- three of the four boundaries below are the same boundary. A practitioner who logs one
+number from this paper should log that one.
+
 \paragraph{What ``filtered'' does and does not mean.} It would be tidier if the transfer operator
 were a contraction. It is not: its spectral radius exceeds one throughout a run, only a third to a
 half of directions contract, and the contracting timescales differ among themselves by more than an
