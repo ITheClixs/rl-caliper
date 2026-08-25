@@ -56,9 +56,11 @@
   \begin{quote}
   Reinforcement learning post-training is reported from single runs, and how much a rerun would
   move the number is established the only way it currently can be: by repeating the training. We
-  show that a run already contains enough information to forecast its own spread.
+  ask what a single run can be made to say about that number: we derive an estimator,
+  establish it where the comparison can be made exactly, and report the scale at which it
+  stops working and why.
 
-  The correction that makes this possible is to stop treating training noise as accumulating. A
+  The correction the estimator rests on is to stop treating training noise as accumulating. A
   perturbation entering at one update is passed through every later update and reweighted by them,
   so the covariance of a run about its mean obeys $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Measuring
   the spectrum of $A_t$ shows this is a filter and not a contraction: only a third to a half of
