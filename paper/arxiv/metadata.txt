@@ -10,8 +10,10 @@ Abstract (plain text, as pasted into the submission form):
   would move the number is established only by repeating the training. We ask what one run
   can be made to say about it.
 
-  Training noise is not accumulated. A perturbation entering at one update is reweighted by
-  every update that follows, so the covariance of a run about its mean obeys
+  Training noise is not accumulated. Replacing every reward with a coin flip, which leaves
+  the noise and the step sizes untouched, restores accumulation and grows divergence by a
+  factor of 90.5. A perturbation entering at one update is reweighted by every update that
+  follows, so the covariance of a run about its mean obeys
   S_{t+1} = A_t S_t A_t^T + Q_t. Carrying the gradient of the reported metric backwards along
   one stored trajectory turns that recursion into the across-seed variance of the metric, as a
   sum of scalars with no covariance matrix formed. The transpose the backward pass needs is
