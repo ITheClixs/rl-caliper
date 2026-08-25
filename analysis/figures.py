@@ -268,20 +268,26 @@ def figure_teaser() -> None:
 
     ax = axes[1]
     truth = np.array([c["measured_kl"] for c in models])
-    for key, label, colour, marker in [
-        ("propagated_kl", "propagated", PALETTE[0], "o"),
-        ("walk_kl", "accumulated", PALETTE[1], "s"),
-        ("scalar_kl", "single timescale", PALETTE[2], "^"),
-    ]:
-        ax.scatter(truth, np.array([c[key] for c in models]), s=20, marker=marker,
-                   color=colour, alpha=0.85, label=label)
+    # accumulation is split by pool homogeneity, which is the axis it succeeds or fails on
+    similar = np.array([c.get("diversity", 1.0) <= 0.2 for c in models])
+    series = [
+        ("propagated_kl", "propagated", PALETTE[0], "o", None),
+        ("walk_kl", "accumulated, similar prompts", PALETTE[1], "s", similar),
+        ("walk_kl", "accumulated, diverse prompts", PALETTE[3], "D", ~similar),
+        ("scalar_kl", "single timescale", PALETTE[2], "^", None),
+    ]
+    for key, label, colour, marker, mask in series:
+        values = np.array([c[key] for c in models])
+        x, y = (truth, values) if mask is None else (truth[mask], values[mask])
+        if x.size:
+            ax.scatter(x, y, s=20, marker=marker, color=colour, alpha=0.85, label=label)
     span = np.array([truth.min() * 0.5, truth.max() * 2.0])
     ax.plot(span, span, color="0.25", lw=1.1, zorder=0)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.legend(fontsize=7, frameon=False, loc="upper left")
+    ax.legend(fontsize=6.2, frameon=False, loc="upper left")
     style(ax, "measured divergence", "predicted divergence",
-          "the model this replaces, on the same settings")
+          "the models this replaces, on the same settings")
     fig.tight_layout()
     save(fig, "teaser.pdf")
     plt.close(fig)

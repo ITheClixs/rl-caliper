@@ -84,10 +84,11 @@
     independent runs
     trained afterwards. Bars are bootstrap intervals over runs; the solid line is equality and the
     dotted lines a factor of $1.5$. \textbf{Right:} predicted against measured policy divergence
-    for three models of where training noise goes. Propagating the covariance tracks it; treating
-    noise as accumulating is wrong by up to $\numWalkWorst\times$, and by a factor of two at the
-    median on homogeneous prompt pools; compressing the filter to one timescale is wrong by two
-    orders of magnitude.}
+    for the models this one replaces. Propagating the covariance tracks it everywhere. Treating
+    noise as accumulating tracks it too where the prompts in a pool are unlike each other, and
+    fails by a factor of two where they are alike, which is where the objective supplies the most
+    curvature. Compressing the filter to a single timescale fails by two orders of magnitude
+    throughout.}
     \label{fig:teaser}
   \end{minipage}
   \vspace{6pt}
