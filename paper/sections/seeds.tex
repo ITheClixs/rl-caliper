@@ -209,7 +209,8 @@ $\nabla M(\theta_T)$, and the backward sweep of Algorithm~\ref{alg:forecast}. Th
 gradient evaluations per stored update and one vector of parameter size held in memory.
 
 And one thing before believing the answer: check that the runs it describes are small perturbations
-of each other. The residual of Section~\ref{sec:exp-linearity} measures that directly, and
+of each other. The pairwise residual of Section~\ref{sec:exp-linearity} measures that directly on
+a pair of runs already in hand, and
 Section~\ref{sec:exp-real} is what happens when nobody checks, on a real run whose seeds separate
 into groups, where the forecast is short by a factor of twenty-five and no amount of care in
 computing it would have helped.

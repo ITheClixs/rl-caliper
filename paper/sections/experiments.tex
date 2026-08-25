@@ -345,7 +345,7 @@ which is very close to it.
 \label{sec:exp-linearity}
 
 Everything above linearises the mean update field between the two runs. That assumption is
-checkable without knowing the answer, which makes it a diagnostic a run can apply to itself. For a
+checkable without knowing the measured spread, though it needs a pair of runs rather than one. For a
 pair of runs at $\theta^A$ and $\theta^B$ with $\Delta = \theta^B - \theta^A$, define the residual
 \begin{equation}
   \label{eq:residual}
@@ -368,7 +368,8 @@ from linearity costs nothing at the median, so the honest statement of the assum
 bounds the worst case rather than setting the accuracy. And $\varepsilon$ is worth logging anyway,
 because it is the quantity that separates the regime where the forecast has a worst case of
 $1.2\times$ from the regime where it has one of $1.6\times$, and computing it costs one extra
-gradient evaluation on a checkpoint a run already has.
+gradient evaluation per checkpoint once a second run exists. Making it available before that
+second run is what Section~\ref{sec:discussion} lists first among the things we would build next.
 
 \subsection{The exact moments the forecast is built on}
 

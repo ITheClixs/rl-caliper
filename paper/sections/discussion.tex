@@ -64,8 +64,11 @@ assumption that the amplification stays linear. At a step size small enough to k
 linear, the seed term drops below what eight runs can resolve at all.
 
 We would rather report this than a number from a setting chosen to make it work. It also sets the
-next experiment precisely: the linearity residual of Section~\ref{sec:exp-linearity} is cheap on a
-real model and would have flagged this run before the seeds were trained.
+next experiment precisely, though not as directly as we would like: the residual of
+Section~\ref{sec:exp-linearity} is measured between two runs, so it diagnoses a pair after the fact
+rather than certifying a forecast made from one. Turning it into a check a single run can apply to
+itself means perturbing a stored state along a direction drawn from its own gradient noise, at a
+radius matched to one update, and we have not done that.
 
 \paragraph{On the size of the models.} The largest measurement here is Qwen2.5-7B with eight seeds
 over twenty updates. That is enough to say that a $7$B model's reported number moves under
@@ -134,9 +137,9 @@ correlation is $\numEarlyCorrelationBig$. The number was real each time and the 
 the failure is instructive: eight runs make a correlation look like a finding, and only the third
 run of the same experiment made it obvious that it was not.
 
-\paragraph{What we would do next, in order.} Measure the linearity residual on a real run, which
-is one extra gradient evaluation per stored checkpoint and would say in advance whether the forecast
-applies to it. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
+\paragraph{What we would do next, in order.} Build the one-run form of the linearity residual and
+validate it against the forecast errors of Section~\ref{sec:exp-forecast}, so that a run can say in
+advance whether the forecast applies to it. The pairwise residual we measure cannot do that. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
 and stays inside the regime. Our best guess is that this needs a larger model, where the same
 relative improvement is a smaller relative move in parameter space. Then treat the estimation error
 in $\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
