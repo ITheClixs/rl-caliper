@@ -75,15 +75,6 @@ laptop, which is enough for exact validation on solvable systems, for population
 transformers, and for eight seeds at $7$B, and is not enough for that. We would rather state the
 boundary than gesture past it.
 
-\paragraph{A cheap intervention, offered tentatively.} If which of two outcomes a run reaches is
-$0.88$-correlated with its first three batches, then it is visible long before the run is over, and
-a practitioner watching that number could abandon a run heading for the worse mode after a few
-updates rather than after all of them. We did not test this, and we are wary of it: the correlation
-comes from eight runs of one configuration, selecting on an early signal is exactly how one
-manufactures an apparent improvement out of noise, and a run abandoned early is a run whose spread
-nobody measured. We record it because it follows directly from what we did measure, and because the
-experiment that would settle it is small.
-
 \paragraph{Two zeros that mean different things.} The most immediately usable thing in this paper
 may be a warning rather than a method. A run can report a zero seed spread for two reasons that
 look identical from outside. The response distribution can collapse, in which case
@@ -120,6 +111,15 @@ goes with it, and a controller holding drift constant answers by raising the ste
 Any drift-targeted schedule needs a floor on the signal or a cap on the step; ours had neither. The
 defensible claim is that behavioural drift is a more invariant coordinate for update magnitude, not
 that a constant value of it is a good schedule.
+
+\paragraph{A cheap intervention, offered tentatively.} If which of two outcomes a run reaches is
+$0.88$-correlated with its first three batches, then it is visible long before the run is over, and
+a practitioner watching that number could abandon a run heading for the worse mode after a few
+updates rather than after all of them. We did not test this, and we are wary of it: the correlation
+comes from eight runs of one configuration, selecting on an early signal is exactly how one
+manufactures an apparent improvement out of noise, and a run abandoned early is a run whose spread
+nobody measured. We record it because it follows directly from what we did measure, and because the
+experiment that would settle it is small.
 
 \paragraph{What we would do next, in order.} Measure the linearity residual on a real run, which
 is one extra gradient evaluation per stored checkpoint and would say in advance whether the forecast
