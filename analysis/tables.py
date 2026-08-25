@@ -9,6 +9,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import functools
+import subprocess
+
 import numpy as np
 
 from caliper.runtime import io
@@ -551,6 +554,31 @@ def table_null() -> None:
     write("null", "\n".join(lines))
 
 
+# The commit that gave every run its own evaluation draw. Records written before it share one
+# draw between seeds, which makes the binomial subtraction over-correct; records written after
+# it carry `eval_key_per_seed` and say so themselves.
+EVAL_KEY_FIX = "69ce8c3"
+
+
+@functools.lru_cache(maxsize=None)
+def _descends_from_fix(sha: str) -> bool:
+    if not sha:
+        return False
+    done = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", EVAL_KEY_FIX, sha],
+        capture_output=True,
+    )
+    return done.returncode == 0
+
+
+def per_seed_evaluation(record) -> bool:
+    """Did each run in this record draw its own evaluation randomness?"""
+    stated = record["result"].get("eval_key_per_seed")
+    if stated is not None:
+        return bool(stated)
+    return _descends_from_fix(record["manifest"].get("git_sha", ""))
+
+
 def table_scale() -> None:
     """The same measurement at two model sizes, side by side."""
     rows = []
@@ -562,7 +590,8 @@ def table_scale() -> None:
     ]
     if small:
         outcome = small[-1]["result"]
-        rows.append(("Qwen2.5-0.5B", outcome, small[-1]["manifest"]["config"]))
+        rows.append(("Qwen2.5-0.5B", outcome, small[-1]["manifest"]["config"],
+                     per_seed_evaluation(small[-1])))
     # the re-scoring pass is what the seven-billion numbers come from: the training loop scored
     # as it went, before each run drew its own evaluation randomness
     big = [
@@ -573,7 +602,8 @@ def table_scale() -> None:
         and len(r["result"].get("held_out_scores", [])) >= 4
     ]
     if big:
-        rows.append(("Qwen2.5-7B", big[0]["result"], big[0]["manifest"]["config"]))
+        rows.append(("Qwen2.5-7B", big[0]["result"], big[0]["manifest"]["config"],
+                     per_seed_evaluation(big[0])))
     if len(rows) < 2:
         raise SystemExit("need both model sizes measured")
 
@@ -581,34 +611,34 @@ def table_scale() -> None:
         r"\setlength{\tabcolsep}{4pt}",
         r"\begin{tabular}{@{}l" + "c" * len(rows) + r"@{}}",
         r"\toprule",
-        "quantity & " + " & ".join(name for name, _, _ in rows) + r" \\",
+        "quantity & " + " & ".join(name for name, _, _, _ in rows) + r" \\",
         r"\midrule",
     ]
 
     def line(label, values):
         lines.append(f"{label} & " + " & ".join(values) + r" \\")
 
-    line("runs", [f"{len(r['held_out_scores'])}" for _, r, _ in rows])
-    line("updates", [f"{c.get('steps', c.get('step', '?'))}" for _, _, c in rows])
-    line("held-out pass rate, base", [f"{r['base_pass_rate']:.3f}" for _, r, _ in rows])
-    line("held-out pass rate, after", [f"{r['observed_spread']['mean']:.3f}" for _, r, _ in rows])
+    line("runs", [f"{len(r['held_out_scores'])}" for _, r, _, _ in rows])
+    line("updates", [f"{c.get('steps', c.get('step', '?'))}" for _, _, c, _ in rows])
+    line("held-out pass rate, base", [f"{r['base_pass_rate']:.3f}" for _, r, _, _ in rows])
+    line("held-out pass rate, after", [f"{r['observed_spread']['mean']:.3f}" for _, r, _, _ in rows])
     lines.append(r"\midrule")
-    line("spread across runs", [f"{r['observed_spread']['std']:.4f}" for _, r, _ in rows])
-    line(r"\quad evaluation part", [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _ in rows])
+    line("spread across runs", [f"{r['observed_spread']['std']:.4f}" for _, r, _, _ in rows])
+    line(r"\quad evaluation part", [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _, _ in rows])
     # Subtracting the binomial term assumes each run drew its own evaluation. Where that is not
     # recorded the draw was shared, the subtraction would over-correct, and all the data support
     # is the bracket of Section 5: the seed term lies between the subtraction and the spread.
     seed_part = []
-    for _, outcome, _ in rows:
+    for _, outcome, _, per_seed in rows:
         observed = outcome["observed_spread"]["std"]
-        if outcome.get("eval_key_per_seed"):
+        if per_seed:
             seed_part.append(f"{outcome['resolved_std']:.4f}")
         else:
             lower = np.sqrt(max(observed**2 - outcome["binomial_variance"], 0.0))
             seed_part.append(f"[{lower:.4f}, {observed:.4f}]")
     line(r"\quad seed part", seed_part)
     spread = []
-    for _, outcome, _ in rows:
+    for _, outcome, _, _ in rows:
         scores = np.sort(np.array(outcome["held_out_scores"]))
         gaps = np.diff(scores)
         cut = int(np.argmax(gaps))

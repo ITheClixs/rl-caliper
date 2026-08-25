@@ -205,6 +205,7 @@ def main() -> None:
             "init_checksum": prediction.init_checksum,
             "held_out_scores": scores,
             "base_pass_rate": float(base_rates.mean()),
+            "eval_key_per_seed": True,
         })
         return
     observed = spread_interval(np.array(scores), n_boot=4000, seed=args.seed)
@@ -242,6 +243,7 @@ def main() -> None:
         "train_traces": traces,
         "eval_samples": args.eval_samples,
         "base_pass_rate": float(base_rates.mean()),
+            "eval_key_per_seed": True,
     })
 
 
