@@ -36,6 +36,10 @@ class Update(Protocol):
     def jacobian_vector(self, direction: np.ndarray) -> np.ndarray:
         """J v for the mean update field at this update's parameters.
 
+        The field is the *ascent* direction, the one in `theta <- theta + eta g`. A trainer whose
+        autodiff returns the gradient of a loss must negate it before differentiating again, or
+        the adjoint is carried through `I - eta J` and the sign of every correction flips.
+
         By Proposition 3 the Jacobian is symmetric for count-based estimators, so this is also
         the transposed product the recursion asks for. An optimiser carrying state breaks that;
         see `caliper.exact.lifted`.
