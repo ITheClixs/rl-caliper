@@ -584,6 +584,13 @@ def table_real_forecast() -> None:
         f"observed s.d.\\ across runs & {observed['std']:.4f} \\\\",
         f"\\quad evaluation (binomial) part & {np.sqrt(result['binomial_variance']):.4f} \\\\",
         f"\\quad seed part, by subtraction & {result['resolved_std']:.4f} \\\\",
+    ]
+    band = result.get("resolved_interval")
+    if band:
+        lines.append(
+            f"\\quad its $95\\%$ interval & [{band['lo']:.4f}, {band['hi']:.4f}] \\\\"
+        )
+    lines += [
         r"\midrule",
         f"forecast from one run & {result['predicted_std']:.4f} \\\\",
     ]
