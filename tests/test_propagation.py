@@ -114,3 +114,40 @@ def test_the_resolved_spread_needs_more_than_one_run():
 
     with pytest.raises(ValueError):
         resolved_spread_interval(np.full((1, 4), 0.3), 8)
+
+
+def test_the_bound_brackets_the_seed_term_whatever_was_shared():
+    """The bracket must contain both readings: independent evaluations, and one shared draw."""
+    from caliper.analysis.uncertainty import spread_bounds
+
+    rng = np.random.default_rng(0)
+    runs, questions, samples = 8, 48, 16
+    centres = 0.35 + rng.normal(0.0, 0.06, size=runs)
+    per_prompt = (
+        rng.binomial(samples, np.clip(centres[:, None] * np.ones((1, questions)), 0, 1)) / samples
+    )
+    bound = spread_bounds(per_prompt, samples)
+    assert bound["lower"] <= bound["upper"]
+    assert bound["upper"] == pytest.approx(per_prompt.mean(axis=1).std(ddof=1))
+    assert bound["width"] >= 0.0
+
+
+def test_the_bound_collapses_when_the_evaluation_is_precise():
+    """With many samples the binomial term vanishes and the question stops mattering."""
+    from caliper.analysis.uncertainty import spread_bounds
+
+    rng = np.random.default_rng(1)
+    runs, questions, samples = 8, 200, 256
+    centres = 0.35 + rng.normal(0.0, 0.08, size=runs)
+    per_prompt = (
+        rng.binomial(samples, np.clip(centres[:, None] * np.ones((1, questions)), 0, 1)) / samples
+    )
+    bound = spread_bounds(per_prompt, samples)
+    assert bound["width"] / bound["upper"] < 0.02
+
+
+def test_the_bound_needs_more_than_one_run():
+    from caliper.analysis.uncertainty import spread_bounds
+
+    with pytest.raises(ValueError):
+        spread_bounds(np.full((1, 4), 0.3), 8)

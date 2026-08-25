@@ -177,6 +177,36 @@ def resolved_spread_interval(
     }
 
 
+def spread_bounds(per_prompt: np.ndarray, samples: int) -> dict[str, float]:
+    """Bracket the seed term when the evaluation randomness may be shared between runs.
+
+    Write a run's score as mu + X_i + E_i, with X the seed effect and E the evaluation noise. If
+    the runs drew independent evaluations then the observed variance across runs is Var(X) +
+    Var(E), and subtracting the binomial term recovers Var(X). If instead every run was scored on
+    the same draw, E is common to all of them, it drops out of the variance across runs entirely,
+    and the observed spread *is* the seed term. Any partial sharing lies between, so
+
+        seed s.d. in [ sqrt(observed^2 - binomial^2),  observed ]
+
+    without needing to know how much was shared. The bracket is only worth reporting when it is
+    wide; where the binomial term is small against the spread the two ends nearly coincide and the
+    question does not arise.
+    """
+    values = np.asarray(per_prompt, dtype=float)
+    if values.ndim != 2 or values.shape[0] < 2:
+        raise ValueError("need at least two runs, each scored on the same questions")
+    observed = float(values.mean(axis=1).std(ddof=1))
+    binomial = float(np.sqrt(np.mean(values * (1.0 - values)) / (samples * values.shape[1])))
+    lower = float(np.sqrt(max(observed**2 - binomial**2, 0.0)))
+    return {
+        "lower": lower,
+        "upper": observed,
+        "binomial": binomial,
+        "width": float(observed - lower),
+        "n_runs": int(values.shape[0]),
+    }
+
+
 def loglog_fit(
     predictors: dict[str, np.ndarray],
     response: np.ndarray,
