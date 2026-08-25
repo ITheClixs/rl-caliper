@@ -27,7 +27,7 @@ src/caliper/
 experiments/    one directory per experiment, config-driven
 analysis/       figure and table generation for the paper
 paper/          LaTeX sources
-docs/           theory notes and result notes
+docs/           theory notes, result notes, and a claim index
 ```
 
 ## What it does
@@ -96,6 +96,9 @@ both compatible with the predicted `-1/2` and `+1/2` and neither tightly pinned.
 Underneath sits an exact finite-`G` covariance for the advantage estimators in current use, which
 makes the injected noise measurable, shows those estimators differ only by a weight on prompt
 difficulty, and fixes the optimal group size at `G* = 1 + sqrt(tau_w/tau_b)`.
+
+`docs/claims.md` indexes every claim in the paper against the experiment that supports it and how
+strongly, including the ones that were withdrawn.
 
 What is *not* established: an earlier route from policy divergence to outcome spread via `sqrt(KL)`
 fails (fitted exponent `+0.10`, CI `[-0.03, +0.45]` against a predicted `+0.5`) and is withdrawn --
