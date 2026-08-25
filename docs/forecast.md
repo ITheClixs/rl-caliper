@@ -103,8 +103,14 @@ Both terms carry `1/P`, so the number of prompts scales them equally and cannot 
 The per-update kernel was checked for a memory horizon and does not have one: across 288 settings
 the number of final updates holding 95% of the variance is a median of 1.00 of the run, against 0.95
 for an exactly uniform kernel. Raising the step size sixteenfold does not move it, and neither does
-starting from a policy already trained for 1200 updates. Filtering lowers the level; it does not
-localise where the spread was made.
+starting from a policy already trained for 1200 updates.
+
+Where the kernel is not flat it tilts toward the **start**. In 254 of 288 settings more of the final
+variance was injected in the first half of the run than the second, median first-half share 55%.
+With the transfer operator close to the identity along `grad M` (section 5b), `k_t ~ eta_t^2
+Sigma_t / P`, and `Sigma_t` is largest early because `E[p(1-p)]` is largest before the policy has
+learned. Early noise is both bigger and no more forgotten than late noise, so the beginning of a run
+is where a larger batch buys the most.
 
 ## 7. Boundaries
 

@@ -554,13 +554,23 @@ def figure_forecast() -> None:
           "identity, with the $1.5\\times$ band")
 
     ax = axes[1]
-    chosen = sorted(cells, key=lambda c: (-c["steps"], c["prompts"]))[:4]
-    for cell, colour in zip(chosen, PALETTE, strict=False):
+    # one trace per band at each step size, so the legend distinguishes what the curves differ by
+    longest = max(c["steps"] for c in cells)
+    chosen = []
+    for band in sorted({c["band"] for c in cells}):
+        for eta in sorted({c["step_size"] for c in cells}):
+            match = [
+                c for c in cells
+                if c["band"] == band and c["step_size"] == eta and c["steps"] == longest
+            ]
+            if match:
+                chosen.append(match[0])
+    for cell, colour in zip(chosen[:4], PALETTE, strict=False):
         kernel = np.array(cell["kernel"])
         share = kernel / kernel.sum()
         ax.plot(np.arange(1, share.size + 1) / share.size, share * share.size,
                 color=colour, lw=1.4,
-                label=f"{cell['band']}, $P={cell['prompts']}$")
+                label=f"{cell['band']}, $\\eta={cell['step_size']:g}$")
     ax.axhline(1.0, color="0.4", lw=0.9, ls="--")
     ax.legend(fontsize=7, frameon=False)
     style(ax, "position in the run", "share of the final variance\n(relative to uniform)",

@@ -127,14 +127,25 @@ larger groups change what the error bar is made of.
   \label{fig:sources}
 \end{figure}
 
-\paragraph{No memory horizon.} If contraction were strong, the kernel $k_t$ of \eqref{eq:kernel}
-would concentrate near the end of the run and reproducing a result would mean reproducing only its
-tail. We looked for that and did not find it. Over $288$ settings, the number of final updates
-holding $95\%$ of the forecast variance is a median of $1.00$ of the run, against $0.95$ for an
-exactly uniform kernel, and it does not move when the step size is raised sixteen-fold or when the
-run is started from a policy already trained for $1200$ updates. Filtering lowers the level of the
-spread; over the horizons we can measure it does not localise where the spread was made. The right
-reading is that reproducing a run means reproducing all of it.
+\paragraph{The uncertainty is made early, not late.} If the filter were sharp, the kernel $k_t$ of
+\eqref{eq:kernel} would concentrate near the end of the run and reproducing a result would mean
+reproducing only its tail. We looked for that and found the opposite. Over $\numMemorySettings$
+settings, the number of final updates holding $95\%$ of the forecast variance is a median of
+$\numMemoryFraction$ of the run against $0.95$ for an exactly uniform kernel, and it does not move
+when the step size is raised sixteen-fold or when the run is started from a policy already trained
+for $1200$ updates.
+
+Where the kernel is not flat it tilts the other way. In $\numTiltedEarly$ of $\numMemorySettings$
+settings more of the final variance was injected in the first half of the run than in the second,
+with a median first-half share of $\numFirstHalfShare\%$ (Figure~\ref{fig:forecast}, right). The
+mechanism follows from the two measurements either side of it: with $\Phi_{T,t}$ close to the
+identity along $\nabla M$, $k_t \propto \eta_t^2\Sigma_t/P$, and $\Sigma_t$ is largest early
+because $\E_x[p(1-p)]$ is largest before the policy has learned anything. Early noise is both
+bigger and no more forgotten than late noise.
+
+The practical reading is the reverse of the one we went looking for. Reproducing a run means
+reproducing all of it, and if anything the beginning matters more --- which is also where a larger
+batch would buy the most.
 
 \subsection{Why the forecast rests on filtering, not accumulation}
 \label{sec:exp-seeds}

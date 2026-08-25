@@ -84,7 +84,10 @@ be carried against the gradient of the reported metric instead of being formed.
   \item \textbf{An explicit account of what does not hold.} A single effective timescale fails by
   two orders of magnitude. A predicted square-root relation between policy divergence and outcome
   spread is not supported by our data and is withdrawn. We looked for a short memory horizon --- a
-  long run whose spread is generated only near its end --- and did not find one. Lifting the
+  long run whose spread is generated only near its end --- and found the opposite: in
+  $\numTiltedEarly$ of $\numMemorySettings$ settings more of the final variance was injected in the
+  first half of the run than the second, because the injected covariance is largest before the
+  policy has learned anything. Lifting the
   recursion to Adam's optimiser state improves on ignoring that state by a factor of two at the
   median but is unreliable where the pass rate saturates. The largest model we measure is $7$B with
   eight seeds, which bounds what any of this establishes about frontier-scale RLVR.

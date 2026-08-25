@@ -424,10 +424,22 @@ def table_numbers() -> None:
         by_group: dict[int, list[float]] = {}
         for cell in cells:
             by_group.setdefault(cell["group_size"], []).append(cell["rollout_share"])
+        first, tilted = [], 0
+        for cell in cells:
+            kernel = np.array(cell["kernel"])
+            if kernel.sum() <= 0:
+                continue
+            share = kernel / kernel.sum()
+            half = share.size // 2
+            first.append(share[:half].sum())
+            grid = (np.arange(share.size) - (share.size - 1) / 2) / max(share.size - 1, 1)
+            tilted += int(np.polyfit(grid, share * share.size, 1)[0] < 0)
         macros |= {
             "MemorySettings": f"{len(cells)}",
             "MemoryFraction": f"{np.median(fraction):.2f}",
             "RolloutShareMedian": f"{100 * np.median([c['rollout_share'] for c in cells]):.0f}",
+            "FirstHalfShare": f"{100 * np.median(first):.0f}",
+            "TiltedEarly": f"{tilted}",
         }
         # LaTeX command names cannot contain digits, so the group size is spelled out
         spelled = {2: "two", 4: "four", 8: "eight", 16: "sixteen", 32: "thirtytwo"}
