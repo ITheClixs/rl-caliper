@@ -13,8 +13,8 @@ though the training procedure were deterministic.
 This paper asks what a single run can be made to say about that number. The answer has two halves.
 Where the comparison can be made exactly, a run does contain enough information to forecast its own
 spread, and we derive the estimator that extracts it and test it prospectively. Carried to a
-pretrained model it underpredicts by a factor of twenty-five, for a reason the same framework
-identifies:
+pretrained model the recommended estimator underpredicts by a factor of twenty-five and the
+transported one by sixteen, for a reason the same framework identifies:
 the runs stop being small perturbations of each other. Both halves are reported, because a method
 that is presented without its boundary is not a method.
 
@@ -78,8 +78,8 @@ be carried against the gradient of the reported metric instead of being formed.
   prompts scales both terms equally and does not move it.
 
   \item \textbf{On a real model it underpredicts, and we say why} (Section~\ref{sec:exp-real}).
-  Run end to end on Qwen2.5-0.5B, the forecast is a factor of twenty-five short of the measured
-  spread, because the eight runs end in groups rather than scattered around one and a linearised
+  Run end to end on Qwen2.5-0.5B, the recommended cheap estimator is a factor of twenty-five short
+  of the measured spread and the transported one sixteen, because the eight runs end in groups rather than scattered around one and a linearised
   model has no way to represent that. What survives is the localisation rather than the
   magnitude: the per-update kernel puts $\numRealFirstHalfShare\%$ of the forecast variance in the first half of the
   run, and the run stops injecting any after the fifth update.
