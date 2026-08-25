@@ -1,5 +1,6 @@
 Title:
-  Predicting the Spread of an RL Post-Training Result from a Single Run
+  Where Run-to-Run Spread in RL Post-Training Comes From, and When One Run
+  Can Predict It
 
 Authors:
   Mehmet Demir Guven (ETH Zurich)
@@ -23,13 +24,14 @@ Abstract (plain text, as pasted into the submission form):
   that costs one extra pass per update.
 
   Tested prospectively -- one run trained and frozen, the prediction recorded, and only then
-  the remaining seeds trained -- the forecast has a median absolute error of 1.08x across 48
-  settings spanning a 30x range of spreads. The filtering is caused by learning: replacing
-  every reward with a coin flip leaves noise, batches and step sizes untouched and
-  divergence then grows 10.7x over eighty updates. A caution comes out of the same
-  framework: at 7B on a task the base model already mostly passes, twenty updates collapse
-  the response distribution and two seeds report the same number to the last decimal while
-  their policies still differ.
+  the remaining seeds trained -- the forecast has a median absolute error of 1.11x across 192
+  settings spanning a 47x range of spreads. Carried to a pretrained model it underpredicts by
+  a factor of twelve, because eight runs end in two distinct groups rather than scattered
+  around one; the mechanism survives even so, since a run's first three batches correlate
+  with its final score at 0.88 and the per-update kernel puts 92% of the variance in the
+  first half. The filtering is caused by learning: replacing every reward with a coin flip
+  leaves rollouts, batches and step sizes untouched, and divergence then grows 90x over
+  eighty updates instead of ending at 0.14x of where it started.
 
 Primary category:
   cs.LG   (Machine Learning)
