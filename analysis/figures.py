@@ -652,7 +652,9 @@ def figure_real_forecast() -> None:
     live = np.array(result.get("live_share", []))
     steps = np.arange(1, kernel.size + 1)
 
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7))
+    scores = np.array(result.get("held_out_scores", []))
+    fig, axes = plt.subplots(1, 3, figsize=(9.6, 2.7))
+
     ax = axes[0]
     share = kernel / kernel.sum() if kernel.sum() > 0 else kernel
     ax.bar(steps, share, color=PALETTE[0], width=0.7)
@@ -663,7 +665,20 @@ def figure_real_forecast() -> None:
     if live.size:
         ax.plot(steps, live, "o-", ms=4, lw=1.4, color=PALETTE[1])
     ax.set_ylim(-0.05, 1.05)
-    style(ax, "update", "prompts with a mixed group", "and when the run stopped making any")
+    style(ax, "update", "prompts with a mixed group", "and when it stopped making any")
+
+    ax = axes[2]
+    if scores.size:
+        jitter = np.linspace(-0.12, 0.12, scores.size)
+        ax.scatter(jitter, scores, s=26, color=PALETTE[2], zorder=3)
+        forecast_sd = result.get("predicted_std", 0.0)
+        centre = float(scores.mean())
+        ax.errorbar([0.0], [centre], yerr=[forecast_sd], fmt="_", ms=18, lw=1.6,
+                    color="0.25", capsize=5, zorder=2, label="forecast s.d.")
+        ax.legend(fontsize=7, frameon=False, loc="lower right")
+        ax.set_xlim(-0.35, 0.35)
+        ax.set_xticks([])
+    style(ax, "", "held-out pass rate", "what the runs actually did")
     fig.tight_layout()
     save(fig, "real_forecast.pdf")
     plt.close(fig)
