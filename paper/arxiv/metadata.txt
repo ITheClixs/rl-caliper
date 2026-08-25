@@ -22,9 +22,9 @@ Abstract (plain text, as pasted into the submission form):
 
   Tested prospectively over 192 settings, one run trained and frozen before the rest existed,
   the forecast has a median error of 1.11x. On a pretrained model it is short by a factor of
-  twelve, because the runs end in two groups rather than scattered around one. The mechanism
-  survives that failure: a run's first three batches correlate with its final score at 0.88,
-  and the per-update kernel puts 92% of the variance in the first half of the run.
+  twenty-five, because the runs end in groups rather than scattered around one. What survives
+  is the localisation: the per-update kernel puts 90% of the variance in the first half of the
+  run, and the run stops injecting any after the fifth update.
 
 Primary category:
   cs.LG   (Machine Learning)
@@ -48,10 +48,7 @@ Submission checklist:
   - figures are PDF; no external font or image dependencies
   - main.bbl is included so the bibliography builds without a bibtex pass
   - no absolute paths; every \input and \includegraphics is relative to the source root
-  - zero overfull hboxes; no unresolved references or citations
-  - three overfull vbox warnings remain: they are vertical-list warnings absorbed by the
-    bottom margin, and body text never comes within 15pt of the folio (checked by measuring
-    glyph extents in the rendered PDF)
+  - zero overfull hboxes and zero overfull vboxes; no unresolved references or citations
 
 Note on length:
   This is the long-form version. A conference-length version would keep Sections 1-6 and move
