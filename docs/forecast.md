@@ -117,33 +117,37 @@ is where a larger batch buys the most.
 `experiments/s7_real_forecast`, Qwen2.5-0.5B, twelve updates of plain gradient ascent, eight seeds,
 on a task the base model passes at 0.16.
 
+All numbers below come from the seeded run, whose adapter initialisation is recorded
+(checksum 7983.803711) so that variants of it can be compared.
+
 | quantity | value |
 |---|---|
-| measured spread across runs | 0.0694 |
+| measured spread across runs | 0.0636 |
 | evaluation (binomial) part | 0.0077 |
-| seed part, by subtraction | 0.0689, interval [0.0033, 0.0737] |
-| forecast, cheap form | **0.0056** |
-| forecast, cheap form, `Sigma` from 64 prompts | 0.0052 |
-| forecast, with transport | 0.0225 |
-| cosine between two `J b` estimates | 0.21 |
-| share of the forecast made in the first half | 92% |
+| seed part, by subtraction | 0.0631, interval [0.0350, 0.0735] |
+| forecast, cheap form | **0.0025** |
+| forecast, cheap form, `Sigma` from 64 prompts | 0.0026 |
+| forecast, with transport | 0.0040 |
+| cosine between two `J b` estimates | 0.12 |
+| share of the forecast made in the first half | 90% |
 
-The cheap form is short by twelve. The transported version is four times larger, and that is noise
-rather than curvature. Repeating the experiment settles it: two runs of the same configuration,
-differing only in adapter initialisation, give transported forecasts 5.7x apart (0.0225 and 0.0040)
-while their cheap forms agree to 8% (0.0056 and 0.0052). On a real model the transport is not a
-small correction badly estimated, it is unusable, and the cheap form is the only one of the two that
-returns the same answer twice.
+The cheap form is short by twenty-five. Neither form is stable under a change of initialisation:
+across two initialisations the transported forecast gives 0.0225 and 0.0040 (5.7x apart) and the
+cheap form 0.0056 and 0.0025 (2.2x). The transport is the worse of the two by a wide margin, so on
+a real model it is not a small correction badly estimated, it is unusable. Given the seed, the
+cheap form does reproduce exactly: two separate processes both return 0.00251.
 
-Two comfortable explanations are ruled out. Estimating the injected term from 64 prompts instead of
-8 moves the forecast by 7% and in the wrong direction, so it is not biased low by a small batch. The
-live share measured on those 64 prompts still falls to zero by the fifth update, so the collapse is
+A comfortable explanation is ruled out. Estimating the injected term from 64 prompts instead of 8,
+from the same initialisation and changing nothing else, moves the forecast from 0.0025 to 0.0026,
+about 5% where a factor of 25 is needed. The share of prompts with a mixed group, measured on those
+64 prompts, still reaches zero at the fifth update and stays under 5% after, so the collapse is
 not a small-sample artefact. The shortfall is not an estimation problem.
 
-The reason is the outcome distribution. Three runs land at 0.350 and five at 0.217, within-group
-spread under 0.01 against a between-group gap of 0.133. A linearised model predicts the spread of a
-unimodal perturbation about one trajectory; a standard deviation is the wrong summary of this
-outcome for anyone.
+The reason is the outcome distribution. Three runs land at 0.346, 0.353 and 0.354, within 0.008 of
+each other, while the remaining five spread from 0.204 to 0.300. Whether that is exactly two modes
+is not something eight runs can settle, but the runs plainly end in groups rather than scattered
+about a centre. A linearised model predicts the spread of a unimodal perturbation about one
+trajectory; a standard deviation is the wrong summary of this outcome for anyone.
 
 What survives is the localisation. The kernel puts 90% of the variance in the first half of the run
 and the run stops injecting any after the fifth update, which reproduces across reruns.
