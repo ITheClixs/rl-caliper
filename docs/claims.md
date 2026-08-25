@@ -61,7 +61,7 @@ Legend for strength:
 | that shortfall is not an estimation artefact | `s7`: Sigma from 64 prompts gives 0.0052, and the live share still collapses | measured |
 | the transport is not reproducible on a real model | `s7`: two runs give 0.0225 and 0.0040 with transport, 5.7x apart, against 0.0056 and 0.0052 without | measured |
 | real RLVR runs separate into discrete outcome modes | `s7` at 0.5B: 3 runs at 0.350, 5 at 0.217, within-group spread under 0.01 | measured |
-| ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.07 at 7B | negative |
+| ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 
 ## Withdrawn or superseded
@@ -74,6 +74,10 @@ Legend for strength:
 | divergence is stationary | bounded over the horizons measured; the spectral radius exceeds one |
 
 ## Not claimed
+
+| at 7B the spread is 84% of the effect | `s6`: 8 runs, 0.203 -> 0.313, spread 0.0925, evaluation part 0.0055 | measured |
+| divergence does not accumulate at 7B either | `s6`: tail slope +0.09 against +1, over updates 10 to 20 | measured |
+| the shortfall is not an estimation problem | `s7`: same initialisation, 8 vs 64 prompts moves the forecast 0.0025 -> 0.0026 | measured |
 
 * an error bar for a frontier-scale run: the largest model measured is 7B, on short-answer tasks
 * that the forecast is usable on a real model as it stands: at a step size that produces learning

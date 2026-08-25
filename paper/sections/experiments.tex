@@ -494,14 +494,14 @@ and $0.21$, and compounding twelve such corrections moves $\|b\|$ by an amount t
 reproduce. On a real model the transport is not a small correction badly estimated, it is unusable,
 and dropping it leaves a quantity that still moves by a factor of two between initialisations.
 
-%% PENDING: restore the eight-versus-sixty-four prompt numbers once both variants have been
-%% rerun from the same seeded initialisation (runs s7_cheap3 and s7_wide2).
-An explanation that would have been comfortable is ruled out by the same table. The injected term is
-estimated from a batch of eight prompts, and once most groups are unanimous that sample is mostly
-zeros, so it could be biased low. Re-estimating it from sixty-four prompts moves the forecast by a
-few percent and in the wrong direction, and measured on those sixty-four prompts the live share
-still falls to zero by the fifth update, so the collapse is not a small-batch artefact either. The
-shortfall is not an estimation problem.
+An explanation that would have been comfortable is ruled out by the same table. The injected term
+is estimated from a batch of eight prompts, and once most groups are unanimous that sample is
+mostly zeros, so it could be biased low. Re-estimating it from sixty-four prompts, from the same
+initialisation and changing nothing else, moves the forecast from $0.0025$ to $0.0026$, about five
+percent where a factor of twenty-five is needed. Measured on those sixty-four prompts the share of
+prompts whose group is not unanimous still reaches zero at the fifth update and never exceeds five
+percent afterwards, so the collapse is not a small-batch artefact either. The shortfall is not an
+estimation problem.
 
 The reason for the shortfall is visible without any statistics. The eight held-out scores are not
 scattered around a centre. Three of them sit at $0.346$, $0.353$ and $0.354$, within $0.008$ of
