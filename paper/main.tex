@@ -87,6 +87,13 @@
   sizes untouched, and divergence then grows by a factor of $\numNullCoin$ over eighty updates instead of
   ending at $\numNullLearning$ of where it started.
 
+  Carried to a pretrained model it underpredicts, and we report that rather than a setting chosen
+  to avoid it: on Qwen2.5-0.5B the forecast is a factor of twelve short, because eight runs end in
+  two distinct groups rather than scattered around one. The mechanism survives even so --- a run's
+  first three batches correlate with its final score at $0.88$, and the kernel puts $92\%$ of the
+  variance in the first half of the run --- but the assumption that the amplification stays linear
+  does not.
+
   Two consequences and one caution. Since $Q_t \propto \Sigma_t/P$, run length does not enter and
   batch composition is the lever, with square-root returns --- and it is the beginning of a run that
   matters most, since the injected covariance is largest before the policy has learned anything; restricting $\Sigma_t$ to one of its
