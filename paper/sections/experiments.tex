@@ -434,6 +434,48 @@ phenomenon at two different places in \eqref{eq:adjoint}: one kills $\Sigma_t$, 
 $\nabla M$, and a practitioner who sees either will read a zero and conclude their pipeline is
 reproducible.
 
+\paragraph{Carrying the backward pass to a pretrained model.} Before the failure modes, the
+attempt they came out of. We ran the forecast end to end on Qwen2.5-0.5B-Instruct with LoRA
+adapters, twelve updates of plain gradient ascent --- the update the recursion is written for ---
+on a task the base model passes at $0.16$, and afterwards trained seven more seeds and measured
+what they did. The backward pass is the one in Algorithm~\ref{alg:forecast}, with the mean update
+field estimated from fresh rollouts under common random numbers.
+
+Two diagnostics came back before the comparison did, and both matter more than the comparison.
+
+The first is that the run stops injecting almost immediately. The fraction of prompts whose group
+is not unanimous falls from $0.5$ over the first four updates to essentially zero, so
+$\Sigma_t \approx 0$ from update five onwards and the forecast is, in effect, made from four
+updates out of twelve (Figure~\ref{fig:real-forecast}). This is the sampling collapse of
+Section~\ref{sec:metric} happening at a step size we chose to be conservative, on a task chosen to
+be hard for the model.
+
+The second is that the directional derivative is not reliably estimated. Taking $J b$ twice from
+independent draws of prompts gives two vectors whose cosine has a median between $0.07$ and $0.5$
+depending on the run --- that is, mostly noise at this batch size. On its own that would sink the
+method. It does not, because Section~\ref{sec:exp-forecast} has already established that the
+transport is worth about $2\%$: what we report is the cheap estimator of \eqref{eq:cheap} in all
+but name, and the quantity that is badly estimated is one the forecast barely uses.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/real_forecast.pdf}
+  \caption{The forecast on a pretrained model. \textbf{Left:} each update's share of it.
+  \textbf{Right:} the fraction of prompts still sampling more than one answer, which is what makes
+  the left panel end where it does.}
+  \label{fig:real-forecast}
+\end{figure}
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/real_forecast}
+  \caption{The forecast on Qwen2.5-0.5B against the spread it was made before seeing. The
+  evaluation's own binomial noise is subtracted to recover the seed term;
+  Appendix~\ref{app:power} simulates what that subtraction can resolve at this design.}
+  \label{tab:real-forecast}
+\end{table}
+
 \paragraph{The metric went blind.} On counting a letter in a word --- a task the base model
 already passes at $0.41$ --- twenty updates take the held-out pass rate to $\numSatScore$ and
 collapse the response distribution. All $\numSatPrompts$ held-out prompts then have a per-prompt
