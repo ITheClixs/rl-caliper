@@ -526,6 +526,20 @@ def table_numbers() -> None:
             # what one run can say about the effect: the spread as a share of the mean improvement
             "ScaleShare": f"{100 * spread / gain:.0f}",
         }
+        # the tail slope of divergence against update count: +1 is what accumulation requires
+        rows = outcome.get("divergence") or []
+        if len(rows) >= 3:
+            steps = np.array([r["step"] for r in rows], dtype=float)
+            values = np.array([r["mean"] for r in rows], dtype=float)
+            keep = steps >= steps.max() / 2
+            if keep.sum() >= 2:
+                slope = np.polyfit(np.log(steps[keep]), np.log(values[keep]), 1)[0]
+                macros["ScaleTailSlope"] = f"{slope:+.2f}"
+            full = np.polyfit(np.log(steps), np.log(values), 1)[0]
+            macros["ScaleFullSlope"] = f"{full:+.2f}"
+            macros["ScaleDivergenceEnd"] = f"{values[-1]:.2f}"
+            macros["ScaleDivergenceStart"] = f"{values[0]:.2f}"
+
 
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
