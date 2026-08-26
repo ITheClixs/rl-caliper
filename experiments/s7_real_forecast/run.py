@@ -39,6 +39,26 @@ def load_adapter(model, state):
     model.update(tree_unflatten([(k, mx.array(v)) for k, v in state.items()]))
 
 
+def optimiser_moments(trainer, order):
+    """Adam's m and v, flattened in the same order as the adapters themselves.
+
+    MLX stores them under `<parameter path>.m` and `.v`, so the two are gathered by walking the
+    adapter keys rather than the optimiser tree, which keeps the vectors aligned with the
+    gradient and the metric direction.
+    """
+    table = dict(tree_flatten(trainer.optimiser.state))
+    moments = {}
+    for name in ("m", "v"):
+        pieces = []
+        for key in order:
+            value = table.get(f"{key}.{name}")
+            if value is None:
+                return None
+            pieces.append(np.asarray(value).reshape(-1))
+        moments[name] = np.concatenate(pieces)
+    return moments
+
+
 def evaluate(trainer, items, samples, key):
     rates = []
     for item in items:
@@ -62,13 +82,27 @@ def train_run(model_name, config, corpus, initial, seed, store=None):
     key = mx.random.key(1000 + seed)
     rng = np.random.default_rng(7919 * (seed + 1))
     states = [adapter_state(trainer.model)] if store is not None else None
+    order = list(states[0]) if store is not None else None
+    # the moments as they stood *before* each update, which is where the sensitivity is taken
+    moments = [] if store is not None else None
     rates = []
     for _ in range(config.steps):
+        if store is not None:
+            before = optimiser_moments(trainer, order)
+            moments.append(
+                before
+                if before is not None
+                else {"m": np.zeros(flatten_like(states[0])), "v": np.zeros(flatten_like(states[0]))}
+            )
         info, key = trainer.step(corpus, rng, key)
         rates.append(info["pass_rate"])
         if store is not None:
             states.append(adapter_state(trainer.model))
-    return trainer, states, rates, key
+    return trainer, states, rates, key, moments
+
+
+def flatten_like(state):
+    return sum(np.asarray(v).size for v in state.values())
 
 
 def main() -> None:
@@ -96,6 +130,9 @@ def main() -> None:
                     help="hold the adjoint at grad M: the cheap form, one pass per update")
     ap.add_argument("--forecast-repeats", type=int, default=2,
                     help="independent forecasts from one run, to see how much the estimate moves")
+    ap.add_argument("--optimiser", default="sgd", choices=("sgd", "adam"),
+                    help="plain ascent is the update the recursion is written for; adam is what "
+                         "a practitioner uses, and carries the noise through its own state")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--store", default="runs/s7_forecast")
     args = ap.parse_args()
@@ -109,7 +146,7 @@ def main() -> None:
     config = RealRLConfig(
         group_size=args.group_size, prompts=args.prompts, blocks=8,
         max_tokens=args.max_tokens, lora_layers=args.lora_layers, steps=args.steps,
-        learning_rate=args.learning_rate, optimiser="sgd", seed=args.seed,
+        learning_rate=args.learning_rate, optimiser=args.optimiser, seed=args.seed,
     )
 
     model, tokenizer = load(args.model)
@@ -121,7 +158,7 @@ def main() -> None:
 
     # (1) one run, kept in full
     started = time.time()
-    trainer, states, rates, key = train_run(
+    trainer, states, rates, key, moments = train_run(
         args.model, config, corpus, initial, 0, store=store
     )
     # every run is scored with its own evaluation randomness. Sharing one key across seeds would
@@ -142,6 +179,7 @@ def main() -> None:
             epsilon=args.epsilon, batches=args.adjoint_batches,
             transport=not args.no_transport,
             variance_prompts=args.variance_prompts,
+            optimiser_states=(moments if config.optimiser == "adam" else None),
             # the diagnostic costs a second backward pass, and has nothing to check without one
             check_agreement=(repeat == 0 and not args.no_transport),
         ))
@@ -152,7 +190,7 @@ def main() -> None:
         prediction = RealForecast(
             variance=0.0, std=0.0, kernel=[], adjoint_norm=[],
             metric_value=float(first_rates.mean()), jvp_agreement=[], live_share=[],
-            init_checksum=float("nan"),
+            second_moment_floor=[], init_checksum=float("nan"),
         )
         repeats = [prediction]
     prediction = repeats[0]
@@ -182,7 +220,7 @@ def main() -> None:
     traces = [rates]
     for seed in range(1, args.seeds):
         started = time.time()
-        trainer, _, rates, _ = train_run(args.model, config, corpus, initial, seed)
+        trainer, _, rates, _, _ = train_run(args.model, config, corpus, initial, seed)
         held, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555 + 101 * seed))
         scores.append(float(held.mean()))
         per_prompt.append(held.tolist())

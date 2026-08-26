@@ -147,6 +147,35 @@ def hessian_vector(
     return (forward - backward) / (2 * scale)
 
 
+def adam_sensitivity(
+    moment: np.ndarray,
+    second: np.ndarray,
+    mean_gradient: np.ndarray,
+    step_size: float,
+    beta1: float = 0.9,
+    beta2: float = 0.999,
+    epsilon: float = 1e-8,
+) -> np.ndarray:
+    """`|d theta' / d g_hat|` for one Adam update, evaluated at the mean gradient.
+
+    Adam applies `theta' = theta - lr m' / (sqrt(v') + eps)` coordinate-wise, so its sensitivity
+    to the gradient it was handed is diagonal and the injected covariance is `B Sigma B` with
+    `B` that diagonal. Two terms contribute: the moment picks the gradient up directly, and the
+    second moment moves the denominator underneath it.
+
+    `moment` and `second` are the optimiser state *before* the update. The magnitude is what the
+    forecast needs, since a variance does not see the sign.
+    """
+    m_new = beta1 * moment + (1.0 - beta1) * mean_gradient
+    v_new = beta2 * second + (1.0 - beta2) * mean_gradient**2
+    root = np.sqrt(np.maximum(v_new, 0.0))
+    denom = root + epsilon
+    direct = (1.0 - beta1) / denom
+    # d/dg of 1/(sqrt(v') + eps), which is where Adam's normalisation enters
+    through_v = m_new * (1.0 - beta2) * mean_gradient / (np.maximum(root, 1e-30) * denom**2)
+    return np.abs(step_size * (direct - through_v))
+
+
 @dataclass
 class RealForecast:
     variance: float
@@ -156,6 +185,7 @@ class RealForecast:
     metric_value: float
     jvp_agreement: list[float]  # cosine between two independent estimates of J b
     live_share: list[float]  # fraction of prompts still sampling more than one answer
+    second_moment_floor: list[float]  # share of coordinates with v = 0, where Adam is singular
     init_checksum: float  # identifies the adapter initialisation this run started from
 
 
@@ -173,6 +203,8 @@ def forecast(
     check_agreement: bool = True,
     transport: bool = True,
     variance_prompts: int | None = None,
+    optimiser_states: list[dict] | None = None,
+    adam: tuple[float, float, float] | None = None,
 ) -> RealForecast:
     """Carry the metric gradient back along the stored states of one run.
 
@@ -184,6 +216,11 @@ def forecast(
 
     `transport=False` holds the adjoint at `grad M` and skips the Hessian-vector products
     entirely, which is the cheap form: one pass per update instead of three.
+
+    `optimiser_states[t]` are Adam's moments before update t. Given them, the update's
+    sensitivity to the gradient it was handed is the diagonal of `adam_sensitivity` rather than
+    the plain `eta`, so the injected term becomes `Var_i(b' B z_i) / P` with `B` that diagonal.
+    Without them the plain-ascent form `eta^2 Var_i(b' z_i) / P` is used.
 
     With `check_agreement`, each Hessian-vector product is estimated a second time from an
     independent draw of prompts and the cosine between the two is recorded. A forecast whose
@@ -202,14 +239,39 @@ def forecast(
     kernel = [0.0] * steps
     norms = [0.0] * steps
     live_share = [0.0] * steps
+    floor = [0.0] * steps
     agreement = []
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
+        if optimiser_states is not None:
+            # the update the run actually took was Adam's, so the noise enters through its
+            # diagonal preconditioner rather than through eta alone
+            store = optimiser_states[t]
+            beta1, beta2, eps = adam if adam is not None else (0.9, 0.999, 1e-8)
+            mean = mean_update(trainer, corpus, seed + 700 + t, key, batches)
+            if not np.all(np.isfinite(mean)):
+                raise FloatingPointError(
+                    f"mean update at step {t} is not finite; the run has diverged"
+                )
+            scale = adam_sensitivity(
+                store["m"], store["v"], mean, step_size, beta1, beta2, eps
+            )
+            # Adam is singular at v = 0: the step is then eta m / eps, so the sensitivity is
+            # bounded only by epsilon and the linearisation says nothing. Record how much of the
+            # state is still there rather than reporting a number that rests on it.
+            floor[t] = float(np.mean(store["v"] <= 0.0))
+            direction = adjoint * scale
+        else:
+            direction = adjoint
         projected, _, live, key = projected_batch_variance(
-            trainer, corpus, np.random.default_rng(seed + 100 + t), key, adjoint,
+            trainer, corpus, np.random.default_rng(seed + 100 + t), key, direction,
             prompts=variance_prompts,
         )
-        kernel[t] = step_size**2 * projected / n_prompts
+        kernel[t] = (
+            projected / n_prompts
+            if optimiser_states is not None
+            else step_size**2 * projected / n_prompts
+        )
         live_share[t] = live
         norms[t] = float(np.linalg.norm(adjoint))
         if not transport:
@@ -233,5 +295,6 @@ def forecast(
         metric_value=metric,
         jvp_agreement=agreement,
         live_share=live_share,
+        second_moment_floor=floor,
         init_checksum=checksum,
     )
