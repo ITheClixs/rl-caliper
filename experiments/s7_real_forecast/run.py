@@ -190,7 +190,8 @@ def main() -> None:
         prediction = RealForecast(
             variance=0.0, std=0.0, kernel=[], adjoint_norm=[],
             metric_value=float(first_rates.mean()), jvp_agreement=[], live_share=[],
-            second_moment_floor=[], init_checksum=float("nan"),
+            second_moment_floor=[], split_variance=(float("nan"), float("nan")),
+            init_checksum=float("nan"),
         )
         repeats = [prediction]
     prediction = repeats[0]
@@ -199,6 +200,9 @@ def main() -> None:
     print(f"forecast: sd {prediction.std:.5f}, and across {len(repeats)} independent "
           f"estimates from the same run the sd of that number is {spread_of_forecasts:.5f}",
           flush=True)
+    lo, hi = prediction.split_variance
+    print(f"two half-sample estimates of the same forecast: "
+          f"{np.sqrt(max(lo, 0)):.5f} and {np.sqrt(max(hi, 0)):.5f}", flush=True)
     print(f"kernel {np.round(prediction.kernel, 8).tolist()}", flush=True)
     print(f"prompts still sampling more than one answer, per update: "
           f"{np.round(prediction.live_share, 2).tolist()}", flush=True)

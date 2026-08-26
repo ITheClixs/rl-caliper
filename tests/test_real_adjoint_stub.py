@@ -140,7 +140,7 @@ def test_the_forecast_matches_the_closed_form_recursion(stub):
     )
 
     # the same quantity, assembled: S_T from the recursion, contracted against grad M
-    projected, _, _, _ = ra.projected_batch_variance(
+    projected, _, _, _, _ = ra.projected_batch_variance(
         stub, corpus, np.random.default_rng(0), mx.random.key(0), np.ones(DIM)
     )
     assert projected >= 0.0
@@ -163,7 +163,7 @@ def test_a_unanimous_group_injects_nothing(stub):
         )
 
     stub.rollout = unanimous
-    _, _, live, _ = ra.projected_batch_variance(
+    _, _, live, _, _ = ra.projected_batch_variance(
         stub, [{}] * stub.config.prompts, np.random.default_rng(0), mx.random.key(0),
         np.ones(DIM),
     )

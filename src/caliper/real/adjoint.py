@@ -98,11 +98,24 @@ def projected_batch_variance(
             live += 1
         _, grads = trainer._gradient([sequences[i]], [masks[i]], [advantage])
         projections.append(float(direction @ ascent_direction(grads)))
+    # Two disjoint halves of the same sample give two independent estimates of the same
+    # variance at no extra rollout cost, which is what says whether the estimate is stable
+    # before it is believed. The prompts were drawn at random, so splitting them in order is
+    # already a random split.
+    middle = len(projections) // 2
+    if middle >= 2:
+        halves = (
+            float(np.var(projections[:middle], ddof=1)),
+            float(np.var(projections[middle:], ddof=1)),
+        )
+    else:
+        halves = (float("nan"), float("nan"))
     return (
         float(np.var(projections, ddof=1)),
         float(rewards.mean()),
         live / max(len(items), 1),
         key,
+        halves,
     )
 
 
@@ -200,6 +213,7 @@ class RealForecast:
     jvp_agreement: list[float]  # cosine between two independent estimates of J b
     live_share: list[float]  # fraction of prompts still sampling more than one answer
     second_moment_floor: list[float]  # share of coordinates with v = 0, where Adam is singular
+    split_variance: tuple[float, float]  # two independent estimates, from disjoint half-samples
     init_checksum: float  # identifies the adapter initialisation this run started from
 
 
@@ -254,6 +268,7 @@ def forecast(
     norms = [0.0] * steps
     live_share = [0.0] * steps
     floor = [0.0] * steps
+    split_kernel = [[0.0] * steps, [0.0] * steps]
     agreement = []
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
@@ -277,15 +292,14 @@ def forecast(
             direction = adjoint * scale
         else:
             direction = adjoint
-        projected, _, live, key = projected_batch_variance(
+        projected, _, live, key, halves = projected_batch_variance(
             trainer, corpus, np.random.default_rng(seed + 100 + t), key, direction,
             prompts=variance_prompts,
         )
-        kernel[t] = (
-            projected / n_prompts
-            if optimiser_states is not None
-            else step_size**2 * projected / n_prompts
-        )
+        factor = 1.0 if optimiser_states is not None else step_size**2
+        kernel[t] = factor * projected / n_prompts
+        split_kernel[0][t] = factor * halves[0] / n_prompts
+        split_kernel[1][t] = factor * halves[1] / n_prompts
         live_share[t] = live
         norms[t] = float(np.linalg.norm(adjoint))
         if not transport:
@@ -310,5 +324,6 @@ def forecast(
         jvp_agreement=agreement,
         live_share=live_share,
         second_moment_floor=floor,
+        split_variance=(float(sum(split_kernel[0])), float(sum(split_kernel[1]))),
         init_checksum=checksum,
     )
