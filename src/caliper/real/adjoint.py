@@ -166,13 +166,27 @@ def adam_sensitivity(
     `moment` and `second` are the optimiser state *before* the update. The magnitude is what the
     forecast needs, since a variance does not see the sign.
     """
+    # The moments arrive from the optimiser in single precision, where the product below
+    # underflows to zero on any coordinate with no gradient and no accumulated second moment,
+    # turning the ratio into 0/0. Do the arithmetic in double.
+    moment = np.asarray(moment, dtype=np.float64)
+    second = np.asarray(second, dtype=np.float64)
+    mean_gradient = np.asarray(mean_gradient, dtype=np.float64)
+
     m_new = beta1 * moment + (1.0 - beta1) * mean_gradient
     v_new = beta2 * second + (1.0 - beta2) * mean_gradient**2
     root = np.sqrt(np.maximum(v_new, 0.0))
     denom = root + epsilon
     direct = (1.0 - beta1) / denom
-    # d/dg of 1/(sqrt(v') + eps), which is where Adam's normalisation enters
-    through_v = m_new * (1.0 - beta2) * mean_gradient / (np.maximum(root, 1e-30) * denom**2)
+    # d/dg of 1/(sqrt(v') + eps), which is where Adam's normalisation enters. The term carries a
+    # factor of the gradient, so it tends to zero as the coordinate goes quiet even though the
+    # ratio that expresses it does not; take that limit rather than evaluating 0/0.
+    through_v = np.zeros_like(m_new)
+    alive = root > 0.0
+    through_v[alive] = (
+        m_new[alive] * (1.0 - beta2) * mean_gradient[alive]
+        / (root[alive] * denom[alive] ** 2)
+    )
     return np.abs(step_size * (direct - through_v))
 
 

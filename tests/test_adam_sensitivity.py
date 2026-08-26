@@ -44,3 +44,33 @@ def test_a_larger_second_moment_damps_the_sensitivity():
     small = adam_sensitivity(m, np.full(dim, 1e-9), grad, 3e-4, 0.9, 0.999, 1e-8)
     large = adam_sensitivity(m, np.full(dim, 1e-4), grad, 3e-4, 0.9, 0.999, 1e-8)
     assert np.all(large < small)
+
+
+def test_the_sensitivity_survives_a_dead_coordinate_in_single_precision():
+    """A coordinate with no gradient and no accumulated second moment must give a number.
+
+    MLX hands the moments back in float32. There `max(root, 1e-30) * (root + eps)**2` underflows
+    to exactly zero when both the gradient and the state are zero, and the ratio becomes 0/0.
+    The limit is zero: the term through `v` carries a factor of the gradient itself.
+    """
+    dim = 5
+    z32 = np.zeros(dim, dtype=np.float32)
+    out = adam_sensitivity(z32, z32, z32, 2e-5)
+    assert np.all(np.isfinite(out)), out
+    # only the direct term survives, bounded by epsilon
+    np.testing.assert_allclose(out, 2e-5 * 0.1 / 1e-8, rtol=1e-6)
+
+
+def test_mixed_precision_agrees_with_double():
+    rng = np.random.default_rng(1)
+    dim = 32
+    m = rng.normal(scale=1e-4, size=dim)
+    v = np.abs(rng.normal(scale=1e-7, size=dim))
+    g = rng.normal(scale=1e-4, size=dim)
+    v[:8] = 0.0
+    g[:4] = 0.0
+    single = adam_sensitivity(m.astype(np.float32), v.astype(np.float32),
+                              g.astype(np.float32), 2e-5)
+    double = adam_sensitivity(m, v, g, 2e-5)
+    assert np.all(np.isfinite(single))
+    np.testing.assert_allclose(single, double, rtol=1e-3)
