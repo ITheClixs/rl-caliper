@@ -643,9 +643,8 @@ The consequence is not that the training failed. On average it worked. It is tha
 this recipe reports a number whose run-to-run uncertainty is nearly as large as the effect being
 claimed, so the ordinary practice of running once and comparing against a baseline cannot separate
 a real improvement from a lucky seed at this scale. This is exactly the case the forecast of
-Section~\ref{sec:metric} is meant for, and it is also the case where we cannot supply one, because
-these runs use Adam and the recursion is written for plain ascent. Section~\ref{sec:discussion}
-says what that would cost to fix.
+Section~\ref{sec:metric} is meant for, and Section~\ref{sec:exp-adam-scale} supplies one for the
+same model under the same optimiser, twelve updates rather than twenty.
 
 \begin{table}[t]
   \centering
