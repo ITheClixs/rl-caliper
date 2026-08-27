@@ -390,3 +390,49 @@ def forecast(
         split_variance=(float(sum(split_kernel[0])), float(sum(split_kernel[1]))),
         init_checksum=checksum,
     )
+
+
+def real_curvature_residual(
+    trainer,
+    state: dict,
+    corpus,
+    key,
+    step_size: float,
+    seed: int,
+    directions: int = 2,
+    batches: int = 1,
+) -> tuple[float, float]:
+    """The one-run curvature residual of `caliper.exact.curvature`, on a pretrained model.
+
+    Probes the mean update field at `theta`, `theta + r d` and `theta - r d`, where `d` comes
+    from the difference of two independent batch gradients at this state and `r` is how far one
+    update of that noise moves the parameters. Returns the residual averaged over directions and
+    the radius it used.
+
+    Three mean-update evaluations per direction, sharing the centre, and no replica of the run.
+    """
+    centre = mean_update(trainer, corpus, seed, key, batches)
+    residuals = []
+    radius = 0.0
+    for i in range(directions):
+        first = mean_update(trainer, corpus, seed + 11 * (i + 1), key, batches)
+        second = mean_update(trainer, corpus, seed + 101 * (i + 1), key, batches)
+        delta = first - second
+        norm = float(np.linalg.norm(delta))
+        if norm == 0.0:
+            continue
+        unit = delta / norm
+        # one update of noise: the step times the spread of the batch gradient about its mean
+        radius = float(step_size * norm / np.sqrt(2.0))
+        if radius == 0.0:
+            continue
+        displaced(trainer, state, unit, radius)
+        plus = mean_update(trainer, corpus, seed + 7, key, batches)
+        displaced(trainer, state, unit, -radius)
+        minus = mean_update(trainer, corpus, seed + 7, key, batches)
+        displaced(trainer, state, np.zeros_like(unit), 0.0)
+        bend = float(np.linalg.norm(plus + minus - 2.0 * centre))
+        travel = float(np.linalg.norm(plus - minus))
+        if travel > 0.0:
+            residuals.append(bend / travel)
+    return (float(np.mean(residuals)) if residuals else 0.0), radius
