@@ -939,7 +939,7 @@ def table_real_forecast() -> None:
     band = result.get("resolved_interval")
     if band:
         lines.append(
-            f"\\quad its $95\\%$ interval & [{band['lo']:.4f}, {band['hi']:.4f}] \\\\"
+            f"\\quad its nominal $95\\%$ interval & [{band['lo']:.4f}, {band['hi']:.4f}] \\\\"
         )
     lines += [
         r"\midrule",

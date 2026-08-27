@@ -32,8 +32,11 @@ RLOO has $W_1 = 1-p$ and $W_0 = -p$, hence $\lambda \equiv 1$: it is unbiased.
 GRPO with a mean baseline has $\lambda = (G-1)/G$, independent of $p$: it is RLOO multiplied by a
 constant. Standardised GRPO has a $\lambda(p, G)$ with no closed form but an exact binomial sum.
 
-So no member of this family points in the wrong direction \emph{on any individual prompt}: each
-computes $h(x)$ scaled by a positive weight. This does not carry over to the aggregate. The family
+So none of the estimators in Table~\ref{tab:family} points in the wrong direction \emph{on any
+individual prompt}: each computes $h(x)$ scaled by a positive weight, for every $p \in (0,1)$ and
+every $G$. That is a property of those weight tables and not of the family, since an arbitrary
+$w(k,r)$ can plainly give $\lambda < 0$; the estimators in use happen to lie in the subset where
+$W_1 > W_0$ throughout. This does not carry over to the aggregate. The family
 optimises the reweighted field $\E_x[\lambda(p(x), G)\, h(x)]$, which need not be collinear with
 $\E_x[h(x)]$ once prompts disagree, so a $p$-dependent $\lambda$ can rotate the direction the run
 actually follows. Standardisation is therefore not \emph{merely} a variance-reduction transformation: under binary

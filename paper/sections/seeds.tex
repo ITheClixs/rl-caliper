@@ -1,10 +1,16 @@
 \section{From one run to the spread of its result}
 \label{sec:seeds}
 
-Fix a policy $\theta_0$ and start two runs from it. They see the same prompts and the same
-objective, and differ only in the randomness of their rollouts. This is the comparison a
-practitioner makes when they change a seed and rerun, and the question this section answers is how
-far apart the numbers they report end up, using only one of the runs.
+Fix a policy $\theta_0$ and start two runs from it. They begin from the same parameters, the same
+optimiser state, the same data distribution and the same recipe, and independently draw every
+stochastic quantity the training seed controls: which prompts each batch contains and which
+responses are sampled for them. That is the comparison a practitioner makes when they change a
+seed and rerun, and it is the estimand throughout, so the two terms of
+Section~\ref{sec:setup} both contribute: $\Sb$ carries the uncertainty in which prompts were
+drawn and $\Sw$ the uncertainty in which responses were sampled. Holding the prompt schedule
+fixed and varying only the rollouts would condition the first away, and we do not do that
+anywhere. The question this section answers is how far apart the numbers two such runs report
+end up, using only one of them.
 
 \subsection{Noise is filtered, not accumulated}
 
@@ -103,9 +109,10 @@ definite, and Section~\ref{sec:exp-spectrum} finds that it is not; what it requi
 directions carrying the variance are ones the objective bends. The claim is testable directly by
 removing the signal while leaving the noise untouched, which Section~\ref{sec:exp-seeds} does.
 
-\paragraph{The level is set by batch composition.} $Q_t \propto \Sigma_t/P$, so halving the
-injected noise requires quadrupling the batch, and nothing in \eqref{eq:unrolled} depends on the
-number of updates once the sum has converged.
+\paragraph{The level is set by batch composition.} $Q_t \propto \Sigma_t/P$, so doubling the
+prompt batch halves the injected \emph{covariance} and quadrupling it halves the corresponding
+standard-deviation scale. Nothing in \eqref{eq:unrolled} depends on the number of updates once the
+sum has converged.
 
 \paragraph{A memory horizon, if the filter is sharp enough to make one.} If $\Phi_{T,t+1}$
 decays with $T - t$, the sum in \eqref{eq:unrolled} is dominated by its last terms and the final

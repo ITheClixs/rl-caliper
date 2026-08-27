@@ -490,8 +490,10 @@ but name, and the quantity that is badly estimated is one the forecast barely us
   \small
   \input{tables/real_forecast}
   \caption{The forecast on Qwen2.5-0.5B against the spread it was made before seeing. The
-  evaluation's own binomial noise is subtracted to recover the seed term;
-  Appendix~\ref{app:power} simulates what that subtraction can resolve at this design.}
+  evaluation's own binomial noise is subtracted to recover the seed term. The interval is a
+  percentile bootstrap at its nominal level, and Appendix~\ref{app:power} simulates its actual
+  coverage at this design as $68\%$ to $88\%$: it is narrower than it claims, so it should be
+  read as indicative rather than as a calibrated $95\%$ interval.}
   \label{tab:real-forecast}
 \end{table}
 
