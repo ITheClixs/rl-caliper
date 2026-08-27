@@ -1,0 +1,49 @@
+{
+  "manifest": {
+    "git_sha": "70456cfcb55444e0db6586815e31b16f8c73b752",
+    "config_hash": "3f726c5dd192",
+    "config": {
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "label": "7b-lr0.02",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "eval_prompts": 48,
+      "eval_samples": 16,
+      "seeds": 1,
+      "steps": 6,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.02,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": true,
+      "variance_prompts": null,
+      "no_transport": true,
+      "forecast_repeats": 2,
+      "seed": 0,
+      "store": "runs/s7_calib7b"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787730361.548673,
+    "wall_clock": 1787731445.402369
+  },
+  "result": {
+    "label": "7b-lr0.02",
+    "transport": false,
+    "predicted_std": 0.0,
+    "predicted_variance": 0.0,
+    "kernel": [],
+    "adjoint_norm": [],
+    "jvp_agreement": [],
+    "live_share": [],
+    "init_checksum": NaN,
+    "held_out_scores": [
+      0.3606770833333333
+    ],
+    "base_pass_rate": 0.203125,
+    "eval_key_per_seed": true
+  }
+}

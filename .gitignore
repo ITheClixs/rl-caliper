@@ -10,7 +10,14 @@ build/
 dist/
 
 # experiment outputs
-/runs/
+# Run records are the evidence behind every figure and table, so they are committed: all 97
+# of them come to under 3 MB. What is excluded is the model weights they reference, which are
+# large and reconstructible by rerunning.
+/runs/*/*adapters*/
+/runs/s3_adapters/
+/runs/s6_adapters/
+/runs/**/*.npz
+/runs/**/*.safetensors
 /data/
 /figures/
 *.sqlite

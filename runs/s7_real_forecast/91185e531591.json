@@ -1,0 +1,85 @@
+{
+  "manifest": {
+    "git_sha": "95b40b8b4c05065f78fe81629582f3f253075412",
+    "config_hash": "91185e531591",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "qwen2.5-0.5b-wide",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "eval_prompts": 48,
+      "eval_samples": 16,
+      "seeds": 1,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.0005,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 1,
+      "skip_forecast": false,
+      "variance_prompts": 64,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "seed": 0,
+      "store": "runs/s7_wide"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787653008.452235
+  },
+  "result": {
+    "label": "qwen2.5-0.5b-wide",
+    "transport": false,
+    "predicted_std": 0.005201857093078284,
+    "predicted_variance": 2.705931721680885e-05,
+    "kernel": [
+      4.189881935269591e-06,
+      7.793987250873374e-06,
+      3.419076892048099e-06,
+      5.015154546695051e-06,
+      0.0,
+      0.0,
+      4.348569149721786e-06,
+      0.0,
+      7.146766290393901e-09,
+      1.3809309649844517e-08,
+      2.2716913662607112e-06,
+      0.0
+    ],
+    "adjoint_norm": [
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991,
+      0.9422145485877991
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.5625,
+      0.71875,
+      0.5625,
+      0.484375,
+      0.0,
+      0.0,
+      0.0625,
+      0.0,
+      0.015625,
+      0.03125,
+      0.015625,
+      0.0
+    ],
+    "held_out_scores": [
+      0.3541666666666667
+    ],
+    "base_pass_rate": 0.16276041666666666
+  }
+}

@@ -1,0 +1,542 @@
+{
+  "manifest": {
+    "git_sha": "2aed49224506309cecf05c82fa58a260d4ed6e7c",
+    "config_hash": "e4739c100256",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "prompt_lengths": [
+        64,
+        256,
+        1024
+      ],
+      "response_lengths": [
+        64,
+        256,
+        1024
+      ],
+      "group_sizes": [
+        1,
+        2,
+        4,
+        8,
+        16,
+        32
+      ],
+      "prompts": 8,
+      "repeats": 8
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787489277.234564
+  },
+  "result": {
+    "timings": [
+      {
+        "prompt_length": 64,
+        "group_size": 1,
+        "streams": 8,
+        "prefill_seconds": 0.17730267187289428,
+        "decode_seconds_per_token": 0.014010510509251617
+      },
+      {
+        "prompt_length": 64,
+        "group_size": 2,
+        "streams": 16,
+        "prefill_seconds": 0.17845181250595488,
+        "decode_seconds_per_token": 0.022966807373450138
+      },
+      {
+        "prompt_length": 64,
+        "group_size": 4,
+        "streams": 32,
+        "prefill_seconds": 0.178655901007005,
+        "decode_seconds_per_token": 0.025369895869516768
+      },
+      {
+        "prompt_length": 64,
+        "group_size": 8,
+        "streams": 64,
+        "prefill_seconds": 0.17879392186296172,
+        "decode_seconds_per_token": 0.03173163012252189
+      },
+      {
+        "prompt_length": 64,
+        "group_size": 16,
+        "streams": 128,
+        "prefill_seconds": 0.17975291663606185,
+        "decode_seconds_per_token": 0.05814573436509818
+      },
+      {
+        "prompt_length": 64,
+        "group_size": 32,
+        "streams": 256,
+        "prefill_seconds": 0.17981344800500665,
+        "decode_seconds_per_token": 0.10893499999656342
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 1,
+        "streams": 8,
+        "prefill_seconds": 0.7141193958668737,
+        "decode_seconds_per_token": 0.01458507812640164
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 2,
+        "streams": 16,
+        "prefill_seconds": 0.7205741197394673,
+        "decode_seconds_per_token": 0.023842765629524365
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 4,
+        "streams": 32,
+        "prefill_seconds": 0.7198279479925986,
+        "decode_seconds_per_token": 0.02732344799733255
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 8,
+        "streams": 64,
+        "prefill_seconds": 0.7261236771300901,
+        "decode_seconds_per_token": 0.034576317615574226
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 16,
+        "streams": 128,
+        "prefill_seconds": 0.7263543333683629,
+        "decode_seconds_per_token": 0.06465736974496394
+      },
+      {
+        "prompt_length": 256,
+        "group_size": 32,
+        "streams": 256,
+        "prefill_seconds": 0.7698433697369182,
+        "decode_seconds_per_token": 0.13024496362777427
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 1,
+        "streams": 8,
+        "prefill_seconds": 3.8374808646331076,
+        "decode_seconds_per_token": 0.016731739495298825
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 2,
+        "streams": 16,
+        "prefill_seconds": 4.474747489628498,
+        "decode_seconds_per_token": 0.03297876562282909
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 4,
+        "streams": 32,
+        "prefill_seconds": 4.613718250009697,
+        "decode_seconds_per_token": 0.04709684374392964
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 8,
+        "streams": 64,
+        "prefill_seconds": 4.711971588505548,
+        "decode_seconds_per_token": 0.05395207287801895
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 16,
+        "streams": 128,
+        "prefill_seconds": 4.760654630124918,
+        "decode_seconds_per_token": 0.0984899687464349
+      },
+      {
+        "prompt_length": 1024,
+        "group_size": 32,
+        "streams": 256,
+        "prefill_seconds": 4.89912586461287,
+        "decode_seconds_per_token": 0.36584154175943695
+      }
+    ],
+    "ratios": [
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 1,
+        "cost_ratio": 0.1977339973575277,
+        "inflation": 1.0944103423111131
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 2,
+        "cost_ratio": 0.24281211794625482,
+        "inflation": 1.1148148357221725
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 4,
+        "cost_ratio": 0.4401276958473577,
+        "inflation": 1.2000532054235586
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 8,
+        "cost_ratio": 0.7043205831712877,
+        "inflation": 1.3054962976474838
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 16,
+        "cost_ratio": 0.7728551311579877,
+        "inflation": 1.3314860611955304
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 64,
+        "group_size": 32,
+        "cost_ratio": 0.8253244963082537,
+        "inflation": 1.3510457047443858
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 1,
+        "cost_ratio": 0.049433499339381924,
+        "inflation": 1.0244186152835089
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 2,
+        "cost_ratio": 0.060703029486563705,
+        "inflation": 1.029904378807355
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 4,
+        "cost_ratio": 0.11003192396183943,
+        "inflation": 1.0535805256181605
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 8,
+        "cost_ratio": 0.1760801457928219,
+        "inflation": 1.084472289084798
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 16,
+        "cost_ratio": 0.1932137827894969,
+        "inflation": 1.0923432531899013
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 256,
+        "group_size": 32,
+        "cost_ratio": 0.20633112407706342,
+        "inflation": 1.0983310630575207
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 1,
+        "cost_ratio": 0.012358374834845481,
+        "inflation": 1.0061602133034506
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 2,
+        "cost_ratio": 0.015175757371640926,
+        "inflation": 1.007559307123725
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 4,
+        "cost_ratio": 0.027507980990459858,
+        "inflation": 1.0136606833602948
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 8,
+        "cost_ratio": 0.04402003644820548,
+        "inflation": 1.0217729867481355
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 16,
+        "cost_ratio": 0.04830344569737423,
+        "inflation": 1.023866908195286
+      },
+      {
+        "prompt_length": 64,
+        "response_length": 1024,
+        "group_size": 32,
+        "cost_ratio": 0.051582781019265854,
+        "inflation": 1.0254671038211152
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 1,
+        "cost_ratio": 0.7650363929296811,
+        "inflation": 1.3285467221478064
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 2,
+        "cost_ratio": 0.9444349532159353,
+        "inflation": 1.394429974296284
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 4,
+        "cost_ratio": 1.646543538499588,
+        "inflation": 1.6268200694912722
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 8,
+        "cost_ratio": 2.6250759450560386,
+        "inflation": 1.9039632205103223
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 16,
+        "cost_ratio": 2.808474641921764,
+        "inflation": 1.9515313581702356
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 64,
+        "group_size": 32,
+        "cost_ratio": 2.955367133953239,
+        "inflation": 1.988810482160942
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 1,
+        "cost_ratio": 0.19125909823242027,
+        "inflation": 1.0914481656186978
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 2,
+        "cost_ratio": 0.23610873830398382,
+        "inflation": 1.1118042715802021
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 4,
+        "cost_ratio": 0.411635884624897,
+        "inflation": 1.1881228407134075
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 8,
+        "cost_ratio": 0.6562689862640096,
+        "inflation": 1.28696114403816
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 16,
+        "cost_ratio": 0.702118660480441,
+        "inflation": 1.3046526972648471
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 256,
+        "group_size": 32,
+        "cost_ratio": 0.7388417834883098,
+        "inflation": 1.318651501909549
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 1,
+        "cost_ratio": 0.047814774558105066,
+        "inflation": 1.0236282404066943
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 2,
+        "cost_ratio": 0.059027184575995956,
+        "inflation": 1.0290904647192083
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 4,
+        "cost_ratio": 0.10290897115622424,
+        "inflation": 1.0501947301125751
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 8,
+        "cost_ratio": 0.1640672465660024,
+        "inflation": 1.078919481039249
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 16,
+        "cost_ratio": 0.17552966512011026,
+        "inflation": 1.084218458208543
+      },
+      {
+        "prompt_length": 256,
+        "response_length": 1024,
+        "group_size": 32,
+        "cost_ratio": 0.18471044587207744,
+        "inflation": 1.0884440481127533
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 1,
+        "cost_ratio": 3.5836464299925095,
+        "inflation": 2.140945218821002
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 2,
+        "cost_ratio": 4.240178684980592,
+        "inflation": 2.289143657567299
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 4,
+        "cost_ratio": 6.122647882593465,
+        "inflation": 2.6688289346815512
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 8,
+        "cost_ratio": 10.917030934008123,
+        "inflation": 3.4521052901103877
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 16,
+        "cost_ratio": 12.084110419359948,
+        "inflation": 3.617196486142265
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 64,
+        "group_size": 32,
+        "cost_ratio": 6.695693770930944,
+        "inflation": 2.7741113479691015
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 1,
+        "cost_ratio": 0.8959116074981274,
+        "inflation": 1.3769210607359186
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 2,
+        "cost_ratio": 1.060044671245148,
+        "inflation": 1.4352855713220098
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 4,
+        "cost_ratio": 1.5306619706483662,
+        "inflation": 1.5908054471393938
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 8,
+        "cost_ratio": 2.7292577335020307,
+        "inflation": 1.931128616509535
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 16,
+        "cost_ratio": 3.021027604839987,
+        "inflation": 2.0052500105572837
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 256,
+        "group_size": 32,
+        "cost_ratio": 1.673923442732736,
+        "inflation": 1.6352135771001708
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 1,
+        "cost_ratio": 0.22397790187453184,
+        "inflation": 1.106335347837414
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 2,
+        "cost_ratio": 0.265011167811287,
+        "inflation": 1.1247271526069276
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 4,
+        "cost_ratio": 0.38266549266209154,
+        "inflation": 1.175867974162955
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 8,
+        "cost_ratio": 0.6823144333755077,
+        "inflation": 1.297040644457801
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 16,
+        "cost_ratio": 0.7552569012099968,
+        "inflation": 1.3248610875144597
+      },
+      {
+        "prompt_length": 1024,
+        "response_length": 1024,
+        "group_size": 32,
+        "cost_ratio": 0.418480860683184,
+        "inflation": 1.1909999415126702
+      }
+    ]
+  }
+}

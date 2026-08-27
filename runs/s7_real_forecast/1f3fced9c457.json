@@ -1,0 +1,58 @@
+{
+  "manifest": {
+    "git_sha": "fab499a94f1e3bcdd7b9b8c48b51d60f7bde752c",
+    "config_hash": "1f3fced9c457",
+    "config": {
+      "model": "mlx-community/SmolLM2-135M-Instruct",
+      "label": "smoke",
+      "family": "count_letter",
+      "corpus_size": 32,
+      "eval_prompts": 6,
+      "eval_samples": 4,
+      "seeds": 3,
+      "steps": 3,
+      "prompts": 4,
+      "group_size": 4,
+      "max_tokens": 20,
+      "learning_rate": 0.002,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 1,
+      "seed": 0,
+      "store": "runs/s7_forecast"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787597949.016665
+  },
+  "result": {
+    "label": "smoke",
+    "predicted_std": 0.0,
+    "predicted_variance": 0.0,
+    "kernel": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "adjoint_norm": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "held_out_scores": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "observed_spread": {
+      "std": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "mean": 0.0,
+      "n_runs": 3
+    },
+    "binomial_variance": 0.0,
+    "resolved_std": 0.0,
+    "base_pass_rate": 0.0
+  }
+}

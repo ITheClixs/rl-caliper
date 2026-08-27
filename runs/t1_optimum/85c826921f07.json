@@ -1,0 +1,232 @@
+{
+  "manifest": {
+    "git_sha": "5206f1b33f85ab4430319a081778d7248104f965",
+    "config_hash": "85c826921f07",
+    "config": {
+      "tau_b": 40.07,
+      "tau_w": 146.0,
+      "signal": 1.144,
+      "prefill_ratios": [
+        0.0,
+        0.04,
+        0.7,
+        2.63,
+        10.92
+      ],
+      "budgets": [
+        64,
+        256,
+        1024,
+        8192
+      ]
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787510284.570549
+  },
+  "result": {
+    "rows": [
+      {
+        "prefill_ratio": 0.0,
+        "rollouts": 64,
+        "prompts_at_optimum": 22.001989791101728,
+        "exact": 2.908827820013058,
+        "stationary": 2.9088278231934526,
+        "closed_form": 2.9088278231934526,
+        "closed_form_error": 1.0933595286909934e-07,
+        "stationary_error": 1.0933595286909934e-07
+      },
+      {
+        "prefill_ratio": 0.0,
+        "rollouts": 256,
+        "prompts_at_optimum": 88.00795785809291,
+        "exact": 2.9088278631891824,
+        "stationary": 2.9088278231934526,
+        "closed_form": 2.9088278231934526,
+        "closed_form_error": 1.3749775414794712e-06,
+        "stationary_error": 1.3749775414794712e-06
+      },
+      {
+        "prefill_ratio": 0.0,
+        "rollouts": 1024,
+        "prompts_at_optimum": 352.03183664332164,
+        "exact": 2.9088278201312683,
+        "stationary": 2.9088278231934526,
+        "closed_form": 2.9088278231934526,
+        "closed_form_error": 1.0527210523520739e-07,
+        "stationary_error": 1.0527210523520739e-07
+      },
+      {
+        "prefill_ratio": 0.0,
+        "rollouts": 8192,
+        "prompts_at_optimum": 2816.2548178379393,
+        "exact": 2.9088276913411772,
+        "stationary": 2.9088278231934526,
+        "closed_form": 2.9088278231934526,
+        "closed_form_error": 4.532832099773006e-06,
+        "stationary_error": 4.532832099773006e-06
+      },
+      {
+        "prefill_ratio": 0.04,
+        "rollouts": 64,
+        "prompts_at_optimum": 21.65945779492179,
+        "exact": 2.9548292762437134,
+        "stationary": 2.9548292819239075,
+        "closed_form": 2.9466300637104506,
+        "closed_form_error": 0.27748515283718767,
+        "stationary_error": 1.9223425659575403e-07
+      },
+      {
+        "prefill_ratio": 0.04,
+        "rollouts": 256,
+        "prompts_at_optimum": 85.92052616951443,
+        "exact": 2.9794975823929684,
+        "stationary": 2.9794975202803653,
+        "closed_form": 2.9466300637104506,
+        "closed_form_error": 1.1031228512063576,
+        "stationary_error": 2.0846670065426484e-06
+      },
+      {
+        "prefill_ratio": 0.04,
+        "rollouts": 1024,
+        "prompts_at_optimum": 332.56777826097874,
+        "exact": 3.0790715966368447,
+        "stationary": 3.0790716458611973,
+        "closed_form": 2.9466300637104506,
+        "closed_form_error": 4.301346323711833,
+        "stationary_error": 1.5986751541532792e-06
+      },
+      {
+        "prefill_ratio": 0.04,
+        "rollouts": 8192,
+        "prompts_at_optimum": 2042.8568127504848,
+        "exact": 4.010070578059929,
+        "stationary": 4.010070694415694,
+        "closed_form": 2.9466300637104506,
+        "closed_form_error": 26.519246822432994,
+        "stationary_error": 2.901588956055101e-06
+      },
+      {
+        "prefill_ratio": 0.7,
+        "rollouts": 64,
+        "prompts_at_optimum": 17.67979430471315,
+        "exact": 3.6199516180422204,
+        "stationary": 3.619951560406504,
+        "closed_form": 3.4888069872160985,
+        "closed_form_error": 3.622828276833405,
+        "stationary_error": 1.5921681482283404e-06
+      },
+      {
+        "prefill_ratio": 0.7,
+        "rollouts": 256,
+        "prompts_at_optimum": 63.7925206666497,
+        "exact": 4.013009633805473,
+        "stationary": 4.013009637420554,
+        "closed_form": 3.4888069872160985,
+        "closed_form_error": 13.062581314869202,
+        "stationary_error": 9.008402693081253e-08
+      },
+      {
+        "prefill_ratio": 0.7,
+        "rollouts": 1024,
+        "prompts_at_optimum": 187.7334130999973,
+        "exact": 5.454543136945794,
+        "stationary": 5.454542996770394,
+        "closed_form": 3.4888069872160985,
+        "closed_form_error": 36.03851139089874,
+        "stationary_error": 2.569883428489662e-06
+      },
+      {
+        "prefill_ratio": 0.7,
+        "rollouts": 8192,
+        "prompts_at_optimum": 626.494828959786,
+        "exact": 13.075925963509965,
+        "stationary": 13.075925966312454,
+        "closed_form": 3.4888069872160985,
+        "closed_form_error": 73.31885331140556,
+        "stationary_error": 2.1432431748434035e-08
+      },
+      {
+        "prefill_ratio": 2.63,
+        "rollouts": 64,
+        "prompts_at_optimum": 12.700837600857275,
+        "exact": 5.039037739973949,
+        "stationary": 5.03903772100934,
+        "closed_form": 4.636805449939377,
+        "closed_form_error": 7.9823234274219095,
+        "stationary_error": 3.763537885012324e-07
+      },
+      {
+        "prefill_ratio": 2.63,
+        "rollouts": 256,
+        "prompts_at_optimum": 41.49554509378107,
+        "exact": 6.169336959459937,
+        "stationary": 6.169336896007624,
+        "closed_form": 4.636805449939377,
+        "closed_form_error": 24.84110560974639,
+        "stationary_error": 1.0285110564452866e-06
+      },
+      {
+        "prefill_ratio": 2.63,
+        "rollouts": 1024,
+        "prompts_at_optimum": 105.98723832421385,
+        "exact": 9.661540541962182,
+        "stationary": 9.66154084411198,
+        "closed_form": 4.636805449939377,
+        "closed_form_error": 52.007597237720866,
+        "stationary_error": 3.12734596726271e-06
+      },
+      {
+        "prefill_ratio": 2.63,
+        "rollouts": 8192,
+        "prompts_at_optimum": 326.51791268139306,
+        "exact": 25.088975770813292,
+        "stationary": 25.088975399134327,
+        "closed_form": 4.636805449939377,
+        "closed_form_error": 81.51855423554794,
+        "stationary_error": 1.4814433571705306e-06
+      },
+      {
+        "prefill_ratio": 10.92,
+        "rollouts": 64,
+        "prompts_at_optimum": 7.369282173038458,
+        "exact": 8.6846993366807,
+        "stationary": 8.684699074880003,
+        "closed_form": 7.590295441820621,
+        "closed_form_error": 12.60151736327536,
+        "stationary_error": 3.01450501079855e-06
+      },
+      {
+        "prefill_ratio": 10.92,
+        "rollouts": 256,
+        "prompts_at_optimum": 22.288426606545134,
+        "exact": 11.48578159055983,
+        "stationary": 11.485781773202154,
+        "closed_form": 7.590295441820621,
+        "closed_form_error": 33.9157254386668,
+        "stationary_error": 1.5901601726930487e-06
+      },
+      {
+        "prefill_ratio": 10.92,
+        "rollouts": 1024,
+        "prompts_at_optimum": 53.409289727658525,
+        "exact": 19.172694585932895,
+        "stationary": 19.172694859065093,
+        "closed_form": 7.590295441820621,
+        "closed_form_error": 60.410909338796536,
+        "stationary_error": 1.4245895198697104e-06
+      },
+      {
+        "prefill_ratio": 10.92,
+        "rollouts": 8192,
+        "prompts_at_optimum": 160.68374732311344,
+        "exact": 50.98213189867291,
+        "stationary": 50.9821311916285,
+        "closed_form": 7.590295441820621,
+        "closed_form_error": 85.11185162498431,
+        "stationary_error": 1.3868474851796593e-06
+      }
+    ],
+    "critical_batch": 53.257992007992016
+  }
+}

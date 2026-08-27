@@ -1,0 +1,89 @@
+{
+  "manifest": {
+    "git_sha": "ae13850c60c98dc70a09863a88f667254522a6f3",
+    "config_hash": "b96fe0f751b7",
+    "config": {
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "label": "qwen2.5-7b-adam-wide",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "eval_prompts": 48,
+      "eval_samples": 16,
+      "seeds": 1,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 2e-05,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": 32,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "optimiser": "adam",
+      "seed": 0,
+      "store": "runs/s7_adam7b_wide"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787771348.693106,
+    "wall_clock": 1787784127.59741
+  },
+  "result": {
+    "label": "qwen2.5-7b-adam-wide",
+    "transport": false,
+    "predicted_std": 0.0023740521003521005,
+    "predicted_variance": 5.63612337518622e-06,
+    "kernel": [
+      2.3197705981042727e-07,
+      6.643313428884467e-07,
+      6.385588660238429e-08,
+      4.66215203465601e-08,
+      4.758085848959855e-08,
+      3.4838008756370955e-09,
+      0.0,
+      3.815995853296689e-07,
+      3.8209512101797685e-06,
+      3.7572211066372857e-07,
+      0.0,
+      0.0
+    ],
+    "adjoint_norm": [
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.3125,
+      0.03125,
+      0.25,
+      0.21875,
+      0.3125,
+      0.09375,
+      0.0,
+      0.0625,
+      0.125,
+      0.1875,
+      0.0,
+      0.0
+    ],
+    "init_checksum": 15900.103515625,
+    "held_out_scores": [
+      0.3541666666666667
+    ],
+    "base_pass_rate": 0.203125,
+    "eval_key_per_seed": true
+  }
+}

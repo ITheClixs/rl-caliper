@@ -1,0 +1,8 @@
+base held-out pass rate 0.2031
+seed 0: train 0.156 -> 0.151 | held out 0.3542 | 27.9 min
+forecast 0: sd 0.00237 (variance 5.636e-06) in 181.5 min
+forecast: sd 0.00237, and across 1 independent estimates from the same run the sd of that number is nan
+two half-sample estimates of the same forecast: 0.00128 and 0.00313
+kernel [2.3e-07, 6.6e-07, 6e-08, 5e-08, 5e-08, 0.0, 0.0, 3.8e-07, 3.82e-06, 3.8e-07, 0.0, 0.0]
+prompts still sampling more than one answer, per update: [0.31, 0.03, 0.25, 0.22, 0.31, 0.09, 0.0, 0.06, 0.12, 0.19, 0.0, 0.0]
+only one seed: no spread to compare the forecast against

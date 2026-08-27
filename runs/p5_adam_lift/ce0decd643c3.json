@@ -1,0 +1,46 @@
+{
+  "manifest": {
+    "git_sha": "353780fe586a2b8edbedbc4c9cb1427623a7200f",
+    "config_hash": "ce0decd643c3",
+    "config": {
+      "vocab": 3,
+      "length": 3,
+      "pool": 16,
+      "seeds": 24,
+      "steps": [
+        10
+      ],
+      "prompts": [
+        8
+      ],
+      "group_size": 8,
+      "step_size": [
+        0.03
+      ],
+      "bands": [
+        "mixed"
+      ],
+      "estimator": "rloo",
+      "warmup": 5,
+      "seed": 0
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787595205.607027
+  },
+  "result": {
+    "cells": [
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.03,
+        "warmup": 5,
+        "measured_kl": 0.012929052227575307,
+        "lifted_kl": 0.01787632191015666,
+        "parameters_only_kl": 0.001931085727481012,
+        "walk_kl": 0.001931238435201028
+      }
+    ]
+  }
+}

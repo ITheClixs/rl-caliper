@@ -1,0 +1,166 @@
+{
+  "manifest": {
+    "git_sha": "06b53686c14f80636c77d183b026da6139d34018",
+    "config_hash": "ed676d4706e4",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "adam-state-smoke",
+      "family": "count_in_string",
+      "corpus_size": 128,
+      "eval_prompts": 24,
+      "eval_samples": 8,
+      "seeds": 2,
+      "steps": 5,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 2e-05,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": 16,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "optimiser": "adam",
+      "seed": 0,
+      "store": "runs/s7_smoke"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787824157.193283,
+    "wall_clock": 1787824434.8634748
+  },
+  "result": {
+    "label": "adam-state-smoke",
+    "transport": false,
+    "predicted_std": 0.0029104324446212423,
+    "predicted_variance": 8.47061701470398e-06,
+    "kernel": [
+      2.7162466633120676e-06,
+      2.6093471208348848e-06,
+      1.83602940891985e-06,
+      1.213775745482672e-06,
+      9.52180761545051e-08
+    ],
+    "adjoint_norm": [
+      0.10908135026693344,
+      0.10908135026693344,
+      0.10908135026693344,
+      0.10908135026693344,
+      0.10908135026693344
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.6875,
+      0.75,
+      0.1875,
+      0.25,
+      0.0625
+    ],
+    "init_checksum": 7983.8037109375,
+    "split_variance": [
+      6.633858704393934e-06,
+      8.501905439601347e-06
+    ],
+    "repeat_stds": [
+      0.0029104324446212423
+    ],
+    "forecast_estimation_sd": NaN,
+    "held_out_scores": [
+      0.2916666666666667,
+      0.2916666666666667
+    ],
+    "observed_spread": {
+      "std": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "mean": 0.2916666666666667,
+      "n_runs": 2
+    },
+    "binomial_variance": 0.0,
+    "resolved_std": 0.0,
+    "resolved_interval": {
+      "resolved": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "observed": 0.0,
+      "binomial": 0.0,
+      "at_zero": 1.0,
+      "n_runs": 2
+    },
+    "per_prompt": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "train_traces": [
+      [
+        0.09375,
+        0.078125,
+        0.015625,
+        0.359375,
+        0.109375
+      ],
+      [
+        0.125,
+        0.203125,
+        0.15625,
+        0.109375,
+        0.25
+      ]
+    ],
+    "eval_samples": 8,
+    "base_pass_rate": 0.140625,
+    "eval_key_per_seed": true
+  }
+}

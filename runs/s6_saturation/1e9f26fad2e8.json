@@ -1,0 +1,62 @@
+{
+  "manifest": {
+    "git_sha": "8b804b3762dd01e83bea8f385595b8397dda479a",
+    "config_hash": "1e9f26fad2e8",
+    "config": {
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "label": "qwen2.5-7b-count_letter",
+      "family": "count_letter",
+      "seeds": 2,
+      "steps": [
+        1,
+        2,
+        5,
+        10,
+        15,
+        20
+      ],
+      "probe_prompts": 8,
+      "store": "runs/s6_adapters"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787599433.7090712
+  },
+  "result": {
+    "label": "qwen2.5-7b-count_letter",
+    "divergence": [
+      {
+        "step": 1,
+        "divergence": 0.07747228440530307
+      },
+      {
+        "step": 2,
+        "divergence": 0.0006982950022020873
+      },
+      {
+        "step": 5,
+        "divergence": 1.7732370492407057e-05
+      },
+      {
+        "step": 10,
+        "divergence": 2.016353892031475e-05
+      },
+      {
+        "step": 15,
+        "divergence": 0.003472192733170232
+      },
+      {
+        "step": 20,
+        "divergence": 9.262176172342151e-05
+      }
+    ],
+    "held_out_scores": [
+      0.875,
+      0.875
+    ],
+    "degenerate_fraction": 1.0,
+    "within_prompt_variance": 0.0,
+    "disagreeing_prompts": 0,
+    "prompts": 32
+  }
+}

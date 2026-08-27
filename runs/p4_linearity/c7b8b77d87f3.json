@@ -1,0 +1,59 @@
+{
+  "manifest": {
+    "git_sha": "353780fe586a2b8edbedbc4c9cb1427623a7200f",
+    "config_hash": "c7b8b77d87f3",
+    "config": {
+      "vocab": 3,
+      "length": 3,
+      "pool": 24,
+      "seeds": 24,
+      "steps": [
+        10
+      ],
+      "prompts": [
+        8
+      ],
+      "group_size": 8,
+      "step_size": [
+        0.5,
+        4.0
+      ],
+      "bands": [
+        "mixed"
+      ],
+      "estimator": "rloo",
+      "seed": 0
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787595279.328096
+  },
+  "result": {
+    "cells": [
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.5,
+        "median_residual": 0.029368368537475285,
+        "worst_residual": 0.037070353961819846,
+        "predicted_std": 0.001348364174426091,
+        "measured_std": 0.0016968856071446626,
+        "ratio": 0.794611120955274,
+        "final_metric": 0.495642611918375
+      },
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 4.0,
+        "median_residual": 0.1566025220360757,
+        "worst_residual": 0.2119892587417349,
+        "predicted_std": 0.01205222824011388,
+        "measured_std": 0.012580812132377179,
+        "ratio": 0.957984914908397,
+        "final_metric": 0.508413619526856
+      }
+    ]
+  }
+}

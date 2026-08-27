@@ -1,0 +1,21 @@
+base held-out pass rate 0.2031
+seed 0: train 0.156 -> 0.151 | held out 0.3542 | 27.9 min
+forecast 0: sd 0.00066 (variance 4.392e-07) in 76.9 min
+forecast 1: sd 0.45124 (variance 2.036e-01) in 76.2 min
+forecast: sd 0.00066, and across 2 independent estimates from the same run the sd of that number is 0.31860
+kernel [1e-08, 0.0, 0.0, 0.0, 0.0, 1e-08, 0.0, 0.0, 0.0, 4.2e-07, 0.0, 0.0]
+prompts still sampling more than one answer, per update: [0.12, 0.0, 0.12, 0.12, 0.0, 0.12, 0.0, 0.0, 0.0, 0.12, 0.0, 0.0]
+seed 1: train 0.255 -> 0.292 | held out 0.5299 | 26.1 min
+seed 2: train 0.240 -> 0.318 | held out 0.3099 | 26.7 min
+seed 3: train 0.250 -> 0.484 | held out 0.4688 | 26.4 min
+seed 4: train 0.130 -> 0.380 | held out 0.3594 | 26.1 min
+seed 5: train 0.188 -> 0.250 | held out 0.2904 | 26.0 min
+seed 6: train 0.057 -> 0.125 | held out 0.3542 | 25.3 min
+seed 7: train 0.188 -> 0.359 | held out 0.2083 | 30.6 min
+seed 8: train 0.203 -> 0.438 | held out 0.3867 | 31.7 min
+seed 9: train 0.281 -> 0.141 | held out 0.3594 | 28.7 min
+held-out score 0.3621
+observed sd 0.08932 [0.03995, 0.11947]
+binomial component sd 0.00506; resolved seed sd 0.08918 [0.03979, 0.11935]
+bootstrap draws landing at zero: 0%
+forecast 0.00066  ratio to resolved 0.01x

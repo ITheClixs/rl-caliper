@@ -1,0 +1,93 @@
+{
+  "manifest": {
+    "git_sha": "06b53686c14f80636c77d183b026da6139d34018",
+    "config_hash": "011e5f332839",
+    "config": {
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "label": "qwen2.5-7b-adam-state",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "eval_prompts": 48,
+      "eval_samples": 16,
+      "seeds": 1,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 2e-05,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": 32,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "optimiser": "adam",
+      "seed": 0,
+      "store": "runs/s7_adam7b_state"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787825498.172682,
+    "wall_clock": 1787835627.1002061
+  },
+  "result": {
+    "label": "qwen2.5-7b-adam-state",
+    "transport": false,
+    "predicted_std": 0.020705819230737103,
+    "predicted_variance": 0.0004287309500159624,
+    "kernel": [
+      6.252729307961469e-05,
+      0.00033920789045570164,
+      8.929591700695055e-07,
+      4.3534380891550546e-06,
+      4.469519415092799e-06,
+      2.0509146127370909e-07,
+      0.0,
+      2.353362806695279e-06,
+      1.241205790500706e-05,
+      2.30933763335265e-06,
+      0.0,
+      0.0
+    ],
+    "adjoint_norm": [
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166,
+      0.2864859998226166
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.3125,
+      0.03125,
+      0.25,
+      0.21875,
+      0.3125,
+      0.09375,
+      0.0,
+      0.0625,
+      0.125,
+      0.1875,
+      0.0,
+      0.0
+    ],
+    "init_checksum": 15900.103515625,
+    "split_variance": [
+      2.710937633808322e-05,
+      0.0008219647186027459
+    ],
+    "held_out_scores": [
+      0.3541666666666667
+    ],
+    "base_pass_rate": 0.203125,
+    "eval_key_per_seed": true
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "manifest": {
+    "git_sha": "c425e2877cd298e603d87ab172437b11adcb8c7a",
+    "config_hash": "c0b2911c2633",
+    "config": {
+      "vocab": 3,
+      "length": 3,
+      "prompts_pool": 32,
+      "batch_prompts": 16,
+      "group_size": 8,
+      "batches": 600,
+      "estimator": "rloo",
+      "seed": 3
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787440094.481832
+  },
+  "result": {
+    "rows": [
+      {
+        "eta": 0.11201774179896985,
+        "eta_over_predicted": 0.125,
+        "delta_j": 9.47230176330588e-05,
+        "delta_j_se": 2.6632432730065416e-06,
+        "kl": 6.0507322977921165e-06,
+        "kl_predicted": 5.89541749703519e-06,
+        "progress_predicted": 8.843126245552785e-05
+      },
+      {
+        "eta": 0.2240354835979397,
+        "eta_over_predicted": 0.25,
+        "delta_j": 0.00018975716230117844,
+        "delta_j_se": 5.341308811022517e-06,
+        "kl": 2.4216813489091346e-05,
+        "kl_predicted": 2.358166998814076e-05,
+        "progress_predicted": 0.0001650716899169853
+      },
+      {
+        "eta": 0.4480709671958794,
+        "eta_over_predicted": 0.5,
+        "delta_j": 0.00038076062340079025,
+        "delta_j_se": 1.0742264126667813e-05,
+        "kl": 9.69760385664035e-05,
+        "kl_predicted": 9.432667995256304e-05,
+        "progress_predicted": 0.0002829800398576891
+      },
+      {
+        "eta": 0.6721064507938191,
+        "eta_over_predicted": 0.75,
+        "delta_j": 0.0005730137480622107,
+        "delta_j_se": 1.6203565092159535e-05,
+        "kl": 0.0002184339059124618,
+        "kl_predicted": 0.00021223502989326686,
+        "progress_predicted": 0.0003537250498221113
+      },
+      {
+        "eta": 0.8961419343917588,
+        "eta_over_predicted": 1.0,
+        "delta_j": 0.0007665195477600001,
+        "delta_j_se": 2.172588462556603e-05,
+        "kl": 0.00038873722060994535,
+        "kl_predicted": 0.00037730671981025214,
+        "progress_predicted": 0.00037730671981025214
+      },
+      {
+        "eta": 1.3442129015876383,
+        "eta_over_predicted": 1.5,
+        "delta_j": 0.0011572993943880538,
+        "delta_j_se": 3.295613112290182e-05,
+        "kl": 0.0008764190580184416,
+        "kl_predicted": 0.0008489401195730674,
+        "progress_predicted": 0.00028298003985768893
+      },
+      {
+        "eta": 1.7922838687835176,
+        "eta_over_predicted": 2.0,
+        "delta_j": 0.001553116830065738,
+        "delta_j_se": 4.443780698501911e-05,
+        "kl": 0.0015609997295859164,
+        "kl_predicted": 0.0015092268792410086,
+        "progress_predicted": 0.0
+      },
+      {
+        "eta": 2.6884258031752766,
+        "eta_over_predicted": 3.0,
+        "delta_j": 0.0023598996461871116,
+        "delta_j_se": 6.81720591799342e-05,
+        "kl": 0.003523945020661284,
+        "kl_predicted": 0.0033957604782922698,
+        "progress_predicted": -0.001131920159430757
+      },
+      {
+        "eta": 3.5845677375670353,
+        "eta_over_predicted": 4.0,
+        "delta_j": 0.003186871722509605,
+        "delta_j_se": 9.295607792560601e-05,
+        "kl": 0.006282010117158173,
+        "kl_predicted": 0.006036907516964034,
+        "progress_predicted": -0.003018453758482017
+      }
+    ],
+    "efficiency": 0.17133827736658638,
+    "signal_fraction": 0.17133827736658638,
+    "critical_batch": 77.3825193407731,
+    "predicted_eta": 0.8961419343917588,
+    "argmax_ratio": 4.0
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "manifest": {
+    "git_sha": "dc9b7264a76c473639de56d4fd64cc28d8801d99",
+    "config_hash": "ce6d1a166ecb",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "qwen2.5-0.5b-wide",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "eval_prompts": 48,
+      "eval_samples": 16,
+      "seeds": 1,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.0005,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": 64,
+      "no_transport": true,
+      "forecast_repeats": 2,
+      "seed": 0,
+      "store": "runs/s7_wide2"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787684219.48828,
+    "wall_clock": 1787686473.69506
+  },
+  "result": {
+    "label": "qwen2.5-0.5b-wide",
+    "transport": false,
+    "predicted_std": 0.0026290223835620003,
+    "predicted_variance": 6.911758693270022e-06,
+    "kernel": [
+      1.282620603070517e-06,
+      1.8493898924235336e-06,
+      6.979656283879072e-07,
+      2.143003877247699e-06,
+      0.0,
+      0.0,
+      5.177184319319105e-07,
+      0.0,
+      2.6545059213234353e-08,
+      4.945376286930161e-08,
+      3.2048012609607916e-07,
+      2.4581312029838926e-08
+    ],
+    "adjoint_norm": [
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267,
+      0.45008713006973267
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.5625,
+      0.671875,
+      0.578125,
+      0.5,
+      0.0,
+      0.0,
+      0.046875,
+      0.0,
+      0.015625,
+      0.03125,
+      0.015625,
+      0.015625
+    ],
+    "init_checksum": 7983.8037109375,
+    "held_out_scores": [
+      0.3541666666666667
+    ],
+    "base_pass_rate": 0.16276041666666666,
+    "eval_key_per_seed": true
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "manifest": {
+    "git_sha": "68fb3cbf0afb8675ef0eb3c1eb9ca9adf2f8dbec",
+    "config_hash": "19a2093debfe",
+    "config": {
+      "batches": 2500,
+      "prompts": 32,
+      "group_size": 8,
+      "pool": 512,
+      "blocks": 8,
+      "estimator": "rloo",
+      "seed": 0
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "wall_clock": 1787495318.267458
+  },
+  "result": {
+    "rows": [
+      {
+        "band": "broad",
+        "diversity": 0.03,
+        "exact_g_star": 9.420003741616501,
+        "crossed_g_star": 9.219169415325503,
+        "exact_tau_b": 0.0004049315673132526,
+        "crossed_tau_b": 0.00042233214970034466,
+        "exact_tau_w_scaled": 0.028708215883133947,
+        "crossed_tau_w_scaled": 0.028530541049041132,
+        "exact_ratio": 70.89646300883587
+      },
+      {
+        "band": "broad",
+        "diversity": 0.08,
+        "exact_g_star": 8.34163727578364,
+        "crossed_g_star": 8.298469065018304,
+        "exact_tau_b": 0.0010283775659944339,
+        "crossed_tau_b": 0.0010637771179390024,
+        "exact_tau_w_scaled": 0.05542917842045199,
+        "crossed_tau_w_scaled": 0.05666490793361206,
+        "exact_ratio": 53.899637889175814
+      },
+      {
+        "band": "broad",
+        "diversity": 0.2,
+        "exact_g_star": 6.5154004827924386,
+        "crossed_g_star": 6.5654625839805805,
+        "exact_tau_b": 0.0019953490008523204,
+        "crossed_tau_b": 0.001980549669351377,
+        "exact_tau_w_scaled": 0.060697803239900955,
+        "crossed_tau_w_scaled": 0.061346285735843345,
+        "exact_ratio": 30.41964248558707
+      },
+      {
+        "band": "broad",
+        "diversity": 0.5,
+        "exact_g_star": 6.201935805552749,
+        "crossed_g_star": 5.949219246333205,
+        "exact_tau_b": 0.002539658067258196,
+        "crossed_tau_b": 0.002830465541287276,
+        "exact_tau_w_scaled": 0.06872349301119414,
+        "crossed_tau_w_scaled": 0.0693316056769102,
+        "exact_ratio": 27.060136125091724
+      },
+      {
+        "band": "broad",
+        "diversity": 1.0,
+        "exact_g_star": 3.7722039673060572,
+        "crossed_g_star": 3.804353981639889,
+        "exact_tau_b": 0.005525165231344617,
+        "crossed_tau_b": 0.005542894364095281,
+        "exact_tau_w_scaled": 0.042461529292677574,
+        "crossed_tau_w_scaled": 0.04359154538966227,
+        "exact_ratio": 7.685114836347443
+      },
+      {
+        "band": "hard",
+        "diversity": 0.03,
+        "exact_g_star": 15.1697928890588,
+        "crossed_g_star": 15.191738851642619,
+        "exact_tau_b": 0.00030329488920042056,
+        "crossed_tau_b": 0.0003109448982910846,
+        "exact_tau_w_scaled": 0.060896466994530565,
+        "crossed_tau_w_scaled": 0.06262599767336234,
+        "exact_ratio": 200.7830305188213
+      },
+      {
+        "band": "hard",
+        "diversity": 0.08,
+        "exact_g_star": 9.995319902928484,
+        "crossed_g_star": 10.400540929939915,
+        "exact_tau_b": 0.0007266619698263935,
+        "crossed_tau_b": 0.0006944354606391226,
+        "exact_tau_w_scaled": 0.05879842019821385,
+        "crossed_tau_w_scaled": 0.061367379554789867,
+        "exact_ratio": 80.91578015602131
+      },
+      {
+        "band": "hard",
+        "diversity": 0.2,
+        "exact_g_star": 5.802076464359534,
+        "crossed_g_star": 5.997837834160409,
+        "exact_tau_b": 0.0023536757767625887,
+        "crossed_tau_b": 0.002264581527879687,
+        "exact_tau_w_scaled": 0.0542756183540616,
+        "crossed_tau_w_scaled": 0.05656558477561727,
+        "exact_ratio": 23.05993836955577
+      },
+      {
+        "band": "hard",
+        "diversity": 0.5,
+        "exact_g_star": 4.868799900685656,
+        "crossed_g_star": 4.842914825512316,
+        "exact_tau_b": 0.003345283222684071,
+        "crossed_tau_b": 0.003418389001520536,
+        "exact_tau_w_scaled": 0.05007090355375413,
+        "crossed_tau_w_scaled": 0.05048274948155436,
+        "exact_ratio": 14.967612671545341
+      },
+      {
+        "band": "hard",
+        "diversity": 1.0,
+        "exact_g_star": 4.285691860846724,
+        "crossed_g_star": 4.28191192212544,
+        "exact_tau_b": 0.004536144649950965,
+        "crossed_tau_b": 0.004612739954595084,
+        "exact_tau_w_scaled": 0.0489711788838609,
+        "crossed_tau_w_scaled": 0.04968357233837084,
+        "exact_ratio": 10.795771004434409
+      },
+      {
+        "band": "easy",
+        "diversity": 0.03,
+        "exact_g_star": 13.931236877443238,
+        "crossed_g_star": 13.072444742448473,
+        "exact_tau_b": 0.00030136301353915387,
+        "crossed_tau_b": 0.0003559177056979534,
+        "exact_tau_w_scaled": 0.05039298503536663,
+        "crossed_tau_w_scaled": 0.05187284235882854,
+        "exact_ratio": 167.21688718054793
+      },
+      {
+        "band": "easy",
+        "diversity": 0.08,
+        "exact_g_star": 8.973842448335748,
+        "crossed_g_star": 8.74926597948048,
+        "exact_tau_b": 0.0002499894840238454,
+        "crossed_tau_b": 0.0002673574306539658,
+        "exact_tau_w_scaled": 0.01589487221920619,
+        "crossed_tau_w_scaled": 0.016055114012180034,
+        "exact_ratio": 63.58216339088106
+      },
+      {
+        "band": "easy",
+        "diversity": 0.2,
+        "exact_g_star": 7.826629801840004,
+        "crossed_g_star": 8.059214475280646,
+        "exact_tau_b": 0.0009059315442666758,
+        "crossed_tau_b": 0.0008692257758223712,
+        "exact_tau_w_scaled": 0.04221901401899572,
+        "crossed_tau_w_scaled": 0.04331570130366436,
+        "exact_ratio": 46.60287445137009
+      },
+      {
+        "band": "easy",
+        "diversity": 0.5,
+        "exact_g_star": 4.668564922919933,
+        "crossed_g_star": 4.691255916524602,
+        "exact_tau_b": 0.002245195206694044,
+        "crossed_tau_b": 0.002257308199897909,
+        "exact_tau_w_scaled": 0.030216664656448716,
+        "crossed_tau_w_scaled": 0.0307566599722815,
+        "exact_ratio": 13.458368593678538
+      },
+      {
+        "band": "easy",
+        "diversity": 1.0,
+        "exact_g_star": 4.434940260156145,
+        "crossed_g_star": 4.490428172140772,
+        "exact_tau_b": 0.0029625309451014677,
+        "crossed_tau_b": 0.002930747148503705,
+        "exact_tau_w_scaled": 0.03495435334088283,
+        "crossed_tau_w_scaled": 0.035705552833466755,
+        "exact_ratio": 11.798814590841559
+      }
+    ]
+  }
+}

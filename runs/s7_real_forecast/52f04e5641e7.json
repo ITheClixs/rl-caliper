@@ -1,0 +1,157 @@
+{
+  "manifest": {
+    "git_sha": "91fe1e45bd7b2c08e1e6cfef0040c1788e9cda4c",
+    "config_hash": "52f04e5641e7",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "adam-smoke3",
+      "family": "count_in_string",
+      "corpus_size": 128,
+      "eval_prompts": 24,
+      "eval_samples": 8,
+      "seeds": 2,
+      "steps": 4,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 2e-05,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": null,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "optimiser": "adam",
+      "seed": 0,
+      "store": "runs/s7_smoke"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787744085.3980339,
+    "wall_clock": 1787744382.802101
+  },
+  "result": {
+    "label": "adam-smoke3",
+    "transport": false,
+    "predicted_std": 0.011555995404311565,
+    "predicted_variance": 0.00013354102978447002,
+    "kernel": [
+      9.228418770628662e-06,
+      5.64414436048423e-05,
+      3.58936280820915e-05,
+      3.197753932690756e-05
+    ],
+    "adjoint_norm": [
+      1.1192620992660522,
+      1.1192620992660522,
+      1.1192620992660522,
+      1.1192620992660522
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      1.0,
+      0.875,
+      0.125,
+      0.375
+    ],
+    "init_checksum": 7983.8037109375,
+    "repeat_stds": [
+      0.011555995404311565
+    ],
+    "forecast_estimation_sd": NaN,
+    "held_out_scores": [
+      0.2864583333333333,
+      0.2916666666666667
+    ],
+    "observed_spread": {
+      "std": 0.003682847818679961,
+      "lo": 0.0,
+      "hi": 0.003682847818679961,
+      "mean": 0.2890625,
+      "n_runs": 2
+    },
+    "binomial_variance": 4.0690104166666664e-05,
+    "resolved_std": 0.0,
+    "resolved_interval": {
+      "resolved": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "observed": 0.003682847818679961,
+      "binomial": 0.00637887953849786,
+      "at_zero": 1.0,
+      "n_runs": 2
+    },
+    "per_prompt": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.875,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.875,
+        0.0,
+        0.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.125,
+        0.0
+      ]
+    ],
+    "train_traces": [
+      [
+        0.09375,
+        0.078125,
+        0.015625,
+        0.359375
+      ],
+      [
+        0.125,
+        0.203125,
+        0.15625,
+        0.109375
+      ]
+    ],
+    "eval_samples": 8,
+    "base_pass_rate": 0.140625,
+    "eval_key_per_seed": true
+  }
+}

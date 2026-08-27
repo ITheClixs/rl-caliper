@@ -1,0 +1,1 @@
+{"variance": NaN, "std": NaN, "kernel": [0.0, 0.0, NaN, NaN], "adjoint_norm": [0.0, 0.0, 0.0, 0.0], "jvp_agreement": [], "live_share": [0.75, 0.125, 0.0, 0.0], "init_checksum": 7983.8037109375}

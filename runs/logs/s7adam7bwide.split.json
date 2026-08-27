@@ -1,0 +1,7 @@
+{
+  "source": "runs/logs/s7adam7bwide.log",
+  "half_sample_std": [
+    0.00128,
+    0.00313
+  ]
+}

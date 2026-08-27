@@ -1,0 +1,141 @@
+{
+  "manifest": {
+    "git_sha": "70456cfcb55444e0db6586815e31b16f8c73b752",
+    "config_hash": "19cce3d1dd6a",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "adam-smoke",
+      "family": "count_in_string",
+      "corpus_size": 128,
+      "eval_prompts": 16,
+      "eval_samples": 8,
+      "seeds": 2,
+      "steps": 4,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.0003,
+      "lora_layers": 8,
+      "epsilon": 0.001,
+      "adjoint_batches": 2,
+      "skip_forecast": false,
+      "variance_prompts": null,
+      "no_transport": true,
+      "forecast_repeats": 1,
+      "optimiser": "adam",
+      "seed": 0,
+      "store": "runs/s7_smoke"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787732384.109239,
+    "wall_clock": 1787732691.24343
+  },
+  "result": {
+    "label": "adam-smoke",
+    "transport": false,
+    "predicted_std": NaN,
+    "predicted_variance": NaN,
+    "kernel": [
+      0.0,
+      0.0,
+      NaN,
+      NaN
+    ],
+    "adjoint_norm": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "jvp_agreement": [],
+    "live_share": [
+      0.75,
+      0.125,
+      0.0,
+      0.0
+    ],
+    "init_checksum": 7983.8037109375,
+    "repeat_stds": [
+      NaN
+    ],
+    "forecast_estimation_sd": NaN,
+    "held_out_scores": [
+      0.0,
+      0.0
+    ],
+    "observed_spread": {
+      "std": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "mean": 0.0,
+      "n_runs": 2
+    },
+    "binomial_variance": 0.0,
+    "resolved_std": 0.0,
+    "resolved_interval": {
+      "resolved": 0.0,
+      "lo": 0.0,
+      "hi": 0.0,
+      "observed": 0.0,
+      "binomial": 0.0,
+      "at_zero": 1.0,
+      "n_runs": 2
+    },
+    "per_prompt": [
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    ],
+    "train_traces": [
+      [
+        0.09375,
+        0.0,
+        0.0,
+        0.0
+      ],
+      [
+        0.125,
+        0.140625,
+        0.0,
+        0.0
+      ]
+    ],
+    "eval_samples": 8,
+    "base_pass_rate": 0.140625,
+    "eval_key_per_seed": true
+  }
+}
