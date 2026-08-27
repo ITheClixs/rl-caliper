@@ -89,11 +89,10 @@ def train_run(model_name, config, corpus, initial, seed, store=None):
     for _ in range(config.steps):
         if store is not None:
             before = optimiser_moments(trainer, order)
-            moments.append(
-                before
-                if before is not None
-                else {"m": np.zeros(flatten_like(states[0])), "v": np.zeros(flatten_like(states[0]))}
-            )
+            if before is None:
+                width = flatten_like(states[0])
+                before = {"m": np.zeros(width), "v": np.zeros(width)}
+            moments.append(before)
         info, key = trainer.step(corpus, rng, key)
         rates.append(info["pass_rate"])
         if store is not None:
@@ -214,9 +213,8 @@ def main() -> None:
         "variance": prediction.variance, "std": prediction.std,
         "kernel": prediction.kernel, "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement, "live_share": prediction.live_share,
+        "init_checksum": prediction.init_checksum,
         "split_variance": list(prediction.split_variance),
-            "init_checksum": prediction.init_checksum,
-            "split_variance": list(prediction.split_variance),
     }))
     del trainer
 

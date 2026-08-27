@@ -7,12 +7,9 @@ Nothing in paper/tables is edited by hand.
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import functools
 import json
 import re
-import subprocess
+from pathlib import Path
 
 import numpy as np
 
@@ -673,16 +670,10 @@ def per_seed_evaluation(record) -> bool:
 def table_scale() -> None:
     """The same measurement at two model sizes, side by side."""
     rows = []
-    small = [
-        r
-        for r in io.load_all("s7_real_forecast")
-        if r["result"].get("resolved_std") is not None
-        and len(r["result"].get("held_out_scores", [])) >= 4
-    ]
-    if small:
-        outcome = small[-1]["result"]
-        rows.append(("Qwen2.5-0.5B", outcome, small[-1]["manifest"]["config"],
-                     per_seed_evaluation(small[-1])))
+    chosen = pick("real_05b_sgd", require=("resolved_std",))
+    if chosen is not None:
+        rows.append(("Qwen2.5-0.5B", chosen["result"], chosen["manifest"]["config"],
+                     per_seed_evaluation(chosen)))
     # the re-scoring pass is what the seven-billion numbers come from: the training loop scored
     # as it went, before each run drew its own evaluation randomness
     big = [
@@ -712,10 +703,12 @@ def table_scale() -> None:
     line("runs", [f"{len(r['held_out_scores'])}" for _, r, _, _ in rows])
     line("updates", [f"{c.get('steps', c.get('step', '?'))}" for _, _, c, _ in rows])
     line("held-out pass rate, base", [f"{r['base_pass_rate']:.3f}" for _, r, _, _ in rows])
-    line("held-out pass rate, after", [f"{r['observed_spread']['mean']:.3f}" for _, r, _, _ in rows])
+    line("held-out pass rate, after",
+         [f"{r['observed_spread']['mean']:.3f}" for _, r, _, _ in rows])
     lines.append(r"\midrule")
     line("spread across runs", [f"{r['observed_spread']['std']:.4f}" for _, r, _, _ in rows])
-    line(r"\quad evaluation part", [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _, _ in rows])
+    line(r"\quad evaluation part",
+         [f"{np.sqrt(r['binomial_variance']):.4f}" for _, r, _, _ in rows])
     # Subtracting the binomial term assumes each run drew its own evaluation. Where that is not
     # recorded the draw was shared, the subtraction would over-correct, and all the data support
     # is the bracket of Section 5: the seed term lies between the subtraction and the spread.
@@ -772,17 +765,59 @@ def table_power() -> None:
     write("power", "\n".join(lines))
 
 
+# Experiments are selected by what they are, never by which ran last. A table headed
+# "Qwen2.5-0.5B" must not silently pick up a seven-billion run that happens to be newer, which is
+# exactly what "latest with a resolved spread" did once a second real-model study existed.
+EXPERIMENTS = {
+    "real_05b_sgd": {
+        "store": "s7_real_forecast",
+        "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+        "optimiser": "sgd",
+        "steps": 12,
+    },
+    "real_7b_adam": {
+        "store": "s7_real_forecast",
+        "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+        "optimiser": "adam",
+        "steps": 12,
+    },
+}
+
+
+def pick(name: str, require=None):
+    """The one record matching a named experiment, or None.
+
+    `require` names result fields that must be present, so a caller asking for a measured spread
+    cannot be handed a forecast-only run. Matching more than one record is an error rather than a
+    coin toss: it means the identity is under-specified.
+    """
+    spec = EXPERIMENTS[name]
+    hits = []
+    for record in io.load_all(spec["store"]):
+        config = record["manifest"]["config"]
+        if config.get("model") != spec["model"]:
+            continue
+        if config.get("optimiser", "sgd") != spec["optimiser"]:
+            continue
+        if config.get("steps") != spec["steps"]:
+            continue
+        if any(record["result"].get(field) is None for field in (require or ())):
+            continue
+        hits.append(record)
+    if not hits:
+        return None
+    if len({id(h) for h in hits}) > 1 and len(hits) > 1:
+        # several runs share the identity; keep the one with the most seeds, and say so
+        hits.sort(key=lambda r: len(r["result"].get("held_out_scores", [])))
+    return hits[-1]
+
+
 def table_real_forecast() -> None:
     """The forecast on a pretrained model, against the spread it was made before seeing."""
-    runs = [
-        r
-        for r in io.load_all("s7_real_forecast")
-        if r["result"].get("resolved_std") is not None
-        and len(r["result"].get("kernel", [])) >= 8
-    ]
-    if not runs:
-        raise SystemExit("no real-model forecast with a measured spread")
-    result = runs[-1]["result"]
+    chosen = pick("real_05b_sgd", require=("resolved_std",))
+    if chosen is None or len(chosen["result"].get("kernel", [])) < 8:
+        raise SystemExit("no 0.5B forecast with a measured spread")
+    result = chosen["result"]
     observed = result["observed_spread"]
     # Only forecasts that started from the same adapters can be compared. Runs made before the
     # initialisation was recorded are excluded rather than silently pooled with the rest, and the

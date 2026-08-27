@@ -165,5 +165,5 @@ def test_the_forecast_scales_as_one_over_the_prompt_count():
     variances = [
         forecast(policy, accepts, "rloo", 8, p, 0.5, 6).variance for p in counts
     ]
-    products = [v * p for v, p in zip(variances, counts)]
+    products = [v * p for v, p in zip(variances, counts, strict=True)]
     assert max(products) / min(products) < 1.02, f"not 1/P: {products}"
