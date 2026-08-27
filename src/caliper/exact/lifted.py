@@ -107,6 +107,7 @@ def transfer_and_injection(
     settings: AdamSettings,
     epsilon: float = 1e-6,
     carry_second_moment: bool = True,
+    carry_curvature: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
     """A = dPhi/dz and Q = B Cov(g_hat) B^T for one Adam update, by central differences.
 
@@ -114,6 +115,13 @@ def transfer_and_injection(
     variable -- beta2 is 0.999 -- and the derivative of its normalisation is the term that makes
     the map hard to linearise, so holding it at its mean trajectory is worth measuring against
     carrying it.
+
+    `carry_curvature` decides whether the blocks that depend on the Jacobian of the mean update
+    are kept. Every one of them sits in the column that differentiates with respect to theta, and
+    on a real model that Jacobian is the one quantity we cannot estimate: independent estimates of
+    it agree to a cosine of about 0.1. Dropping it leaves the couplings that are diagonal and
+    analytic, which is what a real run could actually afford, and asking what that costs here is
+    the point of the option.
     """
     dim = state.policy.dim
     size = 3 * dim
@@ -152,6 +160,11 @@ def transfer_and_injection(
                      settings, state.step, gradient=mean - shift)
         )
         sensitivity[:, index] = (plus - minus) / (2 * epsilon)
+
+    if not carry_curvature:
+        # everything that needs the Jacobian of the mean update lives in the theta column
+        transfer[:dim, :dim] = np.eye(dim)
+        transfer[dim:, :dim] = 0.0
 
     covariance = injected_covariance(state.policy, accepts, weights, n_prompts)
     injection = sensitivity @ covariance @ sensitivity.T
