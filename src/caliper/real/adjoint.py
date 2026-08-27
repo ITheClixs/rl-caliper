@@ -410,6 +410,11 @@ def real_curvature_residual(
     the radius it used.
 
     Three mean-update evaluations per direction, sharing the centre, and no replica of the run.
+
+    A checkpoint where every group has gone unanimous has no noise to probe along: both batch
+    gradients are identically zero and so is their difference. That is not a linear field, it is
+    the absence of a question, and it is reported as such rather than averaged in as a residual
+    of zero.
     """
     centre = mean_update(trainer, corpus, seed, key, batches)
     residuals = []
@@ -435,4 +440,6 @@ def real_curvature_residual(
         travel = float(np.linalg.norm(plus - minus))
         if travel > 0.0:
             residuals.append(bend / travel)
-    return (float(np.mean(residuals)) if residuals else 0.0), radius
+    if not residuals:
+        return float("nan"), 0.0
+    return float(np.mean(residuals)), radius

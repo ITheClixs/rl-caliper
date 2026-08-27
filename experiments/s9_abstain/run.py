@@ -14,11 +14,11 @@ from pathlib import Path
 
 import mlx.core as mx
 import numpy as np
-from caliper.real.tasks import FAMILIES
 from mlx.utils import tree_flatten, tree_unflatten
 from mlx_lm import load
 
 from caliper.real.adjoint import real_curvature_residual
+from caliper.real.tasks import FAMILIES
 from caliper.real.train import RealRLConfig, RealRLTrainer
 from caliper.runtime import io
 
@@ -83,17 +83,24 @@ def main() -> None:
         )
         residuals.append(residual)
         radii.append(radius)
-        print(f"update {t:3d}: residual {residual:.4f}  radius {radius:.3e}", flush=True)
+        state_of = "collapsed, nothing to probe" if radius == 0.0 else f"radius {radius:.3e}"
+        print(f"update {t:3d}: residual {residual:.4f}  {state_of}", flush=True)
 
-    score = float(np.mean(residuals))
-    refused = bool(score > args.threshold)
-    print(f"\nmean residual {score:.4f} against a threshold of {args.threshold:.4f}")
+    # only the checkpoints that still had noise to perturb along say anything about the field
+    live = [r for r in residuals if r == r]
+    collapsed = len(residuals) - len(live)
+    score = float(np.mean(live)) if live else float("nan")
+    refused = bool(score > args.threshold) if live else False
+    print(f"\n{len(live)} of {len(residuals)} checkpoints still had noise to probe along; "
+          f"{collapsed} had none")
+    print(f"mean residual over those {score:.4f} against a threshold of {args.threshold:.4f}")
     print("VERDICT: " + ("refuse the forecast" if refused else "accept the forecast"))
 
     io.save("s9_abstain", vars(args), {
         "label": args.label,
         "residual": score,
         "per_checkpoint": residuals,
+        "live_checkpoints": len([r for r in residuals if r == r]),
         "radii": radii,
         "threshold": args.threshold,
         "refused": refused,

@@ -1,0 +1,47 @@
+{
+  "manifest": {
+    "git_sha": "81d0597a74caac6bb730decbe6971092feda291c",
+    "config_hash": "b7969fd446ff",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "qwen2.5-0.5b",
+      "family": "count_in_string",
+      "corpus_size": 256,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.0005,
+      "lora_layers": 8,
+      "optimiser": "sgd",
+      "checkpoints": 4,
+      "directions": 2,
+      "threshold": 0.0275,
+      "seed": 0,
+      "store": "runs/s9_abstain"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1787851617.3967721,
+    "wall_clock": 1787851903.993189
+  },
+  "result": {
+    "label": "qwen2.5-0.5b",
+    "residual": 0.9878772426488804,
+    "per_checkpoint": [
+      1.7986841712296942,
+      2.1528247993658276,
+      0.0,
+      0.0
+    ],
+    "radii": [
+      0.007348520178437902,
+      0.0070899974788182635,
+      0.0,
+      0.0
+    ],
+    "threshold": 0.0275,
+    "refused": true,
+    "initial_checksum": 7983.8037109375
+  }
+}
