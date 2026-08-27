@@ -63,6 +63,10 @@ Legend for strength:
 | ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 | at 7B under Adam the spread is 56% of the effect | `s7`: 10 runs, 0.203 -> 0.362, resolved seed sd 0.0892 [0.0398, 0.1194] | measured |
+| a one-run residual flags the settings where the forecast fails | `p2`: AUROC 0.94 for errors past 1.3x over 96 settings | measured |
+| refusing the worst fifth caps the error at 1.29x | `p2`: against 1.56x for accepting every setting | measured |
+| the same threshold refuses both pretrained runs | `s9`: residual 2.0 at 0.5B and 160.5 at 7B against 0.0275 | measured |
+| no pretrained regime the diagnostic accepts | not found; both real runs are refused | negative |
 | the forecast is short by 3.1x to 17x at 7B under Adam | `s7`: 0.0207 against 0.0892, half-samples 0.0052/0.0287 | measured |
 | ~~short by 38x at 7B~~ | withdrawn: that forecast carried no adjoint between updates, worth 16x in variance on the exact tier | negative |
 | carrying Adam's state is what the lift buys, not the curvature | exact tier: 1.10x with and without the curvature blocks, 16.1x with neither | measured |

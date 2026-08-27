@@ -80,7 +80,8 @@ be carried against the gradient of the reported metric instead of being formed.
   \item \textbf{On a real model it underpredicts, and we say why} (Section~\ref{sec:exp-real}).
   Run end to end on Qwen2.5-0.5B, the recommended cheap estimator is a factor of twenty-five short
   of the measured spread and the transported one sixteen, and on Qwen2.5-7B under Adam it is short
-  by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$, because the eight runs end in groups rather than scattered around one and a linearised
+  by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$; a diagnostic computed
+  from one run refuses both (Section~\ref{sec:exp-abstain}), because the eight runs end in groups rather than scattered around one and a linearised
   model has no way to represent that. What survives is narrower than the magnitude: the share of
   prompts whose group is not unanimous falls from about a half to under $5\%$ by the fifth update,
   which is measured rather than modelled, so the run stops injecting seed noise there. The failed

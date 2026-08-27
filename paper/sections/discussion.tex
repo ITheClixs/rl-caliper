@@ -162,9 +162,12 @@ correlation is $\numEarlyCorrelationBig$. The number was real each time and the 
 the failure is instructive: eight runs make a correlation look like a finding, and only the third
 run of the same experiment made it obvious that it was not.
 
-\paragraph{What we would do next, in order.} Build the one-run form of the linearity residual and
-validate it against the forecast errors of Section~\ref{sec:exp-forecast}, so that a run can say in
-advance whether the forecast applies to it. The pairwise residual we measure cannot do that. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
+\paragraph{What we would do next, in order.} Find a pretrained regime the diagnostic of
+Section~\ref{sec:exp-abstain} \emph{accepts}. It refuses both of ours, correctly, but a rule that
+has only ever said no on real models is a boundary and not yet a tool. That means a task where the
+model is genuinely uncertain per prompt rather than merely intermediate on average, since what
+collapses our runs is groups going unanimous, and a mean pass rate in the right band does not
+prevent that. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
 and stays inside the regime. Our best guess is that this needs a larger model, where the same
 relative improvement is a smaller relative move in parameter space. Then treat the estimation error
 in $\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the

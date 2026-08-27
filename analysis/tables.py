@@ -599,6 +599,57 @@ def table_numbers() -> None:
                 "AdamScaleStateGain": f"{point / bare:.1f}",
             }
 
+    # the one-run diagnostic: what it scores on the grid, and whether it refuses the real runs
+    # the full grid, not whichever record ran last: a smoke test of one cell would otherwise
+    # be pooled in and move the threshold
+    graded = [
+        record["result"]["cells"]
+        for record in io.load_all("p2_metric_forecast")
+        if record["result"]["cells"]
+        and "curvature_residual" in record["result"]["cells"][0]
+    ]
+    diag = max(graded, key=len) if graded else []
+    if diag:
+        residual = np.array([c["curvature_residual"] for c in diag])
+        ratio = np.array([
+            max(c["predicted_std"] / c["measured_std"], c["measured_std"] / c["predicted_std"])
+            for c in diag
+        ])
+        cut = float(np.quantile(residual, 0.8))
+        kept = residual <= cut
+        macros |= {
+            "DiagCells": f"{len(diag)}",
+            "DiagLow": f"{residual.min():.4f}",
+            "DiagHigh": f"{residual.max():.4f}",
+            "DiagThreshold": f"{cut:.4f}",
+            "DiagCoverage": f"{100 * kept.mean():.0f}",
+            "DiagWorstKept": f"{ratio[kept].max():.2f}",
+            "DiagWorstAll": f"{ratio.max():.2f}",
+        }
+        for level, name in ((1.2, "Low"), (1.3, "High")):
+            bad = ratio > level
+            if 1 < bad.sum() < len(bad) - 1:
+                auroc = float(np.mean([
+                    [(a > b) + 0.5 * (a == b) for b in residual[~bad]] for a in residual[bad]
+                ]))
+                macros[f"DiagAuroc{name}"] = f"{auroc:.2f}"
+                macros[f"DiagFails{name}"] = f"{bad.sum()}"
+
+    # and what it says about the two pretrained runs, using that threshold unchanged
+    for record in io.load_all("s9_abstain"):
+        outcome = record["result"]
+        per = np.array(outcome["per_checkpoint"], dtype=float)
+        radii = np.array(outcome["radii"], dtype=float)
+        live = radii > 0.0
+        if not live.any():
+            continue
+        tag = "Small" if "0.5b" in outcome["label"] else "Large"
+        macros |= {
+            f"Abstain{tag}": f"{np.nanmean(per[live]):.1f}",
+            f"Abstain{tag}Live": f"{int(live.sum())}",
+            f"Abstain{tag}Checks": f"{len(per)}",
+        }
+
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
         result = saturation[-1]["result"]
