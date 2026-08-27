@@ -23,8 +23,10 @@ import numpy as np
 
 from caliper.analysis.uncertainty import spread_interval
 from caliper.exact.adjoint import forecast
+from caliper.exact.curvature import run_residual
 from caliper.exact.pool import build
 from caliper.exact.train import ExactTrainer, RunConfig
+from caliper.objectives.advantages import weight_table
 from caliper.runtime import io
 
 BANDS = {"easy": (0.35, 0.95), "mixed": (0.05, 0.95), "hard": (0.02, 0.45)}
@@ -88,6 +90,16 @@ def main() -> None:
             transport=False,
         )
 
+        # the diagnostic, computed from the frozen run alone and before any replica exists:
+        # how far the mean field bends over the distance one update of noise travels
+        residual = float(np.mean([
+            run_residual(
+                state, accepts, weight_table(args.estimator, group), prompts, group, eta,
+                np.random.default_rng(args.seed + 4241 + i),
+            )
+            for i, state in enumerate(states[:-1])
+        ]))
+
         # (2) only now, the independent seeds
         scores = [first_score]
         for s in range(1, args.seeds):
@@ -101,6 +113,7 @@ def main() -> None:
                 "vocab": vocab,
                 "length": length,
                 "diversity": diversity,
+                "curvature_residual": residual,
                 "band": band,
                 "steps": steps,
                 "prompts": prompts,
