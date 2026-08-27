@@ -78,7 +78,10 @@ class RealRLTrainer(RealNoiseProbe):
         _, grads = self._gradient(sequences, masks, advantages)
         self.optimiser.update(self.model, grads)
         mx.eval(self.model.parameters(), self.optimiser.state)
-        return {"pass_rate": float(rewards.mean())}, key
+        # a unanimous group has an identically zero count-based advantage and injects nothing,
+        # so the share of live groups is what says whether this update carried any seed noise
+        live = float(np.mean([bool(np.any(a != 0.0)) for a in advantages]))
+        return {"pass_rate": float(rewards.mean()), "live_share": live}, key
 
 
 def response_log_probs(model, sequences: mx.array) -> mx.array:
