@@ -43,8 +43,34 @@ def efficiency(
     return 1.0 / (1.0 + g * bcrit / rollouts)
 
 
-def optimal_group_size(tau_b: float, tau_w_scaled: float) -> float:
-    """G* = 1 + sqrt(tau_w / tau_b), the statistically optimal split ignoring prefill cost."""
+def optimal_group_size(
+    tau_b: float,
+    tau_w_scaled: float,
+    rollouts: float | None = None,
+    corpus: int | None = None,
+) -> float:
+    """The group size that minimises the noise at a fixed rollout budget, ignoring prefill cost.
+
+    With an unbounded corpus this is `1 + sqrt(tau_w / tau_b)`.
+
+    With a corpus of `corpus` prompts drawn without replacement it is not that expression with
+    the finite-population factor substituted in, because the budget fixes `R = P G` and so `P`
+    moves with `G`: the factor is a function of the quantity being optimised. Minimising
+    `G B_crit(G)` at fixed `R` gives
+
+        d/dG [ (G N - R) tau_b / (N - 1) + G tau_w / (G - 1) ] = 0,
+
+    hence `G* = 1 + sqrt((N - 1) tau_w / (N tau_b))`, subject to `P <= N`, that is `G >= R / N`.
+    The correction is small, and it lowers the optimum rather than raising it.
+    """
     if tau_b <= 0.0:
         return float("inf")
-    return 1.0 + np.sqrt(max(tau_w_scaled, 0.0) / tau_b)
+    ratio = max(tau_w_scaled, 0.0) / tau_b
+    if corpus is None:
+        return 1.0 + np.sqrt(ratio)
+    if corpus < 2:
+        raise ValueError("corpus must be at least 2")
+    interior = 1.0 + np.sqrt(ratio * (corpus - 1.0) / corpus)
+    if rollouts is None:
+        return float(interior)
+    return float(max(rollouts / corpus, interior))

@@ -12,7 +12,7 @@ import argparse
 import numpy as np
 import torch
 
-from caliper.analysis.efficiency import efficiency
+from caliper.analysis.efficiency import efficiency, optimal_group_size
 from caliper.envs.modsum import ModSum
 from caliper.population.model import ModelConfig, PopulationTransformer
 from caliper.population.train import (
@@ -90,11 +90,12 @@ def main() -> None:
             "tau_w_scaled": float(tau_w_scaled.mean()),
             "signal": float(signal.mean()),
         }
-        # G* is read at the reference split P = R/8, where the corpus factor is evaluated
-        reference_prompts = args.rollouts_per_step / 8
-        share = 0.0 if pool is None else (reference_prompts - 1.0) / (pool - 1.0)
-        effective_tau_b = max((1.0 - share) * pooled["tau_b"], 1e-12)
-        g_star = 1 + np.sqrt(max(pooled["tau_w_scaled"] / effective_tau_b, 0.0))
+        # the budget fixes R = P G, so the corpus factor moves with the group size and cannot
+        # be evaluated once at a reference split; optimal_group_size solves the fixed-R problem
+        g_star = optimal_group_size(
+            pooled["tau_b"], pooled["tau_w_scaled"],
+            rollouts=args.rollouts_per_step, corpus=pool,
+        )
         print(
             f"\npool={pool}: tau_b {pooled['tau_b']:.3e}  tau_w {pooled['tau_w_scaled']:.3e}  "
             f"G* {g_star:.2f}  start pass {start.mean():.3f}"

@@ -74,13 +74,30 @@ $1.031$ of the exact value where the corrected one returns $1.00$. The signal is
 $A + \tau_b/(N-1)$, which matters whenever $\tau_b$ is large relative to it, that is whenever the
 run is far below its critical batch size. Uncorrected, the signal estimate on one pool came out
 negative. The same factor appears in the theory: with a finite corpus the between-prompt
-variance enters $\Cov(\ghat)$ multiplied by $1 - (P-1)/(N-1)$, so
+variance enters $\Cov(\ghat)$ multiplied by $1 - (P-1)/(N-1)$. It cannot simply be substituted
+into the unbounded optimum, because the rollout budget fixes $R = PG$, so $P = R/G$ moves with
+the very quantity being chosen and the factor is a function of it. Minimising $G\,B_{\text{crit}}$
+at fixed $R$ gives
 \begin{equation}
   \label{eq:gstar-corpus}
-  G^{\star} \;=\; 1 + \sqrt{\frac{\tau_w}{\big(1 - \tfrac{P-1}{N-1}\big)\tau_b}},
+  \begin{aligned}
+    \frac{\partial}{\partial G}
+    &\left[
+      \frac{(GN - R)\,\tau_b}{N-1} + \frac{G\,\tau_w}{G-1}
+    \right] = 0 \\[2pt]
+    &\Longrightarrow\quad
+    G^{\star} \;=\; 1 + \sqrt{\frac{(N-1)\,\tau_w}{N\,\tau_b}},
+  \end{aligned}
 \end{equation}
-and a run that covers its whole corpus every step should use larger groups than one that samples
-from a large corpus.
+subject to $P \le N$, that is $G \ge R/N$, and in practice minimised over the group sizes the
+budget admits. A finite corpus therefore lowers the optimum, by the factor
+$\sqrt{(N-1)/N}$, rather than raising it: prompts drawn without replacement carry slightly less
+independent information than the unbounded count suggests, so slightly fewer of them are worth
+buying. The effect is also small: the factor $\sqrt{(N-1)/N}$ is under half a percent at
+$N = 128$. What was not small is the error it replaces. Evaluating the correction once at the
+reference split $P = R/8$ divides $\tau_b$ by $0.756$ rather than multiplying it by $0.996$, and
+reports $G^{\star} = 3.38$ where the fixed-budget optimum is $3.06$. Table~\ref{tab:transformer}
+carries the corrected values.
 
 \paragraph{What the forecast needs is simpler than this.} Equations \eqref{eq:estimators} recover
 two traces of $\Sigma_t$ against a metric. Theorem~\ref{thm:adjoint} needs less: a single scalar

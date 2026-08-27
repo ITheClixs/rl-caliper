@@ -61,3 +61,32 @@ def test_a_vanishing_between_term_sends_the_optimum_to_infinity():
 
 def test_more_within_prompt_noise_calls_for_larger_groups():
     assert optimal_group_size(TAU_B, 4 * TAU_W) > optimal_group_size(TAU_B, TAU_W)
+
+
+def test_the_finite_corpus_optimum_solves_the_fixed_budget_problem():
+    """G* must minimise the objective at fixed R, where P = R/G moves with G.
+
+    The finite-population factor multiplies the between-prompt term by (N-P)/(N-1), and P is
+    R/G, so the factor depends on the variable being optimised. Evaluating it once at some
+    reference split and substituting into the infinite-population formula answers a different
+    question, and gives a different answer.
+    """
+    from caliper.analysis.efficiency import critical_batch, optimal_group_size
+
+    rollouts, corpus = 64.0, 128
+    for tau_b, tau_w in ((0.02, 0.09), (0.005, 0.2), (0.1, 0.05)):
+        analytic = optimal_group_size(tau_b, tau_w, rollouts=rollouts, corpus=corpus)
+        grid = np.linspace(1.05, 40.0, 40000)
+        objective = grid * critical_batch(grid, tau_b, tau_w, 1.0, rollouts, corpus)
+        brute = float(grid[int(np.argmin(objective))])
+        assert abs(analytic - brute) < 0.02, f"{analytic} vs {brute}"
+
+
+def test_the_finite_corpus_optimum_is_below_the_infinite_one():
+    """A finite corpus makes prompts worth slightly less, so it lowers G*, never raises it."""
+    from caliper.analysis.efficiency import optimal_group_size
+
+    infinite = optimal_group_size(0.02, 0.09)
+    finite = optimal_group_size(0.02, 0.09, rollouts=64.0, corpus=128)
+    assert finite < infinite
+    assert finite > 0.95 * infinite, "at N=128 the correction should be small"

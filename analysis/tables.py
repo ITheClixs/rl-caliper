@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+from caliper.analysis.efficiency import optimal_group_size
 from caliper.runtime import io
 
 TABLES = Path(__file__).resolve().parents[1] / "paper" / "tables"
@@ -85,7 +86,15 @@ def table_transfer() -> None:
 
 
 def table_transformer() -> None:
-    cells = latest("b1_group_size", "predicted_efficiency")
+    records = [
+        r for r in io.load_all("b1_group_size")
+        if r["result"].get("cells") and "predicted_efficiency" in r["result"]["cells"][0]
+    ]
+    if not records:
+        raise SystemExit("no transformer group-size sweep")
+    chosen = max(records, key=lambda r: len(r["result"]["cells"]))
+    cells = chosen["result"]["cells"]
+    budget = chosen["manifest"]["config"]["rollouts_per_step"]
     lines = [
         r"\begin{tabular}{lcccccc}",
         r"\toprule",
@@ -106,9 +115,14 @@ def table_transformer() -> None:
         r2 = float(1 - (resid**2).sum() / ((observed - observed.mean()) ** 2).sum())
         label = r"unbounded" if cell["pool"] is None else str(cell["pool"])
         del order
+        # recomputed here rather than read from the record: runs made before the fixed-budget
+        # correction stored an optimum that evaluated the corpus factor at one reference split
+        g_star = optimal_group_size(
+            cell["tau_b"], cell["tau_w_scaled"], rollouts=budget, corpus=cell["pool"]
+        )
         lines.append(
             f"{label} & {cell['tau_b']:.1f} & {cell['tau_w_scaled']:.1f} & "
-            f"{cell['g_star']:.2f} & {cell['group_sizes'][int(np.argmax(observed))]} & "
+            f"{g_star:.2f} & {cell['group_sizes'][int(np.argmax(observed))]} & "
             f"{spearman:+.3f} & {r2:.3f} \\\\"
         )
     lines += [r"\bottomrule", r"\end{tabular}"]
