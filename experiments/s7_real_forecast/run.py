@@ -214,7 +214,9 @@ def main() -> None:
         "variance": prediction.variance, "std": prediction.std,
         "kernel": prediction.kernel, "adjoint_norm": prediction.adjoint_norm,
         "jvp_agreement": prediction.jvp_agreement, "live_share": prediction.live_share,
+        "split_variance": list(prediction.split_variance),
             "init_checksum": prediction.init_checksum,
+            "split_variance": list(prediction.split_variance),
     }))
     del trainer
 
@@ -245,6 +247,7 @@ def main() -> None:
             "jvp_agreement": prediction.jvp_agreement,
             "live_share": prediction.live_share,
             "init_checksum": prediction.init_checksum,
+            "split_variance": list(prediction.split_variance),
             "held_out_scores": scores,
             "base_pass_rate": float(base_rates.mean()),
             "eval_key_per_seed": True,
@@ -274,6 +277,7 @@ def main() -> None:
         "jvp_agreement": prediction.jvp_agreement,
         "live_share": prediction.live_share,
             "init_checksum": prediction.init_checksum,
+            "split_variance": list(prediction.split_variance),
         "repeat_stds": [r.std for r in repeats],
         "forecast_estimation_sd": spread_of_forecasts,
         "held_out_scores": scores,

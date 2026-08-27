@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import functools
+import json
 import re
 import subprocess
 
@@ -365,6 +366,19 @@ def table_spectrum() -> None:
     write("spectrum", "\n".join(lines))
 
 
+def _half_sample(record):
+    """The two half-sample forecasts a run reported, if they were recorded or recoverable."""
+    stored = record["result"].get("split_variance")
+    if stored and all(v == v for v in stored):
+        return [float(np.sqrt(max(v, 0.0))) for v in stored]
+    label = str(record["manifest"]["config"].get("label", ""))
+    for path in sorted((TABLES.parents[1] / "runs" / "logs").glob("*.split.json")):
+        blob = json.loads(path.read_text())
+        if label.split("-")[-1] in blob["source"] or "wide" in blob["source"]:
+            return [float(v) for v in blob["half_sample_std"]]
+    return None
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -546,6 +560,46 @@ def table_numbers() -> None:
             macros["ScaleDivergenceEnd"] = f"{values[-1]:.2f}"
             macros["ScaleDivergenceStart"] = f"{values[0]:.2f}"
 
+
+    # the seven-billion forecast under Adam, against the spread it was made before seeing
+    adam_runs = [
+        r
+        for r in io.load_all("s7_real_forecast")
+        if "7b-adam" in str(r["manifest"]["config"].get("label", ""))
+    ]
+    measured = [r for r in adam_runs if r["result"].get("resolved_std") is not None]
+    wide = [
+        r
+        for r in adam_runs
+        if r["manifest"]["config"].get("variance_prompts")
+        and len(r["result"].get("kernel", [])) >= 8
+    ]
+    if measured and wide:
+        got, guess = measured[-1]["result"], wide[-1]["result"]
+        spread = got["resolved_std"]
+        point = guess["predicted_std"]
+        band = got.get("resolved_interval") or {}
+        halves = _half_sample(wide[-1])
+        macros |= {
+            "AdamScaleSeeds": f"{len(got['held_out_scores'])}",
+            "AdamScaleBase": f"{got['base_pass_rate']:.3f}",
+            "AdamScaleMean": f"{got['observed_spread']['mean']:.3f}",
+            "AdamScaleSpread": f"{got['observed_spread']['std']:.4f}",
+            "AdamScaleBinomial": f"{np.sqrt(got['binomial_variance']):.4f}",
+            "AdamScaleResolved": f"{spread:.4f}",
+            "AdamScaleForecast": f"{point:.5f}",
+            "AdamScaleShortfall": f"{spread / point:.0f}",
+            "AdamScaleWidePrompts": f"{wide[-1]['manifest']['config']['variance_prompts']}",
+        }
+        if band:
+            macros["AdamScaleResolvedLow"] = f"{band['lo']:.4f}"
+            macros["AdamScaleResolvedHigh"] = f"{band['hi']:.4f}"
+            macros["AdamScaleShortfallLow"] = f"{band['lo'] / point:.0f}"
+        if halves:
+            lo, hi = sorted(halves)
+            macros["AdamScaleHalfLow"] = f"{lo:.5f}"
+            macros["AdamScaleHalfHigh"] = f"{hi:.5f}"
+            macros["AdamScaleHalfRatio"] = f"{hi / lo:.1f}"
 
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:

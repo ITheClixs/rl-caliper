@@ -556,6 +556,54 @@ the subtraction returns nothing usable). The window where the runs both learn an
 linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
 is a statement about the experiment we could afford rather than about the method.
 
+\subsection{The forecast at seven billion, under the optimiser people use}
+\label{sec:exp-adam-scale}
+
+Section~\ref{sec:exp-real} makes the forecast under plain ascent, which is the update the
+recursion is written for. A practitioner uses Adam. Section~\ref{sec:exp-adam} shows the lift to
+$z = (\theta, m, v)$ holds where the moments are exact, so the remaining question is whether it
+survives on a pretrained model, and this section answers it. Under the cheap form the injected
+term enters through $B = \partial\Phi/\partial\hat{g}$, which for Adam is diagonal and analytic,
+so the forecast is the same backward pass with the metric direction scaled by the optimiser's own
+preconditioner at each update.
+
+\paragraph{The measurement.} $\numAdamScaleSeeds$ runs of Qwen2.5-7B at four-bit precision, twelve
+updates of Adam, take the held-out pass rate from $\numAdamScaleBase$ to $\numAdamScaleMean$. The
+spread across runs is $\numAdamScaleSpread$, of which $\numAdamScaleBinomial$ is the evaluation's
+own binomial noise, leaving a seed term of $\numAdamScaleResolved$ with an interval of
+$[\numAdamScaleResolvedLow,\ \numAdamScaleResolvedHigh]$. No bootstrap draw lands at zero, so
+unlike the $0.5$B design this one resolves the quantity it is measuring. The spread is a little
+over half the improvement the runs achieved.
+
+\paragraph{The forecast is short by a factor of $\numAdamScaleShortfall$.} It reads
+$\numAdamScaleForecast$ against a measured $\numAdamScaleResolved$, and against the lower end of
+the measured interval it is still short by $\numAdamScaleShortfallLow$. The direction and the
+rough size match Section~\ref{sec:exp-real}: two model scales, two optimisers, the same
+underprediction. That consistency is what makes it a property of the linearisation rather than of
+one configuration.
+
+\paragraph{Establishing that took a second estimate, and the first attempt did not have one.}
+Made from the eight prompts the run trains on, two independent forecasts of this same trajectory
+came out $684\times$ apart, at $0.00066$ and $0.45124$. The reason is in the live share: only
+about a tenth of groups on this task are not unanimous, so a batch of eight prompts contains
+roughly one that contributes anything, and the injected term is estimated from a sample that is
+usually empty. Re-estimating it from $\numAdamScaleWidePrompts$ prompts, and splitting those into
+two disjoint halves to get a second estimate at no extra rollout cost, gives
+$\numAdamScaleHalfLow$ and $\numAdamScaleHalfHigh$, a factor of $\numAdamScaleHalfRatio$ apart.
+Sixteen prompts per half is about what that residual spread implies, so the pooled figure is
+stable enough to compare against the measurement, and the $\numAdamScaleShortfall\times$ shortfall
+is a finding rather than a draw from a noisy estimator. Reporting a single forecast here would
+have produced $0.00066$ and looked publishable.
+
+\paragraph{The diagnostic costs more than the experiment it replaces.} That
+$\numAdamScaleWidePrompts$-prompt backward pass took $181$ minutes on this machine. Training all
+$\numAdamScaleSeeds$ seeds took $260$. The forecast is meant to spare a practitioner the seeds,
+and here it consumes $70\%$ of what running them costs, while still resting on a live share of
+roughly a tenth. Halving its sampling error means doubling the prompts again, at which point it
+costs more than the thing it was supposed to replace. On a saturating task at this scale the
+economics of the method fail before its accuracy does, and we regard that as the more useful half
+of the result.
+
 \subsection{Two ways a run stops being measurable}
 \label{sec:exp-scale}
 

@@ -101,13 +101,19 @@ either is zero, so is the error bar, and it means nothing. Neither reading needs
 rates: it is enough that the measured ones have stopped varying, since that alone is what makes
 the reported number uninformative.
 
-\paragraph{Why there is no forecast at seven billion.} The measurement we report at $7$B is the
-spread itself and the divergence between runs, not a forecast of either, and the reason is a
-mismatch rather than a cost. Those runs use Adam, because that is what a practitioner would use,
-while the recursion is derived for plain ascent and the lift to Adam's state is unreliable at
-saturation. Comparing a forecast to that spread would mean training eight fresh runs under plain
-ascent at $7$B, which on this machine is about nine hours of continuous compute. We chose to spend
-the budget on the measurement that needed no such assumption.
+\paragraph{What the forecast costs, which is the objection we cannot answer.}
+Section~\ref{sec:exp-adam-scale} makes the forecast at $7$B under Adam and finds it short by
+$\numAdamScaleShortfall\times$. The accuracy failure is the same one Section~\ref{sec:exp-real}
+reports at $0.5$B, and we expected it. What we did not expect is the price of establishing it.
+Estimating the injected term from the eight prompts a run trains on gives two forecasts $684\times$
+apart, because only about a tenth of groups are not unanimous and eight prompts rarely contain one.
+Raising that to $\numAdamScaleWidePrompts$ prompts makes the estimate stable, at
+$\numAdamScaleHalfRatio\times$ between disjoint halves, and costs $181$ minutes against the $260$
+that training all $\numAdamScaleSeeds$ seeds costs. A diagnostic that consumes seventy percent of
+the experiment it replaces is not a diagnostic, and halving its remaining error means doubling the
+prompts again. Where the live share is this low, we do not think this estimator can be made
+economical, and we would rather say so than present the $\numAdamScaleShortfall\times$ as the
+whole story.
 
 \paragraph{Adam.} Lifting the recursion to $z = (\theta, m, v)$ works, at $1.10\times$ at the
 median and $1.8\times$ at worst, and the optimiser state is most of the problem: a recursion on
