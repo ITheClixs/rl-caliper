@@ -14,10 +14,10 @@ from pathlib import Path
 
 import mlx.core as mx
 import numpy as np
+from caliper.real.tasks import FAMILIES
 from mlx.utils import tree_flatten, tree_unflatten
 from mlx_lm import load
 
-from caliper.envs.real_tasks import FAMILIES
 from caliper.real.adjoint import real_curvature_residual
 from caliper.real.train import RealRLConfig, RealRLTrainer
 from caliper.runtime import io
