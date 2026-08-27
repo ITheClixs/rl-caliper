@@ -10,8 +10,9 @@ the reported metric backwards along a single stored trajectory turns that recurs
 bar, as a sum of scalars with no covariance matrix formed.
 
 Where the comparison can be made exactly the forecast holds to `1.11x` over 192 settings. On a
-pretrained model it is short by a factor of twelve, because the runs end in two groups rather than
-scattered around one. Both halves are here.
+pretrained model it does not: short by 25x on Qwen2.5-0.5B under plain ascent, and by between 3x
+and 17x on Qwen2.5-7B under Adam, because the runs end in groups rather than scattered around one.
+Both halves are here, including the numbers we withdrew.
 
 ## What is here
 

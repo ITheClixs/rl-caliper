@@ -122,18 +122,26 @@ coordinate, since `v` is of order `g^2` and an absolute epsilon is meaningless t
 
 Measured against 48 independent Adam runs over 24 settings (`experiments/p5_adam_lift`):
 
-| model of seed divergence | median | worst | live signal only |
-|---|---|---|---|
-| lifted, `z = (theta, m, v)` | 2.61x | 141.5x | **1.48x** |
-| second moment frozen | 15.92x | 230.3x | 4.29x |
-| theta block only | 5.45x | 39.2x | 14.04x |
-| accumulation | 5.50x | 38.4x | 13.93x |
+| model of seed divergence | median | worst |
+|---|---|---|
+| lifted, `z = (theta, m, v)` | **1.10x** | 1.8x |
+| second moment frozen | 1.21x | 1.6x |
+| theta block only | 24.60x | 73.7x |
+| accumulation | 24.22x | 73.8x |
 
-Readings. The optimiser state carries seed information, since freezing `v` is six times worse than
-propagating it, not better. Where the learning signal is live the lift is accurate to 1.5x. Where
-the pass rate saturates the linearised map acquires a spectral radius above one and the prediction
-runs away, because Adam's normalisation is what bounds the real spread and a linear recursion does
-not contain that bound.
+Readings. The optimiser state is nearly the whole problem: a recursion on `theta` alone is barely
+better than assuming noise accumulates unfiltered. Dropping the blocks that need the Jacobian of
+the mean update costs nothing measurable, 1.10x either way, which is what makes the lift affordable
+on a real model where that Jacobian cannot be estimated.
 
-The condition for trusting it is the same one that appears everywhere else in these notes:
-`E[p(1-p)]` well away from zero.
+An earlier version of this table reported 2.61x for the lift and 8x on the saturating band, and
+attributed the latter to Adam's normalisation being a nonlinearity a linear recursion cannot hold.
+That was a bug: the mean map squared the mean gradient where the mean of the stochastic map carries
+`E[g^2] = gbar^2 + diag Cov(g)`, discarding a variance term worth six to fifteen times the term
+kept. The old reading is preserved here because the failure looked exactly like a property of
+saturation, which is why it survived as long as it did.
+
+With the mean map corrected the lift holds on every band, including the saturating one, at 1.10x
+against a worst case of 1.8x. There is no longer a saturation condition attached to it here. What
+does still bound the whole approach is `E[p(1-p)]`: when it reaches zero no noise is injected and
+no metric difference is detectable, which is a statement about the run rather than about Adam.
