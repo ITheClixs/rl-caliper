@@ -63,7 +63,9 @@ Legend for strength:
 | ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 | at 7B under Adam the spread is 56% of the effect | `s7`: 10 runs, 0.203 -> 0.362, resolved seed sd 0.0892 [0.0398, 0.1194] | measured |
-| the forecast is short by 38x at 7B under Adam | `s7`: 0.00237 against 0.0892; same direction as the 25x at 0.5B | measured |
+| the forecast is short by 3.1x to 17x at 7B under Adam | `s7`: 0.0207 against 0.0892, half-samples 0.0052/0.0287 | measured |
+| ~~short by 38x at 7B~~ | withdrawn: that forecast carried no adjoint between updates, worth 16x in variance on the exact tier | negative |
+| carrying Adam's state is what the lift buys, not the curvature | exact tier: 1.10x with and without the curvature blocks, 16.1x with neither | measured |
 | the forecast needs its own error bar to be usable | `s7`: two estimates from one run 684x apart at 8 prompts, 2.4x at 32 | measured |
 | the diagnostic costs 70% of running the seeds | `s7`: 181 min for one 32-prompt backward pass against 260 min for 10 seeds | measured |
 | at 7B the spread is 84% of the effect | `s6`: 8 runs, 0.203 -> 0.313, spread 0.0925, evaluation part 0.0055 | measured |

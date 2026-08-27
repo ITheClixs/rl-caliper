@@ -69,10 +69,10 @@
 
   Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
   rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
-  model it is short by twenty-five, and on a $7$B model under Adam by $\numAdamScaleShortfall$,
-  because the runs end in groups rather than scattered around one. Establishing that needs the
-  estimator's own spread: two forecasts of one $7$B trajectory differ by $684\times$, and the
-  wider estimate that settles them costs seventy percent of training the seeds outright.
+  model it is short by twenty-five, and on a $7$B model under Adam by between
+  $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Neither number can be read without
+  the estimator's own spread: two forecasts of one $7$B trajectory differ by $684\times$ when the
+  injected term comes from the eight prompts a run trains on.
     \end{quote}
   \end{minipage}
   \vspace{6pt}

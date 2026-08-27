@@ -575,34 +575,51 @@ $[\numAdamScaleResolvedLow,\ \numAdamScaleResolvedHigh]$. No bootstrap draw land
 unlike the $0.5$B design this one resolves the quantity it is measuring. The spread is a little
 over half the improvement the runs achieved.
 
-\paragraph{The forecast is short by a factor of $\numAdamScaleShortfall$.} It reads
-$\numAdamScaleForecast$ against a measured $\numAdamScaleResolved$, and against the lower end of
-the measured interval it is still short by $\numAdamScaleShortfallLow$. The direction and the
-rough size match Section~\ref{sec:exp-real}: two model scales, two optimisers, the same
-underprediction. That consistency is what makes it a property of the linearisation rather than of
-one configuration.
+\paragraph{The forecast is short, by between $\numAdamScaleShortfallLow$ and
+$\numAdamScaleShortfallHigh$.} It reads $\numAdamScaleForecast$ against a measured
+$\numAdamScaleResolved$, a point ratio of $\numAdamScaleShortfall$. We do not report that ratio on
+its own, because the same run's two half-sample estimates of the injected term are
+$\numAdamScaleHalfLow$ and $\numAdamScaleHalfHigh$, a factor of $\numAdamScaleHalfRatio$ apart, and
+the shortfall they imply runs from $\numAdamScaleShortfallLow$ to $\numAdamScaleShortfallHigh$. The
+direction agrees with Section~\ref{sec:exp-real} and the size is now within the range a linearised
+model might plausibly be wrong by, rather than the two orders of magnitude we previously reported.
 
-\paragraph{Establishing that took a second estimate, and the first attempt did not have one.}
-Made from the eight prompts the run trains on, two independent forecasts of this same trajectory
-came out $684\times$ apart, at $0.00066$ and $0.45124$. The reason is in the live share: only
-about a tenth of groups on this task are not unanimous, so a batch of eight prompts contains
-roughly one that contributes anything, and the injected term is estimated from a sample that is
-usually empty. Re-estimating it from $\numAdamScaleWidePrompts$ prompts, and splitting those into
-two disjoint halves to get a second estimate at no extra rollout cost, gives
-$\numAdamScaleHalfLow$ and $\numAdamScaleHalfHigh$, a factor of $\numAdamScaleHalfRatio$ apart.
-Sixteen prompts per half is about what that residual spread implies, so the pooled figure is
-stable enough to compare against the measurement, and the $\numAdamScaleShortfall\times$ shortfall
-is a finding rather than a draw from a noisy estimator. Reporting a single forecast here would
-have produced $0.00066$ and looked publishable.
+\paragraph{A number we published and then corrected.} An earlier version of this section put that
+shortfall at $\numAdamScaleStatelessShortfall$ and read it as evidence that the runs had left the
+regime a local model can describe. The forecast behind it applied Adam's preconditioner to each
+update's injection but then discarded the adjoint, carrying nothing from one update to the next.
+The exact tier says what that costs: on the same grid, a recursion carrying no state is wrong by a
+factor of $16.1$ in variance where the dynamics are perfectly local and the full lift is right to
+$1.10\times$. Almost all of the $\numAdamScaleStatelessShortfall$ was therefore ours. Carrying
+Adam's moments backwards on the identical trajectory and the identical prompt sample moves the
+forecast from $\numAdamScaleStateless$ to $\numAdamScaleForecast$, a factor of
+$\numAdamScaleStateGain$, and the conclusion the earlier number supported does not survive it.
 
-\paragraph{The diagnostic costs more than the experiment it replaces.} That
-$\numAdamScaleWidePrompts$-prompt backward pass took $181$ minutes on this machine. Training all
-$\numAdamScaleSeeds$ seeds took $260$. The forecast is meant to spare a practitioner the seeds,
-and here it consumes $70\%$ of what running them costs, while still resting on a live share of
-roughly a tenth. Halving its sampling error means doubling the prompts again, at which point it
-costs more than the thing it was supposed to replace. On a saturating task at this scale the
-economics of the method fail before its accuracy does, and we regard that as the more useful half
-of the result.
+\paragraph{What carrying the state costs, which is nothing.} The transfer operator on
+$z = (\theta, m, v)$ has three blocks that require the Jacobian of the mean update, and all three
+sit in the column that differentiates with respect to $\theta$. That Jacobian is the one quantity a
+real model cannot supply: Section~\ref{sec:exp-real} measures independent estimates of it agreeing
+to a cosine of about a tenth. Dropping those blocks leaves couplings that are diagonal and
+analytic, costing one extra vector per update and no rollouts at all. On the exact grid it costs
+nothing measurable, $1.10\times$ either way, so the accuracy the lift buys comes from carrying the
+optimiser state and not from the curvature. That is convenient, since the curvature is the half we
+could not have had.
+
+\paragraph{The estimate of the injected term is now the binding constraint.} Carrying the state
+concentrates the kernel on the first two updates, where a perturbation has the longest to act
+through the moments, and those are estimated from the same sparse sample as everything else. The
+half-sample disagreement accordingly rises from $2.4\times$ without the state to
+$\numAdamScaleHalfRatio\times$ with it. The accuracy problem and the estimation problem have
+swapped places: what limits this forecast is no longer the recursion but how well
+$\numAdamScaleWidePrompts$ prompts pin down a variance when roughly a tenth of groups contribute
+anything at all.
+
+\paragraph{The diagnostic still costs more than it should.} That backward pass took $141$ minutes
+against the $260$ that training all $\numAdamScaleSeeds$ seeds costs. The cost argument is
+unchanged in kind by the correction, though the forecast it buys is now much closer to right. What
+the correction does change is where the remaining effort belongs: on estimating the injected term
+from the groups that actually carry it, rather than on the recursion, which is now the part that
+works.
 
 \subsection{Two ways a run stops being measurable}
 \label{sec:exp-scale}

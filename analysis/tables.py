@@ -559,44 +559,45 @@ def table_numbers() -> None:
 
 
     # the seven-billion forecast under Adam, against the spread it was made before seeing
-    adam_runs = [
-        r
-        for r in io.load_all("s7_real_forecast")
-        if "7b-adam" in str(r["manifest"]["config"].get("label", ""))
-    ]
-    measured = [r for r in adam_runs if r["result"].get("resolved_std") is not None]
-    wide = [
-        r
-        for r in adam_runs
-        if r["manifest"]["config"].get("variance_prompts")
-        and len(r["result"].get("kernel", [])) >= 8
-    ]
-    if measured and wide:
-        got, guess = measured[-1]["result"], wide[-1]["result"]
-        spread = got["resolved_std"]
-        point = guess["predicted_std"]
-        band = got.get("resolved_interval") or {}
-        halves = _half_sample(wide[-1])
+    got = experiment("real_7b_adam", require=("resolved_std",))
+    guess = experiment("real_7b_adam_forecast")
+    stateless = experiment("real_7b_adam_stateless")
+    if got and guess:
+        outcome, prediction = got["result"], guess["result"]
+        spread = outcome["resolved_std"]
+        point = prediction["predicted_std"]
+        band = outcome.get("resolved_interval") or {}
+        halves = sorted(_half_sample(guess) or [])
         macros |= {
-            "AdamScaleSeeds": f"{len(got['held_out_scores'])}",
-            "AdamScaleBase": f"{got['base_pass_rate']:.3f}",
-            "AdamScaleMean": f"{got['observed_spread']['mean']:.3f}",
-            "AdamScaleSpread": f"{got['observed_spread']['std']:.4f}",
-            "AdamScaleBinomial": f"{np.sqrt(got['binomial_variance']):.4f}",
+            "AdamScaleSeeds": f"{len(outcome['held_out_scores'])}",
+            "AdamScaleBase": f"{outcome['base_pass_rate']:.3f}",
+            "AdamScaleMean": f"{outcome['observed_spread']['mean']:.3f}",
+            "AdamScaleSpread": f"{outcome['observed_spread']['std']:.4f}",
+            "AdamScaleBinomial": f"{np.sqrt(outcome['binomial_variance']):.4f}",
             "AdamScaleResolved": f"{spread:.4f}",
-            "AdamScaleForecast": f"{point:.5f}",
-            "AdamScaleShortfall": f"{spread / point:.0f}",
-            "AdamScaleWidePrompts": f"{wide[-1]['manifest']['config']['variance_prompts']}",
+            "AdamScaleForecast": f"{point:.4f}",
+            "AdamScaleShortfall": f"{spread / point:.1f}",
+            "AdamScaleWidePrompts": f"{guess['manifest']['config']['variance_prompts']}",
         }
         if band:
             macros["AdamScaleResolvedLow"] = f"{band['lo']:.4f}"
             macros["AdamScaleResolvedHigh"] = f"{band['hi']:.4f}"
-            macros["AdamScaleShortfallLow"] = f"{band['lo'] / point:.0f}"
         if halves:
-            lo, hi = sorted(halves)
-            macros["AdamScaleHalfLow"] = f"{lo:.5f}"
-            macros["AdamScaleHalfHigh"] = f"{hi:.5f}"
-            macros["AdamScaleHalfRatio"] = f"{hi / lo:.1f}"
+            lo, hi = halves
+            macros |= {
+                "AdamScaleHalfLow": f"{lo:.4f}",
+                "AdamScaleHalfHigh": f"{hi:.4f}",
+                "AdamScaleHalfRatio": f"{hi / lo:.1f}",
+                "AdamScaleShortfallHigh": f"{spread / lo:.0f}",
+                "AdamScaleShortfallLow": f"{spread / hi:.1f}",
+            }
+        if stateless:
+            bare = stateless["result"]["predicted_std"]
+            macros |= {
+                "AdamScaleStateless": f"{bare:.5f}",
+                "AdamScaleStatelessShortfall": f"{spread / bare:.0f}",
+                "AdamScaleStateGain": f"{point / bare:.1f}",
+            }
 
     saturation = [r for r in io.load_all("s6_saturation") if r["result"].get("divergence")]
     if saturation:
@@ -670,7 +671,7 @@ def per_seed_evaluation(record) -> bool:
 def table_scale() -> None:
     """The same measurement at two model sizes, side by side."""
     rows = []
-    chosen = pick("real_05b_sgd", require=("resolved_std",))
+    chosen = experiment("real_05b_sgd", require=("resolved_std",))
     if chosen is not None:
         rows.append(("Qwen2.5-0.5B", chosen["result"], chosen["manifest"]["config"],
                      per_seed_evaluation(chosen)))
@@ -780,11 +781,28 @@ EXPERIMENTS = {
         "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
         "optimiser": "adam",
         "steps": 12,
+        "label": "qwen2.5-7b-adam",
+    },
+    # the forecast that carries Adam's state backwards, and the superseded one that did not.
+    # Both are kept because the difference between them is a result in its own right.
+    "real_7b_adam_forecast": {
+        "store": "s7_real_forecast",
+        "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+        "optimiser": "adam",
+        "steps": 12,
+        "label": "qwen2.5-7b-adam-state",
+    },
+    "real_7b_adam_stateless": {
+        "store": "s7_real_forecast",
+        "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+        "optimiser": "adam",
+        "steps": 12,
+        "label": "qwen2.5-7b-adam-wide",
     },
 }
 
 
-def pick(name: str, require=None):
+def experiment(name: str, require=None):
     """The one record matching a named experiment, or None.
 
     `require` names result fields that must be present, so a caller asking for a measured spread
@@ -801,6 +819,8 @@ def pick(name: str, require=None):
             continue
         if config.get("steps") != spec["steps"]:
             continue
+        if spec.get("label") and config.get("label") != spec["label"]:
+            continue
         if any(record["result"].get(field) is None for field in (require or ())):
             continue
         hits.append(record)
@@ -814,7 +834,7 @@ def pick(name: str, require=None):
 
 def table_real_forecast() -> None:
     """The forecast on a pretrained model, against the spread it was made before seeing."""
-    chosen = pick("real_05b_sgd", require=("resolved_std",))
+    chosen = experiment("real_05b_sgd", require=("resolved_std",))
     if chosen is None or len(chosen["result"].get("kernel", [])) < 8:
         raise SystemExit("no 0.5B forecast with a measured spread")
     result = chosen["result"]
