@@ -196,12 +196,22 @@ is strong enough that one rate almost describes it. Section~\ref{sec:exp-spectru
 spectrum directly and says why the general case is hopeless for it.
 
 \paragraph{The filtering requires a learning signal.} If divergence stops growing because the
-shared objective pulls two runs together, then removing the objective while leaving the noise in
-place should restore accumulation. We ran a population of transformers twice from identical warmed
-parameters: once normally, and once with every reward replaced by an independent coin flip. The
-rollouts, the prompt draws, the group size and the step size are the same in both, and so is the
-estimator; only the reward differs, and a count-based advantage depends on the pattern of rewards
-within a group rather than on whether that pattern is deserved.
+shared objective pulls two runs together, then removing the objective should restore
+accumulation. We ran a population of transformers twice from identical warmed parameters: once
+normally, and once with every reward replaced by an independent coin flip. The architecture, the
+initial parameters, the prompt draws, the rollout count, the group size, the step size and the
+estimator are all held fixed; what the coin destroys is the association between a response and
+whether it was correct.
+
+We are careful about what that controls for. Replacing the rewards changes which responses receive
+positive advantage, so it changes $\Sigma_t$ as well as the mean field, and the two conditions do
+not have identical injected covariance. What is held fixed is the sampling protocol and the batch
+composition, and the realised step sizes are comparable rather than identical. The experiment
+therefore shows that destroying the reward-response association restores accumulation, which is
+strong evidence that the mean dynamics do the filtering. It is not the stronger statement that the
+filtering persists at exactly matched noise; establishing that needs a null whose updates are drawn
+as $(\ghat^{(1)} - \ghat^{(2)})/\sqrt{2}$, which has zero mean and the covariance of the gradient
+itself, and we have not run it.
 
 \begin{figure}[t]
   \centering
