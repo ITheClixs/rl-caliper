@@ -58,22 +58,22 @@
   move the number is established only by repeating the training. We ask what one run can be made
   to say about it.
 
-  Training noise is not accumulated. Replacing every reward with a coin flip, which leaves the
-  noise and the step sizes untouched, restores accumulation and grows divergence by a factor of
-  $\numNullCoin$. A perturbation entering at one update is reweighted by every update that
-  follows, so the covariance of a run about its mean obeys
+  Training noise is not accumulated: a perturbation entering at one update is reweighted by every
+  update that follows, so the covariance of a run about its mean obeys
   $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric backwards
   along one stored trajectory turns that recursion into the across-seed variance of the metric, as
-  a sum of scalars with no covariance matrix formed. The transpose the backward pass needs is
-  free, because the mean update of a count-based estimator is the gradient of a scalar potential.
+  a sum of scalars with no covariance matrix formed. Tested prospectively over
+  $\numForecastSettings$ settings, one run frozen before the rest existed, it has a median error
+  of $\numForecastMedian\times$.
 
-  Tested prospectively over $\numForecastSettings$ settings, one run trained and frozen before the
-  rest existed, the forecast has a median error of $\numForecastMedian\times$. On a pretrained
-  model it is short by twenty-five, and on a $7$B model under Adam by between
-  $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. A run can tell which case it is in
-  before it is rerun: how far the mean update field bends over one update of noise flags the
-  failing settings with an AUROC of $\numDiagAurocHigh$, and a threshold fixed on that grid alone
-  refuses both pretrained forecasts.
+  On a pretrained model it is short by twenty-five, and most of that is the measurement regime
+  rather than the scale. A unanimous group injects nothing, so a corpus the policy has learned or
+  cannot learn carries no seed noise to forecast: the live share falls to a tenth and eight
+  prompts behave like one. Selecting prompts the policy is genuinely uncertain about holds it at
+  $\numMixedLive$ and brings the forecast to $\numMixedRatio$ of the measured spread, with two
+  independent estimates of it agreeing to $\numMixedHalfRatio$ rather than $5.5$. Which prompts
+  those are is a property of the policy rather than the task, and across $\numScanFamilies$
+  families the informative band moves as the model changes.
     \end{quote}
   \end{minipage}
   \vspace{6pt}

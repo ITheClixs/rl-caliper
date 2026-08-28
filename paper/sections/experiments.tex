@@ -558,6 +558,63 @@ the subtraction returns nothing usable). The window where the runs both learn an
 linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
 is a statement about the experiment we could afford rather than about the method.
 
+\subsection{What the failing runs had in common}
+\label{sec:exp-support}
+
+Sections~\ref{sec:exp-real} and~\ref{sec:exp-adam-scale} report the forecast short by
+twenty-five and by three to seventeen, and read that as the runs leaving the regime a local model
+describes. Both runs share something we did not control for. A count-based advantage is
+identically zero on a unanimous group, so a prompt contributes to the seed spread only when its
+group contains both a success and a failure. For a prompt the policy passes with probability $p$
+and a group of $G$,
+\begin{equation}
+  \label{eq:live}
+  \ell(p, G) \;=\; 1 - p^{G} - (1-p)^{G}
+\end{equation}
+is the chance of that happening, and the batch size a run reports is not the batch size its
+estimator receives: with mean live probability $\bar\ell$ the informative count is
+$P_{\text{eff}} \approx P\bar\ell$. On the corpus those runs used, $\bar\ell$ fell to about a
+tenth within five updates, so a nominal eight prompts were carrying about one.
+
+\paragraph{Restoring the support moves three things at once.} We selected prompts the base policy
+is genuinely uncertain about, by measuring $p(x)$ on a survey pool and keeping those away from
+both ends, and repeated the prospective test of Section~\ref{sec:exp-real} unchanged in every
+other respect. The live share holds at $\numMixedLive$ through training rather than collapsing.
+Against $\numMixedSeeds$ seeds the forecast is $\numMixedForecast$ where the measured seed term is
+$\numMixedResolved$, a ratio of $\numMixedRatio$, and the two half-sample estimates of the injected
+term agree to $\numMixedHalfRatio$. The corresponding figures on the saturating corpus were
+twenty-five and $5.5$. The learning is not sacrificed for it: the pass rate goes from
+$\numMixedBase$ to $\numMixedMean$, a larger improvement than any other real-model run here.
+
+The three quantities moving together is what the claim rests on, rather than the ratio alone. We
+do not conclude that the earlier failures were an artefact and the method works; $\numMixedRatio$
+is still outside the factor of $1.5$ we would want, and this is a half-billion-parameter model.
+What the evidence supports is narrower and, we think, more useful: the severity of the failure is
+strongly regime-dependent, and maintaining stochastic support moves the system a long way towards
+the regime the theory describes. A degenerate measurement regime, not model scale, accounts for
+most of the gap we previously reported.
+
+\paragraph{Difficulty is a property of the policy, not of the task.} That raises the obvious
+question of whether the same corpus can be built at $7$B, and the answer in this task suite is no,
+for a reason worth reporting. We surveyed $\numScanFamilies$ families at both scales.
+The families that carry support at half a billion are solved at seven: \texttt{add\_two} reaches
+$1.000$ and \texttt{sort\_digits} $0.987$. Families impossible at half a billion move into the
+band at seven: \texttt{sort\_words} goes from $0.000$ to the best family we measured. The
+informative band does not shrink with scale so much as move, and a fixed suite carries support
+only for the policies it happens to suit.
+
+\paragraph{Support is hard to manufacture where answers are all-or-nothing.} We then built a
+parametric ladder to place a corpus deliberately, varying the number of words to sort, numbers to
+order and terms to add. Only sorting words degrades gradually. Ordering numbers passes at
+$\numScanCliffHigh$ with six and $\numScanCliffLow$ with eight, with nothing usable between: one
+rung takes it from solved to impossible. On tasks whose answer is exactly right or exactly wrong
+the difficulty gradient is a cliff rather than a slope, so stochastic support at a chosen level is
+not merely scarce at scale but structurally hard to construct. Across three surveys and every
+rung we could build, the eligible pool at $7$B reached $192$ prompts against the $240$ our
+pre-registered criterion required, and we did not run the experiment. We record the criterion, its
+hash and the surveys rather than relaxing it after the fact. A task with genuinely graded
+difficulty, which short exact-match problems are not, is what this experiment needs.
+
 \subsection{A run deciding whether to trust its own forecast}
 \label{sec:exp-abstain}
 
@@ -598,13 +655,30 @@ Sections~\ref{sec:exp-real} and~\ref{sec:exp-adam-scale} report as short by twen
 between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$, so the rule declines exactly
 the numbers that should not be believed, having been given no information about them.
 
-We report this as a boundary rather than a solution. It says when the forecast is outside the
-regime it was derived for; it does not supply a regime on a pretrained model where the forecast is
-inside. Of the $\numAbstainSmallChecks$ checkpoints probed on each model, $\numAbstainSmallLive$
+\paragraph{It also refuses the forecast that worked, and that is the more informative case.} The
+mixed-support run of Section~\ref{sec:exp-support}, whose forecast lands at
+$\numMixedRatio$ against the measured spread and whose half-sample estimates agree to
+$\numMixedHalfRatio$, scores $\numMixedResidual$ and is refused as well. So the rule declines the
+best real-model forecast in this paper along with the two worst.
+
+That settles what the two earlier refusals could not. Every real-model residual we have measured
+lies between $2$ and $160$, while the grid the threshold was calibrated on spans
+$\numDiagLow$ to $\numDiagHigh$: the two scales barely overlap, and a threshold from one does not
+transfer to the other. On a tabular policy the second difference in \eqref{eq:curvature} measures
+curvature; on a pretrained model $\gbar$ is itself estimated from sampled rollouts and a second
+difference amplifies that estimation noise, so the same statistic is measuring curvature plus a
+Monte Carlo floor we have not subtracted. We therefore claim only that the diagnostic ranks
+nonlinear regimes within the controlled testbed, where its threshold was set and where both
+classes exist. Its absolute scale does not transfer to pretrained models, its coverage there is
+zero, and a rule that refuses everything is safe and useless. Calibrating it would need a
+statistic normalised by its own estimation noise, and more than one accepted example to calibrate
+against; choosing a threshold from the four real runs whose answers we already know would be
+fitting to the test set.
+
+Of the $\numAbstainSmallChecks$ checkpoints probed on each model, $\numAbstainSmallLive$
 and $\numAbstainLargeLive$ had any noise left to probe along at all, the rest having gone
 unanimous, and a checkpoint with no noise is reported as carrying no measurement rather than as a
-linear field. What the rule would do on a run that is genuinely inside the regime at this scale we
-cannot say, because we have not found one.
+linear field.
 
 \subsection{The forecast at seven billion, under the optimiser people use}
 \label{sec:exp-adam-scale}

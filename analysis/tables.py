@@ -613,6 +613,31 @@ def table_numbers() -> None:
                 "AdamScaleStateGain": f"{point / bare:.1f}",
             }
 
+    # the difficulty scan: where each family sits for each policy, on the live-group coordinate
+    scans = [r for r in io.load_all("s10_difficulty") if r["result"].get("families")]
+    if scans:
+        by_model = {}
+        for record in scans:
+            model = record["manifest"]["config"]["model"]
+            for row in record["result"]["families"]:
+                by_model.setdefault(model, {})[row["family"]] = row
+        small = next((v for k, v in by_model.items() if "0.5B" in k), {})
+        large = {}
+        for k, v in by_model.items():
+            if "7B" in k:
+                large |= v
+        macros |= {
+            "ScanFamilies": f"{len(set(small) | set(large))}",
+            "ScanSmallUsable": f"{sum(1 for r in small.values() if r['in_band'] >= 0.2)}",
+            "ScanLargeUsable": f"{sum(1 for r in large.values() if r['in_band'] >= 0.2)}",
+        }
+        # the rung where a graded family falls off the cliff
+        rungs = [(k, v["mean"]) for k, v in large.items() if k.startswith("sort_digits_")]
+        if len(rungs) >= 2:
+            rungs.sort()
+            macros["ScanCliffHigh"] = f"{max(m for _, m in rungs):.3f}"
+            macros["ScanCliffLow"] = f"{min(m for _, m in rungs):.3f}"
+
     # the prospective test on a corpus of genuinely mixed prompts
     mixed = [
         r for r in io.load_all("s11_prospective")
