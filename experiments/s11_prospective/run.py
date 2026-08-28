@@ -75,7 +75,7 @@ def train_run(model_name, config, corpus, initial, seed, keep=False):
     rng = np.random.default_rng(7919 * (seed + 1))
     states = [adapter_state(trainer.model)] if keep else None
     order = list(states[0]) if keep else None
-    moments, live = ([] if keep else None), []
+    moments, live, trace = ([] if keep else None), [], []
     for _ in range(config.steps):
         if keep:
             before = optimiser_moments(trainer, order)
@@ -85,9 +85,10 @@ def train_run(model_name, config, corpus, initial, seed, keep=False):
             moments.append(before)
         info, key = trainer.step(corpus, rng, key)
         live.append(info["live_share"])
+        trace.append(info)
         if keep:
             states.append(adapter_state(trainer.model))
-    return trainer, states, moments, float(np.mean(live)), key
+    return trainer, states, moments, float(np.mean(live)), key, trace
 
 
 def main() -> None:
@@ -136,9 +137,13 @@ def main() -> None:
 
     # ---- the anchor, and everything decided from it alone ----
     started = time.time()
-    trainer, states, moments, live, key = train_run(
+    trainer, states, moments, live, key, trace = train_run(
         args.model, config, corpus, initial, 0, keep=True
     )
+    print("  update  live  P_eff   E[p(1-p)]   |g|", flush=True)
+    for t, info in enumerate(trace):
+        print(f"  {t:6d}  {info['live_share']:.2f}  {info['effective_prompts']:5.1f}  "
+              f"{info['reward_variance']:9.4f}  {info['gradient_norm']:.3e}", flush=True)
     print(f"anchor trained in {(time.time() - started) / 60:.1f} min, "
           f"mean live share {live:.3f}", flush=True)
 
@@ -179,6 +184,7 @@ def main() -> None:
         "threshold": args.threshold,
         "decision": "accept" if accepted else "refuse",
         "anchor_live_share": live,
+        "anchor_trace": trace,
         "validation_seeds": args.seeds,
         "frozen_at": time.time(),
     }
@@ -193,7 +199,7 @@ def main() -> None:
     scores, per_prompt = [], []
     for s in range(1, args.seeds + 1):
         started = time.time()
-        run, _, _, seed_live, _ = train_run(args.model, config, corpus, initial, s)
+        run, _, _, seed_live, _, _ = train_run(args.model, config, corpus, initial, s)
         rates, _ = evaluate(run, held_out, args.eval_samples, mx.random.key(555 + 101 * s))
         scores.append(float(rates.mean()))
         per_prompt.append(rates.tolist())

@@ -13,7 +13,7 @@ import mlx.core as mx
 import mlx.nn as nn
 import mlx.optimizers as optim
 import numpy as np
-from mlx.utils import tree_map
+from mlx.utils import tree_flatten, tree_map
 
 from caliper.objectives.advantages import weight_table
 from caliper.real.probe import ProbeConfig, RealNoiseProbe
@@ -81,7 +81,19 @@ class RealRLTrainer(RealNoiseProbe):
         # a unanimous group has an identically zero count-based advantage and injects nothing,
         # so the share of live groups is what says whether this update carried any seed noise
         live = float(np.mean([bool(np.any(a != 0.0)) for a in advantages]))
-        return {"pass_rate": float(rewards.mean()), "live_share": live}, key
+        # the stochastic support of the objective at this update: a unanimous group has an
+        # identically zero count-based advantage, so P_eff = P * live is the number of prompts
+        # actually carrying gradient noise, whatever the nominal batch size says
+        per_prompt = rewards.mean(axis=1)
+        return {
+            "pass_rate": float(rewards.mean()),
+            "live_share": live,
+            "effective_prompts": live * len(items),
+            "reward_variance": float(np.mean(per_prompt * (1.0 - per_prompt))),
+            "gradient_norm": float(np.linalg.norm(
+                np.concatenate([np.asarray(v).reshape(-1) for _, v in tree_flatten(grads)])
+            )),
+        }, key
 
 
 def response_log_probs(model, sequences: mx.array) -> mx.array:
