@@ -1,0 +1,21 @@
+{
+  "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+  "prompts_file": "runs/s10_difficulty/qwen2.5-0.5b-mixed.json",
+  "optimiser": "sgd",
+  "learning_rate": 0.0005,
+  "steps": 12,
+  "prompts": 8,
+  "group_size": 8,
+  "variance_prompts": 32,
+  "predicted_std": 0.060444648617057416,
+  "predicted_half_samples": [
+    0.05753349734537092,
+    0.06282380997358977
+  ],
+  "curvature_residual": 2.6580815313511126,
+  "threshold": 0.0275,
+  "decision": "refuse",
+  "anchor_live_share": 0.4479166666666667,
+  "validation_seeds": 12,
+  "frozen_at": 1787874343.9144478
+}

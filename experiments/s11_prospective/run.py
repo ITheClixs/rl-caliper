@@ -204,8 +204,8 @@ def main() -> None:
     resolved = resolved_spread_interval(
         np.array(per_prompt), args.eval_samples, n_boot=4000, seed=args.seed
     )
-    ratio = prediction.std / max(resolved["std"], 1e-12)
-    print(f"\nmeasured spread {observed['std']:.5f}, seed part {resolved['std']:.5f} "
+    ratio = prediction.std / max(resolved["resolved"], 1e-12)
+    print(f"\nmeasured spread {observed['std']:.5f}, seed part {resolved['resolved']:.5f} "
           f"[{resolved['lo']:.5f}, {resolved['hi']:.5f}] over {args.seeds} seeds")
     print(f"forecast {prediction.std:.5f}  ratio {ratio:.2f}x  "
           f"(the frozen decision was {frozen['decision']})")
@@ -215,7 +215,7 @@ def main() -> None:
         "base_pass_rate": float(base.mean()),
         "held_out_scores": scores.tolist(),
         "observed_spread": observed,
-        "resolved_std": resolved["std"],
+        "resolved_std": resolved["resolved"],
         "resolved_interval": {"lo": resolved["lo"], "hi": resolved["hi"]},
         "binomial_variance": resolved["binomial"] ** 2,
         "ratio": float(ratio),
