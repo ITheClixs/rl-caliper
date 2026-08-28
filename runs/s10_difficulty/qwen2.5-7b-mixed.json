@@ -1,0 +1,254 @@
+[
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'table'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "How many times does the letter 'r' appear in the word 'water'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "How many times does the letter 'r' appear in the word 'dragon'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'rocket'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.5
+  },
+  {
+    "prompt": "How many times does the letter 'o' appear in the word 'mouse'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'orange'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.4375
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in the word 'island'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "How many times does the letter 'n' appear in the word 'island'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'orange'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "How many times does the letter 'i' appear in the word 'pencil'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'stone'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in the word 'table'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in the word 'pencil'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in the word 'orange'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in the word 'orange'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "How many times does the letter 'g' appear in the word 'tiger'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "What is the sixth word in this list: apple, river, candle, island, ladder, silver\nAnswer with that word only and nothing else.",
+    "answer": "silver",
+    "family": "nth_word",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "What is the fourth word in this list: island, chair, silver, light, orange, rocket\nAnswer with that word only and nothing else.",
+    "answer": "light",
+    "family": "nth_word",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "What is the third word in this list: island, light, green, river, tiger, paper\nAnswer with that word only and nothing else.",
+    "answer": "green",
+    "family": "nth_word",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "What is the fourth word in this list: chair, paper, jungle, light, island, pencil\nAnswer with that word only and nothing else.",
+    "answer": "light",
+    "family": "nth_word",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: ceffdaccddaebd\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: bdebecffeffecb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.4375
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: caadbcfdbcceab\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: eeadaeafdaefcc\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: dcdbbbfecbfcdb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: bbefaefeaddaff\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: adeaffcddeffab\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.6875
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: bbdbcffeafbabe\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: daebbacdcbecca\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: ebebbfbeddacbd\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: fcaacaecfdfbdd\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: eefbbfdadeaddd\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: acecbacddfbcdd\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.6875
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: ccaeebddeccabd\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: ceafbfcffbaafd\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "Reverse this list: 3 39 4 3 99\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "99 3 4 39 3",
+    "family": "reverse_list",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Reverse this list: 48 37 67 20 54\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "54 20 67 37 48",
+    "family": "reverse_list",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Reverse this list: 52 12 82 29 16\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "16 29 82 12 52",
+    "family": "reverse_list",
+    "base_rate": 0.4375
+  },
+  {
+    "prompt": "Reverse this list: 3 89 19 86 52\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "52 86 19 89 3",
+    "family": "reverse_list",
+    "base_rate": 0.4375
+  },
+  {
+    "prompt": "Reverse this list: 93 2 18 94 75\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "75 94 18 2 93",
+    "family": "reverse_list",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "Reverse this list: 22 60 89 59 78\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "78 59 89 60 22",
+    "family": "reverse_list",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Reverse this list: 74 16 83 63 73\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "73 63 83 16 74",
+    "family": "reverse_list",
+    "base_rate": 0.1875
+  }
+]

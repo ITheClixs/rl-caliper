@@ -1,0 +1,23 @@
+{
+  "purpose": "eligibility for the model-matched 7B corpus, fixed before the survey was read",
+  "selection_coordinate": "live(p,G) = 1 - p^G - (1-p)^G at G=8",
+  "pass_rate_band": [
+    0.1,
+    0.9
+  ],
+  "require_mean_live_at_least": 0.75,
+  "require_prompts_at_least": 240,
+  "stratify": "by estimated pass rate into quintiles of the retained band, sampled evenly",
+  "disjoint": "survey prompts select the family and difficulty regime; the final corpus is drawn fresh from the same families so no individual example is tuned on",
+  "target_profile_from": "runs/s10_difficulty/qwen2.5-0.5b-mixed.json",
+  "target_profile": {
+    "mean_live": 0.8847691100734022,
+    "median_live": 0.899871826171875,
+    "share_live_above_half": 1.0,
+    "mean_pass": 0.31642156862745097,
+    "mean_reward_variance": 0.18752297794117648,
+    "n": 255
+  },
+  "if_unmet": "do not run the experiment; report that no corpus in this suite supports it",
+  "frozen_at": 1787917984.069077
+}

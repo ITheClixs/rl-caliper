@@ -1,0 +1,314 @@
+[
+  {
+    "prompt": "What is 726 + 203 - 231?\nAnswer with a single number and nothing else.",
+    "answer": "698",
+    "family": "add_three",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "What is 248 + 250 - 800?\nAnswer with a single number and nothing else.",
+    "answer": "-302",
+    "family": "add_three",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "What is 225 + 928 - 744?\nAnswer with a single number and nothing else.",
+    "answer": "409",
+    "family": "add_three",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "What is 980 + 748 - 967?\nAnswer with a single number and nothing else.",
+    "answer": "761",
+    "family": "add_three",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "What is 925 + 672 - 388?\nAnswer with a single number and nothing else.",
+    "answer": "1209",
+    "family": "add_three",
+    "base_rate": 0.6875
+  },
+  {
+    "prompt": "What is 434 + 925 - 771?\nAnswer with a single number and nothing else.",
+    "answer": "588",
+    "family": "add_three",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "What is 730 + 292 - 339?\nAnswer with a single number and nothing else.",
+    "answer": "683",
+    "family": "add_three",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "What is 910 + 506 - 443?\nAnswer with a single number and nothing else.",
+    "answer": "973",
+    "family": "add_three",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "What is 928 + 501 - 934?\nAnswer with a single number and nothing else.",
+    "answer": "495",
+    "family": "add_three",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "What is 649 + 131 - 631?\nAnswer with a single number and nothing else.",
+    "answer": "149",
+    "family": "add_three",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "What is 585 + 691 - 106?\nAnswer with a single number and nothing else.",
+    "answer": "1170",
+    "family": "add_three",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "What is 902 + 316 - 345?\nAnswer with a single number and nothing else.",
+    "answer": "873",
+    "family": "add_three",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: water, tiger, needle, sugar, ladder\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "ladder needle sugar tiger water",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: dragon, river, jungle, temple, forest\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "dragon forest jungle river temple",
+    "family": "sort_words",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "Sort these words alphabetically: orange, temple, ladder, needle, sugar\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "ladder needle orange sugar temple",
+    "family": "sort_words",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Sort these words alphabetically: river, dragon, orange, water, rocket\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "dragon orange river rocket water",
+    "family": "sort_words",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "Sort these words alphabetically: apple, table, zebra, temple, pencil\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple pencil table temple zebra",
+    "family": "sort_words",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Sort these words alphabetically: cloud, water, mouse, table, temple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "cloud mouse table temple water",
+    "family": "sort_words",
+    "base_rate": 0.5
+  },
+  {
+    "prompt": "Sort these words alphabetically: amber, brave, chair, needle, jungle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "amber brave chair jungle needle",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: rocket, apple, jungle, mouse, kettle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple jungle kettle mouse rocket",
+    "family": "sort_words",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "Sort these words alphabetically: water, ladder, river, green, table\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "green ladder river table water",
+    "family": "sort_words",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "Sort these words alphabetically: light, needle, kettle, apple, rocket\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple kettle light needle rocket",
+    "family": "sort_words",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "Sort these words alphabetically: silver, zebra, tiger, needle, kettle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "kettle needle silver tiger zebra",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: table, temple, kettle, river, brave\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave kettle river table temple",
+    "family": "sort_words",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "Sort these words alphabetically: orange, apple, island, mouse, brave\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple brave island mouse orange",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: meadow, zebra, temple, needle, forest\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "forest meadow needle temple zebra",
+    "family": "sort_words",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, silver, forest, pencil, stone\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair forest pencil silver stone",
+    "family": "sort_words",
+    "base_rate": 0.6875
+  },
+  {
+    "prompt": "Sort these words alphabetically: orange, stone, mouse, kettle, candle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "candle kettle mouse orange stone",
+    "family": "sort_words",
+    "base_rate": 0.3125
+  },
+  {
+    "prompt": "Sort these words alphabetically: island, jungle, water, light, sugar\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "island jungle light sugar water",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: needle, temple, paper, water, river\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "needle paper river temple water",
+    "family": "sort_words",
+    "base_rate": 0.1875
+  },
+  {
+    "prompt": "Sort these words alphabetically: stone, island, green, cloud, apple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple cloud green island stone",
+    "family": "sort_words",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Sort these words alphabetically: orange, light, kettle, meadow, chair\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair kettle light meadow orange",
+    "family": "sort_words",
+    "base_rate": 0.25
+  },
+  {
+    "prompt": "Sort these words alphabetically: dragon, zebra, ladder, river, needle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "dragon ladder needle river zebra",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: ladder, silver, pencil, cloud, stone\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "cloud ladder pencil silver stone",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: light, chair, stone, pencil, green\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair green light pencil stone",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: stone, apple, green, tiger, forest\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple forest green stone tiger",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: apple, sugar, mouse, paper, orange\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple mouse orange paper sugar",
+    "family": "sort_words",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "Sort these words alphabetically: apple, ladder, paper, orange, zebra\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple ladder orange paper zebra",
+    "family": "sort_words",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "Sort these words alphabetically: sugar, meadow, ladder, river, amber\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "amber ladder meadow river sugar",
+    "family": "sort_words",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Sort these words alphabetically: candle, sugar, brave, silver, temple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave candle silver sugar temple",
+    "family": "sort_words",
+    "base_rate": 0.375
+  },
+  {
+    "prompt": "Sort these words alphabetically: tiger, paper, sugar, river, zebra\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "paper river sugar tiger zebra",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: cloud, candle, sugar, orange, jungle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "candle cloud jungle orange sugar",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: table, chair, amber, water, sugar\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "amber chair sugar table water",
+    "family": "sort_words",
+    "base_rate": 0.5625
+  },
+  {
+    "prompt": "Sort these words alphabetically: island, paper, mouse, meadow, chair\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair island meadow mouse paper",
+    "family": "sort_words",
+    "base_rate": 0.8125
+  },
+  {
+    "prompt": "Sort these words alphabetically: needle, water, meadow, table, dragon\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "dragon meadow needle table water",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: apple, zebra, orange, meadow, kettle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple kettle meadow orange zebra",
+    "family": "sort_words",
+    "base_rate": 0.5
+  },
+  {
+    "prompt": "Sort these words alphabetically: table, meadow, silver, light, temple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "light meadow silver table temple",
+    "family": "sort_words",
+    "base_rate": 0.4375
+  },
+  {
+    "prompt": "Sort these words alphabetically: pencil, table, stone, dragon, chair\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair dragon pencil stone table",
+    "family": "sort_words",
+    "base_rate": 0.625
+  },
+  {
+    "prompt": "Sort these words alphabetically: jungle, brave, temple, table, dragon\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave dragon jungle table temple",
+    "family": "sort_words",
+    "base_rate": 0.75
+  },
+  {
+    "prompt": "Sort these words alphabetically: table, stone, green, ladder, river\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "green ladder river stone table",
+    "family": "sort_words",
+    "base_rate": 0.6875
+  },
+  {
+    "prompt": "Sort these words alphabetically: needle, mouse, candle, kettle, zebra\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "candle kettle mouse needle zebra",
+    "family": "sort_words",
+    "base_rate": 0.5
+  },
+  {
+    "prompt": "Sort these words alphabetically: sugar, silver, apple, rocket, light\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple light rocket silver sugar",
+    "family": "sort_words",
+    "base_rate": 0.4375
+  }
+]
