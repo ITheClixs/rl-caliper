@@ -182,8 +182,10 @@ def main() -> None:
         "validation_seeds": args.seeds,
         "frozen_at": time.time(),
     }
-    (store / f"{args.label}-frozen.json").write_text(json.dumps(frozen, indent=2))
-    print(f"\nfrozen to {store / (args.label + '-frozen.json')}; "
+    frozen_dir = store / "frozen"
+    frozen_dir.mkdir(parents=True, exist_ok=True)
+    (frozen_dir / f"{args.label}.json").write_text(json.dumps(frozen, indent=2))
+    print(f"\nfrozen to {frozen_dir / (args.label + '.json')}; "
           f"training {args.seeds} validation seeds now\n", flush=True)
     del trainer
 

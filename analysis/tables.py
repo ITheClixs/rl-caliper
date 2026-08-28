@@ -613,6 +613,34 @@ def table_numbers() -> None:
                 "AdamScaleStateGain": f"{point / bare:.1f}",
             }
 
+    # the prospective test on a corpus of genuinely mixed prompts
+    mixed = [
+        r for r in io.load_all("s11_prospective")
+        if r["result"].get("resolved_std") is not None
+    ]
+    if mixed:
+        outcome = mixed[-1]["result"]
+        spread = outcome["resolved_std"]
+        point = outcome["predicted_std"]
+        low, high = sorted(outcome["predicted_half_samples"])
+        macros |= {
+            "MixedSeeds": f"{len(outcome['held_out_scores'])}",
+            "MixedBase": f"{outcome['base_pass_rate']:.3f}",
+            "MixedMean": f"{outcome['observed_spread']['mean']:.3f}",
+            "MixedLive": f"{outcome['anchor_live_share']:.2f}",
+            "MixedForecast": f"{point:.4f}",
+            "MixedObserved": f"{outcome['observed_spread']['std']:.4f}",
+            "MixedResolved": f"{spread:.4f}",
+            "MixedRatio": f"{point / max(spread, 1e-12):.1f}",
+            "MixedHalfRatio": f"{high / max(low, 1e-12):.2f}",
+            "MixedResidual": f"{outcome['curvature_residual']:.1f}",
+            "MixedDecision": outcome["decision"],
+        }
+        band = outcome.get("resolved_interval") or {}
+        if band:
+            macros["MixedResolvedLow"] = f"{band['lo']:.4f}"
+            macros["MixedResolvedHigh"] = f"{band['hi']:.4f}"
+
     # the one-run diagnostic: what it scores on the grid, and whether it refuses the real runs
     # the full grid, not whichever record ran last: a smoke test of one cell would otherwise
     # be pooled in and move the threshold

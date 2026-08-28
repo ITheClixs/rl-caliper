@@ -68,5 +68,11 @@ def load_all(name: str) -> list[dict[str, Any]]:
     out = RUNS / name
     if not out.exists():
         return []
-    records = [json.loads(p.read_text()) for p in out.glob("*.json")]
+    records = []
+    for path in out.glob("*.json"):
+        blob = json.loads(path.read_text())
+        # a run store can also hold artefacts an experiment wrote for itself, such as a forecast
+        # frozen before its validation seeds. Those are not records and have no manifest.
+        if isinstance(blob, dict) and "manifest" in blob and "result" in blob:
+            records.append(blob)
     return sorted(records, key=lambda r: r["manifest"].get("wall_clock", 0.0))
