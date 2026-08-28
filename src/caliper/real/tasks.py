@@ -148,3 +148,71 @@ FAMILIES = {
 
 def reward(completion: str, answer: str) -> float:
     return float(completion.strip().split("\n")[0].strip().rstrip(".") == answer)
+
+
+# ---------------------------------------------------------------------------
+# Parametric rungs. A fixed task suite only carries stochastic support for the
+# models it happens to suit: at seven billion `add_two` is solved and
+# `last_letters` is impossible, and neither can contribute noise. These take a
+# difficulty knob so a corpus with a chosen live-group probability can be built
+# for whatever policy is in front of us, rather than hoping one exists.
+
+
+def _sort_words_n(words: int):
+    def make(rng):
+        picks = [WORDS[i] for i in rng.choice(len(WORDS), size=words, replace=False)]
+        return {
+            "prompt": (
+                "Sort these words alphabetically: " + ", ".join(picks)
+                + "\nAnswer with the sorted words separated by single spaces, and nothing else."
+            ),
+            "answer": " ".join(sorted(picks)),
+        }
+    return make
+
+
+def _sort_digits_n(count: int, high: int):
+    def make(rng):
+        values = rng.integers(10, high, size=count)
+        return {
+            "prompt": (
+                "Sort these numbers in increasing order: "
+                + ", ".join(str(int(v)) for v in values)
+                + "\nAnswer with the sorted numbers separated by single spaces, and nothing else."
+            ),
+            "answer": " ".join(str(int(v)) for v in sorted(values)),
+        }
+    return make
+
+
+def _add_chain(terms: int, high: int):
+    def make(rng):
+        values = [int(v) for v in rng.integers(10, high, size=terms)]
+        signs = [1] + [int(s) for s in rng.choice([-1, 1], size=terms - 1)]
+        parts = [str(values[0])]
+        total = values[0]
+        for value, sign in zip(values[1:], signs[1:], strict=True):
+            parts.append(("+ " if sign > 0 else "- ") + str(value))
+            total += sign * value
+        return {
+            "prompt": (
+                "What is " + " ".join(parts) + "?"
+                "\nAnswer with a single number and nothing else."
+            ),
+            "answer": str(total),
+        }
+    return make
+
+
+#: rungs ordered from easy to hard, so a survey can find the band a policy sits in
+LADDER = {
+    f"sort_words_{n}": Family(f"sort_words_{n}", _sort_words_n(n)) for n in (3, 4, 5, 6, 7, 8)
+}
+LADDER |= {
+    f"sort_digits_{n}": Family(f"sort_digits_{n}", _sort_digits_n(n, 100))
+    for n in (4, 5, 6, 7, 8)
+}
+LADDER |= {
+    f"add_chain_{n}": Family(f"add_chain_{n}", _add_chain(n, 1000)) for n in (3, 4, 5, 6)
+}
+FAMILIES |= LADDER
