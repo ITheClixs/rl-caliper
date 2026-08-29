@@ -79,7 +79,14 @@ Prompts are drawn independently, so with $\gbar := \E_x[\lambda h]$ the batch es
 $\Sb$ is the irreducible variance of sampling prompts and does not shrink with $G$; $\Sw$ is the
 variance of sampling responses and does. Pretraining has one level of sampling and therefore one
 noise scale. RLVR has two, and the split of a fixed rollout budget between them is a free choice
-that nothing in the literature currently determines.
+that is not determined by the noise scale alone. Concurrent work approaches the same split from a
+different direction: \citet{zhou2026ustatistic} show the GRPO policy gradient is a U-statistic,
+characterise its mean squared error at finite sample, and derive a scaling law for the group size
+from that error. Our route is the two-level covariance itself, which is what lets the same
+measurement serve the seed-uncertainty forecast and the allocation question together, and what
+carries the prefill economics of Section~\ref{sec:applications}; the group-size result should be
+read as one consequence of that decomposition rather than as the first principled treatment of
+it.
 
 \begin{corollary}[The reward histogram predicts the response-level noise]
   \label{cor:bernoulli}

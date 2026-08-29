@@ -21,9 +21,18 @@ that the resulting filter, not the size of the noise, is what governs reproducib
 Section~\ref{sec:experiments} tests, is whether it survives RLVR: the objective is non-stationary
 because the data distribution is the policy's own samples, the noise covariance depends on the
 pass-rate distribution and moves as the policy improves, and the reward is binary. None of that is
-in the setting the original analysis assumes, and the consequence for reproducibility -- that the
-spread across seeds does not grow with the length of a run -- does not appear to have been stated
+in the setting the original analysis assumes, and the consequence for reproducibility, that the
+spread across seeds does not grow with the length of a run, does not appear to have been stated
 or measured.
+
+\citet{wang2026linear} arrive at a filtering picture of RLVR from the opposite side, reporting that
+weights and log-probabilities evolve close to linearly across model families and algorithms and
+attributing it to the noisy training signal acting as a low-pass filter along a low-dimensional
+drift. Their object is the trajectory of a single run; ours is the covariance between runs that
+differ only in seed, and the quantity we push it through is a reported metric rather than the
+parameters. The two are complementary, and their scales reach considerably further than ours: they
+report the linear regime across families and sizes we cannot train, which is worth weighing against
+the boundary Section~\ref{sec:exp-support} draws at half a billion parameters.
 
 \paragraph{Entropy collapse.} That RLVR drives policy entropy down sharply, often within the first
 updates, is documented and actively worked on \citep{cui2025entropy}; the literature treats it as an
