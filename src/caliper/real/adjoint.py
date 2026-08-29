@@ -70,8 +70,31 @@ def metric_gradient(trainer, items, rng, key) -> tuple[np.ndarray, float, mx.arr
     return ascent_direction(grads), float(rewards.mean()), key
 
 
+def cross_projected_variance(first: np.ndarray, second: np.ndarray) -> float:
+    """The covariance of two projections of the same per-prompt gradients.
+
+    The injected term wants `b' Sigma b` for the true metric gradient `b`. On a real model only
+    an estimate `b_hat = b + eps` is available, and
+
+        E[Var_i(b_hat' z_i)] = b' Sigma b + E[eps' Sigma eps],
+
+    so the plain quadratic is biased upward by a term that more prompts do not remove: it is the
+    metric gradient that is noisy, not the sample. Two estimates built from independent
+    evaluation rollouts have independent errors, so the covariance of their projections is
+    unbiased for the quantity wanted.
+    """
+    a = np.asarray(first, dtype=float)
+    b = np.asarray(second, dtype=float)
+    if a.shape != b.shape:
+        raise ValueError("projections must be of the same prompts")
+    if a.size < 2:
+        return 0.0
+    return float(np.sum((a - a.mean()) * (b - b.mean())) / (a.size - 1))
+
+
 def projected_batch_variance(
-    trainer, corpus, rng, key, direction: np.ndarray, prompts: int | None = None
+    trainer, corpus, rng, key, direction: np.ndarray, prompts: int | None = None,
+    second: np.ndarray | None = None,
 ):
     """Var over prompts of the projected per-prompt gradient, the pass rate, and the live share.
 
@@ -91,27 +114,42 @@ def projected_batch_variance(
     counts = rewards.sum(axis=1).astype(int)
     weights = weight_table(cfg.estimator, cfg.group_size)
     projections = []
+    others = []
     live = 0
     for i in range(len(items)):
         advantage = weights[counts[i], rewards[i].astype(int)]
         if np.any(advantage != 0.0):
             live += 1
         _, grads = trainer._gradient([sequences[i]], [masks[i]], [advantage])
-        projections.append(float(direction @ ascent_direction(grads)))
+        contribution = ascent_direction(grads)
+        projections.append(float(direction @ contribution))
+        if second is not None:
+            others.append(float(second @ contribution))
     # Two disjoint halves of the same sample give two independent estimates of the same
     # variance at no extra rollout cost, which is what says whether the estimate is stable
     # before it is believed. The prompts were drawn at random, so splitting them in order is
     # already a random split.
     middle = len(projections) // 2
     if middle >= 2:
-        halves = (
-            float(np.var(projections[:middle], ddof=1)),
-            float(np.var(projections[middle:], ddof=1)),
-        )
+        if others:
+            halves = (
+                cross_projected_variance(projections[:middle], others[:middle]),
+                cross_projected_variance(projections[middle:], others[middle:]),
+            )
+        else:
+            halves = (
+                float(np.var(projections[:middle], ddof=1)),
+                float(np.var(projections[middle:], ddof=1)),
+            )
     else:
         halves = (float("nan"), float("nan"))
+    total = (
+        cross_projected_variance(projections, others)
+        if others
+        else float(np.var(projections, ddof=1))
+    )
     return (
-        float(np.var(projections, ddof=1)),
+        total,
         float(rewards.mean()),
         live / max(len(items), 1),
         key,
@@ -292,6 +330,7 @@ def forecast(
     variance_prompts: int | None = None,
     optimiser_states: list[dict] | None = None,
     adam: tuple[float, float, float] | None = None,
+    cross_fit: bool = False,
 ) -> RealForecast:
     """Carry the metric gradient back along the stored states of one run.
 
@@ -322,6 +361,15 @@ def forecast(
     adjoint, metric, key = metric_gradient(
         trainer, held_out, np.random.default_rng(seed), key
     )
+    # A second estimate of the same metric gradient, from an independent draw of evaluation
+    # rollouts. Projecting the batch onto both and taking their covariance removes the term
+    # E[eps' Sigma eps] that the estimation error of a single estimate contributes, which is
+    # positive and does not shrink with more prompts.
+    partner = None
+    if cross_fit:
+        partner, _, key = metric_gradient(
+            trainer, held_out, np.random.default_rng(seed + 55_000), key
+        )
 
     kernel = [0.0] * steps
     norms = [0.0] * steps
@@ -331,6 +379,8 @@ def forecast(
     # the two optimiser slots of the adjoint, zero at the end of the run by construction
     carried_moment = np.zeros_like(adjoint)
     carried_second = np.zeros_like(adjoint)
+    partner_moment = np.zeros_like(adjoint)
+    partner_second = np.zeros_like(adjoint)
     agreement = []
     for t in range(steps - 1, -1, -1):
         displaced(trainer, states[t], np.zeros(adjoint.size), 0.0)
@@ -353,11 +403,20 @@ def forecast(
                 adjoint, carried_moment, carried_second,
                 store["m"], store["v"], mean, step_size, beta1, beta2, eps,
             )
+            if partner is None:
+                mate = None
+            else:
+                # the partner is carried through the identical map, with its own state
+                mate, partner_moment, partner_second = adam_adjoint_step(
+                    partner, partner_moment, partner_second,
+                    store["m"], store["v"], mean, step_size, beta1, beta2, eps,
+                )
         else:
             direction = adjoint
+            mate = partner
         projected, _, live, key, halves = projected_batch_variance(
             trainer, corpus, np.random.default_rng(seed + 100 + t), key, direction,
-            prompts=variance_prompts,
+            prompts=variance_prompts, second=mate,
         )
         factor = 1.0 if optimiser_states is not None else step_size**2
         kernel[t] = factor * projected / n_prompts

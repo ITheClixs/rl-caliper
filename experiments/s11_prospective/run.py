@@ -108,6 +108,8 @@ def main() -> None:
     ap.add_argument("--optimiser", default="sgd", choices=("sgd", "adam"))
     ap.add_argument("--variance-prompts", type=int, default=32)
     ap.add_argument("--threshold", type=float, required=True)
+    ap.add_argument("--cross-fit", action="store_true",
+                    help="debias the injected term with two independent metric gradients")
     ap.add_argument("--checkpoints", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--store", default="runs/s11_prospective")
@@ -152,6 +154,7 @@ def main() -> None:
         mx.random.key(4242), seed=args.seed, transport=False,
         variance_prompts=args.variance_prompts, check_agreement=False,
         optimiser_states=(moments if args.optimiser == "adam" else None),
+        cross_fit=args.cross_fit,
     )
     lo, hi = (float(np.sqrt(max(v, 0.0))) for v in prediction.split_variance)
     print(f"forecast {prediction.std:.5f}  half-samples {lo:.5f} / {hi:.5f}", flush=True)
