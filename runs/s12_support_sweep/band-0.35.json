@@ -1,0 +1,1532 @@
+[
+  {
+    "prompt": "Reverse this list: 46 36 11 88 36\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "36 88 11 36 46",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 66 31 47 65 97\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "97 65 47 31 66",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 26 53 12 52 50\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "50 52 12 53 26",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 21 93 60 63 2\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "2 63 60 93 21",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 93 30 22 97 67\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "67 97 22 30 93",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 26 18 10 41 75\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "75 41 10 18 26",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 12 58 0 73 72\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "72 73 0 58 12",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 10 74 30 71 11\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "11 71 30 74 10",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 37 56 15 33 90\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "90 33 15 56 37",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 8 34 77 28 67\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "67 28 77 34 8",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 72 76 24 52 70\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "70 52 24 76 72",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 85 49 81 68 86\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "86 68 81 49 85",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 62 6 85 4 6\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "6 4 85 6 62",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Reverse this list: 32 86 32 47 88\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "88 47 32 86 32",
+    "family": "reverse_list",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "What is the second word in this list: island, pencil, green, orange, apple, water\nAnswer with that word only and nothing else.",
+    "answer": "pencil",
+    "family": "nth_word",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "What is the third word in this list: dragon, pencil, zebra, kettle, needle, mouse\nAnswer with that word only and nothing else.",
+    "answer": "zebra",
+    "family": "nth_word",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 33, 85, 17, 25\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "17 25 33 85",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 70, 70, 49, 93\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "49 70 70 93",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 67, 77, 45, 96\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "45 67 77 96",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 96, 63, 42, 25\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "25 42 63 96",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 19, 71, 75, 63\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "19 63 71 75",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 33, 38, 30, 75\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "30 33 38 75",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 13, 46, 70, 98\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "13 46 70 98",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 66, 94, 79, 67\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "66 67 79 94",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 98, 98, 49, 63\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "49 63 98 98",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 22, 55, 96, 62\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "22 55 62 96",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 26, 11, 73, 33\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "11 26 33 73",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 74, 41, 64, 83\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "41 64 74 83",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 26, 53, 86, 43\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "26 43 53 86",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 51, 94, 32, 54\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "32 51 54 94",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 69, 80, 23, 28\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "23 28 69 80",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 74, 34, 71, 33\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "33 34 71 74",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 89, 90, 25, 60\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "25 60 89 90",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 52, 44, 37, 27\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "27 37 44 52",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 12, 31, 66, 61\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "12 31 61 66",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 89, 37, 30, 71\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "30 37 71 89",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 23, 65, 95, 95\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "23 65 95 95",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 30, 27, 74, 39\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "27 30 39 74",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 36, 70, 21, 80\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "21 36 70 80",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 22, 57, 61, 52\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "22 52 57 61",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 24, 33, 59, 34\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "24 33 34 59",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 85, 49, 64, 91\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "49 64 85 91",
+    "family": "sort_digits",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Take the last letter of each word and join them: table, orange, brave\nAnswer with the three letters only, no spaces and nothing else.",
+    "answer": "eee",
+    "family": "last_letters",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "Sort these words alphabetically: pencil, dragon, tiger, island, light, green, brave, jungle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave dragon green island jungle light pencil tiger",
+    "family": "sort_words_8",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: cecbeabbbfaeba\nAnswer with a single number and nothing else.",
+    "answer": "0",
+    "family": "count_in_string",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: efeeaafbafbaaa\nAnswer with a single number and nothing else.",
+    "answer": "0",
+    "family": "count_in_string",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: baadadbcacbaee\nAnswer with a single number and nothing else.",
+    "answer": "0",
+    "family": "count_in_string",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: dcccecaafecdac\nAnswer with a single number and nothing else.",
+    "answer": "0",
+    "family": "count_in_string",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: adeabaebbfdbdb\nAnswer with a single number and nothing else.",
+    "answer": "0",
+    "family": "count_in_string",
+    "base_rate": 0.0
+  },
+  {
+    "prompt": "What is 60 + 68?\nAnswer with a single number and nothing else.",
+    "answer": "128",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "Reverse this list: 84 79 59 66 7\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "7 66 59 79 84",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 68 + 57?\nAnswer with a single number and nothing else.",
+    "answer": "125",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is 56 + 68 + 34 - 83?\nAnswer with a single number and nothing else.",
+    "answer": "75",
+    "family": "add_chain_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 35 66 51 24 87\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "87 24 51 66 35",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 91 25 42 34 25\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "25 34 42 25 91",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 31 10 92 30 95\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "95 30 92 10 31",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 81 + 87?\nAnswer with a single number and nothing else.",
+    "answer": "168",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "Reverse this list: 86 75 75 96 24\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "24 96 75 75 86",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 361 + 570 - 619 - 339 + 978?\nAnswer with a single number and nothing else.",
+    "answer": "951",
+    "family": "add_chain_5",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 53 86 3 2 54\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "54 2 3 86 53",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, green, water, zebra\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair green water zebra",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 60 + 80?\nAnswer with a single number and nothing else.",
+    "answer": "140",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is 549 + 717 - 386?\nAnswer with a single number and nothing else.",
+    "answer": "880",
+    "family": "add_three",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 72 + 62?\nAnswer with a single number and nothing else.",
+    "answer": "134",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is 33 + 48?\nAnswer with a single number and nothing else.",
+    "answer": "81",
+    "family": "add_two",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the fifth word in this list: table, candle, chair, green, kettle, pencil\nAnswer with that word only and nothing else.",
+    "answer": "kettle",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 536 - 262 - 152?\nAnswer with a single number and nothing else.",
+    "answer": "122",
+    "family": "add_chain_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 23, 91, 36, 57\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "23 36 57 91",
+    "family": "sort_digits",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 328 + 782 + 709?\nAnswer with a single number and nothing else.",
+    "answer": "1819",
+    "family": "add_chain_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 647 + 822 - 262?\nAnswer with a single number and nothing else.",
+    "answer": "1207",
+    "family": "add_three",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 42 21 92 49 6\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "6 49 92 21 42",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 65 + 64?\nAnswer with a single number and nothing else.",
+    "answer": "129",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is the second word in this list: light, mouse, amber, chair, pencil, candle\nAnswer with that word only and nothing else.",
+    "answer": "mouse",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 81 74 72 51 44\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "44 51 72 74 81",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 52 + 19?\nAnswer with a single number and nothing else.",
+    "answer": "71",
+    "family": "add_two",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 24 + 22?\nAnswer with a single number and nothing else.",
+    "answer": "46",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is the fifth word in this list: green, sugar, meadow, candle, ladder, pencil\nAnswer with that word only and nothing else.",
+    "answer": "ladder",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: tiger, temple, zebra\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "temple tiger zebra",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: mouse, candle, light\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "candle light mouse",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the second word in this list: tiger, cloud, orange, pencil, green, sugar\nAnswer with that word only and nothing else.",
+    "answer": "cloud",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: jungle, mouse, cloud\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "cloud jungle mouse",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 9 37 55 46 50\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "50 46 55 37 9",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: meadow, mouse, tiger\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "meadow mouse tiger",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 13 - 317 - 438 + 359?\nAnswer with a single number and nothing else.",
+    "answer": "-383",
+    "family": "add_chain_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: water, stone, chair\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair stone water",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 39 + 34?\nAnswer with a single number and nothing else.",
+    "answer": "73",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "Sort these words alphabetically: table, needle, light\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "light needle table",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 13 6 86 70 32\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "32 70 86 6 13",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 19 + 68?\nAnswer with a single number and nothing else.",
+    "answer": "87",
+    "family": "add_two",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 0 73 0 26 42\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "42 26 0 73 0",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 72 + 69?\nAnswer with a single number and nothing else.",
+    "answer": "141",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "Take the last letter of each word and join them: stone, table, amber\nAnswer with the three letters only, no spaces and nothing else.",
+    "answer": "eer",
+    "family": "last_letters",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 285 + 287 - 459 + 587 - 111 - 573?\nAnswer with a single number and nothing else.",
+    "answer": "16",
+    "family": "add_chain_6",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 52 + 24?\nAnswer with a single number and nothing else.",
+    "answer": "76",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "Reverse this list: 14 33 78 47 15\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "15 47 78 33 14",
+    "family": "reverse_list",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: ladder, water, rocket\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "ladder rocket water",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the sixth word in this list: temple, silver, paper, mouse, rocket, sugar\nAnswer with that word only and nothing else.",
+    "answer": "sugar",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 45 + 60?\nAnswer with a single number and nothing else.",
+    "answer": "105",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: edaeaeccafbcca\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the fourth word in this list: temple, pencil, mouse, stone, jungle, dragon\nAnswer with that word only and nothing else.",
+    "answer": "stone",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: orange, zebra, water\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "orange water zebra",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: abfdbfbaebaaab\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: bbcdbcdbebacff\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: paper, stone, brave\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave paper stone",
+    "family": "sort_words_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 261 - 529 + 80?\nAnswer with a single number and nothing else.",
+    "answer": "-188",
+    "family": "add_chain_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the first word in this list: temple, silver, ladder, sugar, green, brave\nAnswer with that word only and nothing else.",
+    "answer": "temple",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 490 + 534 - 338 + 194 - 163?\nAnswer with a single number and nothing else.",
+    "answer": "717",
+    "family": "add_chain_5",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: candle, tiger, pencil, sugar\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "candle pencil sugar tiger",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the fifth word in this list: table, dragon, water, apple, tiger, orange\nAnswer with that word only and nothing else.",
+    "answer": "tiger",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 753 + 437 + 692?\nAnswer with a single number and nothing else.",
+    "answer": "1882",
+    "family": "add_chain_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, pencil, stone, light, apple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple chair light pencil stone",
+    "family": "sort_words",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, kettle, tiger, apple\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple chair kettle tiger",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: amber, kettle, ladder, orange\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "amber kettle ladder orange",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: island, ladder, paper, green\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "green island ladder paper",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 759 + 339 + 768?\nAnswer with a single number and nothing else.",
+    "answer": "1866",
+    "family": "add_chain_3",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these numbers in increasing order: 14, 45, 67, 90\nAnswer with the sorted numbers separated by single spaces, and nothing else.",
+    "answer": "14 45 67 90",
+    "family": "sort_digits",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: brave, jungle, paper, amber\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "amber brave jungle paper",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 75 + 31?\nAnswer with a single number and nothing else.",
+    "answer": "106",
+    "family": "add_two",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is 65 + 49?\nAnswer with a single number and nothing else.",
+    "answer": "114",
+    "family": "add_two",
+    "base_rate": 0.96875
+  },
+  {
+    "prompt": "What is 361 - 276 + 42 + 496 + 716?\nAnswer with a single number and nothing else.",
+    "answer": "1339",
+    "family": "add_chain_5",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "What is the second word in this list: paper, chair, orange, zebra, river, table\nAnswer with that word only and nothing else.",
+    "answer": "chair",
+    "family": "nth_word",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: adffaccfbfafcd\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, needle, paper, rocket\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "chair needle paper rocket",
+    "family": "sort_words_4",
+    "base_rate": 0.03125
+  },
+  {
+    "prompt": "Reverse this list: 26 31 32 28 39\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "39 28 32 31 26",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 37 56 91 21 85\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "85 21 91 56 37",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 52 + 13?\nAnswer with a single number and nothing else.",
+    "answer": "65",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is 60 + 40?\nAnswer with a single number and nothing else.",
+    "answer": "100",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is the fourth word in this list: chair, jungle, silver, stone, rocket, dragon\nAnswer with that word only and nothing else.",
+    "answer": "stone",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 618 + 212 + 773?\nAnswer with a single number and nothing else.",
+    "answer": "1603",
+    "family": "add_chain_3",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 54 + 50?\nAnswer with a single number and nothing else.",
+    "answer": "104",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is the third word in this list: pencil, brave, sugar, meadow, tiger, candle\nAnswer with that word only and nothing else.",
+    "answer": "sugar",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: edffaecdbdcbff\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: fcdafefdcaffcf\nAnswer with a single number and nothing else.",
+    "answer": "6",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the third word in this list: river, island, apple, kettle, ladder, rocket\nAnswer with that word only and nothing else.",
+    "answer": "apple",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the third word in this list: table, amber, tiger, brave, green, zebra\nAnswer with that word only and nothing else.",
+    "answer": "tiger",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 15 61 40 50 94\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "94 50 40 61 15",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Sort these words alphabetically: island, tiger, green\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "green island tiger",
+    "family": "sort_words_3",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: acfddcfebbfddc\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 69 48 79 41 87\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "87 41 79 48 69",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: badfadaaceeaaf\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 17 68 90 83 61\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "61 83 90 68 17",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 93 + 56?\nAnswer with a single number and nothing else.",
+    "answer": "149",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: fcfdaaabadfbdb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 91 + 38?\nAnswer with a single number and nothing else.",
+    "answer": "129",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is 52 + 83?\nAnswer with a single number and nothing else.",
+    "answer": "135",
+    "family": "add_two",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, meadow, brave\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave chair meadow",
+    "family": "sort_words_3",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the fifth word in this list: green, island, dragon, needle, mouse, orange\nAnswer with that word only and nothing else.",
+    "answer": "mouse",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 57 + 31?\nAnswer with a single number and nothing else.",
+    "answer": "88",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is the sixth word in this list: needle, silver, stone, cloud, green, zebra\nAnswer with that word only and nothing else.",
+    "answer": "zebra",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the fifth word in this list: chair, forest, green, meadow, paper, rocket\nAnswer with that word only and nothing else.",
+    "answer": "paper",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 8 27 47 84 81\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "81 84 47 27 8",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 63 25 27 73 24\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "24 73 27 25 63",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the second word in this list: candle, rocket, tiger, brave, ladder, stone\nAnswer with that word only and nothing else.",
+    "answer": "rocket",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "Reverse this list: 29 61 86 9 70\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "70 9 86 61 29",
+    "family": "reverse_list",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: deabbbfedefbec\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: ecbcceffddeeec\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 52 + 61?\nAnswer with a single number and nothing else.",
+    "answer": "113",
+    "family": "add_two",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is the fourth word in this list: orange, dragon, stone, paper, rocket, island\nAnswer with that word only and nothing else.",
+    "answer": "paper",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 310 + 926 - 519?\nAnswer with a single number and nothing else.",
+    "answer": "717",
+    "family": "add_three",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is 21 + 94?\nAnswer with a single number and nothing else.",
+    "answer": "115",
+    "family": "add_two",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the third word in this list: water, zebra, amber, table, candle, stone\nAnswer with that word only and nothing else.",
+    "answer": "amber",
+    "family": "nth_word",
+    "base_rate": 0.9375
+  },
+  {
+    "prompt": "What is the fourth word in this list: dragon, green, kettle, stone, silver, sugar\nAnswer with that word only and nothing else.",
+    "answer": "stone",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "What is the second word in this list: kettle, cloud, island, chair, rocket, temple\nAnswer with that word only and nothing else.",
+    "answer": "cloud",
+    "family": "nth_word",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: aabacaeecdbcfb\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.0625
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: bfeccbaadadaca\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 32 + 95?\nAnswer with a single number and nothing else.",
+    "answer": "127",
+    "family": "add_two",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 77 + 53?\nAnswer with a single number and nothing else.",
+    "answer": "130",
+    "family": "add_two",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Sort these words alphabetically: apple, cloud, rocket, stone\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "apple cloud rocket stone",
+    "family": "sort_words_4",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'r' appear in the word 'river'?\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_letter",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'v' appear in the word 'brave'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: cbdccbeeebebdb\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Reverse this list: 3 7 69 14 52\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "52 14 69 7 3",
+    "family": "reverse_list",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the fourth word in this list: dragon, orange, light, green, stone, cloud\nAnswer with that word only and nothing else.",
+    "answer": "green",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the fourth word in this list: temple, paper, water, silver, brave, table\nAnswer with that word only and nothing else.",
+    "answer": "silver",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the third word in this list: zebra, mouse, tiger, water, brave, silver\nAnswer with that word only and nothing else.",
+    "answer": "tiger",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 84 + 27?\nAnswer with a single number and nothing else.",
+    "answer": "111",
+    "family": "add_two",
+    "base_rate": 0.90625
+  },
+  {
+    "prompt": "What is 27 + 12?\nAnswer with a single number and nothing else.",
+    "answer": "39",
+    "family": "add_two",
+    "base_rate": 0.90625
+  },
+  {
+    "prompt": "What is the sixth word in this list: dragon, chair, kettle, orange, brave, silver\nAnswer with that word only and nothing else.",
+    "answer": "silver",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the sixth word in this list: paper, silver, brave, chair, orange, stone\nAnswer with that word only and nothing else.",
+    "answer": "stone",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: cbaefadfdebffa\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the second word in this list: temple, green, brave, cloud, orange, zebra\nAnswer with that word only and nothing else.",
+    "answer": "green",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 89 + 98?\nAnswer with a single number and nothing else.",
+    "answer": "187",
+    "family": "add_two",
+    "base_rate": 0.90625
+  },
+  {
+    "prompt": "Reverse this list: 21 85 12 10 84\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "84 10 12 85 21",
+    "family": "reverse_list",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 62 + 11?\nAnswer with a single number and nothing else.",
+    "answer": "73",
+    "family": "add_two",
+    "base_rate": 0.90625
+  },
+  {
+    "prompt": "What is 691 + 347 - 115?\nAnswer with a single number and nothing else.",
+    "answer": "923",
+    "family": "add_chain_3",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Reverse this list: 51 57 37 30 79\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "79 30 37 57 51",
+    "family": "reverse_list",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Sort these words alphabetically: forest, zebra, cloud\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "cloud forest zebra",
+    "family": "sort_words_3",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: eeeeebafdfbaea\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the fifth word in this list: silver, rocket, island, water, ladder, tiger\nAnswer with that word only and nothing else.",
+    "answer": "ladder",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: dddcafaabdbfca\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Sort these words alphabetically: kettle, light, table\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "kettle light table",
+    "family": "sort_words_3",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: dccfcbcfebcabe\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: eaefbfdbfddcce\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 49 + 28?\nAnswer with a single number and nothing else.",
+    "answer": "77",
+    "family": "add_two",
+    "base_rate": 0.90625
+  },
+  {
+    "prompt": "Reverse this list: 16 12 11 71 55\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "55 71 11 12 16",
+    "family": "reverse_list",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the second word in this list: kettle, brave, amber, stone, candle, water\nAnswer with that word only and nothing else.",
+    "answer": "brave",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Sort these words alphabetically: dragon, sugar, needle\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "dragon needle sugar",
+    "family": "sort_words_3",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Reverse this list: 30 52 15 15 79\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "79 15 15 52 30",
+    "family": "reverse_list",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is 50 + 73?\nAnswer with a single number and nothing else.",
+    "answer": "123",
+    "family": "add_two",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Sort these words alphabetically: chair, brave, orange, water, silver\nAnswer with the sorted words separated by single spaces, and nothing else.",
+    "answer": "brave chair orange silver water",
+    "family": "sort_words_5",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: ddedafbeefccaf\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "What is the third word in this list: ladder, dragon, stone, amber, tiger, light\nAnswer with that word only and nothing else.",
+    "answer": "stone",
+    "family": "nth_word",
+    "base_rate": 0.09375
+  },
+  {
+    "prompt": "Reverse this list: 47 94 45 39 38\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "38 39 45 94 47",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: effddffdbaafbe\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the sixth word in this list: brave, pencil, needle, light, cloud, tiger\nAnswer with that word only and nothing else.",
+    "answer": "tiger",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the third word in this list: stone, ladder, mouse, light, amber, brave\nAnswer with that word only and nothing else.",
+    "answer": "mouse",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the first word in this list: sugar, rocket, ladder, kettle, needle, orange\nAnswer with that word only and nothing else.",
+    "answer": "sugar",
+    "family": "nth_word",
+    "base_rate": 0.875
+  },
+  {
+    "prompt": "What is the third word in this list: cloud, temple, forest, kettle, silver, pencil\nAnswer with that word only and nothing else.",
+    "answer": "forest",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the second word in this list: candle, pencil, tiger, mouse, orange, brave\nAnswer with that word only and nothing else.",
+    "answer": "pencil",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the first word in this list: temple, zebra, chair, apple, candle, sugar\nAnswer with that word only and nothing else.",
+    "answer": "temple",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the sixth word in this list: island, forest, mouse, stone, brave, light\nAnswer with that word only and nothing else.",
+    "answer": "light",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the third word in this list: candle, dragon, tiger, silver, table, zebra\nAnswer with that word only and nothing else.",
+    "answer": "tiger",
+    "family": "nth_word",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 24 27 3 28 58\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "58 28 3 27 24",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: acfdecffdebaef\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is 34 + 93?\nAnswer with a single number and nothing else.",
+    "answer": "127",
+    "family": "add_two",
+    "base_rate": 0.875
+  },
+  {
+    "prompt": "How many times does the letter 'n' appear in the word 'island'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 35 64 97 61 5\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "5 61 97 64 35",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 47 51 87 27 86\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "86 27 87 51 47",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: faebbebedebafa\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: dcbdbfcdabdead\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: dbcacfddfbecac\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: baccdfbdabadad\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'f' appear in this string: cfcefcdaeefaea\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'l' appear in the word 'pencil'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: afcddadbdacefb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'temple'?\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: fabaebffedfaea\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'l' appear in the word 'apple'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: cededfefbedfcf\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: deebcfbdbefadb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: ddacefaabbebcd\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in this string: ebbbeecbfcefef\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'green'?\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 80 88 13 54 38\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "38 54 13 88 80",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: edebdbbfacddea\nAnswer with a single number and nothing else.",
+    "answer": "4",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 26 72 16 17 20\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "20 17 16 72 26",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 20 61 15 55 25\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "25 55 15 61 20",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: abcdbcacfadede\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "Reverse this list: 57 39 5 76 58\nAnswer with the reversed list separated by single spaces, and nothing else.",
+    "answer": "58 76 5 39 57",
+    "family": "reverse_list",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'kettle'?\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in the word 'candle'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'e' appear in the word 'brave'?\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_letter",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: fefaabdcaecfda\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: afbcdfecabcfba\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: adfdeefbacfcfb\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is 78 + 33?\nAnswer with a single number and nothing else.",
+    "answer": "111",
+    "family": "add_two",
+    "base_rate": 0.875
+  },
+  {
+    "prompt": "How many times does the letter 'a' appear in this string: febddeabecbede\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.125
+  },
+  {
+    "prompt": "What is the fourth word in this list: table, paper, candle, green, meadow, apple\nAnswer with that word only and nothing else.",
+    "answer": "green",
+    "family": "nth_word",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'b' appear in this string: ddeecefcbbcbdf\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "What is 166 + 125 + 110?\nAnswer with a single number and nothing else.",
+    "answer": "401",
+    "family": "add_chain_3",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: baddbddbacedcf\nAnswer with a single number and nothing else.",
+    "answer": "5",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: cfdeaacabafbfa\nAnswer with a single number and nothing else.",
+    "answer": "1",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: dffddefbbcdfce\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'd' appear in this string: ddebaabfbcfabb\nAnswer with a single number and nothing else.",
+    "answer": "2",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  },
+  {
+    "prompt": "How many times does the letter 'c' appear in this string: adcdebdedbcceb\nAnswer with a single number and nothing else.",
+    "answer": "3",
+    "family": "count_in_string",
+    "base_rate": 0.15625
+  }
+]

@@ -53,7 +53,7 @@ def main() -> None:
     trainer = RealRLTrainer(model, tokenizer, config)
 
     key = mx.random.key(4242 + args.seed)
-    kept, summary = [], []
+    kept, surveyed, summary = [], [], []
     for family in args.families:
         rng = np.random.default_rng(args.seed + abs(hash(family)) % 10_000)
         items = FAMILIES[family].sample(args.per_family, rng)
@@ -72,6 +72,7 @@ def main() -> None:
                 for r in np.array(responses)
             ]))
             rates.append(rate)
+            surveyed.append({**item, "family": family, "base_rate": rate})
             if args.low <= rate <= args.high:
                 kept.append({**item, "family": family, "base_rate": rate})
         rates = np.array(rates)
@@ -94,7 +95,12 @@ def main() -> None:
 
     out = Path(args.out) / f"{args.label}-mixed.json"
     out.write_text(json.dumps(kept, indent=2))
+    # every surveyed prompt with its measured rate, so a corpus can later be built at a chosen
+    # live-group probability rather than only at the one band this run happened to keep
+    every = Path(args.out) / f"{args.label}-surveyed.json"
+    every.write_text(json.dumps(surveyed, indent=2))
     print(f"\nwrote {len(kept)} mixed prompts to {out}")
+    print(f"wrote {len(surveyed)} surveyed prompts with rates to {every}")
     io.save("s10_difficulty", vars(args), {"label": args.label, "families": summary,
                                            "kept": len(kept)})
 
