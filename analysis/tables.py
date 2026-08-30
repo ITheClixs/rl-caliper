@@ -626,6 +626,42 @@ def table_numbers() -> None:
                 "AdamScaleStateGain": f"{point / bare:.1f}",
             }
 
+    # the support sweep: four pre-specified regimes on one model
+    bands = [
+        r["result"] for r in io.load_all("s11_prospective")
+        if str(r["result"].get("label", "")).startswith("band-")
+        and r["result"].get("resolved_std") is not None
+    ]
+    if bands:
+        bands.sort(key=lambda o: float(o["label"].split("-")[1]))
+        errors = [max(o["ratio"], 1 / o["ratio"]) for o in bands]
+        halves = [
+            max(o["predicted_half_samples"]) / max(min(o["predicted_half_samples"]), 1e-12)
+            for o in bands
+        ]
+        inside = [o for o in bands if 2 / 3 < o["ratio"] < 1.5]
+        macros |= {
+            "SweepBands": f"{len(bands)}",
+            "SweepBest": f"{min(errors):.2f}",
+            "SweepWorst": f"{max(errors):.2f}",
+            "SweepInside": f"{len(inside)}",
+            "SweepErrors": ", ".join(f"{e:.2f}" for e in errors),
+            "SweepHalfLow": f"{min(halves):.2f}",
+            "SweepHalfHigh": f"{max(halves):.2f}",
+        }
+        if inside:
+            won = inside[0]
+            macros |= {
+                "SweepWinBand": won["label"].split("-")[1],
+                "SweepWinForecast": f"{won['predicted_std']:.4f}",
+                "SweepWinMeasured": f"{won['resolved_std']:.4f}",
+                "SweepWinLow": f"{won['resolved_interval']['lo']:.4f}",
+                "SweepWinHigh": f"{won['resolved_interval']['hi']:.4f}",
+                "SweepWinRatio": f"{max(won['ratio'], 1 / won['ratio']):.2f}",
+                "SweepWinResidual": f"{won['curvature_residual']:.1f}",
+                "SweepWinGain": f"{won['observed_spread']['mean'] - won['base_pass_rate']:.3f}",
+            }
+
     # the difficulty scan: where each family sits for each policy, on the live-group coordinate
     scans = [r for r in io.load_all("s10_difficulty") if r["result"].get("families")]
     if scans:

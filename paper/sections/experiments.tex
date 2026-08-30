@@ -610,6 +610,58 @@ strongly regime-dependent, and maintaining stochastic support moves the system a
 the regime the theory describes. A degenerate measurement regime, not model scale, accounts for
 most of the gap we previously reported.
 
+\paragraph{A sweep across four regimes, and what it falsifies.} The comparison above changes the
+corpus, and with it the pass-rate distribution, the score geometry and both noise terms together,
+so it implicates the measurement regime without isolating it. We therefore built
+$\numSweepBands$ corpora of $255$ prompts each at pre-specified mean live probabilities of
+$0.15$, $0.35$, $0.60$ and $0.85$, holding the model, optimiser, budget, update count, batch and
+group size, evaluation set and forecast procedure fixed. The corpora and the launch script naming
+all four conditions were written before any of them ran.
+
+The forecast errors are $\numSweepErrors$, in that order. They are not monotone in support, and
+the middle bands are the worst. Half-sample disagreement stays between $\numSweepHalfLow$ and
+$\numSweepHalfHigh$ in every band, including the one whose live share averaged $0.11$. We
+therefore withdraw the reading that sparse stochastic support is the dominant determinant of
+either estimator stability or forecast error: it is not, on this model. Taken with the
+cross-fitting result below, two candidate explanations of the original discrepancy are eliminated.
+The large curvature residuals remain consistent with a breakdown of the local linear approximation,
+but these experiments do not attribute the remaining error to it uniquely, and we do not claim
+they do.
+
+Two features of the sweep are worth recording rather than explaining. Support is endogenous: the
+realised shares are $0.11$, $0.48$, $0.62$ and $0.54$, so the two highest bands reverse, and
+Figure~\ref{fig:support} shows why. The band that learns fastest consumes its own support, falling
+from $0.88$ to about $0.4$, while the lowest band simply stays low throughout. A mean over a run is
+not the treatment we intended to apply, and a corpus that sustains a low share is not the same
+object as one that starts high and collapses.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\linewidth]{figures/support.pdf}
+  \caption{\textbf{Left:} the share of groups that are not unanimous, along each band's anchor
+  run. Support is endogenous: the band that learns fastest spends its own, while the lowest band
+  stays low throughout, so a mean over the run is not the treatment we set. \textbf{Right:}
+  forecast error against realised support, with the declared $1.5\times$ criterion dotted. There
+  is no trend, which is the point.}
+  \label{fig:support}
+\end{figure}
+
+\paragraph{One of the four is accurate, and the diagnostic refuses it.} In the $\numSweepWinBand$
+band the frozen forecast is $\numSweepWinForecast$ against a measured seed term of
+$\numSweepWinMeasured$, nominal interval $[\numSweepWinLow,\ \numSweepWinHigh]$, on a run whose
+pass rate rose by $\numSweepWinGain$. That is a multiplicative error of
+$\numSweepWinRatio$, inside the $1.5\times$ band we declared before the sweep, and the point
+estimate sits comfortably within the interval on the measured spread. It is the first prospective
+forecast in this paper that is quantitatively accurate on a pretrained model.
+
+We report it as one of $\numSweepBands$ pre-specified conditions rather than as a validation, and
+the other three are in the same table. The interval at twelve seeds is wide, so the claim is that
+the forecast is within a quarter of the measured spread multiplicatively, not that the error is
+exactly $\numSweepWinRatio$. And the diagnostic of Section~\ref{sec:exp-abstain} refuses this run
+too, at a residual of $\numSweepWinResidual$: a practitioner following the rule would have been
+told not to trust a forecast that was in fact good. The estimator can be accurate on a real model;
+what we cannot yet do is say in advance when it will be.
+
 \paragraph{Effective prompt difficulty is policy-relative.} That raises the obvious
 question of whether the same corpus can be built at $7$B, and the answer in this task suite is no,
 for a reason worth reporting. We examined $\numScanFamilies$ task families in all, of which

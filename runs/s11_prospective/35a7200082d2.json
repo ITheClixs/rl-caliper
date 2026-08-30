@@ -1,0 +1,169 @@
+{
+  "manifest": {
+    "git_sha": "9ea53d8630d6dab3a47ec2fb5a3d01b787c98634",
+    "config_hash": "35a7200082d2",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "band-0.35",
+      "prompts_file": "runs/s12_support_sweep/band-0.35.json",
+      "eval_prompts": 64,
+      "eval_samples": 16,
+      "seeds": 12,
+      "steps": 12,
+      "prompts": 8,
+      "group_size": 8,
+      "max_tokens": 20,
+      "learning_rate": 0.0005,
+      "lora_layers": 8,
+      "optimiser": "sgd",
+      "variance_prompts": 32,
+      "threshold": 0.0275,
+      "cross_fit": false,
+      "checkpoints": 4,
+      "seed": 0,
+      "store": "runs/s12_support_sweep"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1788081096.2362392,
+    "wall_clock": 1788084607.282392
+  },
+  "result": {
+    "label": "band-0.35",
+    "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+    "prompts_file": "runs/s12_support_sweep/band-0.35.json",
+    "optimiser": "sgd",
+    "learning_rate": 0.0005,
+    "steps": 12,
+    "prompts": 8,
+    "group_size": 8,
+    "variance_prompts": 32,
+    "predicted_std": 0.07027794139088009,
+    "predicted_half_samples": [
+      0.07835245739435052,
+      0.060974159973274177
+    ],
+    "curvature_residual": 45.84745897099766,
+    "threshold": 0.0275,
+    "decision": "refuse",
+    "anchor_live_share": 0.4791666666666667,
+    "anchor_trace": [
+      {
+        "pass_rate": 0.140625,
+        "live_share": 0.375,
+        "effective_prompts": 3.0,
+        "reward_variance": 0.041015625,
+        "gradient_norm": 16.637075424194336
+      },
+      {
+        "pass_rate": 0.125,
+        "live_share": 0.625,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.09375,
+        "gradient_norm": 11.627599716186523
+      },
+      {
+        "pass_rate": 0.15625,
+        "live_share": 0.625,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.10546875,
+        "gradient_norm": 16.65548324584961
+      },
+      {
+        "pass_rate": 0.078125,
+        "live_share": 0.375,
+        "effective_prompts": 3.0,
+        "reward_variance": 0.056640625,
+        "gradient_norm": 9.245960235595703
+      },
+      {
+        "pass_rate": 0.15625,
+        "live_share": 0.25,
+        "effective_prompts": 2.0,
+        "reward_variance": 0.02734375,
+        "gradient_norm": 10.645235061645508
+      },
+      {
+        "pass_rate": 0.140625,
+        "live_share": 0.125,
+        "effective_prompts": 1.0,
+        "reward_variance": 0.013671875,
+        "gradient_norm": 3.859619617462158
+      },
+      {
+        "pass_rate": 0.109375,
+        "live_share": 0.5,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.072265625,
+        "gradient_norm": 16.63581657409668
+      },
+      {
+        "pass_rate": 0.203125,
+        "live_share": 0.5,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.064453125,
+        "gradient_norm": 14.39977741241455
+      },
+      {
+        "pass_rate": 0.09375,
+        "live_share": 0.5,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.0703125,
+        "gradient_norm": 15.296341896057129
+      },
+      {
+        "pass_rate": 0.171875,
+        "live_share": 0.5,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.080078125,
+        "gradient_norm": 27.801076889038086
+      },
+      {
+        "pass_rate": 0.21875,
+        "live_share": 0.625,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.09375,
+        "gradient_norm": 17.33247947692871
+      },
+      {
+        "pass_rate": 0.296875,
+        "live_share": 0.75,
+        "effective_prompts": 6.0,
+        "reward_variance": 0.130859375,
+        "gradient_norm": 30.838056564331055
+      }
+    ],
+    "validation_seeds": 12,
+    "frozen_at": 1788082329.6224582,
+    "base_pass_rate": 0.205078125,
+    "held_out_scores": [
+      0.2294921875,
+      0.3291015625,
+      0.275390625,
+      0.2802734375,
+      0.2490234375,
+      0.3232421875,
+      0.318359375,
+      0.2939453125,
+      0.2607421875,
+      0.2353515625,
+      0.248046875,
+      0.2626953125
+    ],
+    "observed_spread": {
+      "std": 0.03426824549566519,
+      "lo": 0.022147850010186123,
+      "hi": 0.040819579752367004,
+      "mean": 0.2754720052083333,
+      "n_runs": 12
+    },
+    "resolved_std": 0.032982111621965286,
+    "resolved_interval": {
+      "lo": 0.020094346283243004,
+      "hi": 0.03977348479255659
+    },
+    "binomial_variance": 8.649296230740016e-05,
+    "ratio": 2.130789629129649,
+    "eval_key_per_seed": true
+  }
+}

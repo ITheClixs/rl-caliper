@@ -691,6 +691,48 @@ def figure_real_forecast() -> None:
     plt.close(fig)
 
 
+def figure_support() -> None:
+    """Live-group share along each band's anchor run, and the forecast error against it.
+
+    Left: support is endogenous. The band that learns fastest spends its own support, while the
+    lowest band simply stays low. A mean over the run is not the treatment we set.
+
+    Right: forecast error against realised support, which is not monotone. The point of the panel
+    is that no trend is there to see.
+    """
+    bands = [
+        r["result"] for r in io.load_all("s11_prospective")
+        if str(r["result"].get("label", "")).startswith("band-")
+        and r["result"].get("anchor_trace")
+    ]
+    if not bands:
+        raise SystemExit("no support sweep")
+    bands.sort(key=lambda o: float(o["label"].split("-")[1]))
+
+    fig, (left, right) = plt.subplots(1, 2, figsize=(7.4, 2.9))
+    for outcome in bands:
+        share = [t["live_share"] for t in outcome["anchor_trace"]]
+        left.plot(range(len(share)), share, marker="o", markersize=3,
+                  label=f"target {outcome['label'].split('-')[1]}")
+    left.set_xlabel("update")
+    left.set_ylabel("share of groups not unanimous")
+    left.set_ylim(0, 1)
+    left.legend(frameon=False, fontsize=7)
+
+    realised = [outcome["anchor_live_share"] for outcome in bands]
+    error = [max(o["ratio"], 1 / o["ratio"]) for o in bands]
+    right.scatter(realised, error, s=28, zorder=3)
+    for x, y, outcome in zip(realised, error, bands, strict=True):
+        right.annotate(outcome["label"].split("-")[1], (x, y), textcoords="offset points",
+                       xytext=(5, 3), fontsize=7)
+    right.axhline(1.5, linestyle=":", linewidth=0.9, color="0.4")
+    right.set_xlabel("realised live share")
+    right.set_ylabel("forecast error")
+    right.set_ylim(1.0, 3.1)
+    fig.tight_layout()
+    save(fig, "support.pdf")
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
@@ -698,6 +740,7 @@ def main() -> None:
         ("sources", figure_sources),
         ("null", figure_null),
         ("real_forecast", figure_real_forecast),
+        ("support", figure_support),
         ("reconvergence", figure_reconvergence),
         ("real_seeds", figure_real_seeds),
         ("teaser", figure_teaser),

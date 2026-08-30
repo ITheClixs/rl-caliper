@@ -65,6 +65,10 @@ Legend for strength:
 | at 7B under Adam the spread is 56% of the effect | `s7`: 10 runs, 0.203 -> 0.362, resolved seed sd 0.0892 [0.0398, 0.1194] | measured |
 | ~~finite corpus raises G*~~ | withdrawn: the budget fixes R = PG, so the correction is a function of G; it lowers G* by sqrt((N-1)/N) | negative |
 | the fixed-budget finite-corpus optimum is 1 + sqrt((N-1)tau_w/(N tau_b)) | `b1`: matches brute force over feasible G to 0.02 | exact |
+| one prospective pretrained forecast is inside 1.5x | `s11` band 0.85: frozen 0.0205 against measured 0.0253, error 1.24x, 12 held-out seeds | measured |
+| ~~more stochastic support gives a better forecast~~ | withdrawn: four pre-specified bands give 1.66, 2.13, 2.80, 1.24 with no trend | negative |
+| ~~the overprediction is metric-gradient estimation bias~~ | withdrawn: cross-fitting two independent gradients moves 0.0604 to 0.0616 | negative |
+| the diagnostic refuses the accurate run too | `s11` band 0.85 residual 8.0 against a threshold of 0.0275 | measured |
 | a one-run residual flags the settings where the forecast fails | `p2`: AUROC 0.94 for errors past 1.3x over 96 settings | measured |
 | refusing the worst fifth caps the error at 1.29x | `p2`: against 1.56x for accepting every setting | measured |
 | the same threshold refuses both pretrained runs | `s9`: residual 2.0 at 0.5B and 160.5 at 7B against 0.0275 | measured |

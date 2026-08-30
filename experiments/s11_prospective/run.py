@@ -108,6 +108,8 @@ def main() -> None:
     ap.add_argument("--optimiser", default="sgd", choices=("sgd", "adam"))
     ap.add_argument("--variance-prompts", type=int, default=32)
     ap.add_argument("--threshold", type=float, required=True)
+    ap.add_argument("--success-band", nargs=2, type=float, default=[2 / 3, 1.5],
+                    help="the ratio range declared a success, recorded before the seeds run")
     ap.add_argument("--cross-fit", action="store_true",
                     help="debias the injected term with two independent metric gradients")
     ap.add_argument("--checkpoints", type=int, default=4)
@@ -189,6 +191,7 @@ def main() -> None:
         "anchor_live_share": live,
         "anchor_trace": trace,
         "validation_seeds": args.seeds,
+        "success_band": list(args.success_band),
         "frozen_at": time.time(),
     }
     frozen_dir = store / "frozen"

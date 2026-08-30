@@ -66,14 +66,14 @@
   $\numForecastSettings$ settings, one run frozen before the rest existed, it has a median error
   of $\numForecastMedian\times$.
 
-  On a pretrained model it is short by twenty-five, and most of that is the measurement regime
-  rather than the scale. A unanimous group injects nothing, so as a prompt's pass rate approaches
-  zero or one it stops contributing: the live share falls to a tenth and eight prompts carry about
-  one. Selecting prompts the policy is genuinely uncertain about holds it at
-  $\numMixedLive$ and brings the forecast to $\numMixedRatio$ of the measured spread, with two
-  disjoint half-sample estimates of it agreeing to $\numMixedHalfRatio$ rather than $5.5$. Which prompts
-  those are is a property of the prompt and policy together rather than the prompt alone, and
-  across $\numScanFamilies$ task families the informative band moves as the model changes.
+  On pretrained models it is regime-dependent. Across $\numSweepBands$ pre-specified regimes on
+  Qwen2.5-0.5B the frozen forecast misses the measured spread by factors of $\numSweepErrors$,
+  and one meets a criterion of $1.5\times$ declared before the sweep ran: local covariance
+  forecasting can be quantitatively accurate on a pretrained model, though not reliably so. A
+  corpus whose reward groups go unanimous carries no seed noise to forecast at all and misses by
+  twenty-five. The same sweep falsifies a monotone relationship between that stochastic support
+  and accuracy, and a one-run curvature diagnostic calibrated on the exact models does not
+  transfer: it refuses every pretrained run, including the accurate one.
     \end{quote}
   \end{minipage}
   \vspace{6pt}

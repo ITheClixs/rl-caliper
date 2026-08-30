@@ -1,0 +1,107 @@
+{
+  "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+  "prompts_file": "runs/s12_support_sweep/band-0.85.json",
+  "optimiser": "sgd",
+  "learning_rate": 0.0005,
+  "steps": 12,
+  "prompts": 8,
+  "group_size": 8,
+  "variance_prompts": 32,
+  "predicted_std": 0.02049439717117956,
+  "predicted_half_samples": [
+    0.018262740174642262,
+    0.0225018649391407
+  ],
+  "curvature_residual": 7.962687357270377,
+  "threshold": 0.0275,
+  "decision": "refuse",
+  "anchor_live_share": 0.5416666666666666,
+  "anchor_trace": [
+    {
+      "pass_rate": 0.140625,
+      "live_share": 0.875,
+      "effective_prompts": 7.0,
+      "reward_variance": 0.115234375,
+      "gradient_norm": 17.323963165283203
+    },
+    {
+      "pass_rate": 0.28125,
+      "live_share": 0.75,
+      "effective_prompts": 6.0,
+      "reward_variance": 0.1171875,
+      "gradient_norm": 28.49016571044922
+    },
+    {
+      "pass_rate": 0.578125,
+      "live_share": 0.75,
+      "effective_prompts": 6.0,
+      "reward_variance": 0.107421875,
+      "gradient_norm": 24.618995666503906
+    },
+    {
+      "pass_rate": 0.21875,
+      "live_share": 0.5,
+      "effective_prompts": 4.0,
+      "reward_variance": 0.07421875,
+      "gradient_norm": 14.825801849365234
+    },
+    {
+      "pass_rate": 0.4375,
+      "live_share": 0.75,
+      "effective_prompts": 6.0,
+      "reward_variance": 0.1328125,
+      "gradient_norm": 30.96681022644043
+    },
+    {
+      "pass_rate": 0.71875,
+      "live_share": 0.5,
+      "effective_prompts": 4.0,
+      "reward_variance": 0.08203125,
+      "gradient_norm": 42.78335952758789
+    },
+    {
+      "pass_rate": 0.5,
+      "live_share": 0.25,
+      "effective_prompts": 2.0,
+      "reward_variance": 0.046875,
+      "gradient_norm": 13.819978713989258
+    },
+    {
+      "pass_rate": 0.65625,
+      "live_share": 0.5,
+      "effective_prompts": 4.0,
+      "reward_variance": 0.09765625,
+      "gradient_norm": 24.731924057006836
+    },
+    {
+      "pass_rate": 0.59375,
+      "live_share": 0.375,
+      "effective_prompts": 3.0,
+      "reward_variance": 0.06640625,
+      "gradient_norm": 21.03150749206543
+    },
+    {
+      "pass_rate": 0.578125,
+      "live_share": 0.5,
+      "effective_prompts": 4.0,
+      "reward_variance": 0.095703125,
+      "gradient_norm": 22.074420928955078
+    },
+    {
+      "pass_rate": 0.59375,
+      "live_share": 0.375,
+      "effective_prompts": 3.0,
+      "reward_variance": 0.05078125,
+      "gradient_norm": 20.239704132080078
+    },
+    {
+      "pass_rate": 0.5,
+      "live_share": 0.375,
+      "effective_prompts": 3.0,
+      "reward_variance": 0.07421875,
+      "gradient_norm": 24.691593170166016
+    }
+  ],
+  "validation_seeds": 12,
+  "frozen_at": 1788089316.313895
+}
