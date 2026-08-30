@@ -128,6 +128,10 @@ def main() -> None:
                 "adjoint_norm": prediction.adjoint_norm,
                 "forecast_trajectory": prediction.trajectory,
                 "mean_score": float(scores.mean()),
+                # every seed's own score, so a later analysis can designate any one of them the
+                # pilot and evaluate the decision against the rest, rather than drawing pilots
+                # from a fitted normal that the real-model runs are known not to follow
+                "seed_scores": scores.tolist(),
                 "seeds": int(scores.size),
             }
         )
