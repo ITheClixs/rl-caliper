@@ -319,9 +319,12 @@ the four whose predictions discriminate most strongly.
 A population of independent transformers is warmed up on a verifiable running-sum task until each
 member reaches a common pass rate, the noise terms are measured at that frozen policy, and every
 member is then trained from the same starting point at each split of a fixed rollout budget. The
-corpus size is the knob: sampling without replacement from a corpus of $N$ scales the between-prompt
-term by $1 - (P-1)/(N-1)$, so shrinking the corpus toward the batch raises $G^{\star}$ without touching
-the task. Table~\ref{tab:transformer} reports the predicted and measured optimum for each corpus,
+corpus size is the knob: sampling without replacement from a corpus of $N$ scales the
+between-prompt term by $1 - (P-1)/(N-1)$, which moves $G^{\star}$ without touching the task. At a
+fixed rollout budget that factor depends on the group size being chosen, and
+\eqref{eq:gstar-corpus} shows it \emph{lowers} the optimum, by $\sqrt{(N-1)/N}$; the effect is
+under half a percent at the corpus sizes here, so what the sweep varies is mostly the measured
+noise terms themselves. Table~\ref{tab:transformer} reports the predicted and measured optimum for each corpus,
 and Figure~\ref{fig:transformer-curves} the sweeps behind it.
 
 \begin{table*}[t]

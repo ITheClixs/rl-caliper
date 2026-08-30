@@ -273,12 +273,27 @@ def table_optimum() -> None:
     write("optimum", "\n".join(lines))
 
 
+def headline_grid():
+    """The prospective forecast grid the paper's headline numbers come from.
+
+    There is exactly one, and every table and macro that quotes it must select it the same way.
+    Smaller grids exist for the estimator ablations and for calibrating the diagnostic on a
+    disjoint environment seed; picking whichever ran last silently swaps one for another, which
+    is how a table came to disagree with the prose above it.
+    """
+    grids = [
+        r for r in io.load_all("p2_metric_forecast")
+        if len(r["result"].get("cells", [])) >= 100
+        and r["manifest"]["config"].get("estimator") == "rloo"
+    ]
+    if not grids:
+        raise SystemExit("no prospective forecast grid")
+    return max(grids, key=lambda r: len(r["result"]["cells"]))
+
+
 def table_forecast() -> None:
     """Forecast accuracy, broken out by the run length and the batch it was made at."""
-    runs = [r for r in io.load_all("p2_metric_forecast") if r["result"].get("cells")]
-    if not runs:
-        raise SystemExit("no forecast validation run")
-    cells = runs[-1]["result"]["cells"]
+    cells = headline_grid()["result"]["cells"]
     lines = [
         r"\setlength{\tabcolsep}{4pt}",
         r"\begin{tabular}{@{}lcccc@{}}",
@@ -394,9 +409,7 @@ def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
 
-    forecast = [
-        r for r in io.load_all("p2_metric_forecast") if len(r["result"].get("cells", [])) >= 100
-    ]
+    forecast = [headline_grid()]
     if forecast:
         cells = forecast[-1]["result"]["cells"]
         ratio = np.array([c["predicted_std"] / c["measured_std"] for c in cells])
@@ -626,8 +639,10 @@ def table_numbers() -> None:
         for k, v in by_model.items():
             if "7B" in k:
                 large |= v
+        matched = set(small) & set(large)
         macros |= {
             "ScanFamilies": f"{len(set(small) | set(large))}",
+            "ScanMatched": f"{len(matched)}",
             "ScanSmallUsable": f"{sum(1 for r in small.values() if r['in_band'] >= 0.2)}",
             "ScanLargeUsable": f"{sum(1 for r in large.values() if r['in_band'] >= 0.2)}",
         }

@@ -6,13 +6,19 @@ forecast from a single training run, to a median factor of $\numForecastMedian$ 
 $\numForecastSettings$ settings where the comparison can be made exactly; that the mechanism is filtering rather than accumulation, and that
 the filter is the shared objective and not an artefact of runs starting nearby; and that the
 backward pass the forecast needs is cheap because the mean update of a count-based estimator is a
-gradient field. The practical readings are that run length does not enter the answer, that batch
-composition does with square-root returns, and that rollout sampling rather than prompt selection
-is what the reported number mostly remembers.
+gradient field. The practical readings are that run length need not produce linear growth in the
+spread, since under a stable enough filter later updates saturate rather than accumulate; that
+batch composition does move it, with square-root returns in the standard deviation; and that
+response sampling is the larger source at the small and moderate group sizes we measure, with
+prompt selection taking the majority somewhere between groups of eight and sixteen.
 
 \paragraph{One quantity runs through all of it.} Read together, the measurements in this paper
-keep returning to $\E_x[p(1-p)]$, the mean within-prompt reward variance. It sets $\Sigma_t$, so it
-sets how much seed noise a batch injects. It sets the learning signal, so it sets how much of that
+keep returning to $\E_x[p(1-p)]$, the mean within-prompt reward variance. Under the score-scale
+conditions of Corollary~\ref{cor:bernoulli} it tracks the dominant Bernoulli contribution to the
+response-level term $\Sw$, which is a useful observable rather than a determination of
+$\Sigma_t$: it says nothing about the between-prompt term $\Sb$, the conditional score geometry,
+or the full covariance. Within that scope it indexes how much seed noise a batch injects. It also
+indexes the learning signal, so it indexes how much of that
 noise the following updates filter. It is largest before a policy has learned anything, which is
 why the per-update kernel tilts towards the start of a run. And when it reaches zero the injection
 stops and the metric stops resolving the policy, so two of the boundaries below are the same
@@ -136,13 +142,27 @@ term worth six to fifteen times the term kept. It vanishes last where the mean g
 first, which is what made it look like a property of saturation.
 Section~\ref{sec:exp-adam} gives the corrected numbers by band.
 
-\paragraph{Limits of the linearisation, with a diagnostic.} \eqref{eq:seed-recursion} requires the
-two runs to stay close enough that the mean gradient field is locally linear between them, and
-$\eta\|\mathcal{J}_t\| \ll 1$. Section~\ref{sec:exp-linearity} measures the residual
-$\|\gbar(\theta^B) - \gbar(\theta^A) - \mathcal{J}(\theta^A)\Delta\| / \|\gbar(\theta^B) - \gbar(\theta^A)\|$
-along real pairs of runs and reports the forecast error against it. The residual is computable
-during training without knowing the answer, which is what makes it useful: a run can say whether
-its own forecast is inside the regime that produced it.
+\paragraph{Limits of the linearisation, and a diagnostic that does not yet transfer.}
+\eqref{eq:seed-recursion} requires runs to stay close enough that the mean gradient field is
+locally linear over the distance seed noise moves them. Section~\ref{sec:exp-linearity} measures
+that between pairs of runs, and Section~\ref{sec:exp-abstain} builds the version a single run can
+compute about itself. Within the enumerable grid it works: it flags forecasts wrong by more than
+$1.3\times$ with an AUROC of $\numDiagAurocHigh$, and refusing the fifth of settings with the
+largest residual caps the worst error at $\numDiagWorstKept$ against $\numDiagWorstAll$. On a grid
+generated from a different environment seed it still accepts $78\%$ and still cuts the tail,
+though the accepted worst case rises to $1.58\times$, so the calibration figure was optimistic.
+
+Its absolute scale does not transfer to pretrained models, and we say that plainly rather than
+presenting two correct refusals as validation. Every real-model residual we measure lies between
+$2$ and $160$ where the calibration grid spans $\numDiagLow$ to $\numDiagHigh$, and the
+mixed-support run of Section~\ref{sec:exp-support}, whose forecast is the best in this paper, is
+refused along with the two worst. Its coverage on real models is therefore zero. The likely reason
+is visible in the statistic: \eqref{eq:curvature} is a second difference, which on a tabular policy
+measures curvature and on a pretrained model measures curvature plus an amplified Monte Carlo
+floor we have not subtracted. A usable version would normalise by that floor, and calibrating it
+would need more than the four pretrained runs whose answers we already know. We report the
+present statistic as evidence that local curvature carries information about the tail of forecast
+error in a controlled setting, and as an unsuccessful first attempt at a cross-scale validity test.
 
 \paragraph{Against drift targeting, in one case.} Section~\ref{sec:drift} recommends specifying a
 run by a drift target rather than a learning rate, and Section~\ref{sec:applications} shows that
@@ -162,14 +182,23 @@ correlation is $\numEarlyCorrelationBig$. The number was real each time and the 
 the failure is instructive: eight runs make a correlation look like a finding, and only the third
 run of the same experiment made it obvious that it was not.
 
-\paragraph{What we would do next, in order.} Find a pretrained regime the diagnostic of
-Section~\ref{sec:exp-abstain} \emph{accepts}. It refuses both of ours, correctly, but a rule that
-has only ever said no on real models is a boundary and not yet a tool. That means a task where the
-model is genuinely uncertain per prompt rather than merely intermediate on average, since what
-collapses our runs is groups going unanimous, and a mean pass rate in the right band does not
-prevent that. Then find, if it exists, a scale or a step size at which a real RLVR run both learns
-and stays inside the regime. Our best guess is that this needs a larger model, where the same
-relative improvement is a smaller relative move in parameter space. Then treat the estimation error
-in $\nabla M$ and $\Sigma_t$ properly, because on a real model the error bar on the error bar is the
-thing a practitioner will actually be handed. Only then is what we have a tool rather than a
-mechanism with a validated special case.
+\paragraph{What we would do next, in order.} Establish whether stochastic support is causally
+responsible for the difference between $25\times$ and $\numMixedRatio$, rather than associated
+with it. Changing the corpus changed the pass-rate distribution, the live share, the score
+geometry and both noise terms together, so the comparison implicates the measurement regime
+without isolating it. The experiment that would isolate it holds the model, the optimiser, the
+budget and the update count fixed and varies only the target live share across several
+pre-specified bands, asking whether the forecast error moves with it monotonically.
+
+We would not spend the next compute on another pretrained corpus search. One candidate bias is
+already excluded: the estimation error in $\nabla M$ contributes a positive term
+$\E[\epsilon^{\!\top}\Sigma\epsilon]$ to the injected quantity, which is the sign of our remaining
+overprediction, but cross-fitting two independent metric gradients to remove it moves the
+mixed-support forecast from $0.0604$ to $0.0616$ and the ratio not at all. Whatever the residual
+factor of two is, it is not that, and the curvature residual of $\numMixedResidual$ on the same
+run points at the linearisation itself.
+
+Beyond that, the forecast should carry its own interval rather than a point value, and the
+real-model spread should be estimated with a procedure whose coverage is calibrated rather than
+nominal. Only then is what we have a tool rather than a mechanism with a validated special case
+and a measured boundary.

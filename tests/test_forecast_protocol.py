@@ -88,3 +88,32 @@ def test_the_interval_widens_with_the_forecast():
 def test_memory_reads_the_kernel_from_the_end():
     assert Forecast(variance=1.0, kernel=[0.0, 0.0, 0.0, 1.0]).memory(0.95) == 1
     assert Forecast(variance=1.0, kernel=[0.25] * 4).memory(0.95) == 4
+
+
+def test_the_tables_and_the_prose_quote_the_same_grid():
+    """Table 2 and the headline macros must come from one record, not from whichever ran last.
+
+    Smaller grids exist for the estimator ablations and for calibrating the diagnostic on a
+    disjoint environment seed. Selecting by recency silently swapped one for the other, and the
+    table then disagreed with the sentence above it.
+    """
+    import re
+    import sys
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    sys.path.insert(0, str(root / "analysis"))
+    table = (root / "paper" / "tables" / "forecast.tex").read_text()
+    macros = (root / "paper" / "tables" / "numbers.tex").read_text()
+    if "all settings" not in table:
+        return  # tables not generated in this checkout
+
+    row = next(line for line in table.splitlines() if "all settings" in line)
+    in_table = int(re.search(r"&\s*(\d+)\s*&", row).group(1))
+    quoted = int(re.search(r"numForecastSettings\}\{(\d+)\}", macros).group(1))
+    assert in_table == quoted, f"table says {in_table} settings, prose says {quoted}"
+
+    inside_table = re.search(r"(\d+)/(\d+)\s*\\\\", row)
+    inside_quoted = re.search(r"numForecastInside\}\{(\d+)\}", macros).group(1)
+    assert inside_table.group(1) == inside_quoted
+    assert inside_table.group(2) == str(quoted)

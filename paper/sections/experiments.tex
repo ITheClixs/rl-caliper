@@ -227,7 +227,9 @@ itself, and we have not run it.
   \small
   \input{tables/null}
   \caption{Divergence between runs that differ only in rollout randomness, with and without a
-  learning signal. Same noise, same batches, same step sizes; only the rewards differ. The pass
+  learning signal. Same sampling protocol, same batches, same step sizes, with the association
+  between a response and whether it was correct removed; the injected covariance is not held
+  identical. The pass
   rate column is the verifier's in both conditions, so the coin column shows what the run is
   actually achieving while it optimises noise.}
   \label{tab:signal}
@@ -582,17 +584,21 @@ and a group of $G$,
   \ell(p, G) \;=\; 1 - p^{G} - (1-p)^{G}
 \end{equation}
 is the chance of that happening, and the batch size a run reports is not the batch size its
-estimator receives: with mean live probability $\bar\ell$ the informative count is
-$P_{\text{eff}} \approx P\bar\ell$. On the corpus those runs used, $\bar\ell$ fell to about a
+estimator receives: with mean live probability $\bar\ell$ the expected number of prompts carrying
+any noise at all is $P\bar\ell$. That is a count rather than a statistical effective sample size,
+which would additionally depend on how unequally the live prompts contribute, but it is the
+quantity that says whether a batch has anything in it to measure. On the corpus those runs used, $\bar\ell$ fell to about a
 tenth within five updates, so a nominal eight prompts were carrying about one.
 
 \paragraph{Restoring the support moves three things at once.} We selected prompts the base policy
 is genuinely uncertain about, by measuring $p(x)$ on a survey pool and keeping those away from
 both ends, and repeated the prospective test of Section~\ref{sec:exp-real} unchanged in every
 other respect. The live share holds at $\numMixedLive$ through training rather than collapsing.
-Against $\numMixedSeeds$ seeds the forecast is $\numMixedForecast$ where the measured seed term is
-$\numMixedResolved$, a ratio of $\numMixedRatio$, and the two half-sample estimates of the injected
-term agree to $\numMixedHalfRatio$. The corresponding figures on the saturating corpus were
+The forecast is computed from one anchor run, frozen to disk with the accept-or-refuse decision
+before any replica exists, and evaluated against $\numMixedSeeds$ independently trained seeds that
+exclude the anchor. It is $\numMixedForecast$ where the measured seed term is
+$\numMixedResolved$, a ratio of $\numMixedRatio$, and two disjoint half-sample estimates of the
+injected term agree to $\numMixedHalfRatio$. The corresponding figures on the saturating corpus were
 twenty-five and $5.5$. The learning is not sacrificed for it: the pass rate goes from
 $\numMixedBase$ to $\numMixedMean$, a larger improvement than any other real-model run here.
 
@@ -604,9 +610,10 @@ strongly regime-dependent, and maintaining stochastic support moves the system a
 the regime the theory describes. A degenerate measurement regime, not model scale, accounts for
 most of the gap we previously reported.
 
-\paragraph{Difficulty is a property of the policy, not of the task.} That raises the obvious
+\paragraph{Effective prompt difficulty is policy-relative.} That raises the obvious
 question of whether the same corpus can be built at $7$B, and the answer in this task suite is no,
-for a reason worth reporting. We surveyed $\numScanFamilies$ families at both scales.
+for a reason worth reporting. We examined $\numScanFamilies$ task families in all, of which
+$\numScanMatched$ have matched surveys at both scales.
 The families that carry support at half a billion are solved at seven: \texttt{add\_two} reaches
 $1.000$ and \texttt{sort\_digits} $0.987$. Families impossible at half a billion move into the
 band at seven: \texttt{sort\_words} goes from $0.000$ to the best family we measured. The
@@ -621,7 +628,8 @@ rung takes it from solved to impossible. On tasks whose answer is exactly right 
 the difficulty gradient is a cliff rather than a slope, so stochastic support at a chosen level is
 not merely scarce at scale but structurally hard to construct. Across three surveys and every
 rung we could build, the eligible pool at $7$B reached $192$ prompts against the $240$ our
-pre-registered criterion required, and we did not run the experiment. We record the criterion, its
+criterion required, a criterion fixed and hashed into the repository before the survey was
+extended, and we did not run the experiment. We record the criterion, its
 hash and the surveys rather than relaxing it after the fact. A task with genuinely graded
 difficulty, which short exact-match problems are not, is what this experiment needs.
 
