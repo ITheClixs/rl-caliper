@@ -189,6 +189,9 @@ def main() -> None:
 
     accuracy = np.array(
         [max(a["adjoint"] / a["oracle"], a["oracle"] / a["adjoint"]) for a in arms])
+    scale = np.array([a["oracle"] / a["frozen"] for a in arms])
+    relative = np.array(
+        [max(a["calibrated"] / a["oracle"], a["oracle"] / a["calibrated"]) for a in arms])
 
     print(f"{len(pairs)} unambiguous comparisons over {len(arms)} configurations, "
           f"{seeds} seeds each"
@@ -244,6 +247,13 @@ def main() -> None:
                            for k, row in table.items()},
         "ratio_at_finest": ratios,
         "forecast_accuracy": {"median": float(np.median(accuracy)), "worst": float(accuracy.max())},
+        # The closed form drops the metric gradient's norm, so it is off by a near-constant factor.
+        # How near constant it is decides whether it can size a comparison, since a threshold
+        # absorbs a constant and nothing absorbs the part that varies.
+        "frozen_scale": float(1.0 / np.median(scale)),
+        "frozen_scale_spread": float(scale.max() / scale.min()),
+        "frozen_relative": float(np.median(relative)),
+        "frozen_relative_worst": float(relative.max()),
         "curves": {name: {"seeds": (2 * curves[name][0].mean(1)).tolist(),
                           "error": curves[name][1].mean(1).tolist()} for name in POLICIES},
         "source": record["manifest"]["config_hash"],

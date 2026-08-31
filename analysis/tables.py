@@ -888,6 +888,10 @@ def table_numbers() -> None:
             "SizeOracleLo": band("oracle")[1],
             "SizeOracleHi": band("oracle")[2],
             "SizeForecastError": f"{result['forecast_accuracy']['median']:.2f}",
+            "SizeFrozenScale": f"{result['frozen_scale']:.0f}",
+            "SizeFrozenScaleSpread": f"{result['frozen_scale_spread']:.1f}",
+            "SizeFrozenRelative": f"{result['frozen_relative']:.2f}",
+            "SizeFrozenRelativeWorst": f"{result['frozen_relative_worst']:.2f}",
         }
 
     overlap = sizing_record(holdout=0)

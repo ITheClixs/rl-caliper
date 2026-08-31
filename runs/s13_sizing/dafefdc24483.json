@@ -1,6 +1,6 @@
 {
   "manifest": {
-    "git_sha": "2d671f8b1b68b6b318a20d7a0d5d57300da5fda1",
+    "git_sha": "48dd8a26e65805b81cedb3fb820d708162d9ccfd",
     "config_hash": "dafefdc24483",
     "config": {
       "pool": 24,
@@ -23,8 +23,8 @@
     },
     "python": "3.12.13",
     "platform": "macOS-26.0.1-arm64-arm-64bit",
-    "started_at": 1788175029.203848,
-    "wall_clock": 1788175078.5394402
+    "started_at": 1788176491.5837939,
+    "wall_clock": 1788176547.835038
   },
   "result": {
     "pairs": 1020,
@@ -285,6 +285,10 @@
       "median": 1.1077298532449469,
       "worst": 1.5755764635881828
     },
+    "frozen_scale": 84.28760327358455,
+    "frozen_scale_spread": 4.773407641403774,
+    "frozen_relative": 1.2620171698236224,
+    "frozen_relative_worst": 2.4306512876063637,
     "curves": {
       "fixed": {
         "seeds": [

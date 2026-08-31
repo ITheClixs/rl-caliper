@@ -43,15 +43,27 @@ one extra pass per update and no Hessian-vector products, with the full recursio
 for runs long enough, or curvature strong enough, that a per-update discrepancy of a percent
 compounds. Knowing which regime one is in is what the recursion is for.
 
-\paragraph{A closed form with no run at all.} Substituting \eqref{eq:two-level} into
-\eqref{eq:cheap} with $\Phi \approx I$ and a constant step gives a predictor needing only the run
-length, the batch shape and the two noise traces,
+\paragraph{A closed form with no run at all.} Take \eqref{eq:cheap} with $\Phi \approx I$ and a
+constant step, replace the projection $\Var_i(\nabla M^{\!\top}\hat g_{t,i})$ by the trace
+\eqref{eq:two-level}, and the run drops out entirely:
 \begin{equation}
   \label{eq:frozen}
-  \sigma \;\approx\; \eta \sqrt{T/P}\,\sqrt{\tau_{\mathrm{b}} + \tau_{\mathrm{w}}/(G-1)},
+  \sigma \;\propto\; \eta \sqrt{T/P}\,\sqrt{\tau_{\mathrm{b}} + \tau_{\mathrm{w}}/(G-1)}.
 \end{equation}
-which we call the \emph{frozen} forecast because it is available before any training happens. Both
-traces come from the microbatch gradients a trainer already accumulates: with blocks $a$ holding
+We call this the \emph{frozen} forecast because it needs only the run length, the batch shape and
+the two noise traces, and is therefore available before any training happens.
+
+It is written as a proportionality on purpose. The constant it is missing carries
+$\|\nabla M\|$, which is exactly the part that requires a trained model, and on our grid
+\eqref{eq:frozen} overstates the measured deviation by a factor of about
+$\numSizeFrozenScale$. That factor is not quite constant: it varies by
+$\numSizeFrozenScaleSpread\times$ across the grid, leaving a relative error of
+$\numSizeFrozenRelative\times$ at the median once one common scale is removed. So
+\eqref{eq:frozen} is useless for reporting an error bar and, by the argument of
+Section~\ref{sec:sizing}, entirely serviceable for sizing one, because a stopping threshold absorbs
+a constant and nothing absorbs the part that varies.
+
+Both traces come from the microbatch gradients a trainer already accumulates: with blocks $a$ holding
 disjoint prompts and sub-groups $b \in \{1,2\}$ independent given a prompt,
 \begin{equation}
   \label{eq:estimators}
