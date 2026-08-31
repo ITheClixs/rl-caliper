@@ -883,6 +883,7 @@ def table_numbers() -> None:
             "SizeConstantHi": band("constant")[2],
             "SizeFrozenGain": band("frozen")[0],
             "SizeFrozenRuns": f"{runs['frozen'][-1]:.2f}",
+            "SizeFrozenVsFixed": f"{runs['fixed'][-1] / runs['frozen'][-1]:.1f}",
             "SizeOracleGain": band("oracle")[0],
             "SizeOracleLo": band("oracle")[1],
             "SizeOracleHi": band("oracle")[2],

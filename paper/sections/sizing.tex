@@ -96,6 +96,16 @@ without it.
 The ordering of the six tracks how accurately each predicts the deviation, which is the result
 rather than a coincidence, and it is what makes the next question the operative one.
 
+Note which predictor is doing the work. The frozen forecast is the closed form of
+Section~\ref{sec:estimation}: the step size, the run length and the two noise traces, with no
+stored trajectory, no backward pass and no adjoint. It reaches $\numSizeFrozenRuns$ runs, within
+$\numSizeFrozenGain\times$ of the adjoint and still $\numSizeFrozenVsFixed\times$ better than a fixed budget. On the
+exact models those traces are computed in closed form; on a trained model they come from the
+microbatch gradients a trainer already accumulates (Section~\ref{sec:estimation}), which is close
+to free. So the bulk of the saving here does not require Theorem~\ref{thm:adjoint} at all, and the
+backward pass buys the last $\numSizeFrozenGain\times$. That is worth saying plainly, because it is
+the cheap half of this paper that a practitioner would deploy first.
+
 \subsection{How wrong the forecast may be}
 
 On a pretrained model the forecast is accurate only in some regimes
