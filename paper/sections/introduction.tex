@@ -33,9 +33,10 @@ be carried against the gradient of the reported metric instead of being formed.
   measured by what it is for. Two recipes are ordered by training seeds until the lead clears $z$
   standard errors, a rule that needs a deviation and therefore cannot start until one has been
   estimated. Supplying it from the first run of each arm settles $\numSizePairs$ comparisons at a
-  $\numSizeTarget\%$ mistake rate in $\numSizeAdjointRuns$ runs, against $\numSizeOracleRuns$ for a
-  policy handed the realised deviation and $\numSizeFixedRuns$ for fixed-budget practice, a saving
-  of $\numSizeFixedGain\times$ $[\numSizeFixedLo, \numSizeFixedHi]$. Estimating the deviation from
+  $\numSizeTarget\%$ mistake rate in $\numSizeAdjointRuns$ runs, indistinguishable from the
+  $\numSizeOracleRuns$ of a rule handed the realised deviation, against $\numSizeFixedRuns$ for
+  fixed-budget practice: a saving of $\numSizeFixedGain\times$
+  $[\numSizeFixedLo, \numSizeFixedHi]$, graded on seeds no policy is allowed to see. Estimating the deviation from
   spent seeds instead costs $\numSizeEmpiricalGain\times$, most of it structural, since that rule
   cannot stop at one seed per arm however large the lead. Corrupting the forecast deliberately
   locates the break-even against fixed budget at about $\numTolBreakeven\times$ relative error, and

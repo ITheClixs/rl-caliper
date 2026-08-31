@@ -113,6 +113,25 @@ largely orthogonal, since those methods distribute responses across prompts at a
 someone else chose, while the question here is what that group size should be; the baseline we
 compare against is therefore the fixed $G$ of a published recipe rather than an allocation rule.
 
+\paragraph{Deciding when to stop repeating.} Stopping a comparison as soon as one arm is
+convincingly ahead is sequential analysis \citep{wald1945sequential}, and its machine-learning form
+is racing: run every candidate on more data until a confidence bound separates them
+\citep{maron1993hoeffding, evendar2006action}, sharpened by using an empirical variance in the
+bound rather than a range \citep{audibert2009exploration}, and scaled to hyperparameter search by
+allocating a budget across candidates \citep{li2017hyperband}. Section~\ref{sec:sizing} uses the
+simplest rule of that family, and deliberately so: the contribution is not a better stopping rule
+but the quantity the rule consumes. Every method in that literature obtains its variance from the
+samples it has already drawn, which is sound when a sample is a validation example and unaffordable
+when a sample is a training run. At one run per arm those bounds are vacuous, and the experiment
+shows that the resulting floor, not the shape of the bound, is what the comparison actually pays.
+Supplying the variance from a model of the run's own dynamics is what removes it, and it is
+orthogonal to which bound is used afterwards.
+
+Note also the difference in what is being allocated. The rollout-allocation methods above
+distribute responses \emph{within} a batch, across the prompts of one update. The budget at issue
+here is across independent training runs of the same recipe, which is a level those methods do not
+address and which is where the reproducibility cost is actually incurred.
+
 \paragraph{Trust regions and KL control.} Constraining how far a policy moves is old
 \citep{schulman2015trpo, schulman2017ppo} and its modern LLM forms clip importance ratios or
 penalise divergence from a reference. The drift used here is neither: it is the KL between

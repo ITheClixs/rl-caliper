@@ -103,14 +103,16 @@ def collect(record, pool: int) -> list[dict]:
     return arms
 
 
-def comparisons(arms: list[dict], margin: float, seeds: int) -> list[tuple]:
+def comparisons(arms: list[dict], margin: float, truth_seeds: np.ndarray) -> list[tuple]:
+    """Pairs whose ordering over `truth_seeds` is unambiguous, with the sign that ordering gives."""
     out = []
     for i, first in enumerate(arms):
         for second in arms[i + 1:]:
             if first["task"] != second["task"]:
                 continue
-            gap = second["scores"].mean() - first["scores"].mean()
-            noise = np.hypot(first["oracle"], second["oracle"]) / np.sqrt(seeds)
+            left, right = first["scores"][truth_seeds], second["scores"][truth_seeds]
+            gap = right.mean() - left.mean()
+            noise = np.hypot(left.std(ddof=1), right.std(ddof=1)) / np.sqrt(len(truth_seeds))
             if abs(gap) > margin * noise:
                 out.append((first, second, float(np.sign(gap))))
     return out
@@ -145,9 +147,12 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pool", type=int, default=24)
     ap.add_argument("--cells", type=int, default=192)
-    ap.add_argument("--cap", type=int, default=16, help="most seeds per arm a policy may spend")
+    ap.add_argument("--cap", type=int, default=16,
+                    help="most seeds per arm a policy may spend")
     ap.add_argument("--orders", type=int, default=400, help="seed orderings per comparison")
     ap.add_argument("--margin", type=float, default=4.0, help="how unambiguous a pair must be")
+    ap.add_argument("--holdout", type=int, default=32,
+                    help="seeds reserved for the true ordering, which no policy may draw")
     ap.add_argument("--targets", nargs="+", type=float, default=[0.01, 0.005, 0.002, 0.001])
     ap.add_argument("--floor", type=float, default=1e-3)
     ap.add_argument("--ceiling", type=float, default=1e2)
@@ -159,12 +164,23 @@ def main() -> None:
     record = load_grid(args.cells, args.pool)
     arms = collect(record, args.pool)
     seeds = min(len(a["scores"]) for a in arms)
-    pairs = comparisons(arms, args.margin, seeds)
+    rng = np.random.default_rng(args.seed)
+
+    # With no holdout the true ordering is read from every seed, including the few a policy will
+    # later be shown. Reserving seeds removes that overlap: the ordering is fixed on seeds no
+    # policy ever sees, and the policies draw from the rest.
+    shuffled = rng.permutation(seeds)
+    if args.holdout:
+        if args.holdout + args.cap > seeds:
+            raise SystemExit("holdout and cap together ask for more seeds than exist")
+        truth_seeds, available = shuffled[: args.holdout], shuffled[args.holdout:]
+    else:
+        truth_seeds, available = shuffled, shuffled
+    pairs = comparisons(arms, args.margin, truth_seeds)
     if not pairs:
         raise SystemExit("no unambiguous comparisons at this margin")
 
-    rng = np.random.default_rng(args.seed)
-    orders = [rng.permutation(seeds)[: args.cap] for _ in range(args.orders)]
+    orders = [rng.permutation(available)[: args.cap] for _ in range(args.orders)]
     # Log spaced and deliberately wide. A predictor that is off by a constant factor
     # needs its threshold moved by the reciprocal of that factor, and a grid too narrow
     # to allow the move measures the grid rather than the predictor.
@@ -175,7 +191,8 @@ def main() -> None:
         [max(a["adjoint"] / a["oracle"], a["oracle"] / a["adjoint"]) for a in arms])
 
     print(f"{len(pairs)} unambiguous comparisons over {len(arms)} configurations, "
-          f"{seeds} seeds each")
+          f"{seeds} seeds each"
+          + (f", {args.holdout} of them reserved for the ordering" if args.holdout else ""))
     print(f"forecast accuracy: median {np.median(accuracy):.2f}x, worst {accuracy.max():.2f}x\n")
     print("runs needed to hold the mistake rate at a target\n")
     header = "".join(f"{100 * t:>9.1f}%" for t in args.targets)
@@ -220,6 +237,7 @@ def main() -> None:
         "pairs": len(pairs),
         "arms": len(arms),
         "seeds": int(seeds),
+        "holdout": args.holdout,
         "thresholds": thresholds.tolist(),
         "targets": args.targets,
         "runs_at_target": {k: [None if not np.isfinite(v) else v for v in row]

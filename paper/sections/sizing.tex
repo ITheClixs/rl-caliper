@@ -35,13 +35,20 @@ across configurations. We check both claims below.
 The scores are the $\numSizeSeeds$ per-seed scores already stored for each of the
 $\numSizeArms$ configurations of Section~\ref{sec:exp-forecast}; no new training is done, and every
 policy sees the same seeds in the same order, so the comparison is paired. We compare
-configurations that share a task, and keep the $\numSizePairs$ pairs whose ordering over all
-$\numSizeSeeds$ seeds is unambiguous at four standard errors, so that a disagreement is a mistake
-rather than a coin landing the other way up. Each pair is replayed under $400$ random seed
-orderings, and a policy is a curve rather than a point, since $z$ trades runs against mistakes.
-Reading every curve at a common mistake rate is what makes two policies comparable; we report the
-runs each needs to hold its mistake rate at $\numSizeTarget\%$, and both arms are counted, so
-$k$ seeds per arm is $2k$ runs.
+configurations that share a task.
+
+The true ordering of a pair has to come from somewhere, and reading it from seeds a policy is also
+shown would correlate the policy's evidence with the answer it is graded against, flattering
+whichever policy looks at the most seeds. So $\numSizeHoldout$ of the $\numSizeSeeds$ seeds are
+reserved: the ordering is fixed on those, and no policy may ever draw one. The $\numSizePairs$
+pairs whose reserved-seed ordering is unambiguous at four standard errors are kept, so that a
+disagreement is a mistake rather than a coin landing the other way up, and the policies draw from
+the remaining $\numSizeCap$. Each pair is replayed under $400$ random orderings of those.
+
+A policy is a curve rather than a point, since $z$ trades runs against mistakes, and reading every
+curve at a common mistake rate is what makes two of them comparable. We report the runs each needs
+to hold its mistake rate at $\numSizeTarget\%$, with both arms counted, so $k$ seeds per arm is
+$2k$ runs.
 
 Six policies are compared. \emph{Fixed budget} spends a predetermined $k$ and never stops early.
 \emph{Deviation from the seeds} estimates $\sigma_D$ from the seeds in hand, and cannot stop before
@@ -53,15 +60,25 @@ arm. \emph{Measured deviation} is given the realised across-seed deviation and i
 
 \subsection{Result}
 
-Table~\ref{tab:sizing} is the outcome. The adjoint forecast reaches
-$\numSizeAdjointRuns$ runs against the ceiling's $\numSizeOracleRuns$: within resampling error of a
-policy told the answer, at $\numSizeOracleGain\times$
-$[\numSizeOracleLo, \numSizeOracleHi]$. Ordinary fixed-budget practice needs $\numSizeFixedRuns$
-runs for the same reliability, $\numSizeFixedGain\times$ $[\numSizeFixedLo, \numSizeFixedHi]$ more.
-Spending seeds to estimate the deviation instead of forecasting it costs
-$\numSizeEmpiricalGain\times$ $[\numSizeEmpiricalLo, \numSizeEmpiricalHi]$, and most of that
-penalty is structural: that policy cannot stop at one seed per arm whatever the lead looks like, so
-its floor is four runs before any comparison is decided.
+Table~\ref{tab:sizing} is the outcome. The adjoint forecast reaches $\numSizeAdjointRuns$ runs.
+The ceiling, a rule handed the realised deviation, reaches $\numSizeOracleRuns$: the two are the
+same policy to within resampling error, at $\numSizeOracleGain\times$
+$[\numSizeOracleLo, \numSizeOracleHi]$, and we read that as the forecast being good enough to cost
+nothing here rather than as an improvement on knowing the answer. Ordinary fixed-budget practice
+needs $\numSizeFixedRuns$ runs for the same reliability, $\numSizeFixedGain\times$
+$[\numSizeFixedLo, \numSizeFixedHi]$ more. Spending seeds to estimate the deviation instead of
+forecasting it costs $\numSizeEmpiricalGain\times$
+$[\numSizeEmpiricalLo, \numSizeEmpiricalHi]$, and most of that penalty is structural rather than
+statistical: that rule cannot stop at one seed per arm however large the lead, so four runs are
+committed before any comparison can be decided.
+
+The reserved ordering set matters to the size of the effect, and in the direction that argues for
+using it. Grading against all $\numSizeSeeds$ seeds instead, so that a policy's own seeds are part
+of the answer, cuts the advantage over a fixed budget from $\numSizeFixedGain\times$ to
+$\numSizeOverlapFixed\times$ and over spent seeds from $\numSizeEmpiricalGain\times$ to
+$\numSizeOverlapEmpirical\times$. The overlap helps a policy in proportion to how many seeds it
+draws, so it favours the baselines that draw the most, and the headline numbers here are the ones
+without it.
 
 \begin{table}[t]
   \centering

@@ -453,16 +453,20 @@ def latest_record(store: str):
     return records[-1] if records else None
 
 
-def sizing_record():
-    """The sizing benchmark run over the full grid, with the wide threshold range.
+def sizing_record(holdout: int = 32):
+    """The sizing benchmark over the full grid, at a given size of reserved ordering set.
 
-    A narrower range measures the range rather than the predictor, so records made before it was
-    widened are not comparable and are skipped by their configuration rather than by their date.
+    Two choices make records incomparable rather than merely different. A threshold range too
+    narrow to let a predictor reach its own operating point measures the range instead of the
+    predictor. And reading the true ordering from seeds a policy is also shown correlates the
+    policy's evidence with the answer, which flatters whichever policy sees the most seeds.
+    Records are selected on both, by configuration rather than by date.
     """
     hits = [
         r for r in io.load_all("s13_sizing")
         if r["manifest"]["config"].get("cells") == 192
         and r["manifest"]["config"].get("ceiling", 0) >= 100
+        and r["manifest"]["config"].get("holdout", 0) == holdout
         and "frozen" in r["result"].get("runs_at_target", {})
     ]
     return hits[-1] if hits else None
@@ -861,6 +865,8 @@ def table_numbers() -> None:
             "SizePairs": f"{result['pairs']}",
             "SizeArms": f"{result['arms']}",
             "SizeSeeds": f"{result['seeds']}",
+            "SizeHoldout": f"{result['holdout']}",
+            "SizeCap": f"{result['seeds'] - result['holdout']}",
             "SizeTarget": f"{100 * finest:.1f}",
             "SizeAdjointRuns": f"{runs['adjoint'][-1]:.2f}",
             "SizeOracleRuns": f"{runs['oracle'][-1]:.2f}",
@@ -881,6 +887,14 @@ def table_numbers() -> None:
             "SizeOracleLo": band("oracle")[1],
             "SizeOracleHi": band("oracle")[2],
             "SizeForecastError": f"{result['forecast_accuracy']['median']:.2f}",
+        }
+
+    overlap = sizing_record(holdout=0)
+    if overlap is not None:
+        macros |= {
+            "SizeOverlapFixed": f"{overlap['result']['ratio_at_finest']['fixed'][0]:.2f}",
+            "SizeOverlapEmpirical": f"{overlap['result']['ratio_at_finest']['empirical'][0]:.2f}",
+            "SizeOverlapRuns": f"{overlap['result']['runs_at_target']['adjoint'][-1]:.2f}",
         }
 
     tolerance = latest_record("s13_tolerance")
