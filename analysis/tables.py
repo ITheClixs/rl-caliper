@@ -913,13 +913,17 @@ def table_numbers() -> None:
             if below <= result["fixed"] <= above:
                 share = (result["fixed"] - below) / (above - below)
                 breakeven = lower + share * (upper - lower)
-        scale = [v[i] for i, _ in enumerate(result["biases"])
-                 for k, v in rows.items() if k == min(ordered)]
+        # How much a systematic scale error moves the answer, read along the row where the
+        # forecast is otherwise exact. Columns the threshold grid cannot reach are left out.
+        flat = rows[min(ordered)]
+        reached = [(b, v) for b, v in zip(result["biases"], flat, strict=True) if v is not None]
+        scale = [v for _, v in reached]
+        spanned = [b for b, _ in reached]
         macros |= {
             "TolBreakeven": "-" if breakeven is None else f"{breakeven:.1f}",
             "TolFixed": f"{result['fixed']:.1f}",
             "TolClean": f"{result['clean']:.2f}",
-            "TolScaleRange": f"{max(result['biases']) / min(result['biases']):.0f}",
+            "TolScaleRange": f"{max(spanned) / min(spanned):.0f}",
             "TolScaleSpread": f"{max(scale) / min(scale):.3f}",
             "TolWorst": f"{worst:.1f}",
         }

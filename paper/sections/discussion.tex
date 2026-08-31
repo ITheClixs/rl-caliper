@@ -45,6 +45,23 @@ $\numForecastMedian\times$ over $\numForecastSettings$ settings. The same contra
 policy divergence and metric spread come apart in Section~\ref{sec:exp-scale}: they weight the
 directions of $S_T$ differently, and one of the two weightings can be identically zero.
 
+\paragraph{What the sizing result is not.} The stopping rule in \eqref{eq:stop} is not
+anytime-valid. Testing after every seed and stopping on the first crossing inflates the error of a
+fixed-sample test, so its nominal $z$ carries no coverage guarantee, and we make no claim on one.
+What Section~\ref{sec:sizing} reports is the mistake rate the rule actually realises, measured
+against an ordering fixed on seeds no policy may draw, which is the quantity a practitioner
+spending runs cares about. Every policy is graded by the same measurement and separated at a common
+realised rate, so the comparison does not depend on the boundary being calibrated. Substituting a
+sequentially valid boundary would move all of these policies together, since the deviation enters
+each of them the same way, and we would expect it to change the constants and not the ordering. We
+have not verified that.
+
+Two further limits are structural. Pairs whose ordering is ambiguous over the reserved seeds are
+excluded, so the benchmark says nothing about near-ties, where the honest answer is to keep
+training whatever rule is in use. And the decision is over one scalar metric; a comparison made on
+several metrics at once is a different problem, and a forecast per metric is necessary for it but
+plainly not sufficient.
+
 \paragraph{What it does not establish.} The forecast is validated where the metric, its gradient
 and the injected covariance are all exact. On a real model each becomes an estimate, and one of the
 three is biased in a direction we can name. Writing the estimated metric gradient as

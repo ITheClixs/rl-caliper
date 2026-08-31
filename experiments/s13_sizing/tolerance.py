@@ -50,6 +50,8 @@ def main() -> None:
     ap.add_argument("--cap", type=int, default=16)
     ap.add_argument("--orders", type=int, default=400)
     ap.add_argument("--margin", type=float, default=4.0)
+    ap.add_argument("--holdout", type=int, default=32,
+                    help="seeds reserved for the true ordering, as in the benchmark")
     ap.add_argument("--target", type=float, default=0.001)
     ap.add_argument("--repeats", type=int, default=12, help="draws of the random corruption")
     ap.add_argument("--errors", nargs="+", type=float,
@@ -62,9 +64,13 @@ def main() -> None:
     record = load_grid(args.cells, args.pool)
     arms = collect(record, args.pool)
     seeds = min(len(a["scores"]) for a in arms)
-    pairs = comparisons(arms, args.margin, seeds)
     rng = np.random.default_rng(args.seed)
-    orders = np.array([rng.permutation(seeds)[: args.cap] for _ in range(args.orders)])
+    shuffled = rng.permutation(seeds)
+    truth_seeds, available = (
+        (shuffled[: args.holdout], shuffled[args.holdout:]) if args.holdout
+        else (shuffled, shuffled))
+    pairs = comparisons(arms, args.margin, truth_seeds)
+    orders = np.array([rng.permutation(available)[: args.cap] for _ in range(args.orders)])
     first = np.stack([a["scores"][orders] for a, _, _ in pairs])
     second = np.stack([b["scores"][orders] for _, b, _ in pairs])
     truth = np.array([t for _, _, t in pairs])
