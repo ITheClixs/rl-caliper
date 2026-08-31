@@ -288,7 +288,16 @@ def headline_grid():
     ]
     if not grids:
         raise SystemExit("no prospective forecast grid")
-    return max(grids, key=lambda r: len(r["result"]["cells"]))
+    # Among grids of the same size prefer the one carrying per-seed scores: it is the same
+    # experiment with more of it recorded, and picking by size alone leaves the choice to
+    # whichever happened to load first.
+    return max(
+        grids,
+        key=lambda r: (
+            len(r["result"]["cells"]),
+            "seed_scores" in r["result"]["cells"][0],
+        ),
+    )
 
 
 def table_forecast() -> None:
@@ -403,6 +412,60 @@ def _half_sample(record):
         if label.split("-")[-1] in blob["source"] or "wide" in blob["source"]:
             return [float(v) for v in blob["half_sample_std"]]
     return None
+
+
+def table_sizing() -> None:
+    """Runs each policy needs to hold the mistake rate at the finest target."""
+    record = sizing_record()
+    if record is None:
+        raise SystemExit("s13_sizing has not been run over the full grid")
+    result = record["result"]
+    runs = result["runs_at_target"]
+    ratio = result["ratio_at_finest"]
+    order = [
+        ("fixed", "fixed budget, no stopping rule"),
+        ("empirical", "deviation from the seeds in hand"),
+        ("constant", "one deviation for every recipe"),
+        ("frozen", "frozen forecast, before any run"),
+        ("adjoint", "adjoint forecast, from one run"),
+        ("oracle", "measured deviation"),
+    ]
+    rows = []
+    for key, label in order:
+        cost = runs[key][-1]
+        median, lo, hi = ratio[key]
+        cell = "--" if cost is None else f"{cost:.2f}"
+        rows.append(f"    {label} & {cell} & ${median:.2f}$ & $[{lo:.2f}, {hi:.2f}]$ " + r"\\")
+    body = [
+        r"\begin{tabular}{lccc}",
+        r"  \toprule",
+        r"  policy & runs & vs.\ adjoint & $95\%$ \\",
+        r"  \midrule",
+        *rows,
+        r"  \bottomrule",
+        r"\end{tabular}",
+    ]
+    write("sizing", chr(10).join(body))
+
+
+def latest_record(store: str):
+    records = io.load_all(store)
+    return records[-1] if records else None
+
+
+def sizing_record():
+    """The sizing benchmark run over the full grid, with the wide threshold range.
+
+    A narrower range measures the range rather than the predictor, so records made before it was
+    widened are not comparable and are skipped by their configuration rather than by their date.
+    """
+    hits = [
+        r for r in io.load_all("s13_sizing")
+        if r["manifest"]["config"].get("cells") == 192
+        and r["manifest"]["config"].get("ceiling", 0) >= 100
+        and "frozen" in r["result"].get("runs_at_target", {})
+    ]
+    return hits[-1] if hits else None
 
 
 def table_numbers() -> None:
@@ -780,6 +843,76 @@ def table_numbers() -> None:
             "SatKLlow": f"{min(divergences):.1e}".replace("e-0", "e-"),
             "SatKLhigh": f"{max(divergences):.1e}".replace("e-0", "e-"),
         }
+
+    sizing = sizing_record()
+    if sizing is not None:
+        result = sizing["result"]
+        finest = result["targets"][-1]
+        runs = result["runs_at_target"]
+        ratio = result["ratio_at_finest"]
+
+        def band(name):
+            median, lo, hi = ratio[name]
+            return f"{median:.2f}", f"{lo:.2f}", f"{hi:.2f}"
+
+        fixed, fixed_lo, fixed_hi = band("fixed")
+        empirical, empirical_lo, empirical_hi = band("empirical")
+        macros |= {
+            "SizePairs": f"{result['pairs']}",
+            "SizeArms": f"{result['arms']}",
+            "SizeSeeds": f"{result['seeds']}",
+            "SizeTarget": f"{100 * finest:.1f}",
+            "SizeAdjointRuns": f"{runs['adjoint'][-1]:.2f}",
+            "SizeOracleRuns": f"{runs['oracle'][-1]:.2f}",
+            "SizeFixedRuns": f"{runs['fixed'][-1]:.1f}",
+            "SizeFixedGain": fixed,
+            "SizeFixedLo": fixed_lo,
+            "SizeFixedHi": fixed_hi,
+            "SizeEmpiricalRuns": f"{runs['empirical'][-1]:.2f}",
+            "SizeEmpiricalGain": empirical,
+            "SizeEmpiricalLo": empirical_lo,
+            "SizeEmpiricalHi": empirical_hi,
+            "SizeConstantGain": band("constant")[0],
+            "SizeConstantLo": band("constant")[1],
+            "SizeConstantHi": band("constant")[2],
+            "SizeFrozenGain": band("frozen")[0],
+            "SizeFrozenRuns": f"{runs['frozen'][-1]:.2f}",
+            "SizeOracleGain": band("oracle")[0],
+            "SizeOracleLo": band("oracle")[1],
+            "SizeOracleHi": band("oracle")[2],
+            "SizeForecastError": f"{result['forecast_accuracy']['median']:.2f}",
+        }
+
+    tolerance = latest_record("s13_tolerance")
+    if tolerance is not None:
+        result = tolerance["result"]
+        unbiased = str(min(result["biases"], key=lambda b: abs(np.log(b))))
+        column = result["biases"].index(float(unbiased))
+        rows = {float(k): v for k, v in result["runs"].items()}
+        worst = max(v[column] for v in rows.values() if v[column] is not None)
+        breakeven = None
+        ordered = sorted(rows)
+        for lower, upper in zip(ordered, ordered[1:], strict=False):
+            below, above = rows[lower][column], rows[upper][column]
+            if below is None or above is None:
+                continue
+            if below <= result["fixed"] <= above:
+                share = (result["fixed"] - below) / (above - below)
+                breakeven = lower + share * (upper - lower)
+        scale = [v[i] for i, _ in enumerate(result["biases"])
+                 for k, v in rows.items() if k == min(ordered)]
+        macros |= {
+            "TolBreakeven": "-" if breakeven is None else f"{breakeven:.1f}",
+            "TolFixed": f"{result['fixed']:.1f}",
+            "TolClean": f"{result['clean']:.2f}",
+            "TolScaleRange": f"{max(result['biases']) / min(result['biases']):.0f}",
+            "TolScaleSpread": f"{max(scale) / min(scale):.3f}",
+            "TolWorst": f"{worst:.1f}",
+        }
+        # LaTeX control sequences are letters only, so the error factors are spelled out.
+        for factor, tag in ((1.5, "OneHalf"), (2.0, "Double"), (2.5, "TwoHalf")):
+            if factor in rows and rows[factor][column] is not None:
+                macros[f"TolRuns{tag}"] = f"{rows[factor][column]:.1f}"
 
     if not macros:
         raise SystemExit("no records to build paper macros from")
@@ -1217,6 +1350,7 @@ def main() -> None:
         ("adam_lift", table_adam_lift),
         ("spectrum", table_spectrum),
         ("null", table_null),
+        ("sizing", table_sizing),
         ("numbers", table_numbers),
     ):
         try:

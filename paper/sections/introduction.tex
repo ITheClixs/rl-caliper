@@ -29,6 +29,19 @@ be carried against the gradient of the reported metric instead of being formed.
 
 \paragraph{Contributions.}
 \begin{itemize}
+  \item \textbf{Comparisons sized from one run} (Section~\ref{sec:sizing}). The forecast is
+  measured by what it is for. Two recipes are ordered by training seeds until the lead clears $z$
+  standard errors, a rule that needs a deviation and therefore cannot start until one has been
+  estimated. Supplying it from the first run of each arm settles $\numSizePairs$ comparisons at a
+  $\numSizeTarget\%$ mistake rate in $\numSizeAdjointRuns$ runs, against $\numSizeOracleRuns$ for a
+  policy handed the realised deviation and $\numSizeFixedRuns$ for fixed-budget practice, a saving
+  of $\numSizeFixedGain\times$ $[\numSizeFixedLo, \numSizeFixedHi]$. Estimating the deviation from
+  spent seeds instead costs $\numSizeEmpiricalGain\times$, most of it structural, since that rule
+  cannot stop at one seed per arm however large the lead. Corrupting the forecast deliberately
+  locates the break-even against fixed budget at about $\numTolBreakeven\times$ relative error, and
+  shows a systematic scale error costs nothing at all, because the threshold absorbs it. That
+  break-even is what makes the pretrained results below actionable rather than merely reported.
+
   \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint} and
   Proposition~\ref{prop:potential}). Carrying the metric gradient backwards along a single stored
   trajectory gives the across-seed variance of the reported score as a sum of scalars, one per

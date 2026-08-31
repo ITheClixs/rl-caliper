@@ -31,11 +31,12 @@ from caliper.exact.pool import build
 from caliper.runtime import io
 
 BANDS = {"easy": (0.35, 0.95), "mixed": (0.05, 0.95), "hard": (0.02, 0.45)}
-POLICIES = ("fixed", "constant", "empirical", "calibrated", "adjoint", "oracle")
+POLICIES = ("fixed", "constant", "empirical", "frozen", "calibrated", "adjoint", "oracle")
 LABEL = {
     "fixed": "fixed budget",
     "constant": "constant deviation",
     "empirical": "deviation from the seeds",
+    "frozen": "frozen forecast",
     "calibrated": "calibrated frozen forecast",
     "adjoint": "adjoint forecast",
     "oracle": "measured deviation",
@@ -148,6 +149,9 @@ def main() -> None:
     ap.add_argument("--orders", type=int, default=400, help="seed orderings per comparison")
     ap.add_argument("--margin", type=float, default=4.0, help="how unambiguous a pair must be")
     ap.add_argument("--targets", nargs="+", type=float, default=[0.01, 0.005, 0.002, 0.001])
+    ap.add_argument("--floor", type=float, default=1e-3)
+    ap.add_argument("--ceiling", type=float, default=1e2)
+    ap.add_argument("--grid", type=int, default=161)
     ap.add_argument("--bootstrap", type=int, default=600)
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
@@ -161,7 +165,10 @@ def main() -> None:
 
     rng = np.random.default_rng(args.seed)
     orders = [rng.permutation(seeds)[: args.cap] for _ in range(args.orders)]
-    thresholds = np.arange(0.5, 4.01, 0.125)
+    # Log spaced and deliberately wide. A predictor that is off by a constant factor
+    # needs its threshold moved by the reciprocal of that factor, and a grid too narrow
+    # to allow the move measures the grid rather than the predictor.
+    thresholds = np.geomspace(args.floor, args.ceiling, args.grid)
     curves = evaluate(pairs, orders, thresholds)
 
     accuracy = np.array(

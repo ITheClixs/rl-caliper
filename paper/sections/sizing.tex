@@ -1,0 +1,104 @@
+\section{What the forecast is for}
+\label{sec:sizing}
+
+A predicted standard deviation is not a result on its own. Nobody trains a model in order to learn
+how much its score would move under a different seed; they want to know whether one recipe beats
+another, and the deviation is the thing that says how many runs settle it. This section measures
+the forecast by that standard.
+
+\subsection{The decision}
+
+Two configurations are to be ordered. A practitioner trains each for a seed, looks at the lead,
+and either calls it or trains another seed of each. Stopping when the lead $\bar D_k$ after $k$
+seeds per arm clears $z$ standard errors,
+\begin{equation}
+  \label{eq:stop}
+  |\bar D_k| \;\ge\; z\,\frac{\sigma_D}{\sqrt{k}},
+  \qquad
+  \sigma_D=\sqrt{\sigma_A^2+\sigma_B^2},
+\end{equation}
+is the rule this is an instance of. It needs $\sigma_D$, and that is the difficulty: at $k=1$
+there is no empirical deviation to put there, because one seed per arm carries no information
+about spread. The choices that remain are to fix $k$ in advance, which is what is normally done, or
+to spend seeds building a variance estimate before the comparison can begin. Section~\ref{sec:seeds}
+supplies $\sigma_A$ and $\sigma_B$ from the first run of each arm, so \eqref{eq:stop} is available
+from $k=1$.
+
+Note what \eqref{eq:stop} does \emph{not} require. Multiplying every $\sigma$ by a common factor is
+undone by dividing $z$ by the same factor, so a forecast that is uniformly off by a constant
+reaches the same operating points as one that is not, provided $z$ is chosen on a range wide enough
+to allow the move. What matters is whether the forecast gets the \emph{relative} deviation right,
+across configurations. We check both claims below.
+
+\subsection{Setup}
+
+The scores are the $\numSizeSeeds$ per-seed scores already stored for each of the
+$\numSizeArms$ configurations of Section~\ref{sec:exp-forecast}; no new training is done, and every
+policy sees the same seeds in the same order, so the comparison is paired. We compare
+configurations that share a task, and keep the $\numSizePairs$ pairs whose ordering over all
+$\numSizeSeeds$ seeds is unambiguous at four standard errors, so that a disagreement is a mistake
+rather than a coin landing the other way up. Each pair is replayed under $400$ random seed
+orderings, and a policy is a curve rather than a point, since $z$ trades runs against mistakes.
+Reading every curve at a common mistake rate is what makes two policies comparable; we report the
+runs each needs to hold its mistake rate at $\numSizeTarget\%$, and both arms are counted, so
+$k$ seeds per arm is $2k$ runs.
+
+Six policies are compared. \emph{Fixed budget} spends a predetermined $k$ and never stops early.
+\emph{Deviation from the seeds} estimates $\sigma_D$ from the seeds in hand, and cannot stop before
+$k=2$. \emph{Constant deviation} uses one number for every configuration, the median measured
+deviation, which is the sharpest form of the assumption that variance does not depend on the
+recipe. \emph{Frozen forecast} is the predictor of Section~\ref{sec:estimation} available before
+any run exists. \emph{Adjoint forecast} is Theorem~\ref{thm:adjoint} run on the first seed of each
+arm. \emph{Measured deviation} is given the realised across-seed deviation and is the ceiling.
+
+\subsection{Result}
+
+Table~\ref{tab:sizing} is the outcome. The adjoint forecast reaches
+$\numSizeAdjointRuns$ runs against the ceiling's $\numSizeOracleRuns$: within resampling error of a
+policy told the answer, at $\numSizeOracleGain\times$
+$[\numSizeOracleLo, \numSizeOracleHi]$. Ordinary fixed-budget practice needs $\numSizeFixedRuns$
+runs for the same reliability, $\numSizeFixedGain\times$ $[\numSizeFixedLo, \numSizeFixedHi]$ more.
+Spending seeds to estimate the deviation instead of forecasting it costs
+$\numSizeEmpiricalGain\times$ $[\numSizeEmpiricalLo, \numSizeEmpiricalHi]$, and most of that
+penalty is structural: that policy cannot stop at one seed per arm whatever the lead looks like, so
+its floor is four runs before any comparison is decided.
+
+\begin{table}[t]
+  \centering
+  \small
+  \input{tables/sizing}
+  \caption{Runs needed to hold the mistake rate at $\numSizeTarget\%$ over $\numSizePairs$
+  unambiguous comparisons, both arms counted, with $95\%$ intervals from resampling the
+  comparisons. The forecast is not better than knowing the deviation; it is not measurably worse,
+  which is the point. Ordering follows forecast accuracy: the adjoint forecast is
+  $\numSizeForecastError\times$ off at the median here, the frozen predictor
+  is coarser, and a constant deviation discards the variation entirely.}
+  \label{tab:sizing}
+\end{table}
+
+The ordering of the six tracks how accurately each predicts the deviation, which is the result
+rather than a coincidence, and it is what makes the next question the operative one.
+
+\subsection{How wrong the forecast may be}
+
+On a pretrained model the forecast is accurate only in some regimes
+(Section~\ref{sec:exp-support}). Whether that matters depends on how much error the decision
+tolerates, so we corrupt the forecast on purpose and rerun the benchmark: a lognormal
+multiplicative error of controlled median magnitude, and separately a systematic scale error.
+
+The scale error does nothing. Over a range of $\numTolScaleRange$ orders of magnitude the runs
+needed change by a factor of $\numTolScaleSpread$, because $z$ absorbs it exactly as
+\eqref{eq:stop} says it should. A forecast does not need to be calibrated to be useful here, which
+is worth stating plainly because it is the opposite of what is required for reporting an error bar.
+
+Relative error is what costs. Runs needed rise from $\numTolClean$ at the measured accuracy to
+$\numTolRunsOneHalf$ at a median error of $1.5\times$, $\numTolRunsDouble$ at $2\times$ and
+$\numTolRunsTwoHalf$ at $2.5\times$, reaching fixed-budget's $\numTolFixed$ at about
+$\numTolBreakeven\times$. So the tolerance is wide but not unlimited: a forecast wrong by less
+than roughly a factor of three pays for itself, and one wrong by twenty-five, as
+Section~\ref{sec:exp-real} reports for a corpus whose reward groups go unanimous, does not.
+
+That break-even is the honest statement of scope. It is met comfortably on the exact models, it is
+met by the accurate regime of the pretrained sweep, and it is not met by the others. The
+contribution is a decision procedure together with the condition under which it beats what is
+currently done, not a claim that the condition always holds.
