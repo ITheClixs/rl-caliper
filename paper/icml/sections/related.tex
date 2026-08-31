@@ -1,0 +1,56 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Run-to-run variance.} That RL results move under reseeding is old news in deep RL
+\citep{henderson2018matters} and documented again for language-model reasoning
+\citep{hochlehnert2025sober}. Those papers establish the size of the problem by replication, which
+is the only instrument available without a model of where the variance comes from.
+\citet{agarwal2021precipice} prescribe how the resulting samples should be summarised. All of it
+presumes the runs exist. Practice for benchmark error bars treats the evaluation set as the only
+source of randomness \citep{miller2024adding}, which is the right interval for a fixed model and
+the wrong one for a training procedure; \citet{bouthillier2021accounting} argue the pipeline's own
+randomness belongs in the interval and estimate it by replication. We estimate the same quantity
+without replicating, and our real-model measurements subtract the binomial term explicitly.
+
+\paragraph{Deciding when to stop repeating.} Stopping a comparison once one arm is convincingly
+ahead is sequential analysis \citep{wald1945sequential}, and its machine-learning form is racing
+\citep{maron1993hoeffding, evendar2006action}, sharpened by using an empirical variance in the
+bound \citep{audibert2009exploration} and scaled to hyperparameter search by allocating a budget
+across candidates \citep{li2017hyperband}. Section~\ref{sec:sizing} uses the simplest rule of that
+family deliberately: the contribution is not a better stopping rule but the quantity the rule
+consumes. Every method there takes its variance from samples already drawn, which is sound when a
+sample is a validation example and unaffordable when a sample is a training run. At one run per arm
+those bounds are vacuous, and the experiment shows that the resulting floor, not the shape of the
+bound, is what a comparison pays.
+
+\paragraph{Stochastic dynamics of training.} Treating stochastic optimisation as a process whose
+covariance is set by gradient noise against curvature is standard \citep{mandt2017sgd}, and
+\eqref{eq:lyapunov} is not new as mathematics. What we add is the RLVR-specific measurement of
+$Q_t$ through the two-level decomposition, the finite-time rather than stationary treatment, and
+the observation that the filter, not the size of the noise, is what governs reproducibility here.
+\citet{wang2026linear} reach a filtering picture from the opposite side, reporting near-linear
+evolution of weights and log-probabilities; their object is one run's trajectory, ours the
+covariance between runs differing only in seed.
+
+\paragraph{Adjoint sensitivity.} Carrying a scalar backwards through a trajectory to avoid forming
+a large intermediate is the adjoint method \citep{pontryagin1962mathematical, chen2018neural}.
+Theorem~\ref{thm:adjoint} applies it to a covariance rather than a loss, and
+Proposition~\ref{prop:potential} is what makes it cheap here by removing the transpose.
+
+\paragraph{Entropy collapse.} That RLVR drives policy entropy down sharply is documented
+\citep{cui2025entropy} and treated as an optimisation pathology. It has a second consequence that
+follows from \eqref{eq:adjoint}: a count-based advantage is identically zero on a unanimous group,
+so a collapsed policy injects $\Sigma_t = 0$, stops accumulating seed uncertainty, and any
+measurement of its reproducibility from that point is measuring nothing.
+
+\paragraph{Batch size and gradient noise.} The gradient noise scale predicts the batch size beyond
+which data parallelism stops buying speed \citep{mccandlish2018empirical, shallue2019measuring}.
+Both concern a single level of sampling. RLVR samples prompts and then responses within each
+prompt, and the resulting two-level scale has no counterpart there; the decomposition itself is the
+classical two-stage sampling result \citep{cochran1977sampling}.
+
+\paragraph{Allocating rollouts.} Recent methods vary responses per prompt within a batch from pass
+rates or gradient variance \citep{nguyen2026allocation}, or adapt batch size from a divergence
+signal \citep{park2026batchscaling}. Those distribute responses \emph{within} one update, across
+its prompts. The budget at issue here is across independent training runs of the same recipe, which
+is a level those methods do not address and where the reproducibility cost is actually incurred.

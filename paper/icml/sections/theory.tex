@@ -1,0 +1,98 @@
+\section{Noise is filtered, not accumulated}
+\label{sec:theory}
+
+Fix a policy $\theta_0$ and start two runs from it. They share parameters, optimiser state, data
+distribution and recipe, and independently draw everything the seed controls: which prompts each
+batch contains and which responses are sampled. That is the comparison a practitioner makes when
+they rerun, and it is the estimand throughout, so both terms of \eqref{eq:two-level} contribute.
+
+Write $\delta_t := \theta_t - \bar\theta_t$ for one run's departure from the mean trajectory. With
+updates $\theta \leftarrow \theta + \eta\ghat$ and
+$\mathcal{J}_t := \partial\gbar/\partial\theta$,
+\begin{equation}
+  \label{eq:seed-recursion}
+  \delta_{t+1} = A_t \delta_t + \eta\,\xi_t,
+  \qquad A_t := I + \eta \mathcal{J}_t,
+\end{equation}
+to first order in $\delta$, where $\E[\xi_t \mid \mathcal{F}_t] = 0$ and
+$\Cov(\xi_t) = \Sigma_t/P$.
+
+If the objective were flat, $\mathcal{J} = 0$, this would be a random walk: divergence would
+accumulate as $\E\|\Delta_t\|^2 \propto t$ and a longer run would be strictly less reproducible.
+That is the implicit model behind measuring run-to-run variance by brute force. But two RLVR runs
+climb the same objective, and $A_t$ reweights a perturbation rather than passing it through.
+
+\begin{theorem}[Finite-time covariance]
+  \label{thm:propagation}
+  Let $S_t := \Cov(\delta_t)$, with $S_0 = 0$ when runs start together. Under
+  \eqref{eq:seed-recursion},
+  \begin{equation}
+    \label{eq:lyapunov}
+    S_{t+1} = A_t S_t A_t^{\!\top} + Q_t,
+    \qquad Q_t := \eta^2 \Sigma_t / P,
+  \end{equation}
+  hence $S_T = \sum_{t<T} \Phi_{T,t+1} Q_t \Phi_{T,t+1}^{\!\top}$ with
+  $\Phi_{T,s} := \prod_{u=s}^{T-1} A_u$ taken in order of decreasing $u$. Two independent seeds
+  satisfy $\Cov(\theta^A_T - \theta^B_T) = 2S_T$.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+  Taking the covariance of \eqref{eq:seed-recursion} leaves a cross term
+  $\E[\delta_t \xi_t^{\!\top}]$. It vanishes without assuming $\xi_t$ and $\delta_t$ are
+  independent, which they are not, since the batch noise is drawn at $\theta_t$ and that parameter
+  was produced by earlier noise. What holds is that $\xi_t$ is a martingale difference,
+  $\E[\xi_t \mid \mathcal{F}_t] = 0$, and $\delta_t$ is $\mathcal{F}_t$-measurable, so the cross
+  term is zero by the tower rule. Unrolling from $S_0 = 0$ gives the sum.
+\end{proof}
+
+The factor of two belongs to the difference of two runs and not to the covariance of one; keeping
+them apart is what makes the statement unambiguous.
+
+\subsection{Carrying it to the number that gets reported}
+
+Equation \eqref{eq:lyapunov} concerns policies. What a paper reports is a score $M(\theta)$:
+pass rate, exact match, win rate. Linearising about the endpoint,
+$\Var_{\text{seed}}[M(\theta_T)] \approx \nabla M^{\!\top} S_T \nabla M$, which needs a matrix
+nobody can form for a real model. It is not needed.
+
+\begin{theorem}[Adjoint form of the reported spread]
+  \label{thm:adjoint}
+  Define $b_T := \nabla M(\theta_T)$ and $b_s := A_s^{\!\top} b_{s+1}$ for $s = T-1,\dots,0$. Then
+  \begin{equation}
+    \label{eq:adjoint}
+      V^{\text{lin}}_T \,=\, \sum_{t=0}^{T-1} b_{t+1}^{\!\top} Q_t\, b_{t+1}
+      \,=\, \frac{\eta^2}{P}\sum_{t=0}^{T-1} \Var_{i}\!\big(b_{t+1}^{\!\top} z_{t,i}\big),
+  \end{equation}
+  the variance taken over prompts.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+  $b_s = \Phi_{T,s}^{\!\top}\nabla M$ by induction; substitute the unrolled $S_T$. The second
+  equality is $Q_t = \eta^2\Sigma_t/P$ with
+  $b^{\!\top}\Sigma_t b = \Var_i(b^{\!\top} z_{t,i})$, since $\Sigma_t$ is the covariance of one
+  prompt's contribution rather than of the batch mean.
+\end{proof}
+
+The equality is exact for $V^{\text{lin}}_T$, the variance of the metric linearised at
+$\bar\theta_T$. The quantity a practitioner wants is $\Var_{\text{seed}}[M(\theta_T)]$, and the two
+agree to the order at which the linearisation holds; Section~\ref{sec:real} is about when that
+agreement fails. Every term of \eqref{eq:adjoint} is one scalar per update, which a trainer can
+accumulate alongside the update it is already making.
+
+What the backward pass costs depends on $A_s^{\!\top}$, and here the estimator family pays for
+itself.
+
+\begin{proposition}[The mean update is a gradient field]
+  \label{prop:potential}
+  For any count-based estimator, $\gbar(\theta) = \nabla_\theta\,\Psi(\theta)$ with
+  $\Psi(\theta) = \E_x[\Lambda(p_x)]$ and $\Lambda' = \lambda$, where the per-prompt mean update is
+  $\lambda(p_x, G)\nabla_\theta p_x$. Hence $\mathcal{J} = \nabla^2\Psi$ is symmetric and
+  $A_s^{\!\top} = A_s$.
+\end{proposition}
+
+Because $\lambda$ depends on $\theta$ only through $p_x$, $\lambda(p_x)\nabla p_x = \nabla
+\Lambda(p_x)$, and averaging over $x$ commutes with the gradient. We call $\Psi$ the
+\emph{estimator potential}; it is not the objective $J$ unless $\lambda \equiv 1$, and the gap is
+exactly the difficulty reweighting the estimator applies. For RLOO the potential is the pass rate
+itself. The practical consequence is that the backward pass needs no transpose and can be run with
+the same code path as the forward one.

@@ -1,0 +1,71 @@
+\section{Running it}
+\label{sec:estimation}
+
+\begin{algorithm}[t]
+\caption{The forecast, as a trainer would run it}
+\label{alg:forecast}
+\small
+\begin{algorithmic}[1]
+  \State train as usual, storing $\theta_t$ and $\eta_t$ for each update
+  \State $b \gets \nabla M(\theta_T)$ \Comment{one rollout and backward pass on the eval set}
+  \State $v \gets 0$
+  \For{$t = T-1$ \textbf{down to} $0$}
+    \State draw a batch at $\theta_t$; let $\hat{g}_{t,i}$ be its per-prompt gradients
+    \State $v \gets v + (\eta_t^2/P)\,\widehat{\Var}_i\big(b^{\!\top}\hat{g}_{t,i}\big)$
+      \Comment{one scalar}
+    \If{transport is needed}
+      \State $\delta \gets \epsilon\, b/\|b\|$
+      \State $b \gets b + \dfrac{\eta_t}{2}\cdot\dfrac{\|b\|}{\epsilon}
+        \big(\gbar(\theta_t + \delta) - \gbar(\theta_t - \delta)\big)$
+        \Comment{common random numbers}
+    \EndIf
+  \EndFor
+  \State \Return $\sqrt{v}$
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{What it costs, plainly.} As written, the backward pass makes three passes per stored
+update: one batch for the injected term and two for the Hessian-vector product. That is about three
+times the compute of the training run, not a rounding error, and we would rather state it than let
+a reader discover it.
+
+It is also usually unnecessary. Ablating the transport, holding $b$ at $\nabla M(\theta_T)$ instead
+of carrying it back, changes the forecast by a median of $2\%$ and the median error not at all over
+runs of ten and twenty-five updates. The reason is in the spectrum of $A_t$: most of it sits within
+$10^{-4}$ of one and $\nabla M$ points into that part, so $\Phi_{T,t}$ is close to the identity
+along the one direction the forecast needs. What we recommend is the cheap estimator,
+\begin{equation}
+  \label{eq:cheap}
+  \Var_{\text{seed}}\big[M(\theta_T)\big] \;\approx\;
+  \sum_{t} \frac{\eta_t^2}{P}\,\widehat{\Var}_i\!\big(\nabla M(\theta_T)^{\!\top}\hat{g}_{t,i}\big),
+\end{equation}
+one extra pass per update and no Hessian-vector products, with the full recursion held in reserve
+for runs long enough, or curvature strong enough, that a per-update discrepancy of a percent
+compounds. Knowing which regime one is in is what the recursion is for.
+
+\paragraph{A closed form with no run at all.} Substituting \eqref{eq:two-level} into
+\eqref{eq:cheap} with $\Phi \approx I$ and a constant step gives a predictor needing only the run
+length, the batch shape and the two noise traces,
+\begin{equation}
+  \label{eq:frozen}
+  \sigma \;\approx\; \eta \sqrt{T/P}\,\sqrt{\tau_{\mathrm{b}} + \tau_{\mathrm{w}}/(G-1)},
+\end{equation}
+which we call the \emph{frozen} forecast because it is available before any training happens. Both
+traces come from the microbatch gradients a trainer already accumulates: with blocks $a$ holding
+disjoint prompts and sub-groups $b \in \{1,2\}$ independent given a prompt,
+\begin{equation}
+  \label{eq:estimators}
+  \begin{aligned}
+  \tr\Sb &= \tfrac{P}{K}\big( \E[ g_{a1}^{\!\top} g_{a2} ] - \E[ g_{a1}^{\!\top} g_{a'2} ]_{a \neq a'} \big),\\
+  \tr\Sw &= \tfrac{P}{2K}\, \E\big[ \| g_{a1} - g_{a2} \|^2 \big].
+  \end{aligned}
+\end{equation}
+The cost is $2K$ gradient buffers rather than one, no extra responses and no extra backward work.
+Estimating the total and subtracting the within-prompt part instead differences two large
+correlated quantities and is badly conditioned: on homogeneous pools it returns a negative
+$\tau_{\mathrm{b}}$. Against exactly known values over pools whose noise ratio spans a factor of
+$26$, \eqref{eq:estimators} recovers the optimal group size to a median error of $1.3\%$, while the
+subtractive form reports $6.1$ where the truth is $9.4$.
+
+Section~\ref{sec:sizing} finds that \eqref{eq:frozen} does most of the work, which matters because
+it costs almost nothing.

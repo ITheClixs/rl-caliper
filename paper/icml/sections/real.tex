@@ -1,0 +1,42 @@
+\section{On pretrained models}
+\label{sec:real}
+
+Run end to end on Qwen2.5-0.5B with LoRA, the cheap estimator \eqref{eq:cheap} is a factor of
+twenty-five short of the measured spread and the transported one sixteen. On Qwen2.5-7B under Adam,
+with the recursion lifted to the optimiser state $z = (\theta, m, v)$, it is short by between
+$\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Carrying that state matters: on the
+exact models, ignoring it costs $24.6\times$ where the lift gives $1.10\times$.
+
+\paragraph{Accuracy is regime-dependent, not uniformly poor.} A corpus whose reward groups go
+unanimous injects $\Sigma_t = 0$ and carries no seed noise to forecast, so we built four corpora at
+pre-specified mean live-group probabilities and ran the prospective test on each. The errors are
+$\numSweepErrors$; the best, on the band at $\numSweepWinBand$, meets a criterion of $1.5\times$
+declared before the sweep ran, forecasting $\numSweepWinForecast$ against a measured
+$\numSweepWinMeasured$ $[\numSweepWinLow, \numSweepWinHigh]$ on a gain of $\numSweepWinGain$. So
+local covariance forecasting can be quantitatively accurate on a pretrained model, though not
+reliably so.
+
+All four sit inside the $\numTolBreakeven\times$ break-even of Section~\ref{sec:sizing}, the worst
+of them only barely. That is the sense in which these results are usable: not that the forecast is
+accurate on pretrained models, but that where we have measured it, it is accurate enough for the
+decision it is meant to serve. We have not run the sizing benchmark itself at this scale, and that
+is the gap between what we show and what we claim.
+
+\paragraph{Two things the sweep falsified.} It does not support a monotone relationship between
+stochastic support and accuracy: the ordering of errors across the four bands does not follow the
+ordering of their live-group probabilities. And a one-run curvature diagnostic, calibrated on the
+exact models to refuse forecasts whose runs are not small perturbations of each other, does not
+transfer: it refuses every pretrained run, including the accurate one.
+
+\paragraph{What survives is narrower than the magnitude.} The share of prompts whose group is not
+unanimous falls from about a half to under $5\%$ by the fifth update, which is measured rather than
+modelled, so the run stops injecting seed noise there. The failed forecast's own kernel puts
+$\numRealFirstHalfShare\%$ of its predicted variance before that point; whether the actual seed
+variance is distributed the same way we did not test.
+
+\paragraph{A metric can go blind before the seeds agree.} At $7$B on a task the base model already
+mostly passes, twenty updates collapse the response distribution: every held-out prompt scores
+exactly $0$ or $1$, two seeds report the same number to the last decimal, and their policies still
+differ by up to $8\times10^{-2}$ in KL. A zero measured spread on a saturated benchmark is not
+evidence of a reproducible procedure, and it is the failure mode that a practitioner is most likely
+to read as success.

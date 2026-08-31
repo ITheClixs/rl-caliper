@@ -58,6 +58,17 @@ recipe. \emph{Frozen forecast} is the predictor of Section~\ref{sec:estimation} 
 any run exists. \emph{Adjoint forecast} is Theorem~\ref{thm:adjoint} run on the first seed of each
 arm. \emph{Measured deviation} is given the realised across-seed deviation and is the ceiling.
 
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{sizing.pdf}
+  \caption{Mistakes against runs spent. A policy is a curve, not a point, since the stopping
+  threshold trades one against the other, and what separates two policies is how far left a curve
+  sits at a fixed height. At $\numSizeTarget\%$ the forecasts cross near $\numSizeAdjointRuns$ runs
+  and a fixed budget near $\numSizeFixedRuns$. The rule driven by spent seeds flattens on the left
+  because it cannot stop before two seeds per arm however large the lead.}
+  \label{fig:sizing}
+\end{figure}
+
 \subsection{Result}
 
 Table~\ref{tab:sizing} is the outcome. The adjoint forecast reaches $\numSizeAdjointRuns$ runs.

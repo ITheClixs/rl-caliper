@@ -1,0 +1,61 @@
+\section{Introduction}
+\label{sec:introduction}
+
+Reinforcement learning with verifiable rewards is the standard way to turn a pretrained model into
+a reasoning one \citep{deepseekr1}, and a paper reports that a recipe moved a benchmark by two
+points. Whether that is a result depends on a number nobody has: how much the same recipe would
+have moved it under a different seed. The problem is documented
+\citep{henderson2018matters, hochlehnert2025sober}, and the only instrument the field has for it is
+replication, which at RL post-training cost is close to unaffordable.
+
+The practical form of the problem is not reporting but budgeting. Deciding that one recipe beats
+another means training seeds of each until the lead is convincing, and how many that takes is
+governed by the across-seed deviation. A practitioner who does not have it either fixes the seed
+count in advance, or spends seeds estimating it before the comparison can start. Both are
+expensive, and the second is expensive for a structural reason: after a single run per arm there is
+no empirical deviation at all, so the first two runs of every arm buy no evidence about the
+question being asked.
+
+This paper forecasts that deviation from one run, and then spends it. The route runs through a
+correction to the obvious model of where run-to-run spread comes from. That model says gradient
+noise perturbs each update, perturbations accumulate, two runs execute a random walk away from each
+other, and reproducibility decays with run length. It is wrong. Noise from one update does not
+survive to the end of training unchanged: it is passed through every update that follows, which
+reweights it. What reaches the end is a convolution of injected noise with the sensitivity of the
+remaining trajectory, an object that obeys a recursion and that can be carried against the gradient
+of the reported metric rather than being formed.
+
+\paragraph{Contributions.}
+\begin{itemize}\itemsep2pt
+  \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint}). Carrying the metric
+  gradient backwards along a single stored trajectory gives the across-seed variance of the
+  reported score as a sum of scalars, one per update, with no covariance matrix formed. The
+  transpose a backward pass would need is free, because the mean update of any count-based
+  estimator is the gradient of a scalar potential and its Jacobian is therefore symmetric. Frozen
+  before the remaining seeds were trained, its median error is $\numForecastMedian\times$ across
+  $\numForecastSettings$ settings.
+
+  \item \textbf{Comparisons sized from one run} (Section~\ref{sec:sizing}). Supplying the deviation
+  from the first run of each arm settles $\numSizePairs$ comparisons at a $\numSizeTarget\%$
+  mistake rate in $\numSizeAdjointRuns$ runs, indistinguishable from the $\numSizeOracleRuns$ of a
+  rule handed the realised deviation, against $\numSizeFixedRuns$ for fixed-budget practice: a
+  saving of $\numSizeFixedGain\times$ {$[\numSizeFixedLo, \numSizeFixedHi]$}, graded against an
+  ordering fixed on seeds no policy may draw. Estimating the deviation from spent seeds instead
+  costs $\numSizeEmpiricalGain\times$, most of it structural.
+
+  \item \textbf{The condition under which it pays.} Corrupting the forecast deliberately puts the
+  break-even against a fixed budget at about $\numTolBreakeven\times$ relative error, and shows
+  that a systematic scale error costs nothing at all across
+  $\numTolScaleRange$ orders of magnitude, because the stopping threshold absorbs it. A forecast
+  used this way does not need to be calibrated, which is the opposite of what reporting an error
+  bar requires.
+
+  \item \textbf{An honest boundary} (Section~\ref{sec:real}). On Qwen2.5-0.5B accuracy is
+  regime-dependent: across $\numSweepBands$ pre-specified regimes the errors are
+  $\numSweepErrors$, all inside the break-even above, while a corpus whose reward groups go
+  unanimous injects no seed noise and is missed by twenty-five. At $7$B under Adam the forecast is
+  short by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
+\end{itemize}
+
+Every experiment here runs on one laptop, which bounds what any of it establishes about
+frontier-scale RLVR and is stated plainly in Section~\ref{sec:discussion}.

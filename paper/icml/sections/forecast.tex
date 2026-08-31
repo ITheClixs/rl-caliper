@@ -1,0 +1,42 @@
+\section{Does the forecast work}
+\label{sec:forecast}
+
+We test where the answer can be checked exactly. The environments are small enough to enumerate
+every sequence, so $\gbar$, the Fisher and the metric gradient are computed in closed form rather
+than sampled, and the forecast is compared against a spread measured from
+$\numForecastSeeds$ independent seeds. The grid spans two policy shapes, two prompt-pool
+diversities, three difficulty bands, two group sizes and a range of step sizes:
+$\numForecastSettings$ settings in all, over which the measured spread itself varies by
+$\numForecastSpreadRange\times$.
+
+The test is prospective. One run is trained, the forecast is computed from it alone and written to
+disk, and only then are the remaining seeds trained. The anchor is excluded from the measured
+spread, since a predictor that is also one of its own targets is not independent of them.
+
+\begin{table}[t]
+  \centering \small
+  \input{../tables/forecast}
+  \caption{Forecast against measured spread, prospectively. Error is the ratio in whichever
+  direction exceeds one.}
+  \label{tab:forecast}
+\end{table}
+
+Table~\ref{tab:forecast} reports a median error of $\numForecastMedian\times$ and a worst case of
+$\numForecastWorst\times$, with the forecast inside the measured $95\%$ interval in
+$\numForecastInside$ of $\numForecastSettings$ settings.
+
+\paragraph{The recursion is what makes it work.} Two cheaper stories are available and both fail.
+Accumulation, the random-walk picture that ignores $A_t$ entirely, is wrong by a factor of two on
+homogeneous prompt pools, which is where the objective's curvature is most consistent and the
+filtering therefore strongest; on heterogeneous pools it is wrong by three percent, which is what
+\eqref{eq:lyapunov} predicts. A single effective timescale fails by two orders of magnitude.
+Measuring the spectrum of $A_t$ says why neither works: it is not a contraction. The spectral
+radius exceeds one throughout, by up to $2\%$ early and decaying as the policy improves, and only
+$\numSpectrumShareLow$--$\numSpectrumShareHigh\%$ of directions contract. Divergence stays bounded
+because expansion is slow relative to run length, not because every direction shrinks.
+
+\paragraph{The filtering is caused by learning.} Replacing rewards with coin flips, which leaves
+the rollouts, the batch composition and the step sizes untouched, turns a divergence trace that
+ends at $\numNullLearning$ of where it started into one that grows by a factor of $\numNullCoin$
+over eighty updates, a gap of $\numNullGap\times$ at the end. The learning condition also moves
+further per update, so what brings those runs back together is not smaller steps.

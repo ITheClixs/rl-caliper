@@ -1,0 +1,100 @@
+\documentclass[10pt,twocolumn]{article}
+
+\usepackage[letterpaper,margin=0.85in,columnsep=0.28in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{bm}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{caption}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\graphicspath{{../figures/}}
+\setlength{\emergencystretch}{2.2em}
+\captionsetup{font=small,labelfont=bf,skip=5pt}
+\setlength{\abovecaptionskip}{5pt}
+\setlength{\textfloatsep}{10pt}
+\setlength{\dbltextfloatsep}{10pt}
+\bibliographystyle{plainnat}
+\setlength{\bibsep}{1pt}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{assumption}{Assumption}
+
+\input{../macros}
+\input{../tables/numbers}
+
+\newcommand{\ruledtitle}[1]{%
+  \par\noindent\rule{\textwidth}{1.6pt}\par\vspace{3pt}
+  {\centering\fontsize{15}{17}\selectfont\bfseries #1\par}
+  \vspace{3pt}\noindent\rule{\textwidth}{0.4pt}\par
+}
+
+\begin{document}
+
+\twocolumn[
+  \ruledtitle{How Many Runs Does an RL Post-Training Comparison Need?\\
+  Forecasting Run-to-Run Spread from a Single Run}
+  \vspace{6pt}
+  {\centering
+    \normalsize Mehmet Demir G\"uven$^{\dagger}$\par\vspace{2pt}
+    \normalsize\textbf{ETH Z\"urich}$^{*}$\par\vspace{1pt}
+    \small\texttt{dgueven@student.ethz.ch}\par
+  }
+  \vspace{6pt}
+  \begin{minipage}{\textwidth}
+  \begin{center}\textbf{Abstract}\end{center}
+  \vspace{-4pt}
+  \begin{quote}
+  Reinforcement learning post-training is compared from single runs, and how many runs a
+  comparison needs is set by a quantity nobody measures: how much a rerun would move the score.
+  The usual recourse is to fix the run count in advance, or to spend runs estimating the spread
+  before the comparison can begin, because after one run per arm there is no empirical spread to
+  put in a stopping rule.
+
+  We forecast it instead. Training noise is not accumulated: a perturbation entering at one update
+  is reweighted by every update that follows, so the covariance of a run about its mean obeys
+  $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric backwards
+  along one stored trajectory turns that recursion into the across-seed variance of the metric, as
+  a sum of scalars with no covariance matrix formed. Frozen before the remaining seeds existed, it
+  has a median error of $\numForecastMedian\times$ over $\numForecastSettings$ settings.
+
+  Used to size comparisons, it matches a rule told the realised spread
+  ($\numSizeOracleGain\times$ {$[\numSizeOracleLo, \numSizeOracleHi]$}) and needs
+  $\numSizeFixedGain\times$ {$[\numSizeFixedLo, \numSizeFixedHi]$} fewer runs than fixed-budget
+  practice across $\numSizePairs$ comparisons, graded on seeds no policy may see. Corrupting the
+  forecast on purpose shows a systematic scale error is free, since the stopping threshold absorbs
+  it, and that the procedure pays until relative error reaches about $\numTolBreakeven\times$.
+
+  On pretrained models accuracy is regime-dependent. Across $\numSweepBands$ pre-specified regimes
+  on Qwen2.5-0.5B the frozen forecast misses by factors of $\numSweepErrors$, all of them inside
+  that break-even, while a corpus whose reward groups go unanimous carries no seed noise to
+  forecast and misses by twenty-five. We report the break-even rather than the method alone.
+  \end{quote}
+  \end{minipage}
+  \vspace{6pt}
+]
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{ETH Z\"urich neither endorsed nor funded this work; the author was a BSc Computer
+Science student during this research, hence the affiliation.}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+\input{sections/introduction}
+\input{sections/setup}
+\input{sections/theory}
+\input{sections/estimation}
+\input{sections/forecast}
+\input{sections/sizing}
+\input{sections/real}
+\input{sections/related}
+\input{sections/discussion}
+
+\bibliography{../refs}
+
+\end{document}

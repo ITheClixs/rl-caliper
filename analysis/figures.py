@@ -733,6 +733,53 @@ def figure_support() -> None:
     save(fig, "support.pdf")
 
 
+def figure_sizing() -> None:
+    """Mistakes against runs spent, one curve per source of the deviation.
+
+    The whole comparison is visible here: policies are curves, not points, and what separates them
+    is how far left a curve sits at a fixed height.
+    """
+    from analysis.tables import sizing_record
+
+    record = sizing_record()
+    if record is None:
+        raise SystemExit("s13_sizing has not been run over the full grid")
+    result = record["result"]
+    order = [
+        ("fixed", "fixed budget", "-"),
+        ("empirical", "deviation from spent seeds", "-"),
+        ("constant", "one deviation for all", "-"),
+        ("frozen", "frozen forecast", "-"),
+        ("adjoint", "adjoint forecast", "-"),
+        ("oracle", "measured deviation", "--"),
+    ]
+    colours = dict(zip([k for k, _, _ in order], PALETTE + ["#555555"], strict=True))
+    fig, ax = plt.subplots(figsize=(3.4, 2.3))
+    for key, label, dashes in order:
+        curve = result["curves"][key]
+        runs = np.asarray(curve["seeds"], dtype=float)
+        error = np.asarray(curve["error"], dtype=float)
+        keep = np.argsort(runs)
+        runs, error = runs[keep], error[keep]
+        alive = error > 0
+        ax.plot(runs[alive], 100 * error[alive], dashes, color=colours[key], linewidth=1.7,
+                label=label, alpha=0.75 if key == "oracle" else 0.95)
+    target = 100 * result["targets"][-1]
+    ax.axhline(target, color="0.55", linewidth=0.8, linestyle=":")
+    ax.annotate(f"{target:g}%", xy=(0.01, target), xycoords=("axes fraction", "data"),
+                ha="left", va="bottom", fontsize=7, color="0.45")
+    ax.set_yscale("log")
+    ax.set_xscale("log", base=2)
+    ax.set_xticks([2, 4, 8, 16, 32])
+    ax.set_xticklabels(["2", "4", "8", "16", "32"])
+    ax.minorticks_off()
+    style(ax, "runs spent, both arms counted", "mistakes (%)")
+    ax.legend(fontsize=6.6, frameon=False, loc="upper center", bbox_to_anchor=(0.5, -0.32),
+              ncol=2, handlelength=1.5, columnspacing=1.2, labelspacing=0.3)
+    save(fig, "sizing.pdf")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
@@ -751,6 +798,7 @@ def main() -> None:
         ("transfer", figure_transfer),
         ("cost_model", figure_cost_model),
         ("real_model", figure_real_model),
+        ("sizing", figure_sizing),
     ]:
         try:
             fn()

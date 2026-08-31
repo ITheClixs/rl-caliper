@@ -1,0 +1,33 @@
+\section{Setup}
+\label{sec:setup}
+
+A policy $\policy(y \mid x)$ answers a prompt $x \sim \mathcal{D}$ and a verifier returns a binary
+reward $r(x,y) \in \{0,1\}$. The objective is $J(\theta) = \E_x[p(x)]$ with
+$p(x) := \Pr[r = 1 \mid x]$. Write $\score(y) := \nabla_\theta \log \policy(y \mid x)$, so
+$\E_y[\score] = 0$, and let $u_r := \E[\score \mid r]$. Because the reward is binary, every
+quantity below depends on the policy only through the per-prompt objects $(p, u_1, S_0, S_1)$,
+where $S_r := \Cov(\score \mid r)$, which is what makes an exact finite-$G$ treatment possible.
+
+A batch is $P$ prompts drawn from $\mathcal{D}$ with $G$ responses each; $R = PG$ is fixed by
+hardware. With $k$ the number of successes in a group we consider any advantage of the form
+$A_j = w(k, r_j)$, which covers RLOO \citep{ahmadian2024rloo}, GRPO with a mean baseline
+\citep{liu2025drgrpo}, standardised GRPO \citep{shao2024deepseekmath} and a fixed external
+baseline. The per-prompt and batch estimators are
+$z := G^{-1}\sum_j w(k, r_j)\score(y_j)$ and $\ghat := P^{-1}\sum_i z_i$.
+
+\paragraph{Two levels of noise.} Prompts are sampled and then responses are sampled within each
+prompt, so by the law of total variance
+\begin{equation}
+  \label{eq:two-level}
+  \Cov(\ghat) \;=\; \frac{1}{P}\Big[\, \Sb + \tfrac{1}{G-1}\Sw \,\Big],
+\end{equation}
+with $\Sb$ the covariance across prompts of the per-prompt mean update and $\Sw$ the within-prompt
+term, written in the $(G-1)$ convention the leave-one-out estimators use. Both traces are
+recoverable from the microbatch gradients a trainer already accumulates. We write
+$\tau_{\mathrm{b}}$ and $\tau_{\mathrm{w}}$ for those traces.
+
+\paragraph{Intervals.} Seed experiments produce pairwise quantities: $n$ runs give $\binom{n}{2}$
+distances, which are not $\binom{n}{2}$ observations, since every run appears in $n-1$ of them.
+Treating them as independent understates the standard error by roughly a factor of two at the seed
+counts anyone trains. Every interval here resamples \emph{runs} and rebuilds the pairwise quantity
+from the resampled set.
