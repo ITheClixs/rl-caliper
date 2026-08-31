@@ -10,7 +10,11 @@ where $S_r := \Cov(\score \mid r)$, which is what makes an exact finite-$G$ trea
 
 A batch is $P$ prompts drawn from $\mathcal{D}$ with $G$ responses each; $R = PG$ is fixed by
 hardware. With $k$ the number of successes in a group we consider any advantage of the form
-$A_j = w(k, r_j)$, which covers RLOO \citep{ahmadian2024rloo}, GRPO with a mean baseline
+\begin{equation}
+  \label{eq:family}
+  A_j = w(k, r_j),
+\end{equation}
+that is, any rule in which a response's advantage depends only on its own reward and on how many of its group-mates succeeded. It covers RLOO \citep{ahmadian2024rloo}, GRPO with a mean baseline
 \citep{liu2025drgrpo}, standardised GRPO \citep{shao2024deepseekmath} and a fixed external
 baseline. The per-prompt and batch estimators are
 $z := G^{-1}\sum_j w(k, r_j)\score(y_j)$ and $\ghat := P^{-1}\sum_i z_i$.
