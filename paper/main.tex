@@ -97,22 +97,15 @@
     throughout.}
     \label{fig:teaser}
   \end{minipage}
-  \vspace{6pt}
-  \begin{minipage}{\textwidth}
-    \scriptsize
-    \noindent\rule{0.32\columnwidth}{0.4pt}\par\vspace{2pt}
-    \noindent $^{*}$Department of Computer Science, ETH Z\"urich, 8092 Zurich, Switzerland.
-
-    \smallskip
-    \noindent $^{\dagger}$ETH Z\"urich neither endorsed, supervised nor funded this work; the author was enrolled as an undergrad at the programme BSc Computer Science during this research, hence the affiliation.
-
-    \smallskip
-    \noindent All opinions and any errors are the author's alone. The electronic mail address above
-    is a student account provided solely as a means of contact and implies no institutional
-    sponsorship of, or agreement with, this work; correspondence should be directed to the author
-    and not to ETH Z\"urich.
-  \end{minipage}
 ]
+
+\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+\footnotetext[1]{Department of Computer Science, ETH Z\"urich, 8092 Zurich, Switzerland.}
+\footnotetext[2]{ETH Z\"urich neither endorsed, supervised nor funded this work; the author was
+enrolled as an undergrad at the programme BSc Computer Science during this research, hence the
+affiliation.}
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
 
 % The opening page carries the title, the abstract, the summary figure and the affiliation notice.
 % The body begins overleaf, so that none of it is squeezed into the few lines left underneath.
