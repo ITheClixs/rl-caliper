@@ -875,3 +875,45 @@ $\nabla M^{\!\top} S_T \nabla M$, and when $\nabla M$ is zero on the evaluated d
 of $S_T$ reaches it. It is also, in retrospect, why the route through $\sqrt{\KL}$ that an earlier
 version of this work took could not have worked in general.
 
+\subsection{The same benchmark on a pretrained model, and why it does not settle the question}
+\label{sec:exp-real-sizing}
+
+The result above is measured where the forecast is validated exactly. To see whether it carries
+over, we trained $\numRealSizeRecipes$ recipes on one corpus of Qwen2.5-0.5B at a matched rollout
+budget of $64$ per update, crossing the two ways of splitting that budget, $(P, G) \in \{(16,4),
+(8,8)\}$, with three learning rates spanning a factor of four. Each recipe is one anchor run, which
+produces the forecast, and $\numRealSizeSeeds$ validation seeds: $\numRealSizeRuns$ training runs.
+
+\paragraph{The forecast itself holds up.} Across the six recipes its median error against the
+measured spread is $\numRealSizeError\times$ and its worst $\numRealSizeErrorWorst\times$, so all
+six sit inside the $\numTolLooseBreakeven\times$ break-even. It overpredicts in five of the six.
+The across-recipe variation it is supposed to capture is real: the measured deviation spans
+$4.7\times$ between the quietest and noisiest recipe, and the forecast spans $3.0\times$ of that,
+correlating at $0.60$ in logs. That is a weaker correlation than the $0.98$ of the exact grid and a
+compressed range, but it is the right ordering from one run each.
+
+\paragraph{The benchmark built on it is underpowered, and we report it as such.} Only
+$\numRealSizePairs$ of the $\numRealSizeAllPairs$ recipe pairs are ordered unambiguously at
+$\numRealSizeMargin$ standard errors; the median pair is separated by $1.5$. The six recipes differ
+in mean by at most $0.025$ while their per-recipe deviations run from $0.010$ to $0.049$, so most
+of these pairs are genuine near-ties at sixteen seeds. That fact is worth stating on its own, since
+it is the paper's premise showing up in the data: at this scale, most of the recipe choices a
+practitioner would actually weigh are not resolvable by the seed counts anyone runs.
+
+What survives on four comparisons is one thing. A stopping rule of any kind beats a fixed budget,
+which needs $\numRealSizeFixed$ runs against the forecast's $\numRealSizeAdjoint$, a factor of
+$\numRealSizeFixedGain$ $[\numRealSizeFixedLo, \numRealSizeFixedHi]$. Nothing else separates. The
+constant deviation costs $\numRealSizeConstantGain\times$ and the rule driven by spent seeds
+$\numRealSizeEmpiricalGain\times$ $[\numRealSizeEmpiricalLo, \numRealSizeEmpiricalHi]$, both
+intervals straddling one, and the ordering among them changes with the seed cap and the target
+error. The clearest sign that this is resolution rather than result is that the measured deviation,
+which cannot be beaten by a forecast of it, comes out at $\numRealSizeOracleGain\times$
+$[\numRealSizeOracleLo, \numRealSizeOracleHi]$: nominally behind the forecast, which is not a
+real effect and marks the floor of what four comparisons can see.
+
+So the $\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is not demonstrated at this scale and
+we do not claim it. What this experiment establishes is narrower: the forecast is accurate enough
+on a pretrained model to be inside the break-even, and stopping early beats not stopping. Whether
+forecasting the deviation beats estimating it cheaply is a question sixteen seeds on six recipes
+cannot answer, and answering it needs either more seeds per recipe or recipes chosen to be further
+apart, neither of which we could afford on one laptop.

@@ -22,6 +22,24 @@ accurate on pretrained models, but that where we have measured it, it is accurat
 decision it is meant to serve. We have not run the sizing benchmark itself at this scale, and that
 is the gap between what we show and what we claim.
 
+\paragraph{The sizing benchmark at this scale is underpowered.} We trained
+$\numRealSizeRecipes$ recipes on one corpus at a matched rollout budget of $64$ per update,
+crossing $(P,G) \in \{(16,4),(8,8)\}$ with three learning rates spanning a factor of four:
+$\numRealSizeRuns$ training runs. The forecast holds up, at a median error of
+$\numRealSizeError\times$ and a worst of $\numRealSizeErrorWorst\times$, all six inside the
+break-even, tracking $3.0\times$ of the $4.7\times$ spread in measured deviation across recipes.
+
+The benchmark does not. Only $\numRealSizePairs$ of $\numRealSizeAllPairs$ pairs are ordered
+unambiguously at $\numRealSizeMargin$ standard errors, because the recipes differ in mean by at
+most $0.025$ while their deviations run from $0.010$ to $0.049$: most are genuine near-ties at
+sixteen seeds, which is the paper's premise appearing in its own data. On four comparisons a
+stopping rule beats a fixed budget by $\numRealSizeFixedGain$
+$[\numRealSizeFixedLo, \numRealSizeFixedHi]$ and nothing else separates, the ordering among the
+$\sigma$-aware policies changing with the seed cap. That the measured deviation itself comes out
+nominally behind the forecast, at $\numRealSizeOracleGain\times$, marks the resolution floor rather
+than a result. The $\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is therefore not
+demonstrated at this scale and we do not claim it.
+
 \paragraph{Two things the sweep falsified.} It does not support a monotone relationship between
 stochastic support and accuracy: the ordering of errors across the four bands does not follow the
 ordering of their live-group probabilities. And a one-run curvature diagnostic, calibrated on the

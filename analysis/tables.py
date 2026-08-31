@@ -448,6 +448,20 @@ def table_sizing() -> None:
     write("sizing", chr(10).join(body))
 
 
+def real_sizing_record():
+    """The pretrained sizing benchmark at its default operating point.
+
+    The cap and the target are choices, and on four comparisons they change which baseline comes
+    second. The default is recorded here and the sensitivity is reported in the text rather than
+    the best of the settings being quoted.
+    """
+    hits = [r for r in io.load_all("s14_real_sizing")
+            if r["manifest"]["config"].get("prefix") == "sizing-"
+            and r["manifest"]["config"].get("cap") == 8
+            and r["result"].get("recipes", 0) >= 6]
+    return hits[-1] if hits else None
+
+
 def tolerance_record():
     """The corruption sweep, in the form that sweeps several targets at once.
 
@@ -910,6 +924,36 @@ def table_numbers() -> None:
             "SizeOverlapFixed": f"{overlap['result']['ratio_at_finest']['fixed'][0]:.2f}",
             "SizeOverlapEmpirical": f"{overlap['result']['ratio_at_finest']['empirical'][0]:.2f}",
             "SizeOverlapRuns": f"{overlap['result']['runs_at_target']['adjoint'][-1]:.2f}",
+        }
+
+    real = real_sizing_record()
+    if real is not None:
+        result = real["result"]
+        margin = min(result["runs_at_target"], key=float)
+        runs = result["runs_at_target"][margin]
+        ratio = result["ratio_at_finest"][margin]
+        macros |= {
+            "RealSizeRecipes": f"{result['recipes']}",
+            "RealSizeSeeds": f"{result['seeds']}",
+            "RealSizeRuns": f"{result['recipes'] * (result['seeds'] + 1)}",
+            "RealSizePairs": f"{result['pairs'][margin]}",
+            "RealSizeAllPairs": f"{result['recipes'] * (result['recipes'] - 1) // 2}",
+            "RealSizeMargin": f"{float(margin):g}",
+            "RealSizeError": f"{result['forecast_error']['median']:.2f}",
+            "RealSizeErrorWorst": f"{result['forecast_error']['worst']:.2f}",
+            "RealSizeTarget": f"{100 * result['targets'][-1]:.0f}",
+            "RealSizeAdjoint": f"{runs['adjoint'][-1]:.2f}",
+            "RealSizeFixed": f"{runs['fixed'][-1]:.2f}",
+            "RealSizeFixedGain": f"{ratio['fixed'][0]:.2f}",
+            "RealSizeFixedLo": f"{ratio['fixed'][1]:.2f}",
+            "RealSizeFixedHi": f"{ratio['fixed'][2]:.2f}",
+            "RealSizeEmpiricalGain": f"{ratio['empirical'][0]:.2f}",
+            "RealSizeEmpiricalLo": f"{ratio['empirical'][1]:.2f}",
+            "RealSizeEmpiricalHi": f"{ratio['empirical'][2]:.2f}",
+            "RealSizeConstantGain": f"{ratio['constant'][0]:.2f}",
+            "RealSizeOracleGain": f"{ratio['oracle'][0]:.2f}",
+            "RealSizeOracleLo": f"{ratio['oracle'][1]:.2f}",
+            "RealSizeOracleHi": f"{ratio['oracle'][2]:.2f}",
         }
 
     choice = latest_record("s13_selection")
