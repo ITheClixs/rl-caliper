@@ -209,7 +209,14 @@ stopping rule spends deeply only on the comparisons that need it, and a corrupte
 degrades that allocation without destroying it. The practical reading is the looser number, since
 $\numTolLooseBreakeven\times$ is the point at which the condition binds first.
 
-That break-even is the honest statement of scope. It is met comfortably on the exact models, it is
-met by the accurate regime of the pretrained sweep, and it is not met by the others. The
-contribution is a decision procedure together with the condition under which it beats what is
-currently done, not a claim that the condition always holds.
+That break-even is the honest statement of scope, and it is wider than the errors we actually
+measure on a pretrained model. All $\numSweepBands$ regimes of Section~\ref{sec:exp-support}, whose
+errors are $\numSweepErrors$, sit inside it, though only one of them met the tighter
+$1.5\times$ accuracy criterion declared before that sweep ran. The two are different bars and we
+keep them apart: one asks whether the forecast is right, the other whether it is useful.
+
+What sits outside is the corpus whose reward groups go unanimous, missed by twenty-five. There the
+forecast is not merely inaccurate; the run has stopped injecting seed noise at all, so there is
+nothing for a local covariance model to be accurate about. The contribution is a decision procedure
+together with the condition under which it beats what is currently done, and a statement of what
+puts a run outside that condition.

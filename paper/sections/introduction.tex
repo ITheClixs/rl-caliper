@@ -97,7 +97,7 @@ be carried against the gradient of the reported metric instead of being formed.
   by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Accuracy is
   regime-dependent rather than uniformly poor: across $\numSweepBands$ pre-specified regimes the
   errors are $\numSweepErrors$, one of them inside a criterion fixed before the sweep
-  (Section~\ref{sec:exp-support}), because the eight runs end in groups rather than scattered around one and a linearised
+  and all of them inside the break-even above (Section~\ref{sec:exp-support}), because the eight runs end in groups rather than scattered around one and a linearised
   model has no way to represent that. What survives is narrower than the magnitude: the share of
   prompts whose group is not unanimous falls from about a half to under $5\%$ by the fifth update,
   which is measured rather than modelled, so the run stops injecting seed noise there. The failed
