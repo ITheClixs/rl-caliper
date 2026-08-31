@@ -108,6 +108,30 @@ costs one dot product per microbatch and no extra memory beyond $b$ itself. The 
 what the batch-allocation results of Section~\ref{sec:applications} need, and is more than the
 error bar requires.
 
+\paragraph{A closed form with no run at all.} Take \eqref{eq:cheap} with
+$\Phi_{T,t} \approx I$ and a constant step, replace the projection
+$\Var_i(\nabla M^{\!\top}\hat g_{t,i})$ by the trace of the injected covariance, and the run drops
+out entirely:
+\begin{equation}
+  \label{eq:frozen}
+  \sigma \;\propto\; \eta \sqrt{T/P}\,\sqrt{\tau_b + \tau_w/(G-1)}.
+\end{equation}
+We call this the \emph{frozen} forecast, because it needs only the run length, the batch shape and
+the two noise traces, and is therefore available before any training happens.
+
+It is written as a proportionality on purpose. The constant it is missing carries $\|\nabla M\|$,
+which is exactly the part that requires a trained model, and on the grid of
+Section~\ref{sec:exp-forecast} \eqref{eq:frozen} overstates the measured deviation by a factor of
+about $\numSizeFrozenScale$. That factor is not quite constant: it varies by
+$\numSizeFrozenScaleSpread\times$ across the grid, leaving a relative error of
+$\numSizeFrozenRelative\times$ at the median, and $\numSizeFrozenRelativeWorst\times$ at worst, once
+one common scale is removed. So \eqref{eq:frozen} is useless for reporting an error bar, and by the
+argument of Section~\ref{sec:sizing} entirely serviceable for sizing one, because a stopping
+threshold absorbs a constant and nothing absorbs the part that varies. That distinction is not a
+technicality here: it is why the cheapest predictor in this paper is also the one we would
+recommend deploying first, and why we separate the two uses rather than reporting a single accuracy
+number.
+
 \paragraph{Preconditioners.} An update is $\eta\,\Pi\,\ghat$ for a preconditioner $\Pi$, and Adam
 is scale invariant, so both the drift model and the estimators must be read in the metric the
 update actually moves in. In practice this means instrumenting the preconditioned gradient: the

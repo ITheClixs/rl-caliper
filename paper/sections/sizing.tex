@@ -117,6 +117,46 @@ to free. So the bulk of the saving here does not require Theorem~\ref{thm:adjoin
 backward pass buys the last $\numSizeFrozenGain\times$. That is worth saying plainly, because it is
 the cheap half of this paper that a practitioner would deploy first.
 
+\subsection{The procedure, stated so it can be followed}
+\label{sec:protocol}
+
+Nothing above needs a change to the training loop. Written out as a practitioner would run it, for
+two recipes $A$ and $B$ to be ordered:
+
+\begin{enumerate}\itemsep2pt
+  \item \textbf{During the first run of each arm}, tag the microbatches a trainer already
+  accumulates by prompt block and rollout sub-group and accumulate \eqref{eq:estimators}, giving
+  $\tau_{\mathrm{b}}$ and $\tau_{\mathrm{w}}$. Store $\theta_t$ and $\eta_t$. Log the share of
+  prompts whose reward group is not unanimous. None of this changes the run.
+
+  \item \textbf{Take a deviation.} The closed form \eqref{eq:frozen} needs nothing further and is
+  what we would reach for first; it is $\numSizeFrozenVsFixed\times$ better than a fixed budget on
+  our grid. If the extra passes are affordable, one backward sweep of
+  Algorithm~\ref{alg:forecast} over the stored trajectory gives the adjoint forecast, worth a
+  further $\numSizeFrozenGain\times$.
+
+  \item \textbf{Complete it with the evaluation term.} The forecast covers the seed part. What is
+  watched is a score on a finite prompt set, which carries its own binomial noise, and the stopping
+  rule needs the deviation of the observable. Add the two in quadrature; the second is closed form
+  and costs no runs.
+
+  \item \textbf{Run the rule.} After each seed of each arm, stop when
+  \eqref{eq:stop} fires and report the sign of the lead. Choose $z$ from the mistake rate that can
+  be tolerated rather than from a table: the curve in Figure~\ref{fig:sizing} is what $z$ moves
+  along, and no coverage guarantee attaches to a nominal value (Section~\ref{sec:discussion}).
+
+  \item \textbf{Check the break-even before trusting it.} The procedure beats a fixed budget while
+  the forecast's \emph{relative} error is under about $\numTolBreakeven\times$. A systematic scale
+  error does not count against this and needs no correction. Two conditions predict being outside
+  it, and both are measured in step~1 rather than assumed: reward groups going unanimous, which
+  drives the injected covariance to zero and is the failure mode of
+  Section~\ref{sec:exp-real}, and a metric that has saturated, where a zero measured spread is not
+  evidence of anything.
+\end{enumerate}
+
+The honest summary of step~5 is that we can tell a practitioner what the tolerance is and how to
+watch the two quantities that predict falling outside it, but not, from one run, whether they have.
+
 \subsection{The other decision, where it helps less}
 
 Sizing is not the only thing a deviation is used for. The other is choosing: run each of several
