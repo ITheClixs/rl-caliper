@@ -106,6 +106,32 @@ to free. So the bulk of the saving here does not require Theorem~\ref{thm:adjoin
 backward pass buys the last $\numSizeFrozenGain\times$. That is worth saying plainly, because it is
 the cheap half of this paper that a practitioner would deploy first.
 
+\subsection{The other decision, where it helps less}
+
+Sizing is not the only thing a deviation is used for. The other is choosing: run each of several
+configurations once, and keep the one with the most gain per unit of noise and rollout. Reporting
+only the decision that flatters the forecast would misrepresent it, so we measure both on the same
+grid, with the seeds split three ways and never reused across roles. One pilot supplies the
+observed gain, a disjoint pool supplies whatever deviation a policy is entitled to, and a third
+reserved set scores the choice. That last separation matters: letting the scoring seeds also set
+the deviation makes an oracle look unbeatable, because its denominator then shares noise with the
+denominator it is graded against, and an earlier version of this experiment did exactly that.
+
+Over $\numPickTasks$ tasks, the share of the best achievable value the choice keeps is
+$\numPickConstant\%$ with one deviation for every recipe, $\numPickFrozen\%$ with the frozen
+forecast, $\numPickAdjoint\%$ with the adjoint forecast and $\numPickOracle\%$ with the measured
+deviation. The forecast recovers $\numPickGain$ points
+$[\numPickGainLo, \numPickGainHi]$ of the $\numPickOraclePoints$ that a measured deviation
+recovers, a share of $\numPickShare$.
+
+So the forecast is close to the ceiling in both decisions, but the ceilings differ. Choosing has
+only $\numPickOraclePoints$ points of headroom to compete for at all, because the observed gain of a
+single pilot run is noisy and that noise limits the choice whatever denominator is used. Sizing has
+no such competing term: the run count scales as $(\sigma/\mu)^2$, the deviation enters squared, and
+at one run per arm there is no alternative estimate of it. That asymmetry, rather than the quality
+of the forecast, is why the two numbers look so different, and it is the reason we lead with
+sizing.
+
 \subsection{How wrong the forecast may be}
 
 On a pretrained model the forecast is accurate only in some regimes

@@ -898,6 +898,23 @@ def table_numbers() -> None:
             "SizeOverlapRuns": f"{overlap['result']['runs_at_target']['adjoint'][-1]:.2f}",
         }
 
+    choice = latest_record("s13_selection")
+    if choice is not None:
+        result = choice["result"]
+        macros |= {
+            "PickTasks": f"{result['tasks']}",
+            "PickConstant": f"{100 * result['kept']['constant'][0]:.0f}",
+            "PickFrozen": f"{100 * result['kept']['frozen'][0]:.0f}",
+            "PickAdjoint": f"{100 * result['kept']['adjoint'][0]:.0f}",
+            "PickOracle": f"{100 * result['kept']['oracle'][0]:.0f}",
+            "PickAdjointLow": f"{100 * result['kept']['adjoint'][1]:.0f}",
+            "PickGain": f"{100 * result['gain_points']:.1f}",
+            "PickGainLo": f"{100 * result['gain_low']:.1f}",
+            "PickGainHi": f"{100 * result['gain_high']:.1f}",
+            "PickOraclePoints": f"{100 * result['oracle_points']:.1f}",
+            "PickShare": f"{result['share_of_oracle']:.2f}",
+        }
+
     tolerance = latest_record("s13_tolerance")
     if tolerance is not None:
         result = tolerance["result"]
