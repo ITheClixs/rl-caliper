@@ -52,12 +52,11 @@ def main() -> None:
     ap.add_argument("--margin", type=float, default=4.0)
     ap.add_argument("--holdout", type=int, default=32,
                     help="seeds reserved for the true ordering, as in the benchmark")
-    ap.add_argument("--target", type=float, default=0.001)
-    ap.add_argument("--repeats", type=int, default=12, help="draws of the random corruption")
+    ap.add_argument("--targets", nargs="+", type=float, default=[0.01, 0.001])
+    ap.add_argument("--repeats", type=int, default=8, help="draws of the random corruption")
     ap.add_argument("--errors", nargs="+", type=float,
-                    default=[1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0])
-    ap.add_argument("--biases", nargs="+", type=float,
-                    default=[0.01, 0.1, 1.0, 10.0, 100.0])
+                    default=[1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 6.0, 8.0, 12.0])
+    ap.add_argument("--biases", nargs="+", type=float, default=[0.1, 1.0, 10.0])
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -77,39 +76,57 @@ def main() -> None:
     difference = running_difference(first, second)
     thresholds = np.geomspace(1e-3, 1e2, 161)
 
-    clean = cost(pairs, difference, {id(a): a["adjoint"] for a in arms},
-                 thresholds, truth, args.target)
     steps = np.arange(1, args.cap + 1, dtype=float)
     fixed_wrong = (np.sign(difference) != truth[:, None, None]).mean(1).T.mean(1)
-    fixed = runs_for_error(steps, fixed_wrong, args.target)
-    print(f"{len(pairs)} comparisons, target mistake rate {100 * args.target:.1f}%")
-    print(f"forecast as measured: {clean:.2f} runs;  fixed budget: {fixed:.2f} runs\n")
+    print(f"{len(pairs)} comparisons, cap {args.cap} seeds per arm\n")
 
-    print("runs needed, against the median error of the forecast and its scale error\n")
-    print(f"{'median error':>14s}" + "".join(f"{b:>9.3g}x" for b in args.biases))
-    grid = {}
-    for factor in args.errors:
-        spread = np.log(factor) / NORMAL_QUARTILE
-        row = []
-        for bias in args.biases:
-            draws = [cost(pairs, difference,
-                          corrupt(arms, spread, np.log(bias), np.random.default_rng(r)),
-                          thresholds, truth, args.target)
-                     for r in range(args.repeats if spread > 0 else 1)]
-            row.append(float(np.median(draws)))
-        grid[factor] = row
-        print(f"{factor:>13.2f}x" + "".join(
-            f"{v:>10.2f}" if np.isfinite(v) else f"{'over cap':>10s}" for v in row))
-    print(f"\n(scale error 1.00x is unbiased; fixed budget costs {fixed:.2f} runs)")
+    grids, summary = {}, {}
+    for target in args.targets:
+        clean = cost(pairs, difference, {id(a): a["adjoint"] for a in arms},
+                     thresholds, truth, target)
+        fixed = runs_for_error(steps, fixed_wrong, target)
+        print(f"target mistake rate {100 * target:.1f}%:  forecast as measured {clean:.2f} runs, "
+              f"fixed budget {fixed:.2f} runs")
+        print(f"{'median error':>14s}" + "".join(f"{b:>9.3g}x" for b in args.biases))
+        rows = {}
+        for factor in args.errors:
+            spread = np.log(factor) / NORMAL_QUARTILE
+            row = []
+            for bias in args.biases:
+                draws = [cost(pairs, difference,
+                              corrupt(arms, spread, np.log(bias), np.random.default_rng(r)),
+                              thresholds, truth, target)
+                         for r in range(args.repeats if spread > 0 else 1)]
+                row.append(float(np.median(draws)))
+            rows[factor] = row
+            print(f"{factor:>13.2f}x" + "".join(
+                f"{v:>10.2f}" if np.isfinite(v) else f"{'over cap':>10s}" for v in row))
+
+        # Where a corrupted forecast stops being worth more than simply fixing the run count.
+        column = args.biases.index(1.0)
+        ordered = sorted(rows)
+        breakeven = None
+        for lower, upper in zip(ordered, ordered[1:], strict=False):
+            below, above = rows[lower][column], rows[upper][column]
+            if below is None or above is None or not (np.isfinite(below) and np.isfinite(above)):
+                continue
+            if below <= fixed <= above:
+                breakeven = lower + (fixed - below) / (above - below) * (upper - lower)
+        tag = ("beyond the range tested" if breakeven is None
+               else f"{breakeven:.1f}x relative error")
+        print(f"  break-even against a fixed budget: {tag}\n")
+        grids[target] = rows
+        summary[target] = {"clean": clean, "fixed": fixed, "breakeven": breakeven}
 
     path = io.save("s13_tolerance", vars(args), {
         "pairs": len(pairs),
-        "clean": clean,
-        "fixed": fixed,
         "errors": args.errors,
         "biases": args.biases,
-        "runs": {str(k): [None if not np.isfinite(v) else v for v in row]
-                 for k, row in grid.items()},
+        "targets": args.targets,
+        "summary": {str(k): {kk: (None if vv is None or not np.isfinite(vv) else float(vv))
+                             for kk, vv in v.items()} for k, v in summary.items()},
+        "runs": {str(k): {str(kk): [None if not np.isfinite(x) else x for x in row]
+                          for kk, row in g.items()} for k, g in grids.items()},
     })
     print(f"wrote {path}")
 

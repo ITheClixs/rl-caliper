@@ -448,6 +448,16 @@ def table_sizing() -> None:
     write("sizing", chr(10).join(body))
 
 
+def tolerance_record():
+    """The corruption sweep, in the form that sweeps several targets at once.
+
+    Earlier records graded against every seed, including the ones a policy drew, which understates
+    the fixed-budget baseline and so understates the break-even. They are skipped by shape.
+    """
+    hits = [r for r in io.load_all("s13_tolerance") if "summary" in r["result"]]
+    return hits[-1] if hits else None
+
+
 def latest_record(store: str):
     records = io.load_all(store)
     return records[-1] if records else None
@@ -919,38 +929,44 @@ def table_numbers() -> None:
             "PickShare": f"{result['share_of_oracle']:.2f}",
         }
 
-    tolerance = latest_record("s13_tolerance")
+    tolerance = tolerance_record()
     if tolerance is not None:
         result = tolerance["result"]
-        unbiased = str(min(result["biases"], key=lambda b: abs(np.log(b))))
-        column = result["biases"].index(float(unbiased))
-        rows = {float(k): v for k, v in result["runs"].items()}
-        worst = max(v[column] for v in rows.values() if v[column] is not None)
-        breakeven = None
-        ordered = sorted(rows)
-        for lower, upper in zip(ordered, ordered[1:], strict=False):
-            below, above = rows[lower][column], rows[upper][column]
-            if below is None or above is None:
-                continue
-            if below <= result["fixed"] <= above:
-                share = (result["fixed"] - below) / (above - below)
-                breakeven = lower + share * (upper - lower)
-        # How much a systematic scale error moves the answer, read along the row where the
-        # forecast is otherwise exact. Columns the threshold grid cannot reach are left out.
-        flat = rows[min(ordered)]
+        finest = str(min(float(t) for t in result["targets"]))
+        summary = result["summary"][finest]
+        rows = {float(k): v for k, v in result["runs"][finest].items()}
+        column = result["biases"].index(1.0)
+
+        # A systematic scale error should be invisible: the stopping threshold divides it out.
+        # Read along the row where the forecast is otherwise exact, over the columns the
+        # threshold grid can actually reach.
+        flat = rows[min(rows)]
         reached = [(b, v) for b, v in zip(result["biases"], flat, strict=True) if v is not None]
-        scale = [v for _, v in reached]
-        spanned = [b for b, _ in reached]
         macros |= {
-            "TolBreakeven": "-" if breakeven is None else f"{breakeven:.1f}",
-            "TolFixed": f"{result['fixed']:.1f}",
-            "TolClean": f"{result['clean']:.2f}",
-            "TolScaleRange": f"{max(spanned) / min(spanned):.0f}",
-            "TolScaleSpread": f"{max(scale) / min(scale):.3f}",
-            "TolWorst": f"{worst:.1f}",
+            "TolFixed": f"{summary['fixed']:.1f}",
+            "TolClean": f"{summary['clean']:.2f}",
+            "TolTarget": f"{100 * float(finest):.1f}",
+            "TolScaleRange": f"{max(b for b, _ in reached) / min(b for b, _ in reached):.0f}",
+            "TolScaleSpread": f"{max(v for _, v in reached) / min(v for _, v in reached):.3f}",
+            "TolTested": f"{max(rows):.0f}",
         }
-        # LaTeX control sequences are letters only, so the error factors are spelled out.
-        for factor, tag in ((1.5, "OneHalf"), (2.0, "Double"), (2.5, "TwoHalf")):
+        if summary["breakeven"] is not None:
+            macros["TolBreakeven"] = f"{summary['breakeven']:.1f}"
+
+        # The break-even moves with how reliable the answer has to be, because a fixed budget
+        # scales badly with the target while a corrupted forecast does not. Report the loosest
+        # target too, which is where the condition actually binds.
+        loosest = str(max(float(t) for t in result["targets"]))
+        loose = result["summary"][loosest]
+        macros |= {
+            "TolLooseTarget": f"{100 * float(loosest):.0f}",
+            "TolLooseFixed": f"{loose['fixed']:.2f}",
+            "TolLooseClean": f"{loose['clean']:.2f}",
+        }
+        if loose["breakeven"] is not None:
+            macros["TolLooseBreakeven"] = f"{loose['breakeven']:.1f}"
+        for factor, tag in ((1.5, "OneHalf"), (2.0, "Double"), (2.5, "TwoHalf"),
+                            (4.0, "Quadruple")):
             if factor in rows and rows[factor][column] is not None:
                 macros[f"TolRuns{tag}"] = f"{rows[factor][column]:.1f}"
 

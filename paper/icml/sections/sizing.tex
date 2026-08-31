@@ -120,14 +120,28 @@ On a pretrained model the forecast is accurate only in some regimes (Section~\re
 corrupt it on purpose and rerun the benchmark: a lognormal multiplicative error of controlled
 median magnitude, and separately a systematic scale error.
 
-The scale error does nothing. Over $\numTolScaleRange$ orders of magnitude the runs needed change
-by a factor of $\numTolScaleSpread$, because $z$ absorbs it exactly as \eqref{eq:stop} says. A
-forecast used this way does not need to be calibrated, which is worth stating because it is the
-opposite of what reporting an error bar requires.
+The scale error does nothing. Over $\numTolScaleRange$-fold changes in scale the runs needed are
+identical to the digits we print, a factor of $\numTolScaleSpread$, because $z$ absorbs it exactly
+as \eqref{eq:stop} says. A forecast used this way does not need to be calibrated, which is worth
+stating plainly because it is the opposite of what reporting an error bar requires.
 
-Relative error is what costs. Runs needed rise from $\numTolClean$ at the measured accuracy to
-$\numTolRunsOneHalf$ at a median error of $1.5\times$, $\numTolRunsDouble$ at $2\times$ and
-$\numTolRunsTwoHalf$ at $2.5\times$, reaching the fixed budget's $\numTolFixed$ at about
-$\numTolBreakeven\times$. The tolerance is wide but not unlimited: a forecast wrong by less than
-roughly a factor of three pays for itself, and one wrong by twenty-five does not. That break-even
-is the honest statement of scope, and Section~\ref{sec:real} is where it is tested.
+Relative error is what costs, and it costs less than we expected. At the $\numTolTarget\%$ target
+the runs needed rise from $\numTolClean$ at the measured accuracy to $\numTolRunsOneHalf$ at a
+median error of $1.5\times$, $\numTolRunsDouble$ at $2\times$, $\numTolRunsTwoHalf$ at $2.5\times$
+and $\numTolRunsQuadruple$ at $4\times$, and never reach the fixed budget's $\numTolFixed$ anywhere
+in the range we corrupted, which extends to $\numTolTested\times$. At a looser
+$\numTolLooseTarget\%$ target, where a fixed budget needs only $\numTolLooseFixed$ runs, the
+break-even is $\numTolLooseBreakeven\times$.
+
+That the tolerance widens as the reliability demanded goes up is not a paradox. A fixed budget
+scales badly with the target, because it carries every comparison to the same depth; a stopping
+rule spends deeply only where it must, and a corrupted deviation degrades that allocation without
+destroying it. The number to quote is therefore the looser one, $\numTolLooseBreakeven\times$,
+since that is where the condition binds first.
+
+That break-even is the honest statement of scope, and it is wider than the errors
+we measure on a pretrained model: all $\numSweepBands$ regimes of Section~\ref{sec:real}, at
+$\numSweepErrors$, sit inside it. What does not is the corpus whose reward groups go unanimous,
+missed by twenty-five, where the run has stopped injecting seed noise and there is nothing for a
+local covariance model to be accurate about.
+

@@ -1,0 +1,181 @@
+{
+  "manifest": {
+    "git_sha": "98a57e87d9cc04ef221227105131ccfcb6c0926e",
+    "config_hash": "70e14132ffe8",
+    "config": {
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "label": "sizing-p16g4-lr2.5e-4",
+      "prompts_file": "runs/s12_support_sweep/band-0.85.json",
+      "eval_prompts": 64,
+      "eval_samples": 16,
+      "seeds": 16,
+      "steps": 12,
+      "prompts": 16,
+      "group_size": 4,
+      "max_tokens": 20,
+      "learning_rate": 0.00025,
+      "lora_layers": 8,
+      "optimiser": "sgd",
+      "variance_prompts": 32,
+      "threshold": 8.0,
+      "success_band": [
+        0.6666666666666666,
+        1.5
+      ],
+      "cross_fit": false,
+      "checkpoints": 4,
+      "seed": 0,
+      "store": "runs/s14_real_sizing"
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.0.1-arm64-arm-64bit",
+    "started_at": 1788175448.024538,
+    "wall_clock": 1788180248.603022
+  },
+  "result": {
+    "label": "sizing-p16g4-lr2.5e-4",
+    "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+    "prompts_file": "runs/s12_support_sweep/band-0.85.json",
+    "optimiser": "sgd",
+    "learning_rate": 0.00025,
+    "steps": 12,
+    "prompts": 16,
+    "group_size": 4,
+    "variance_prompts": 32,
+    "predicted_std": 0.023132765490016974,
+    "predicted_half_samples": [
+      0.023156409404285386,
+      0.022722516771415263
+    ],
+    "curvature_residual": 4.85012113066137,
+    "threshold": 8.0,
+    "decision": "accept",
+    "anchor_live_share": 0.40625,
+    "anchor_trace": [
+      {
+        "pass_rate": 0.34375,
+        "live_share": 0.75,
+        "effective_prompts": 12.0,
+        "reward_variance": 0.15625,
+        "gradient_norm": 23.006938934326172
+      },
+      {
+        "pass_rate": 0.34375,
+        "live_share": 0.5625,
+        "effective_prompts": 9.0,
+        "reward_variance": 0.1171875,
+        "gradient_norm": 33.861324310302734
+      },
+      {
+        "pass_rate": 0.34375,
+        "live_share": 0.5625,
+        "effective_prompts": 9.0,
+        "reward_variance": 0.109375,
+        "gradient_norm": 25.968841552734375
+      },
+      {
+        "pass_rate": 0.46875,
+        "live_share": 0.375,
+        "effective_prompts": 6.0,
+        "reward_variance": 0.0859375,
+        "gradient_norm": 23.078039169311523
+      },
+      {
+        "pass_rate": 0.484375,
+        "live_share": 0.4375,
+        "effective_prompts": 7.0,
+        "reward_variance": 0.08984375,
+        "gradient_norm": 13.834697723388672
+      },
+      {
+        "pass_rate": 0.40625,
+        "live_share": 0.375,
+        "effective_prompts": 6.0,
+        "reward_variance": 0.078125,
+        "gradient_norm": 17.129770278930664
+      },
+      {
+        "pass_rate": 0.546875,
+        "live_share": 0.3125,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.06640625,
+        "gradient_norm": 22.89572525024414
+      },
+      {
+        "pass_rate": 0.53125,
+        "live_share": 0.25,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.0546875,
+        "gradient_norm": 20.394922256469727
+      },
+      {
+        "pass_rate": 0.703125,
+        "live_share": 0.3125,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.05859375,
+        "gradient_norm": 28.009321212768555
+      },
+      {
+        "pass_rate": 0.4375,
+        "live_share": 0.375,
+        "effective_prompts": 6.0,
+        "reward_variance": 0.0703125,
+        "gradient_norm": 20.169233322143555
+      },
+      {
+        "pass_rate": 0.671875,
+        "live_share": 0.25,
+        "effective_prompts": 4.0,
+        "reward_variance": 0.05078125,
+        "gradient_norm": 27.02544593811035
+      },
+      {
+        "pass_rate": 0.46875,
+        "live_share": 0.3125,
+        "effective_prompts": 5.0,
+        "reward_variance": 0.0625,
+        "gradient_norm": 20.587217330932617
+      }
+    ],
+    "validation_seeds": 16,
+    "success_band": [
+      0.6666666666666666,
+      1.5
+    ],
+    "frozen_at": 1788176481.66207,
+    "base_pass_rate": 0.2568359375,
+    "held_out_scores": [
+      0.52734375,
+      0.501953125,
+      0.533203125,
+      0.5244140625,
+      0.5244140625,
+      0.53515625,
+      0.5146484375,
+      0.5205078125,
+      0.509765625,
+      0.5146484375,
+      0.5283203125,
+      0.5361328125,
+      0.5068359375,
+      0.51171875,
+      0.5205078125,
+      0.5263671875
+    ],
+    "observed_spread": {
+      "std": 0.01026707363890855,
+      "lo": 0.007113952281066529,
+      "hi": 0.012342304654768443,
+      "mean": 0.52099609375,
+      "n_runs": 16
+    },
+    "resolved_std": 0.0031956630722773205,
+    "resolved_interval": {
+      "lo": 0.0,
+      "hi": 0.007451316861816155
+    },
+    "binomial_variance": 9.520053863525392e-05,
+    "ratio": 7.238799888103318,
+    "eval_key_per_seed": true
+  }
+}

@@ -69,7 +69,8 @@
   $\numSizeFixedGain\times$ {$[\numSizeFixedLo, \numSizeFixedHi]$} fewer runs than fixed-budget
   practice across $\numSizePairs$ comparisons, graded on seeds no policy may see. Corrupting the
   forecast on purpose shows a systematic scale error is free, since the stopping threshold absorbs
-  it, and that the procedure pays until relative error reaches about $\numTolBreakeven\times$.
+  it, and that the procedure pays until relative error reaches
+  $\numTolLooseBreakeven\times$, wider than any error we measure on a pretrained model.
 
   On pretrained models accuracy is regime-dependent. Across $\numSweepBands$ pre-specified regimes
   on Qwen2.5-0.5B the frozen forecast misses by factors of $\numSweepErrors$, all of them inside
