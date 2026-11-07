@@ -3,10 +3,12 @@
 
 \paragraph{Run-to-run variance.} That RL results move under reseeding is old news in deep RL
 \citep{henderson2018matters} and documented again for language-model reasoning
-\citep{hochlehnert2025sober}. Those papers establish the size of the problem by replication, which
-is the only instrument available without a model of where the variance comes from.
+\citep{hochlehnert2025sober}. Those papers establish the size of the problem by replication, and
+\citet{colas2018seeds} turn it into a power analysis that sizes the seed count from a pilot
+sample of seeds, which is the practice our sizing experiment replaces.
 \citet{agarwal2021precipice} prescribe how the resulting samples should be summarised. All of it
-presumes the runs exist. Practice for benchmark error bars treats the evaluation set as the only
+presumes the runs exist. \citet{heineman2025signal} estimate a benchmark's noise within one run,
+from checkpoint to checkpoint; ours is the across-seed spread of the training procedure. Practice for benchmark error bars treats the evaluation set as the only
 source of randomness \citep{miller2024adding}, which is the right interval for a fixed model and
 the wrong one for a training procedure; \citet{bouthillier2021accounting} argue the pipeline's own
 randomness belongs in the interval and estimate it by replication. We estimate the same quantity
@@ -30,12 +32,12 @@ $Q_t$ through the two-level decomposition, the finite-time rather than stationar
 the observation that the filter, not the size of the noise, is what governs reproducibility here.
 \citet{wang2026linear} reach a filtering picture from the opposite side, reporting near-linear
 evolution of weights and log-probabilities; their object is one run's trajectory, ours the
-covariance between runs differing only in seed.
+covariance between runs differing only in seed. Closest to us, \citet{ghosh2026predictable} reduce
+GRPO to a scalar damped oscillator with a stationary fluctuation scaling as $1/G$; we keep the full
+covariance, at finite time, and test it on seeds trained after the forecast was frozen.
 
-\paragraph{Adjoint sensitivity.} Carrying a scalar backwards through a trajectory to avoid forming
-a large intermediate is the adjoint method \citep{pontryagin1962mathematical, chen2018neural}.
-Theorem~\ref{thm:adjoint} applies it to a covariance rather than a loss, and
-Proposition~\ref{prop:potential} is what makes it cheap here by removing the transpose.
+\paragraph{Adjoint sensitivity.} Theorem~\ref{thm:adjoint} applies the adjoint method
+\citep{pontryagin1962mathematical, chen2018neural} to a covariance rather than a loss.
 
 \paragraph{Entropy collapse.} That RLVR drives policy entropy down sharply is documented
 \citep{cui2025entropy} and treated as an optimisation pathology. It has a second consequence that
@@ -47,10 +49,12 @@ measurement of its reproducibility from that point is measuring nothing.
 which data parallelism stops buying speed \citep{mccandlish2018empirical, shallue2019measuring}.
 Both concern a single level of sampling. RLVR samples prompts and then responses within each
 prompt, and the resulting two-level scale has no counterpart there; the decomposition itself is the
-classical two-stage sampling result \citep{cochran1977sampling}.
+classical two-stage sampling result \citep{cochran1977sampling}. \citet{zhou2026ustatistic}
+concurrently derive an optimal group size from the mean-squared error of the GRPO gradient as a
+U-statistic; ours minimises injected noise at fixed rollout budget, and the two remain uncompared.
 
 \paragraph{Allocating rollouts.} Recent methods vary responses per prompt within a batch from pass
-rates or gradient variance \citep{nguyen2026allocation}, or adapt batch size from a divergence
-signal \citep{park2026batchscaling}. Those distribute responses \emph{within} one update, across
-its prompts. The budget at issue here is across independent training runs of the same recipe, which
+rates or gradient variance \citep{nguyen2026allocation}, and outside language models the batch size
+itself has been adapted during training \citep{park2026batchscaling}. Those allocate samples
+\emph{within} one run. The budget at issue here is across independent training runs of the same recipe, which
 is a level those methods do not address and where the reproducibility cost is actually incurred.

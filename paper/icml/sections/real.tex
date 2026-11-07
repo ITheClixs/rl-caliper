@@ -4,11 +4,12 @@
 Run end to end on Qwen2.5-0.5B with LoRA, the cheap estimator \eqref{eq:cheap} is a factor of
 twenty-five short of the measured spread and the transported one sixteen. On Qwen2.5-7B under Adam,
 with the recursion lifted to the optimiser state $z = (\theta, m, v)$, it is short by between
-$\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Carrying that state matters: on the
-exact models, ignoring it costs $24.6\times$ where the lift gives $1.10\times$.
+$\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$; on the exact models the lift gives
+$1.10\times$ where ignoring that state costs $24.6\times$.
 
-\paragraph{Accuracy is regime-dependent, not uniformly poor.} A corpus whose reward groups go
-unanimous injects $\Sigma_t = 0$ and carries no seed noise to forecast, so we built four corpora at
+\paragraph{Accuracy is regime-dependent, not uniformly poor.} On the corpus above the reward
+groups go unanimous within five updates, after which $\Sigma_t = 0$ and a local forecast sees
+nothing, yet its measured seed spread is the largest we report. So we built four corpora at
 pre-specified mean live-group probabilities and ran the prospective test on each. The errors are
 $\numSweepErrors$; the best, on the band at $\numSweepWinBand$, meets a criterion of $1.5\times$
 declared before the sweep ran, forecasting $\numSweepWinForecast$ against a measured
@@ -16,13 +17,13 @@ $\numSweepWinMeasured$ $[\numSweepWinLow, \numSweepWinHigh]$ on a gain of $\numS
 local covariance forecasting can be quantitatively accurate on a pretrained model, though not
 reliably so.
 
-All four sit inside the $\numTolLooseBreakeven\times$ break-even of Section~\ref{sec:sizing}, the worst
-of them only barely. That is the sense in which these results are usable: not that the forecast is
-accurate on pretrained models, but that where we have measured it, it is accurate enough for the
-decision it is meant to serve. We have not run the sizing benchmark itself at this scale, and that
-is the gap between what we show and what we claim.
+All four sit inside the $\numTolLooseBreakeven\times$ break-even of Section~\ref{sec:sizing},
+which was measured with $z$ read in sample. That is the narrow sense in which these results are
+usable: in those four regimes the forecast is accurate enough for the decision it serves, while on
+the unanimous corpus and at $7$B under Adam it is not. Running the sizing benchmark itself at this
+scale is the direct test, and it is underpowered.
 
-\paragraph{The sizing benchmark at this scale is underpowered.} We trained
+\paragraph{The sizing benchmark at this scale.} We trained
 $\numRealSizeRecipes$ recipes on one corpus at a matched rollout budget of $64$ per update,
 crossing $(P,G) \in \{(16,4),(8,8)\}$ with three learning rates spanning a factor of four:
 $\numRealSizeRuns$ training runs. The forecast holds up, at a median error of

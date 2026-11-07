@@ -12,10 +12,8 @@ verified that. Pairs whose ordering is ambiguous are excluded, so the benchmark 
 near-ties, where the honest answer is to keep training whatever rule is in use. And the decision is
 over one scalar metric.
 
-\paragraph{Scale.} The largest model measured here is $7$B with $\numAdamScaleSeeds$ seeds, and
-every experiment runs on one laptop. That bounds what any of this establishes about frontier-scale
-RLVR. The exact tier, where the forecast is validated to machine precision against enumeration, is
-by construction the tier furthest from a frontier run.
+\paragraph{Scale.} The largest model is a $4$-bit $7$B with $\numAdamScaleSeeds$ seeds, on one
+laptop, and the exact tier where the forecast is validated is the furthest from a frontier run.
 
 \paragraph{What the forecast costs, which is the objection we cannot fully answer.} Estimating the
 injected term from the eight prompts a run trains on gives two forecasts $684\times$ apart, because
@@ -30,8 +28,7 @@ to the frozen forecast \eqref{eq:frozen}, which Section~\ref{sec:sizing} finds d
 work and which costs almost nothing.
 
 \paragraph{Claims we withdrew.} A predicted square-root relation between policy divergence and
-outcome spread is not supported by our data. We looked for a short memory horizon, a long run whose
-spread is generated only near its end, and found the opposite: in $\numTiltedEarly$ of
+outcome spread is not supported by our data. Nor is a short memory horizon: in $\numTiltedEarly$ of
 $\numMemorySettings$ settings more of the final variance was injected in the first half of the run
 than the second, because the injected covariance is largest before the policy has learned anything.
 Token-level advantage reshaping, length normalisation and clipping fall outside the estimator

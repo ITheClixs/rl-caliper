@@ -147,13 +147,11 @@ in the range we corrupted, which extends to $\numTolTested\times$. At a looser
 $\numTolLooseTarget\%$ target, where a fixed budget needs only $\numTolLooseFixed$ runs, the
 break-even is $\numTolLooseBreakeven\times$.
 
-The tolerance widens with the reliability demanded because a fixed budget carries every comparison
-to the same depth, so the binding number is the looser one.
-
 That break-even, measured with $z$ read in sample, is the statement of scope. The
 $\numSweepBands$ pre-specified regimes of Section~\ref{sec:real}, at $\numSweepErrors$, sit inside
 it. Two of our pretrained results do not: the corpus whose reward groups go unanimous, missed by
 twenty-five although its measured seed spread is the largest we report, and Qwen2.5-7B under Adam,
-short by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Where the forecast
+short by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$, a range reaching well
+past it. Where the forecast
 misses that badly, a forecast-driven stopping rule would stop too early.
 

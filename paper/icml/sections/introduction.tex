@@ -5,7 +5,7 @@ Reinforcement learning with verifiable rewards is the standard way to turn a pre
 a reasoning one \citep{deepseekr1}, and a paper reports that a recipe moved a benchmark by two
 points. Whether that is a result depends on a number nobody has: how much the same recipe would
 have moved it under a different seed. The problem is documented
-\citep{henderson2018matters, hochlehnert2025sober}, and the only instrument the field has for it is
+\citep{henderson2018matters, hochlehnert2025sober}, and the standard instrument for it is
 replication, which at RL post-training cost is close to unaffordable.
 
 The practical form of the problem is not reporting but budgeting. Deciding that one recipe beats
@@ -31,31 +31,32 @@ of the reported metric rather than being formed.
   gradient backwards along a single stored trajectory gives the across-seed variance of the
   reported score as a sum of scalars, one per update, with no covariance matrix formed. The
   transpose a backward pass would need is free, because the mean update of any count-based
-  estimator is the gradient of a scalar potential and its Jacobian is therefore symmetric. Frozen
-  before the remaining seeds were trained, its median error is $\numForecastMedian\times$ across
-  $\numForecastSettings$ settings.
+  estimator is the gradient of a scalar potential and its Jacobian is therefore symmetric. On
+  enumerable policies, where every input to the forecast is exact, and frozen before the remaining
+  seeds were trained, its median error is $\numForecastMedian\times$ across
+  $\numForecastSettings$ settings of at most $25$ updates.
 
-  \item \textbf{Comparisons sized from one run} (Section~\ref{sec:sizing}). Supplying the deviation
-  from the first run of each arm settles $\numSizePairs$ comparisons at a $\numSizeTarget\%$
-  mistake rate in $\numSizeAdjointRuns$ runs, indistinguishable from the $\numSizeOracleRuns$ of a
-  rule handed the realised deviation, against $\numSizeFixedRuns$ for fixed-budget practice: a
-  saving of $\numSizeFixedGain\times$ {$[\numSizeFixedLo, \numSizeFixedHi]$}, graded against an
-  ordering fixed on seeds no policy may draw. Estimating the deviation from spent seeds instead
-  costs $\numSizeEmpiricalGain\times$, most of it structural.
+  \item \textbf{Comparisons sized from one run} (Section~\ref{sec:sizing}). With every stopping
+  threshold chosen on other tasks before it is applied, the forecast settles $\numSizePairs$
+  comparisons at a $\numSizeTarget\%$ mistake rate in $\numHeldStrictAdjointRuns$ runs, against
+  $\numHeldStrictUncappedFixedRuns$ for an uncapped fixed budget and
+  $\numHeldStrictEmpiricalGain\times$ as many for a deviation estimated from spent seeds. A closed
+  form that needs no run does nearly as well once its threshold is learned
+  ($\numHeldStrictFrozenGain\times$ $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$); what the
+  stored run adds is an absolute scale, which lets the textbook threshold be used with no
+  calibration at all.
 
   \item \textbf{The condition under which it pays.} Corrupting the forecast deliberately puts the
-  break-even against a fixed budget at $\numTolLooseBreakeven\times$ relative error, and shows
-  that a systematic scale error costs nothing at all across
-  $\numTolScaleRange$ orders of magnitude, because the stopping threshold absorbs it. A forecast
-  used this way does not need to be calibrated, which is the opposite of what reporting an error
-  bar requires.
+  break-even against a fixed budget at $\numTolLooseBreakeven\times$ relative error; a pure scale
+  error is free only where the threshold can be tuned on comparisons with known outcomes.
 
   \item \textbf{An honest boundary} (Section~\ref{sec:real}). On Qwen2.5-0.5B accuracy is
   regime-dependent: across $\numSweepBands$ pre-specified regimes the errors are
-  $\numSweepErrors$, all inside the break-even above, while a corpus whose reward groups go
-  unanimous injects no seed noise and is missed by twenty-five. At $7$B under Adam the forecast is
-  short by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
+  $\numSweepErrors$, all inside the break-even above. Outside it, a corpus whose reward groups go
+  unanimous within five updates is missed by twenty-five, although its measured seed spread is
+  the largest we report, and at $7$B under Adam the forecast is short by between
+  $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
 \end{itemize}
 
-Every experiment here runs on one laptop, which bounds what any of it establishes about
-frontier-scale RLVR and is stated plainly in Section~\ref{sec:discussion}.
+Every experiment runs on one laptop, and every pretrained forecast spans at most $12$ updates with
+LoRA adapters, so none of it establishes behaviour at frontier scale (Section~\ref{sec:discussion}).
