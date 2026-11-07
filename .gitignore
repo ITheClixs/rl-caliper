@@ -42,3 +42,7 @@ paper/arxiv/submission.tar.gz
 .vscode/
 scratch/
 *.bak
+
+# local agent tooling, not part of the project
+.agents/
+skills-lock.json

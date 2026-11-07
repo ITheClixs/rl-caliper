@@ -22,6 +22,19 @@ Legend for strength:
 | the transport is worth ~2% at these run lengths | `p2` ablation: adjoint held at `grad M` | measured |
 | the cheap form costs one extra pass per update | arithmetic on the algorithm | exact |
 
+## What the forecast is for: sizing a comparison
+
+| claim | evidence | strength |
+|---|---|---|
+| with thresholds read in sample, the forecast needs 9.57x fewer runs than a fixed budget at 0.1% | `s13_sizing`; the fixed budget sits at its 32-run cap, which inflates the ratio | measured |
+| with thresholds chosen on other tasks, the forecast needs 3.14 runs at 0.1% | `s15_sizing_heldout`, leave-one-task-out over 12 tasks, intervals resample tasks | measured |
+| that is 4.5x fewer than an uncapped fixed budget | normal approximation on held-out seeds; the measured budget hits the cap | measured |
+| and 2.12x fewer than estimating the deviation from spent seeds | `s15` | measured |
+| the free closed form is within 1.11x of the forecast once its threshold is learned | `s15`: [0.97, 1.28], an interval containing one | measured |
+| the stored run's contribution is absolute scale | `s15`: at the textbook threshold the closed form never stops (scale off 84x); the forecast decides in 4.37 runs with 0.001% mistakes at a 1% target | measured |
+| ~~a forecast used for sizing does not need to be calibrated~~ | withdrawn: true only where the threshold is tuned on comparisons with known outcomes | negative |
+| ~~the break-even is wider than every pretrained error~~ | withdrawn: the unanimous corpus (25x) and 7B under Adam (3.1-17x) are outside it | negative |
+
 ## The mechanism
 
 | claim | evidence | strength |
@@ -75,8 +88,8 @@ Legend for strength:
 | ~~more stochastic support gives a better forecast~~ | withdrawn: four pre-specified bands give 1.66, 2.13, 2.80, 1.24 with no trend | negative |
 | ~~the overprediction is metric-gradient estimation bias~~ | withdrawn: cross-fitting two independent gradients moves 0.0604 to 0.0616 | negative |
 | the diagnostic refuses the accurate run too | `s11` band 0.85 residual 8.0 against a threshold of 0.0300 | measured |
-| a one-run residual ranks the settings where the forecast fails above chance | `p2`: AUROC 0.74 for errors past 1.3x on the 192-setting headline grid, 0.87 on the pool-16 replicate | measured |
-| ~~refusing the worst fifth caps the error at 1.29x~~ | withdrawn: true on the first 96-setting grid only. On both 192-setting grids the worst setting sits at the 62nd-64th residual percentile and is accepted, so the worst error is unchanged (1.58x, 1.48x) | negative |
+| a one-run residual ranks the settings where the forecast fails above chance | `p2`: AUROC 0.78 for errors past 1.3x on the 192-setting headline grid, 0.85 on the pool-16 replicate | measured |
+| ~~refusing the worst fifth caps the error at 1.29x~~ | withdrawn: true on the first 96-setting grid only. On the 192-setting headline grid the worst setting sits at the 75th residual percentile and is accepted, so the worst error is unchanged (1.56x); the pool-16 replicate behaves the same (1.50x) | negative |
 | the same threshold refuses both pretrained runs | `s9`: residual 2.0 at 0.5B and 160.5 at 7B against 0.0300 | measured |
 | no pretrained regime the diagnostic accepts | not found; both real runs are refused | negative |
 | the forecast is short by 3.1x to 17x at 7B under Adam | `s7`: 0.0207 against 0.0892, half-samples 0.0052/0.0287 | measured |

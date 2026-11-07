@@ -23,7 +23,12 @@ table below includes the tiers where it does not.*
 ## Results at a glance
 
 "Error" is the ratio between forecast and measured standard deviation, taken in whichever direction
-is above one, so 1.0x is perfect and 2x means off by a factor of two either way.
+is above one, so 1.0x is perfect and 2x means off by a factor of two either way. A few other terms:
+*enumerable policies* are small tabular policies where every probability can be computed exactly;
+a *unanimous reward group* is a set of responses to one prompt that all pass or all fail, which
+gives a group-baselined estimator nothing to learn from; *spent seeds* means estimating the spread
+from the runs already trained; the *textbook threshold* stops a comparison once the lead clears
+the normal quantile of the mistake rate you will tolerate.
 
 | setting | what was compared | result |
 |---|---|---|
@@ -31,7 +36,7 @@ is above one, so 1.0x is perfect and 2x means off by a factor of two either way.
 | Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen forecast against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
 | Qwen2.5-0.5B, corpus whose reward groups go unanimous | cheap forecast against 8 seeds | **25x short** |
 | Qwen2.5-7B (4-bit, LoRA) under Adam | lifted forecast against 10 seeds | **3.1x to 17x short** |
-| sizing a comparison (enumerable tier, 1020 comparisons) | runs to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs, against 14 for an uncapped fixed budget and 2.12x as many from spent seeds |
+| sizing a comparison (enumerable tier, 1020 comparisons) | runs per comparison, both arms, to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs, against 14 for an uncapped fixed budget (extrapolated; the measured one hits its 32-run cap) and 2.12x as many from spent seeds |
 
 Two things the sizing benchmark shows that the headline does not. A closed form that needs no
 stored run comes within 1.11x of the forecast once its stopping threshold has been learned on other
@@ -99,20 +104,23 @@ class MyUpdate:                  # step_size, n_prompts as attributes
     def jacobian_vector(self, b):      # J b, one Hessian-vector product
         ...
 
-result = run_backward(metric_gradient, updates)
-result.std                # forecast s.d. of the reported score across seeds
-result.interval(0.784)    # a normal interval around the number you are reporting
-result.kernel             # each update's share of the variance
-result.memory()           # how many final updates hold 95% of it
+result = run_backward(metric_gradient, updates)                    # full form
+cheap = run_backward(metric_gradient, updates, transport=False)    # no Jacobian-vector products
+result.std                                # forecast s.d. of the reported score across seeds
+result.normal_approx_interval(score, 0.95)  # a normal interval around the score you report
+result.kernel                             # each update's share of the variance
+result.memory()                           # how many final updates hold 95% of it
 ```
 
 `caliper.exact.adjoint` runs its forecast through this protocol (`ExactUpdate`). The pretrained-model
 version in `caliper.real.adjoint` implements the same recursion inline, because it also carries
 Adam's moments backwards and cross-fits the injected term, which the protocol does not express yet.
 
-The full backward pass costs three passes per stored update. Holding `b` at `grad M` instead of
-carrying it back changes the forecast by a median of 2% at these run lengths, so the cheap form,
-one extra pass per update and no Hessian-vector products, is the recommended default.
+The full backward pass costs three passes per stored update. The cheap form (`transport=False`)
+holds `b` at `grad M` instead of carrying it back: one extra pass per update and no
+Hessian-vector products. On the exact tier it changes the forecast by a median of 2% at runs of up
+to 25 updates, so it is the recommended starting point. The normal interval assumes the seed
+distribution is normal, which the pretrained runs show it need not be.
 
 ## Running it
 
@@ -141,8 +149,6 @@ This is a single-author project. I chose the research question and its framing, 
 experiments to run, judged the results, and decided which claims to keep, correct or withdraw; I
 also derived and checked parts of the theory and wrote or debugged parts of the code. AI coding
 agents (Claude Code) wrote most of the code, the LaTeX and the documentation, and ran the sweeps
-under that direction, which is why the commit history is dense. A revision pass in November 2026
-was also done with Claude; its commits carry a `Co-Authored-By` trailer. It fixed a table that
-printed 7B numbers in a 0.5B table, restored the headline grid after an accidental switch, withdrew
-the diagnostic's tail claim, regraded the sizing benchmark with thresholds set before grading, and
-located the pretrained seed spread from the stored records.
+under that direction, which is why the commit history is dense. A revision pass in November 2026,
+prompted by an outside review of the repository, was also done with Claude; its commits carry a
+`Co-Authored-By` trailer and say what each change was and why.

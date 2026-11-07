@@ -31,7 +31,8 @@ CHECKS = [
     ("README.md", "errors {SweepErrors}"),
     ("README.md", "**{AdamScaleShortfallLow}x to {AdamScaleShortfallHigh}x short**"),
     ("README.md", "**{HeldStrictAdjointRuns}** runs, against {HeldStrictUncappedFixedRuns} for an "
-                  "uncapped fixed budget and {HeldStrictEmpiricalGain}x as many from spent seeds"),
+                  "uncapped fixed budget (extrapolated; the measured one hits its 32-run cap) and "
+                  "{HeldStrictEmpiricalGain}x as many from spent seeds"),
     ("README.md", "comes within {HeldStrictFrozenGain}x of the forecast"),
     ("README.md", "its scale is off by {SizeFrozenScale}x"),
     ("README.md", "decides in {NominalLooseAdjointRuns} runs with a {NominalLooseAdjointMistakes}% "
@@ -52,6 +53,19 @@ CHECKS = [
                        "{ForecastSettings}"),
     ("docs/claims.md", "`p2`: {ForecastReplicateMedian}x, {ForecastReplicateWorst}x, "
                        "{ForecastReplicateInside} of {ForecastSettings} inside"),
+    ("docs/claims.md", "AUROC {DiagAurocHigh} for errors past 1.3x on the 192-setting "
+                       "headline grid, {DiagReplicateAurocHigh} on the pool-16 replicate"),
+    ("docs/claims.md", "the worst setting sits at the {DiagWorstPercentile}th residual percentile"),
+    ("docs/claims.md", "the worst error is unchanged ({DiagWorstAll}x)"),
+    ("docs/claims.md", "thresholds read in sample, the forecast needs {SizeFixedGain}x fewer runs"),
+    ("docs/claims.md", "the forecast needs {HeldStrictAdjointRuns} runs at 0.1%"),
+    ("docs/claims.md", "that is {HeldStrictUncappedGain}x fewer than an uncapped fixed budget"),
+    ("docs/claims.md", "and {HeldStrictEmpiricalGain}x fewer than estimating the deviation"),
+    ("docs/claims.md", "within {HeldStrictFrozenGain}x of the forecast once its threshold is "
+                       "learned | `s15`: [{HeldStrictFrozenLo}, {HeldStrictFrozenHi}]"),
+    ("docs/claims.md", "scale off {SizeFrozenScale}x); the forecast decides in "
+                       "{NominalLooseAdjointRuns} runs with {NominalLooseAdjointMistakes}% "
+                       "mistakes"),
 ]
 
 
