@@ -8,8 +8,10 @@ Theorem 2 needs three things from a training run and nothing else:
 
 Nothing here knows what a policy is, which array library holds it, or how a rollout is sampled.
 Supply an object per update that answers those two questions and this accumulates the forecast.
-`caliper.exact.adjoint` and `caliper.real.adjoint` are the two implementations of that protocol in
-this repository; a trainer in another framework needs only a third.
+`caliper.exact.adjoint` runs its forecast through `run_backward`; a trainer in another framework
+needs only its own `Update`. `caliper.real.adjoint` implements the same recursion inline, because
+on a pretrained model it also carries Adam's moments backwards and cross-fits the injected term
+from two independent metric gradients, and this protocol does not yet express either.
 
 The updates are consumed in reverse order, which is the order the recursion runs in and the order
 a stored trajectory is usually most convenient to read back.

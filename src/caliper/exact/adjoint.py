@@ -26,12 +26,14 @@ prediction can be checked against independently trained runs.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 
 import numpy as np
 
 from caliper.exact.policy import TabularPolicy, fisher, make_prompt
 from caliper.exact.propagation import batch_model, injected_covariance, mean_gradient
+from caliper.forecast import run_backward
 from caliper.objectives.advantages import weight_table
 
 
@@ -110,6 +112,35 @@ def mean_trajectory(
     return states
 
 
+@dataclass(frozen=True)
+class ExactUpdate:
+    """One update of an enumerable run, as `caliper.forecast.Update`.
+
+    `injected_covariance` already carries the `1/P`, and the protocol divides by `n_prompts`
+    itself, so the projection is scaled back up by the prompt count rather than divided twice.
+    """
+
+    state: TabularPolicy
+    accepts: np.ndarray
+    weights: np.ndarray
+    n_prompts: int
+    step_size: float
+    source: str
+    carry: Callable[..., np.ndarray]
+    transport: bool = True
+
+    def projected_variance(self, direction: np.ndarray) -> float:
+        injected = injected_covariance(
+            self.state, self.accepts, self.weights, self.n_prompts, self.source
+        )
+        return float(self.n_prompts * direction @ injected @ direction)
+
+    def jacobian_vector(self, direction: np.ndarray) -> np.ndarray:
+        if not self.transport:
+            return np.zeros_like(direction)
+        return self.carry(self.state, self.accepts, self.weights, direction)
+
+
 def forecast(
     policy: TabularPolicy,
     accepts: np.ndarray,
@@ -141,17 +172,15 @@ def forecast(
         raise ValueError("need one stored state per update, plus the final one")
     trajectory = [metric_value(state, accepts) for state in states[: steps + 1]]
 
-    # backward pass: b_T = grad M, b_s = A_s^T b_{s+1} = b_{s+1} + eta J_s b_{s+1}
+    # backward pass: b_T = grad M, b_s = A_s^T b_{s+1} = b_{s+1} + eta J_s b_{s+1}, run through
+    # the same protocol a trainer in any other framework would implement
     carry = hessian_vector_product if matrix_free else transposed_jacobian_product
-    adjoint = metric_gradient(states[steps], accepts)
-    kernel = [0.0] * steps
-    norms = [0.0] * steps
-    for t in range(steps - 1, -1, -1):
-        injected = injected_covariance(states[t], accepts, weights, n_prompts, source)
-        kernel[t] = float(step_size**2 * adjoint @ injected @ adjoint)
-        norms[t] = float(np.linalg.norm(adjoint))
-        if transport:
-            adjoint = adjoint + step_size * carry(states[t], accepts, weights, adjoint)
+    updates = [
+        ExactUpdate(states[t], accepts, weights, n_prompts, step_size, source, carry, transport)
+        for t in range(steps)
+    ]
+    result = run_backward(metric_gradient(states[steps], accepts), updates)
+    kernel, norms = result.kernel, result.adjoint_norm
 
     variance = float(sum(kernel))
     return MetricForecast(
