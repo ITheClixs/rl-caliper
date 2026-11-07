@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from caliper.real.adjoint import cross_projected_variance
+from caliper.real.numerics import cross_projected_variance
 
 
 def _projections(direction, contributions):

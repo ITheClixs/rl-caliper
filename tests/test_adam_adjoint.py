@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from caliper.real.adjoint import adam_adjoint_step, adam_sensitivity
+from caliper.real.numerics import adam_adjoint_step, adam_sensitivity
 
 
 def test_the_injected_direction_reduces_to_the_sensitivity_at_the_start():

@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from caliper.real.adjoint import adam_sensitivity
+from caliper.real.numerics import adam_sensitivity
 
 
 def _mlx_update(m, v, grad, lr, b1, b2, eps):
