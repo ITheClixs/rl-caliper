@@ -45,12 +45,14 @@ run adds is an *absolute* scale: with the textbook threshold and no calibration 
 stops (its scale is off by 84x), while the forecast decides in 4.37 runs with a 0.001% mistake rate
 for a 1% target.
 
-Why it fails on pretrained models, as far as the records show: in both large misses the run the
-forecast was made from answers every held-out prompt 16/16 or 0/16, where the score is locally flat,
-while later seeds differ in which way each prompt collapses. At 0.5B two thirds of the seed spread is
-prompts flipping independently between seeds; at 7B 60% is shared. A first-order forecast around
-one collapsed trajectory has no term for that. This is from two runs and is stated as an
-observation, not a result.
+Why it fails on pretrained models, as far as the records show: on the counting task those runs
+use, most runs learn to answer one constant whatever they are asked. The run the forecast was made
+from answers "1" to every prompt and so passes exactly the 17 of 48 prompts whose count is one; at
+0.5B, 5 of 8 runs answer a constant, and which constant explains 94% of the across-seed variance
+(81-99% over three launches). A constant answer gives every response to a prompt the same reward,
+so the group-baselined update is zero and the run cannot leave it. The spread is which constant a
+run is absorbed into, a discrete outcome that a linearisation about one absorbed run cannot see,
+and it also means much of the measured "learning" on that task is guessing.
 
 `docs/claims.md` indexes every claim in the paper against the experiment that supports it and how
 strongly, including the claims that were withdrawn and why.

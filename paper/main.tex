@@ -81,7 +81,8 @@
   on Qwen2.5-0.5B the frozen forecast misses by factors of $\numSweepErrors$, one of them inside a
   criterion declared before the sweep ran and all of them inside that break-even. A corpus whose
   reward groups go unanimous is missed by twenty-five although its measured seed spread is the
-  largest we report, and Qwen2.5-7B under Adam by $\numAdamScaleShortfallLow$ to
+  largest we report, and most of its runs turn out to answer one constant whatever they are
+  asked; Qwen2.5-7B under Adam on the same task is short by $\numAdamScaleShortfallLow$ to
   $\numAdamScaleShortfallHigh\times$. We report where it fails as well as where it works.
       \end{quote}
   \end{minipage}

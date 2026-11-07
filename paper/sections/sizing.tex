@@ -269,11 +269,11 @@ inside it, though only one of them met the tighter
 $1.5\times$ accuracy criterion declared before that sweep ran. The two are different bars and we
 keep them apart: one asks whether the forecast is right, the other whether it is useful.
 
-What sits outside is the corpus whose reward groups go unanimous, missed by twenty-five, and
-Qwen2.5-7B under Adam, short by between $\numAdamScaleShortfallLow$ and
-$\numAdamScaleShortfallHigh$. On the unanimous corpus the run stops injecting noise after five
-updates, yet its measured seed spread is the largest we report, so the noise that separates its
-seeds is there and the local model does not see it. Where the forecast is short by that much, a
+What sits outside is the task on which most runs learn to answer one constant, missed by
+twenty-five, and Qwen2.5-7B under Adam on the same task, short by between
+$\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. There the seed spread is which
+constant a run is absorbed into (Section~\ref{sec:exp-real}), and a local model about one absorbed
+run does not see it. Where the forecast is short by that much, a
 forecast-driven stopping rule stops too early. The contribution is a decision procedure
 together with the condition under which it beats what is currently done, and a statement of what
 puts a run outside that condition.

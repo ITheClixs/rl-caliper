@@ -1,0 +1,185 @@
+{
+  "manifest": {
+    "git_sha": "34bcfe37998ef6a0a54d9fe9f9add7cd461effc9",
+    "git_dirty": false,
+    "config_hash": "9e359679cee2",
+    "config": {
+      "records": {
+        "small": "1d3f31eda6cd",
+        "large": "107b7137ba01",
+        "small_rerun": "098b39058393",
+        "small_traces": "6fd81c84f706"
+      },
+      "held_out_seed": 9001
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794093261.3932219,
+    "wall_clock": 1794093261.440864
+  },
+  "result": {
+    "small": {
+      "record": "1d3f31eda6cd",
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "seeds": 8,
+      "modes": [
+        "1",
+        "mixed",
+        "1",
+        "mixed",
+        "mixed",
+        "4",
+        "1",
+        "2"
+      ],
+      "anchor_mode": "1",
+      "constant_seeds": 5,
+      "answer_counts": {
+        "0": 3,
+        "1": 17,
+        "2": 10,
+        "3": 8,
+        "4": 10
+      },
+      "scores": [
+        0.3541666666666667,
+        0.2994791666666667,
+        0.3528645833333333,
+        0.25390625,
+        0.24739583333333334,
+        0.20703125,
+        0.3463541666666667,
+        0.20442708333333334
+      ],
+      "mode_share": 0.9418274801230573,
+      "same_answer_correlation": 0.8961424610599973,
+      "other_answer_correlation": -0.33070809072072094,
+      "forecast_repeats": [
+        0.003971589220959081
+      ]
+    },
+    "large": {
+      "record": "107b7137ba01",
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "seeds": 10,
+      "modes": [
+        "1",
+        "mixed",
+        "mixed",
+        "mixed",
+        "1",
+        "mixed",
+        "1",
+        "2",
+        "mixed",
+        "mixed"
+      ],
+      "anchor_mode": "1",
+      "constant_seeds": 4,
+      "answer_counts": {
+        "0": 3,
+        "1": 17,
+        "2": 10,
+        "3": 8,
+        "4": 10
+      },
+      "scores": [
+        0.3541666666666667,
+        0.5299479166666666,
+        0.3098958333333333,
+        0.46875,
+        0.359375,
+        0.2903645833333333,
+        0.3541666666666667,
+        0.20833333333333334,
+        0.38671875,
+        0.359375
+      ],
+      "mode_share": 0.39989233831268634,
+      "same_answer_correlation": 0.7806123516521352,
+      "other_answer_correlation": -0.15784139900504127,
+      "forecast_repeats": [
+        0.0006627441143035818,
+        0.45123733175671615
+      ]
+    },
+    "small_rerun": {
+      "record": "098b39058393",
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "seeds": 8,
+      "modes": [
+        "1",
+        "1",
+        "1",
+        "mixed",
+        "2",
+        "mixed",
+        "2",
+        "2"
+      ],
+      "anchor_mode": "1",
+      "constant_seeds": 6,
+      "answer_counts": {
+        "0": 3,
+        "1": 17,
+        "2": 10,
+        "3": 8,
+        "4": 10
+      },
+      "scores": [
+        0.3502604166666667,
+        0.3528645833333333,
+        0.34765625,
+        0.23046875,
+        0.21354166666666666,
+        0.20833333333333334,
+        0.22135416666666666,
+        0.2109375
+      ],
+      "mode_share": 0.9905756965424639,
+      "same_answer_correlation": 0.9474395097082692,
+      "other_answer_correlation": -0.26072878265430466,
+      "forecast_repeats": [
+        0.02250783248594719
+      ]
+    },
+    "small_traces": {
+      "record": "6fd81c84f706",
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "seeds": 8,
+      "modes": [
+        "1",
+        "1",
+        "1",
+        "mixed",
+        "mixed",
+        "4",
+        "mixed",
+        "2"
+      ],
+      "anchor_mode": "1",
+      "constant_seeds": 5,
+      "answer_counts": {
+        "0": 3,
+        "1": 17,
+        "2": 10,
+        "3": 8,
+        "4": 10
+      },
+      "scores": [
+        0.3541666666666667,
+        0.3541666666666667,
+        0.3528645833333333,
+        0.23828125,
+        0.24348958333333334,
+        0.20442708333333334,
+        0.3372395833333333,
+        0.2109375
+      ],
+      "mode_share": 0.8105922873034461,
+      "same_answer_correlation": 0.930610917618736,
+      "other_answer_correlation": -0.34853576383601936,
+      "forecast_repeats": []
+    }
+  }
+}

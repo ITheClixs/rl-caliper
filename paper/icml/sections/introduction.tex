@@ -52,9 +52,8 @@ of the reported metric rather than being formed.
 
   \item \textbf{An honest boundary} (Section~\ref{sec:real}). On Qwen2.5-0.5B accuracy is
   regime-dependent: across $\numSweepBands$ pre-specified regimes the errors are
-  $\numSweepErrors$, all inside the break-even above. Outside it, a corpus whose reward groups go
-  unanimous within five updates is missed by twenty-five, although its measured seed spread is
-  the largest we report, and at $7$B under Adam the forecast is short by between
+  $\numSweepErrors$, all inside the break-even above. Outside it, on a task where most runs learn to
+  answer one constant whatever they are asked, the forecast is short by twenty-five, and at $7$B under Adam the forecast is short by between
   $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
 \end{itemize}
 

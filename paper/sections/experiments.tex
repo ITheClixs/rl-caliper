@@ -551,26 +551,30 @@ not claim from eight runs, and the grouping is not identical between reruns; wha
 reruns is a tight cluster near $0.35$ sitting apart from everything else. A standard deviation is a
 poor summary of such an outcome for anyone, forecast or not.
 
-\paragraph{What the stored run could see, and where the spread actually is.} The record keeps
-every seed's pass rate on each held-out prompt, which is enough to locate the spread without
-training anything (\texttt{experiments/s16\_saturation}). Writing the variance of the mean score
-across seeds as the sum of a prompt-by-prompt covariance matrix, $\numSatSmallPerPrompt\%$ of it is
-on the diagonal: it is mostly prompts flipping between seeds independently of one another, not
-seeds that are better or worse as a whole. The higher-scoring half of the seeds is better on
-$\numSatSmallBetter$ prompts and worse on $\numSatSmallWorse$; the seeds trade prompts. The run
-the forecast was made from answers every one of the $\numSatSmallPrompts$ held-out prompts either
-$16/16$ or $0/16$, while the seeds trained afterwards land elsewhere on $\numSatSmallMoved$ of them
-and are themselves saturated on anywhere from $\numSatSmallLaterLow\%$ to $\numSatSmallLaterHigh\%$
-of prompts. A first-order forecast is the sensitivity of the score to small parameter changes at
-the stored endpoint, and on a prompt the policy has saturated that sensitivity is near zero, so
-the forecast is built from almost nothing at exactly the prompts that carry the spread. The
-variance is in which way each prompt collapses, a discrete outcome that a linearisation about one
-collapsed trajectory has no term for. At $7$B under Adam the picture is different in its split,
-$\numSatLargeShared\%$ shared and the better half better on $\numSatLargeBetter$ prompts and worse
-on $\numSatLargeWorse$, but the stored endpoint is again saturated on all $\numSatLargePrompts$.
-This is two runs, and a prediction rather than a result: endpoint saturation, which costs only the
-evaluation a run already does, should flag a forecast that will fall short. The prospective runs
-of Section~\ref{sec:exp-support} did not store per-prompt endpoints, so we could not test it there.
+\paragraph{What the runs actually learned.} The held-out prompts can be regenerated from the
+seed the experiment used, so each prompt's correct count is known, and that settles what the
+grouping is (\texttt{experiments/s16\_saturation}). The run the forecast was made from answers
+``1'' to every prompt: it passes exactly the $\numModeOnePrompts$ of $\numModePrompts$ prompts
+whose count is one, which is the score of $\numModeOneScore$ the three clustered runs share. Of the
+$\numModeSmallSeeds$ runs, $\numModeSmallConstant$ answer a single constant whatever they are asked
+(``1'', ``2'' or ``4''), and which constant a run falls into explains $\numModeSmallShare\%$ of the
+across-seed variance of its score. Prompts sharing an answer move together across seeds
+(correlation $\numModeSmallSame$) and against the others ($\numModeSmallOther$). Two earlier launches
+of the same configuration look the same, with $\numModeSmallRerunConstant$ and
+$\numModeSmallTracesConstant$ of eight runs constant and the label explaining
+$\numModeSmallRerunShare\%$ and $\numModeSmallTracesShare\%$, and in every launch the anchor answers
+``1''. At $7$B under Adam on the same task, $\numModeLargeConstant$ of $\numModeLargeSeeds$ runs
+answer a constant and the label explains $\numModeLargeShare\%$.
+
+On this task and budget, then, RLVR mostly teaches the model to guess a count. A constant answer
+gives every response to a prompt the same reward, so the count-based advantage is zero and a run
+that reaches one cannot leave it. The seed spread is which constant a run is absorbed into, a
+discrete outcome that a linearisation about one run, already absorbed, has no term for. That also
+qualifies everything else measured on this task: much of the held-out gain is guessing, and the
+forecasts made here, which differ by a factor of $\numModeLargeRepeatRatio$ between two repeats from
+the same $7$B run, describe runs in a degenerate regime. The corpora of
+Section~\ref{sec:exp-support} were built differently and did not store per-prompt outcomes, so
+whether their runs collapse the same way we cannot say.
 
 \paragraph{Whether the outcome is decided early, which we cannot establish.} It is tempting to read
 the grouping off the start of each run, and the data invite it: the pass rate a run achieves on its

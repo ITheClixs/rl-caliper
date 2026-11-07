@@ -9,8 +9,8 @@ $1.10\times$ where ignoring that state costs $24.6\times$.
 
 \paragraph{Accuracy is regime-dependent, not uniformly poor.} On the corpus above the reward
 groups go unanimous within five updates, yet its measured seed spread is the largest we report.
-The stored run answers all $\numSatSmallPrompts$ held-out prompts $16/16$ or $0/16$, where it is
-locally flat, and later seeds differ on $\numSatSmallMoved$ of them. So we built four corpora at
+Most runs there learn to answer one constant: the stored run says ``1'' to every prompt, and
+which constant a run falls into explains $\numModeSmallShare\%$ of the spread. So we built four corpora at
 pre-specified mean live-group probabilities and ran the prospective test on each. The errors are
 $\numSweepErrors$; the best, on the band at $\numSweepWinBand$, meets a criterion of $1.5\times$
 declared before the sweep ran, forecasting $\numSweepWinForecast$ against a measured

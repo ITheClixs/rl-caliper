@@ -626,25 +626,36 @@ def table_heldout() -> None:
 
 
 def saturation_macros() -> dict[str, str]:
-    """Where the pretrained seed spread lives (`s16_saturation/analyse.py`)."""
+    """What the pretrained runs collapse to (`s16_saturation/analyse.py`)."""
     records = io.load_all("s16_saturation")
     if not records:
         raise SystemExit("s16_saturation/analyse.py has not been run")
+    result = records[-1]["result"]
+    if "small" not in result or "modes" not in result["small"]:
+        raise SystemExit("s16_saturation predates the mode analysis; rerun it")
+    names = {"small": "Small", "large": "Large", "small_rerun": "SmallRerun",
+             "small_traces": "SmallTraces"}
     macros: dict[str, str] = {}
-    for tag, row in records[-1]["result"].items():
-        title = tag.capitalize()
-        later = row["later_saturated_share"]
+    for tag, title in names.items():
+        row = result[tag]
         macros |= {
-            f"Sat{title}PerPrompt": f"{100 * row['per_prompt_share']:.0f}",
-            f"Sat{title}Shared": f"{100 * row['shared_share']:.0f}",
-            f"Sat{title}Better": f"{row['high_half_better']}",
-            f"Sat{title}Worse": f"{row['high_half_worse']}",
-            f"Sat{title}Anchor": f"{row['anchor_saturated']}",
-            f"Sat{title}Prompts": f"{row['prompts']}",
-            f"Sat{title}Moved": f"{row['anchor_saturated_moved']}",
-            f"Sat{title}LaterLow": f"{100 * min(later):.0f}",
-            f"Sat{title}LaterHigh": f"{100 * max(later):.0f}",
+            f"Mode{title}Seeds": f"{row['seeds']}",
+            f"Mode{title}Constant": f"{row['constant_seeds']}",
+            f"Mode{title}Share": f"{100 * row['mode_share']:.0f}",
+            f"Mode{title}Same": f"{row['same_answer_correlation']:.2f}",
+            f"Mode{title}Other": f"{row['other_answer_correlation']:.2f}",
+            f"Mode{title}Anchor": row["anchor_mode"],
         }
+    small = result["small"]
+    ones = small["answer_counts"]["1"]
+    prompts = sum(small["answer_counts"].values())
+    repeats = result["large"]["forecast_repeats"]
+    macros |= {
+        "ModeOnePrompts": f"{ones}",
+        "ModePrompts": f"{prompts}",
+        "ModeOneScore": f"{ones / prompts:.3f}",
+        "ModeLargeRepeatRatio": f"{max(repeats) / min(repeats):.0f}",
+    }
     return macros
 
 
