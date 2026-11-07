@@ -14,9 +14,10 @@ Legend for strength:
 | claim | evidence | strength |
 |---|---|---|
 | `Var[M] = sum_t b'Q_t b` with `b_s = A_s' b_{s+1}` | Theorem 2; `tests/test_adjoint.py` builds `S_T` explicitly and compares | exact |
-| forecast matches realised spread to 1.11x median, 1.58x worst | `p2_metric_forecast`, 192 settings, 48 seeds each, prospective | measured |
+| forecast matches realised spread to 1.10x median, 1.56x worst | `p2_metric_forecast`, 192 settings at a pool of 24, graded on the 47 seeds trained after the anchor, prospective | measured |
+| the same on a replicate grid at a pool of 16 | `p2`: 1.10x, 1.50x, 154 of 192 inside | measured |
 | inside the measured 95% interval in 162 of 192 | same | measured |
-| holds across two policy shapes (1.11x vs 1.10x) | same, shape as an axis | measured |
+| holds across two policy shapes (1.10x each) | same, shape as an axis | measured |
 | holds across the estimator family | `p2` re-run under `grpo_mean` (1.10x) and `grpo_std` (1.10x), 12 settings each | measured |
 | the transport is worth ~2% at these run lengths | `p2` ablation: adjoint held at `grad M` | measured |
 | the cheap form costs one extra pass per update | arithmetic on the algorithm | exact |

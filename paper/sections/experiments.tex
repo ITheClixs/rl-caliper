@@ -90,9 +90,11 @@ the injected term and discarding everything the trajectory does to it.
 \end{table}
 
 It does not, at these horizons (Table~\ref{tab:transport}). The two agree to a median of $2\%$ in
-the forecast itself (extremes $0.72$ to $1.05$), the median error is identical to two decimal
-places, and both land inside the measured interval in the same $\numForecastInside$ settings. What carrying it back buys is the tail:
-at $T=25$ and $\eta = 1.5$ the worst case is $1.58\times$ carried against $1.75\times$ held.
+the forecast itself (extremes $0.72$ to $1.05$), the median error is $\numForecastMedian\times$
+carried against $\numForecastHeldMedian\times$ held, and they land inside the measured interval in
+$\numForecastInside$ and $\numForecastHeldInside$ settings. What carrying it back buys is the tail:
+at $T=25$ and $\eta = 1.5$ the worst case is $\numForecastWorst\times$ carried against
+$\numForecastHeldWorst\times$ held.
 
 This is not a defect in the theory; it is the theory being informative about its own cost.
 Section~\ref{sec:exp-spectrum} measures most of the spectrum of $A_t$ sitting within $10^{-4}$ of

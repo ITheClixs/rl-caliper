@@ -1,23 +1,74 @@
 # caliper
 
-Where run-to-run spread in RL post-training comes from, and when one run can predict it.
+How much would an RL post-training score move if you reran it with a different seed, and can one
+run tell you before you pay for the others?
 
-A reported score is the output of a stochastic procedure, and the only instrument the field has for
-its spread is replication. This repository implements a cheaper one, and measures where it works.
-Gradient noise injected at one update is filtered by the updates that follow rather than
-accumulated, so the covariance of a run about its mean obeys a recursion; carrying the gradient of
-the reported metric backwards along a single stored trajectory turns that recursion into an error
-bar, as a sum of scalars with no covariance matrix formed.
+A reported score is the output of a stochastic procedure. The usual way to learn its spread is to
+train the recipe several times. This repository implements a cheaper estimate and measures where it
+works and where it does not. Noise injected at one update is reweighted by the updates that follow
+rather than simply accumulated, so the covariance of a run about its mean obeys a recursion.
+Carrying the gradient of the reported metric backwards along a single stored trajectory turns that
+recursion into an error bar: a sum of one scalar per update, with no covariance matrix formed.
 
-Where the comparison can be made exactly the forecast holds to `1.11x` over 192 settings. On a
-pretrained model it does not: short by 25x on Qwen2.5-0.5B under plain ascent, and by between 3x
-and 17x on Qwen2.5-7B under Adam, because the runs end in groups rather than scattered around one.
-Both halves are here, including the numbers we withdrew.
+![Forecast against measured spread](docs/teaser.png)
+
+*Left: on enumerable policies, the across-seed standard deviation forecast from one frozen run
+against the value measured over 47 seeds trained afterwards (1.0x is perfect; dotted lines are
+1.5x). Right: the simpler models this replaces. This is the tier where the method works; the
+table below includes the tiers where it does not.*
+
+**Paper:** [full version (PDF)](paper/pdf/caliper.pdf) ·
+[eight-page version (PDF)](paper/pdf/caliper-icml.pdf) · LaTeX sources in `paper/`
+
+## Results at a glance
+
+"Error" is the ratio between forecast and measured standard deviation, taken in whichever direction
+is above one, so 1.0x is perfect and 2x means off by a factor of two either way.
+
+| setting | what was compared | result |
+|---|---|---|
+| enumerable policies, exact inputs, at most 25 updates | forecast frozen before 47 further seeds were trained, 192 settings | median error **1.10x**, worst 1.56x, inside the measured 95% interval in 162 of 192 |
+| Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen forecast against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
+| Qwen2.5-0.5B, corpus whose reward groups go unanimous | cheap forecast against 8 seeds | **25x short** |
+| Qwen2.5-7B (4-bit, LoRA) under Adam | lifted forecast against 10 seeds | **3.1x to 17x short** |
+| sizing a comparison (enumerable tier, 1020 comparisons) | runs to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs, against 14 for an uncapped fixed budget and 2.12x as many from spent seeds |
+
+Two things the sizing benchmark shows that the headline does not. A closed form that needs no
+stored run comes within 1.11x of the forecast once its stopping threshold has been learned on other
+tasks, so on this tier the backward pass adds little to *ranking* configurations. What the stored
+run adds is an *absolute* scale: with the textbook threshold and no calibration the closed form never
+stops (its scale is off by 84x), while the forecast decides in 4.37 runs with a 0.001% mistake rate
+for a 1% target.
+
+Why it fails on pretrained models, as far as the records show: in both large misses the run the
+forecast was made from answers every held-out prompt 16/16 or 0/16, where the score is locally flat,
+while later seeds differ in which way each prompt collapses. At 0.5B two thirds of the seed spread is
+prompts flipping independently between seeds; at 7B 60% is shared. A first-order forecast around
+one collapsed trajectory has no term for that. This is from two runs and is stated as an
+observation, not a result.
+
+`docs/claims.md` indexes every claim in the paper against the experiment that supports it and how
+strongly, including the claims that were withdrawn and why.
+
+## What is not established
+
+* Anything at frontier scale. Every experiment runs on one laptop; the largest model is a 4-bit 7B
+  with LoRA, and every pretrained forecast spans at most 12 updates.
+* That the forecast is accurate on pretrained models in general. It is inside 1.5x in one of four
+  pre-specified regimes, and misses by 25x and by 3-17x in the two other pretrained settings.
+* A coverage guarantee for the stopping rule. The textbook threshold realised its target on our grid;
+  that is an observation on one grid.
+* That the one-run curvature diagnostic bounds the worst case. It ranks failures above chance (AUROC
+  0.78) but on the 192-setting grid it accepts the single worst forecast; an earlier claim that it
+  capped the tail did not survive doubling the grid and is withdrawn.
+* A route from policy divergence to outcome spread via `sqrt(KL)` (fitted exponent `+0.10` against a
+  predicted `+0.5`), and a short memory horizon. Both were looked for and not found.
 
 ## What is here
 
 ```
 src/caliper/
+  forecast.py   the backward pass, as a protocol any trainer can implement
   objectives/   the estimator family as a (G+1) x 2 weight table
   exact/        enumerable policies: exact scores, Fisher, moments, a trainer,
                 the covariance recursion, the adjoint, and Adam's lifted state
@@ -25,16 +76,16 @@ src/caliper/
   population/   transformers trained as a batched population, and the RLVR trainer
   control/      step size as a feedback loop on realised drift
   real/         the same measurement on a pretrained model through MLX
-  forecast.py   the backward pass, as a protocol any trainer can implement
-  analysis/     the efficiency curve and interval estimation
+  analysis/     efficiency curves, interval estimation, sizing, and grid selection
   runtime/      run manifests
 experiments/    one directory per experiment, config-driven
+runs/           the stored record of every run the paper quotes
 analysis/       figure and table generation for the paper
-paper/          LaTeX sources
-docs/           theory notes, result notes, and a claim index
+paper/          LaTeX sources and built PDFs
+docs/           theory notes, result notes, and the claim index
 ```
 
-## What it does
+## Using the forecast
 
 `caliper.forecast` is framework-agnostic. Supply one object per update that can answer two
 questions about the trajectory you stored, and it accumulates the error bar:
@@ -55,79 +106,43 @@ result.kernel             # each update's share of the variance
 result.memory()           # how many final updates hold 95% of it
 ```
 
-The full backward pass costs three passes per stored update. An ablation over 192 settings shows
-the transport is worth a median of 2% at these run lengths, so the recommended default is the cheap
-form: hold `b` at `grad M` and accumulate one scalar per update, one extra pass, no
-Hessian-vector products. The recursion is what tells you when that stops being enough.
+`caliper.exact.adjoint` runs its forecast through this protocol (`ExactUpdate`). The pretrained-model
+version in `caliper.real.adjoint` implements the same recursion inline, because it also carries
+Adam's moments backwards and cross-fits the injected term, which the protocol does not express yet.
 
-Two implementations of that protocol ship here: `caliper.exact.adjoint` for enumerable policies,
-where every term is exact, and `caliper.real.adjoint` for a pretrained model through MLX, which takes two
-gradient evaluations per stored update, with common random numbers so the finite difference is a
-directional derivative rather than a difference of two noise draws.
-
-## Results in one paragraph
-
-**The forecast.** Tested prospectively, with one run trained and frozen and the prediction
-recorded before the remaining seeds were trained, the forecast of the across-seed standard deviation
-of the reported pass rate has a median absolute error of `1.11x` over 192 settings. Those settings
-span two policy shapes, two prompt-pool diversities and a 47x range of spreads. Its worst case is
-`1.58x`, and it lands inside the measured 95% interval in 162 of them.
-
-**Why it works.** Run-to-run variance in RLVR does not accumulate. Across nine settings the log-log
-slope of policy divergence against update count runs from `-1.15` to `+0.26`, where a random walk
-requires `+1`, and the same holds on Qwen2.5-0.5B. The cause is the learning signal: replacing every
-reward with an independent coin flip, leaving the rollouts, batches and step sizes otherwise
-untouched, turns a trace that ends at `0.14x` of where it started into one that grows `90.5x` over
-eighty updates, a gap of `671x`. The learning condition moves *further* per update, so what brings
-those runs back together is not smaller steps.
-
-**Why it is cheap.** The mean update of a count-based estimator is the gradient of a scalar
-potential `E_x[Lambda(p_x)]`, so its Jacobian is symmetric (measured asymmetry 3e-10) and the
-backward pass is a Hessian-vector product. For RLOO the potential is the pass rate itself.
-
-**Where the spread comes from.** Restricting the injected covariance to one term attributes the
-forecast by origin. Rollout sampling dominates prompt selection at every group size measured --
-93% at `G=2`, 65% at `G=8`, 46% at `G=16`. The prompt count scales both equally, so it cannot
-change the mix.
-
-The level is predicted by propagating the update covariance,
-`S_{t+1} = A_t S_t A_t' + eta^2 Sigma_t / P` with `A_t = I + eta J_t`. Against exact Monte Carlo
-over twelve settings this is accurate to 1.09x at the median; ignoring contraction is wrong by up
-to 3.9x, and compressing the spectrum of `A_t` into a single timescale by up to 844x. Scaling
-exponents are `-0.61` in `P` (95% CI `[-1.42, +0.24]`) and `+0.59` in drift (`[+0.27, +1.04]`),
-both compatible with the predicted `-1/2` and `+1/2` and neither tightly pinned.
-
-Underneath sits an exact finite-`G` covariance for the advantage estimators in current use, which
-makes the injected noise measurable, shows those estimators differ only by a weight on prompt
-difficulty, and fixes the optimal group size at `G* = 1 + sqrt(tau_w/tau_b)`.
-
-`docs/claims.md` indexes every claim in the paper against the experiment that supports it and how
-strongly, including the ones that were withdrawn.
-
-What is *not* established: an earlier route from policy divergence to outcome spread via `sqrt(KL)`
-fails (fitted exponent `+0.10`, CI `[-0.03, +0.45]` against a predicted `+0.5`) and is withdrawn --
-Theorem 2 replaces it. We looked for a short memory horizon and did not find one: 95% of the
-forecast variance spans a median of 1.00 of the run, against 0.95 for a uniform kernel. Lifting the
-recursion to Adam's optimiser state halves the error of ignoring that state but is unreliable where
-the pass rate saturates. See `docs/forecast.md` and `docs/theory-seeds.md` for the full list of
-boundaries.
+The full backward pass costs three passes per stored update. Holding `b` at `grad M` instead of
+carrying it back changes the forecast by a median of 2% at these run lengths, so the cheap form,
+one extra pass per update and no Hessian-vector products, is the recommended default.
 
 ## Running it
 
 ```
 uv venv --python 3.12
 uv pip install -e ".[dev]"
-uv run pytest                                  # includes the exactness tests
-uv run python experiments/s1_contraction/run.py   # seed divergence over training
-uv run python experiments/p1_propagation/run.py    # covariance recursion vs Monte Carlo
+uv run pytest                                      # includes the exactness tests
 uv run python experiments/p2_metric_forecast/run.py  # the forecast, tested prospectively
-uv run python experiments/p3_memory_sources/run.py   # attribution and memory horizon
-uv run python experiments/a4_law/run.py           # enumerable policies
-uv run python experiments/b1_group_size/run.py    # transformers from scratch
-uv run python analysis/figures.py                 # regenerate every figure
+uv run python experiments/s13_sizing/run.py          # sizing, thresholds read in sample
+uv run python experiments/s13_sizing/heldout.py      # sizing, thresholds set before grading
+uv run python experiments/s16_saturation/analyse.py  # where the pretrained seed spread is
+uv run python analysis/tables.py                   # regenerate every table and paper macro
+uv run python analysis/figures.py                  # regenerate every figure
 ```
 
-The real-model experiments additionally need `uv pip install -e ".[mlx]"` and run on Apple Silicon.
+The pretrained-model experiments additionally need `uv pip install -e ".[mlx]"` and Apple Silicon.
 
-Every run writes a manifest recording its configuration, the commit it ran at, and the platform.
-No number in the paper is transcribed by hand; figures and tables are generated from those records.
+Every run writes a manifest with its configuration, the commit it ran at, whether the tree was
+dirty, and the platform. Numbers in tables and in the paper's macros are generated from those
+records, and `tests/test_docs_numbers.py` fails if a number quoted in this README or in `docs/`
+disagrees with them. Some numbers in the paper's prose are still typed by hand.
+
+## How this was built
+
+This is a single-author project. I chose the research question and its framing, decided which
+experiments to run, judged the results, and decided which claims to keep, correct or withdraw; I
+also derived and checked parts of the theory and wrote or debugged parts of the code. AI coding
+agents (Claude Code) wrote most of the code, the LaTeX and the documentation, and ran the sweeps
+under that direction, which is why the commit history is dense. A revision pass in November 2026
+was also done with Claude; its commits carry a `Co-Authored-By` trailer. It fixed a table that
+printed 7B numbers in a 0.5B table, restored the headline grid after an accidental switch, withdrew
+the diagnostic's tail claim, regraded the sizing benchmark with thresholds set before grading, and
+located the pretrained seed spread from the stored records.

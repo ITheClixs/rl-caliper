@@ -50,15 +50,16 @@ Retrospective agreement is cheap and unconvincing. Everything reported here is p
 
 ## 5. What was measured
 
-* **192 settings**, enumerable policies, 48 seeds each. Two policy shapes (vocab 3 over 3
+* **192 settings**, enumerable policies, 48 seeds each: the anchor the forecast is made from and 47
+  trained afterwards, against which it is graded. Two policy shapes (vocab 3 over 3
   positions, vocab 4 over 2), two prompt-pool diversities, three difficulty bands, two run lengths,
-  two prompt counts, two group sizes, two step sizes. Realised spreads span a factor of 47.
-* Median absolute error **1.11x**, worst **1.58x**; forecast inside the measured 95% interval in
-  **162 of 192**.
-* The two policy shapes agree (1.11x against 1.10x), so the result is not a property of one
+  two prompt counts, two group sizes, two step sizes. Realised spreads span a factor of 46.
+* Median absolute error **1.10x**, worst **1.56x**; forecast inside the measured 95% interval in
+  **162 of 192**. The same grid on a pool of 16 prompts, run as a replicate: 1.10x, 1.50x, 154.
+* The two policy shapes agree (1.10x each at the median), so the result is not a property of one
   tabular family.
-* Coverage tracks the step size: 90/96 at eta=0.5 against 72/96 at eta=1.5. The median barely
-  moves (1.09x against 1.13x); it is the tail that the linearisation costs.
+* Coverage tracks the step size: 92/96 at eta=0.5 against 70/96 at eta=1.5. The median barely
+  moves (1.10x against 1.13x); it is the tail that the linearisation costs.
 
 ## 5b. What the backward pass is worth
 
@@ -67,12 +68,12 @@ the transport. Over the same 192 settings:
 
 | | median error | worst |
 |---|---|---|
-| adjoint carried back | 1.11x | 1.58x |
+| adjoint carried back | 1.10x | 1.56x |
 | adjoint held at grad M | 1.11x | 1.75x |
 
 The two forecasts agree to a median of 2% (extremes 0.72x to 1.05x) and land inside the measured
-interval in the same 162 settings. Carrying it back buys the tail, and only where the run is long
-and the step large: at T=25, eta=1.5 the worst case is 1.58x carried against 1.75x held.
+interval in 162 and 158 settings. Carrying it back buys the tail, and only where the run is long
+and the step large: at T=25, eta=1.5 the worst case is 1.56x carried against 1.75x held.
 
 Why: `theory-seeds.md` section 3b measures most of the spectrum of `A_t` within 1e-4 of one, and
 `grad M` points into that part of it, so the transfer operator is close to the identity along the

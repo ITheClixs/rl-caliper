@@ -291,6 +291,9 @@ def figure_teaser() -> None:
           "the models this replaces, on the same settings")
     fig.tight_layout()
     save(fig, "teaser.pdf")
+    # the same figure as an image the README can show without a PDF viewer
+    fig.savefig(FIGURES.parents[1] / "docs" / "teaser.png", bbox_inches="tight", dpi=200,
+                metadata={"Software": None})
     plt.close(fig)
 
 

@@ -667,6 +667,14 @@ def table_numbers() -> None:
             "ForecastSpreadRange": f"{spread.max() / spread.min():.0f}",
             "ForecastSeeds": f"{cells[0]['seeds']}",
         }
+        held = np.abs(np.log(np.array([c["untransported_std"] / c["measured_std"] for c in cells])))
+        held_inside = sum(
+            c["measured_lo"] <= c["untransported_std"] <= c["measured_hi"] for c in cells)
+        macros |= {
+            "ForecastHeldMedian": f"{np.exp(np.median(held)):.2f}",
+            "ForecastHeldWorst": f"{np.exp(held.max()):.2f}",
+            "ForecastHeldInside": f"{held_inside}",
+        }
     replicate = replicate_grid()["result"]["cells"]
     ratio = np.array([c["predicted_std"] / c["measured_std"] for c in replicate])
     error = np.abs(np.log(ratio))
