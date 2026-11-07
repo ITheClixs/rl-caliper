@@ -286,7 +286,7 @@ def figure_teaser() -> None:
     ax.plot(span, span, color="0.25", lw=1.1, zorder=0)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.legend(fontsize=6.2, frameon=False, loc="upper left")
+    ax.legend(fontsize=6.2, frameon=True, framealpha=0.9, edgecolor="none", loc="lower right")
     style(ax, "measured divergence", "predicted divergence",
           "the models this replaces, on the same settings")
     fig.tight_layout()
