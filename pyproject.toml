@@ -1,7 +1,7 @@
 [project]
 name = "caliper"
 version = "0.1.0"
-description = "Measurement tools for the batch-size and step-size scaling of RL post-training"
+description = "Forecast the run-to-run spread of RL post-training from a single stored run, and measure where the forecast holds"
 readme = "README.md"
 requires-python = ">=3.12,<3.13"
 authors = [{ name = "Mehmet Demir Güven", email = "dgueven@student.ethz.ch" }]
