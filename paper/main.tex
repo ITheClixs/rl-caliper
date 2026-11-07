@@ -64,21 +64,25 @@
   is reweighted by every update that follows, so the covariance of a run about its mean obeys
   $S_{t+1} = A_t S_t A_t^{\!\top} + Q_t$. Carrying the gradient of the reported metric backwards
   along one stored trajectory turns that recursion into the across-seed variance of the metric, as
-  a sum of scalars with no covariance matrix formed. Frozen before the remaining seeds existed, it
-  has a median error of $\numForecastMedian\times$ over $\numForecastSettings$ settings.
+  a sum of scalars with no covariance matrix formed. On enumerable policies, where every input is
+  exact, and frozen before the remaining seeds existed, it has a median error of
+  $\numForecastMedian\times$ over $\numForecastSettings$ settings of at most $25$ updates.
 
-  Used to size comparisons, it matches a policy told the true spread
-  ($\numSizeOracleGain\times$ {$[\numSizeOracleLo, \numSizeOracleHi]$}) and needs
-  $\numSizeFixedGain\times$ {$[\numSizeFixedLo, \numSizeFixedHi]$} fewer runs than fixed-budget
-  practice across $\numSizePairs$ comparisons. Corrupting the forecast on purpose shows a
-  systematic scale error is free, since the stopping threshold absorbs it, and that the procedure
-  pays until relative error reaches about $\numTolLooseBreakeven\times$.
+  Used to size comparisons, with every stopping threshold chosen on other tasks before it is
+  applied, it settles comparisons at a $\numSizeTarget\%$ mistake rate in
+  $\numHeldStrictAdjointRuns$ runs, against $\numHeldStrictUncappedFixedRuns$ for a fixed budget and
+  $\numHeldStrictEmpiricalGain\times$ as many when the deviation is estimated from spent seeds. A
+  closed form that needs no run comes within $\numHeldStrictFrozenGain\times$ once its threshold is
+  learned; what the stored run adds is an absolute scale, which lets the textbook threshold be used
+  with no calibration. Corrupting the forecast on purpose puts the point where it stops paying at
+  about $\numTolLooseBreakeven\times$ relative error.
 
   On pretrained models accuracy is regime-dependent. Across $\numSweepBands$ pre-specified regimes
   on Qwen2.5-0.5B the frozen forecast misses by factors of $\numSweepErrors$, one of them inside a
-  criterion declared before the sweep ran and all of them inside that break-even, while a corpus
-  whose reward groups go unanimous carries no seed noise to forecast and misses by twenty-five. We report the break-even rather than the
-  method alone.
+  criterion declared before the sweep ran and all of them inside that break-even. A corpus whose
+  reward groups go unanimous is missed by twenty-five although its measured seed spread is the
+  largest we report, and Qwen2.5-7B under Adam by $\numAdamScaleShortfallLow$ to
+  $\numAdamScaleShortfallHigh\times$. We report where it fails as well as where it works.
       \end{quote}
   \end{minipage}
   \vspace{6pt}

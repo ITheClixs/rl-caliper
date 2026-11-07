@@ -6,7 +6,7 @@ model into a reasoning one \citep{deepseekr1}, and a paper reports that it moved
 points. Whether
 that is a result depends on a number nobody has: how much the same recipe would have moved it with
 a different seed. The problem is documented \citep{henderson2018matters, hochlehnert2025sober} and
-the only instrument the field has is replication, which at current RL compute is close to
+the standard instrument is replication, which at current RL compute is close to
 unaffordable. So the number usually goes unmeasured, and single-run improvements are read as
 though the training procedure were deterministic.
 
@@ -32,16 +32,19 @@ be carried against the gradient of the reported metric instead of being formed.
   \item \textbf{Comparisons sized from one run} (Section~\ref{sec:sizing}). The forecast is
   measured by what it is for. Two recipes are ordered by training seeds until the lead clears $z$
   standard errors, a rule that needs a deviation and therefore cannot start until one has been
-  estimated. Supplying it from the first run of each arm settles $\numSizePairs$ comparisons at a
-  $\numSizeTarget\%$ mistake rate in $\numSizeAdjointRuns$ runs, indistinguishable from the
-  $\numSizeOracleRuns$ of a rule handed the realised deviation, against $\numSizeFixedRuns$ for
-  fixed-budget practice: a saving of $\numSizeFixedGain\times$
-  $[\numSizeFixedLo, \numSizeFixedHi]$, graded on seeds no policy is allowed to see. Estimating the deviation from
-  spent seeds instead costs $\numSizeEmpiricalGain\times$, most of it structural, since that rule
-  cannot stop at one seed per arm however large the lead. Corrupting the forecast deliberately
-  locates the break-even against fixed budget at $\numTolLooseBreakeven\times$ relative error, and
-  shows a systematic scale error costs nothing at all, because the threshold absorbs it. That
-  break-even is what makes the pretrained results below actionable rather than merely reported.
+  estimated. Supplying it from the first run of each arm, with every threshold chosen on other
+  tasks before it is applied, settles $\numSizePairs$ comparisons at a $\numSizeTarget\%$ mistake
+  rate in $\numHeldStrictAdjointRuns$ runs, against $\numHeldStrictUncappedFixedRuns$ for an
+  uncapped fixed budget and $\numHeldStrictEmpiricalGain\times$ as many for a deviation estimated
+  from spent seeds, a rule that cannot stop at one seed per arm however large the lead. Read in
+  sample, as is usual, the saving over the capped fixed budget is $\numSizeFixedGain\times$
+  $[\numSizeFixedLo, \numSizeFixedHi]$. The closed form \eqref{eq:frozen}, which needs no run, comes
+  within $\numHeldStrictFrozenGain\times$ $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$ once
+  its threshold is learned on other tasks; what the stored run adds is an absolute scale, which
+  lets the textbook threshold be used with no calibration. Corrupting the forecast deliberately
+  locates the break-even against a fixed budget at $\numTolLooseBreakeven\times$ relative error,
+  and a pure scale error is free only where the threshold can be tuned on comparisons with known
+  outcomes.
 
   \item \textbf{An error bar from one run} (Theorem~\ref{thm:adjoint} and
   Proposition~\ref{prop:potential}). Carrying the metric gradient backwards along a single stored
@@ -52,7 +55,8 @@ be carried against the gradient of the reported metric instead of being formed.
   pass rate itself. In its cheap form, which an ablation shows loses nothing at these run lengths,
   it costs one extra pass per update, against $N$ full runs for replication. We test it
   prospectively, training one run and freezing it and recording the forecast before the remaining
-  seeds were trained. Its median absolute error against the realised spread is
+  seeds were trained. On enumerable policies, where every input to the forecast is exact and runs
+  are at most $25$ updates long, its median absolute error against the realised spread is
   $\numForecastMedian\times$ across $\numForecastSettings$ settings spanning two policy shapes, two
   prompt-pool diversities and a $\numForecastSpreadRange\times$ range of spreads. Its worst is
   $\numForecastWorst\times$, and it falls inside the measured $95\%$ interval in
@@ -97,7 +101,8 @@ be carried against the gradient of the reported metric instead of being formed.
   by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Accuracy is
   regime-dependent rather than uniformly poor: across $\numSweepBands$ pre-specified regimes the
   errors are $\numSweepErrors$, one of them inside a criterion fixed before the sweep
-  and all of them inside the break-even above (Section~\ref{sec:exp-support}), because the eight runs end in groups rather than scattered around one and a linearised
+  and all of them inside the break-even above (Section~\ref{sec:exp-support}). The large misses
+  arise because the eight runs end in groups rather than scattered around one and a linearised
   model has no way to represent that. What survives is narrower than the magnitude: the share of
   prompts whose group is not unanimous falls from about a half to under $5\%$ by the fifth update,
   which is measured rather than modelled, so the run stops injecting seed noise there. The failed

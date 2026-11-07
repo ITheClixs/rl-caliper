@@ -117,6 +117,55 @@ to free. So the bulk of the saving here does not require Theorem~\ref{thm:adjoin
 backward pass buys the last $\numSizeFrozenGain\times$. That is worth saying plainly, because it is
 the cheap half of this paper that a practitioner would deploy first.
 
+\subsection{Setting the threshold before the comparison}
+\label{sec:heldout}
+
+Every number above reads a policy at the threshold that meets the target on the comparisons it is
+then graded on. That is even-handed, since each policy gets the same in-sample choice of its one
+knob, but a practitioner cannot do it, and it is what makes a constant scale error look free. We
+therefore repeat the benchmark in the two ways a practitioner could run it (Table~\ref{tab:heldout},
+\texttt{experiments/s13\_sizing/heldout.py}). In the first, the threshold, or for a fixed budget
+the seed count, is the cheapest one meeting the target on the other eleven tasks, and is applied
+unchanged to the twelfth. In the second there is no tuning at all: the rule stops once the lead
+clears the one-sided normal quantile of the target, in units of the policy's own standard error.
+Intervals resample the twelve tasks rather than the comparisons, because comparisons inside a task
+share arms and are not independent.
+
+\begin{table}[t]
+  \centering
+  \input{tables/heldout}
+  \caption{Runs per comparison and realised mistake rate over $\numHeldLoosePairs$ comparisons
+  when no threshold is read off the comparisons being graded. Upper block: each policy's threshold
+  is fitted on the other eleven tasks and applied to the twelfth. Lower block: the textbook
+  threshold, with no tuning. At $0.1\%$ the fixed budget sits at the $16$-seed cap, so the last row
+  extrapolates it without one from the normal approximation.}
+  \label{tab:heldout}
+\end{table}
+
+Thresholds chosen on other tasks transfer: realised mistake rates land at the target for every
+policy. At $0.1\%$ the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs and a fixed budget
+$\numHeldStrictFixedGain\times$ $[\numHeldStrictFixedLo, \numHeldStrictFixedHi]$ as many, but that
+budget is pinned at the cap; without one, the normal approximation puts it at
+$\numHeldStrictUncappedFixedRuns$ runs, $\numHeldStrictUncappedGain\times$ the forecast, and that is
+the comparison we would quote. At $1\%$ the saving is $\numHeldLooseFixedGain\times$ over a fixed
+budget and $\numHeldLooseEmpiricalGain\times$ over a rule that estimates the deviation from spent
+seeds. Against the closed form it is $\numHeldStrictFrozenGain\times$
+$[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$ at $0.1\%$ and $\numHeldLooseFrozenGain\times$ at
+$1\%$: once a threshold can be learned from comparisons on other tasks, the stored run adds little
+to a forecast that only has to rank configurations.
+
+What the stored run does buy is the absolute scale. With the textbook threshold and nothing
+learned, the closed form never stops, because its scale is off by a factor of
+$\numSizeFrozenScale$, while the adjoint forecast decides in $\numNominalLooseAdjointRuns$ runs with
+a realised mistake rate of $\numNominalLooseAdjointMistakes\%$ against a $1\%$ target. A single
+deviation for every recipe costs the same runs but makes $\numNominalLooseConstantMistakes\%$
+mistakes, and it is not available in practice: we set it to the median measured spread, which
+takes the replicates the forecast exists to avoid. When near-ties are kept, ordering pairs at two
+standard errors rather than four ($\numHeldTieLoosePairs$ pairs), every policy runs into the cap at
+$0.1\%$ and the tuned policies other than the fixed budget are within ten per cent of each other at
+$1\%$; the textbook-threshold adjoint rule then realises $\numNominalTieLooseAdjointMistakes\%$
+mistakes for a $1\%$ target.
+
 \subsection{The procedure, stated so it can be followed}
 \label{sec:protocol}
 
@@ -129,25 +178,28 @@ two recipes $A$ and $B$ to be ordered:
   $\tau_{\mathrm{b}}$ and $\tau_{\mathrm{w}}$. Store $\theta_t$ and $\eta_t$. Log the share of
   prompts whose reward group is not unanimous. None of this changes the run.
 
-  \item \textbf{Take a deviation.} The closed form \eqref{eq:frozen} needs nothing further and is
-  what we would reach for first; it is $\numSizeFrozenVsFixed\times$ better than a fixed budget on
-  our grid. If the extra passes are affordable, one backward sweep of
-  Algorithm~\ref{alg:forecast} over the stored trajectory gives the adjoint forecast, worth a
-  further $\numSizeFrozenGain\times$.
+  \item \textbf{Take a deviation.} One backward sweep of Algorithm~\ref{alg:forecast} over the
+  stored trajectory gives the adjoint forecast, whose absolute scale is what lets step~4 use the
+  textbook threshold. The closed form \eqref{eq:frozen} needs nothing further and ranks
+  configurations almost as well, but its scale is off by a factor of $\numSizeFrozenScale$, so use it
+  only where the threshold can be set on comparisons with known outcomes from related tasks
+  (Section~\ref{sec:heldout}).
 
   \item \textbf{Complete it with the evaluation term.} The forecast covers the seed part. What is
   watched is a score on a finite prompt set, which carries its own binomial noise, and the stopping
   rule needs the deviation of the observable. Add the two in quadrature; the second is closed form
   and costs no runs.
 
-  \item \textbf{Run the rule.} After each seed of each arm, stop when
-  \eqref{eq:stop} fires and report the sign of the lead. Choose $z$ from the mistake rate that can
-  be tolerated rather than from a table: the curve in Figure~\ref{fig:sizing} is what $z$ moves
-  along, and no coverage guarantee attaches to a nominal value (Section~\ref{sec:discussion}).
+  \item \textbf{Run the rule.} After each seed of each arm, stop when \eqref{eq:stop} fires and
+  report the sign of the lead. With the adjoint forecast, $z$ at the one-sided normal quantile of
+  the tolerated mistake rate realised far less than that rate on clear comparisons, and
+  $\numNominalTieLooseAdjointMistakes\%$ for a $1\%$ target once near-ties were included. That is
+  an observation on one grid, not a coverage guarantee (Section~\ref{sec:discussion}).
 
   \item \textbf{Check the break-even before trusting it.} The procedure beats a fixed budget while
-  the forecast's \emph{relative} error is under $\numTolLooseBreakeven\times$. A systematic scale
-  error does not count against this and needs no correction. Two conditions predict being outside
+  the forecast's \emph{relative} error is under $\numTolLooseBreakeven\times$, a figure measured
+  with $z$ read in sample. A systematic scale error does not count against it only where $z$ is set
+  on comparisons with known outcomes. Two conditions predict being outside
   it, and both are measured in step~1 rather than assumed: reward groups going unanimous, which
   drives the injected covariance to zero and is the failure mode of
   Section~\ref{sec:exp-real}, and a metric that has saturated, where a zero measured spread is not
@@ -190,10 +242,12 @@ On a pretrained model the forecast is accurate only in some regimes
 tolerates, so we corrupt the forecast on purpose and rerun the benchmark: a lognormal
 multiplicative error of controlled median magnitude, and separately a systematic scale error.
 
-The scale error does nothing. Over $\numTolScaleRange$-fold changes in scale the runs needed are
-identical to the digits we print, a factor of $\numTolScaleSpread$, because $z$ absorbs it exactly
-as \eqref{eq:stop} says. A forecast used this way does not need to be calibrated, which is worth
-stating plainly because it is the opposite of what reporting an error bar requires.
+The scale error does nothing here. Over $\numTolScaleRange$-fold changes in scale the runs needed
+are identical to the digits we print, a factor of $\numTolScaleSpread$, because $z$ absorbs it
+exactly as \eqref{eq:stop} says. That holds because this benchmark reads $z$ off the graded
+comparisons. With the textbook threshold a scale error is not absorbed, which is why the closed
+form never stops in Table~\ref{tab:heldout}: calibration is free only to someone who already has
+comparisons with known outcomes to set $z$ on.
 
 Relative error is what costs, and it costs less than we expected. At the
 $\numTolTarget\%$ target the runs needed rise from $\numTolClean$ at the measured accuracy to
@@ -209,14 +263,17 @@ stopping rule spends deeply only on the comparisons that need it, and a corrupte
 degrades that allocation without destroying it. The practical reading is the looser number, since
 $\numTolLooseBreakeven\times$ is the point at which the condition binds first.
 
-That break-even is the honest statement of scope, and it is wider than the errors we actually
-measure on a pretrained model. All $\numSweepBands$ regimes of Section~\ref{sec:exp-support}, whose
-errors are $\numSweepErrors$, sit inside it, though only one of them met the tighter
+That break-even, measured with $z$ read in sample, is the statement of scope. All
+$\numSweepBands$ regimes of Section~\ref{sec:exp-support}, whose errors are $\numSweepErrors$, sit
+inside it, though only one of them met the tighter
 $1.5\times$ accuracy criterion declared before that sweep ran. The two are different bars and we
 keep them apart: one asks whether the forecast is right, the other whether it is useful.
 
-What sits outside is the corpus whose reward groups go unanimous, missed by twenty-five. There the
-forecast is not merely inaccurate; the run has stopped injecting seed noise at all, so there is
-nothing for a local covariance model to be accurate about. The contribution is a decision procedure
+What sits outside is the corpus whose reward groups go unanimous, missed by twenty-five, and
+Qwen2.5-7B under Adam, short by between $\numAdamScaleShortfallLow$ and
+$\numAdamScaleShortfallHigh$. On the unanimous corpus the run stops injecting noise after five
+updates, yet its measured seed spread is the largest we report, so the noise that separates its
+seeds is there and the local model does not see it. Where the forecast is short by that much, a
+forecast-driven stopping rule stops too early. The contribution is a decision procedure
 together with the condition under which it beats what is currently done, and a statement of what
 puts a run outside that condition.
