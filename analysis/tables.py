@@ -13,6 +13,7 @@ from pathlib import Path
 
 import numpy as np
 
+from caliper.analysis import grids
 from caliper.analysis.efficiency import optimal_group_size
 from caliper.runtime import io
 
@@ -274,30 +275,19 @@ def table_optimum() -> None:
 
 
 def headline_grid():
-    """The prospective forecast grid the paper's headline numbers come from.
+    """The prospective forecast grid the paper's headline numbers come from. See `grids`."""
+    try:
+        return grids.forecast_grid(grids.HEADLINE_POOL)
+    except LookupError as error:
+        raise SystemExit(str(error)) from error
 
-    There is exactly one, and every table and macro that quotes it must select it the same way.
-    Smaller grids exist for the estimator ablations and for calibrating the diagnostic on a
-    disjoint environment seed; picking whichever ran last silently swaps one for another, which
-    is how a table came to disagree with the prose above it.
-    """
-    grids = [
-        r for r in io.load_all("p2_metric_forecast")
-        if len(r["result"].get("cells", [])) >= 100
-        and r["manifest"]["config"].get("estimator") == "rloo"
-    ]
-    if not grids:
-        raise SystemExit("no prospective forecast grid")
-    # Among grids of the same size prefer the one carrying per-seed scores: it is the same
-    # experiment with more of it recorded, and picking by size alone leaves the choice to
-    # whichever happened to load first.
-    return max(
-        grids,
-        key=lambda r: (
-            len(r["result"]["cells"]),
-            "seed_scores" in r["result"]["cells"][0],
-        ),
-    )
+
+def replicate_grid():
+    """The same grid on a smaller prompt pool, quoted as a replicate of the headline."""
+    try:
+        return grids.forecast_grid(grids.REPLICATE_POOL)
+    except LookupError as error:
+        raise SystemExit(str(error)) from error
 
 
 def table_forecast() -> None:
@@ -496,6 +486,49 @@ def sizing_record(holdout: int = 32):
     return hits[-1] if hits else None
 
 
+OTHER_ENV_SEED = 991  # the grid generated from a different environment seed
+
+
+def diagnostic_macros(cells: list[dict], prefix: str, cut: float | None = None) -> dict[str, str]:
+    """How well the one-run curvature residual flags a bad forecast on one grid.
+
+    With `cut` unset the threshold is fitted on this grid, refusing the fifth of settings with
+    the largest residual; given, it is applied unchanged.
+    """
+    from scipy.stats import spearmanr
+
+    residual = np.array([c["curvature_residual"] for c in cells])
+    ratio = np.array([
+        max(c["predicted_std"] / c["measured_std"], c["measured_std"] / c["predicted_std"])
+        for c in cells
+    ])
+    if cut is None:
+        cut = float(np.quantile(residual, 0.8))
+    kept = residual <= cut
+    worst = int(np.argmax(ratio))
+    macros = {
+        f"{prefix}Cells": f"{len(cells)}",
+        f"{prefix}Low": f"{residual.min():.4f}",
+        f"{prefix}High": f"{residual.max():.4f}",
+        f"{prefix}Threshold": f"{cut:.4f}",
+        f"{prefix}Coverage": f"{100 * kept.mean():.0f}",
+        f"{prefix}WorstKept": f"{ratio[kept].max():.2f}",
+        f"{prefix}WorstAll": f"{ratio.max():.2f}",
+        f"{prefix}Rank": f"{spearmanr(residual, ratio)[0]:.2f}",
+        # where the single worst forecast sits among the residuals, as a percentile
+        f"{prefix}WorstPercentile": f"{100 * (residual < residual[worst]).mean():.0f}",
+    }
+    for level, name in ((1.2, "Low"), (1.3, "High")):
+        bad = ratio > level
+        if 1 < bad.sum() < len(bad) - 1:
+            auroc = float(np.mean([
+                [(a > b) + 0.5 * (a == b) for b in residual[~bad]] for a in residual[bad]
+            ]))
+            macros[f"{prefix}Auroc{name}"] = f"{auroc:.2f}"
+            macros[f"{prefix}Fails{name}"] = f"{bad.sum()}"
+    return macros
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -515,6 +548,17 @@ def table_numbers() -> None:
             "ForecastSpreadRange": f"{spread.max() / spread.min():.0f}",
             "ForecastSeeds": f"{cells[0]['seeds']}",
         }
+    replicate = replicate_grid()["result"]["cells"]
+    ratio = np.array([c["predicted_std"] / c["measured_std"] for c in replicate])
+    error = np.abs(np.log(ratio))
+    inside = sum(c["measured_lo"] <= c["predicted_std"] <= c["measured_hi"] for c in replicate)
+    macros |= {
+        "ForecastReplicatePool": f"{grids.REPLICATE_POOL}",
+        "ForecastHeadlinePool": f"{grids.HEADLINE_POOL}",
+        "ForecastReplicateMedian": f"{np.exp(np.median(error)):.2f}",
+        "ForecastReplicateWorst": f"{np.exp(error.max()):.2f}",
+        "ForecastReplicateInside": f"{inside}",
+    }
 
     null = [
         r
@@ -808,41 +852,19 @@ def table_numbers() -> None:
             macros["MixedResolvedLow"] = f"{band['lo']:.4f}"
             macros["MixedResolvedHigh"] = f"{band['hi']:.4f}"
 
-    # the one-run diagnostic: what it scores on the grid, and whether it refuses the real runs
-    # the full grid, not whichever record ran last: a smoke test of one cell would otherwise
-    # be pooled in and move the threshold
-    graded = [
-        record["result"]["cells"]
-        for record in io.load_all("p2_metric_forecast")
-        if record["result"]["cells"]
-        and "curvature_residual" in record["result"]["cells"][0]
+    # the one-run diagnostic: calibrated on the headline grid, then scored on the replicate and on
+    # a grid from a different environment seed with that threshold held fixed
+    headline_cells = headline_grid()["result"]["cells"]
+    macros |= diagnostic_macros(headline_cells, "Diag")
+    cut = float(macros["DiagThreshold"])
+    macros |= diagnostic_macros(replicate_grid()["result"]["cells"], "DiagReplicate", cut)
+    other = [
+        r for r in io.load_all("p2_metric_forecast")
+        if r["manifest"]["config"].get("seed") == OTHER_ENV_SEED and r["result"].get("cells")
     ]
-    diag = max(graded, key=len) if graded else []
-    if diag:
-        residual = np.array([c["curvature_residual"] for c in diag])
-        ratio = np.array([
-            max(c["predicted_std"] / c["measured_std"], c["measured_std"] / c["predicted_std"])
-            for c in diag
-        ])
-        cut = float(np.quantile(residual, 0.8))
-        kept = residual <= cut
-        macros |= {
-            "DiagCells": f"{len(diag)}",
-            "DiagLow": f"{residual.min():.4f}",
-            "DiagHigh": f"{residual.max():.4f}",
-            "DiagThreshold": f"{cut:.4f}",
-            "DiagCoverage": f"{100 * kept.mean():.0f}",
-            "DiagWorstKept": f"{ratio[kept].max():.2f}",
-            "DiagWorstAll": f"{ratio.max():.2f}",
-        }
-        for level, name in ((1.2, "Low"), (1.3, "High")):
-            bad = ratio > level
-            if 1 < bad.sum() < len(bad) - 1:
-                auroc = float(np.mean([
-                    [(a > b) + 0.5 * (a == b) for b in residual[~bad]] for a in residual[bad]
-                ]))
-                macros[f"DiagAuroc{name}"] = f"{auroc:.2f}"
-                macros[f"DiagFails{name}"] = f"{bad.sum()}"
+    if len(other) != 1:
+        raise SystemExit(f"expected one grid at environment seed {OTHER_ENV_SEED}")
+    macros |= diagnostic_macros(other[0]["result"]["cells"], "DiagOtherEnv", cut)
 
     # and what it says about the two pretrained runs, using that threshold unchanged
     for record in io.load_all("s9_abstain"):
@@ -1332,15 +1354,9 @@ def table_real_forecast() -> None:
 
 def table_transport() -> None:
     """What carrying the adjoint back is worth, against holding it at grad M."""
-    runs = [
-        r
-        for r in io.load_all("p2_metric_forecast")
-        if len(r["result"].get("cells", [])) >= 100
-        and "untransported_std" in r["result"]["cells"][0]
-    ]
-    if not runs:
-        raise SystemExit("no transport ablation")
-    cells = runs[-1]["result"]["cells"]
+    cells = headline_grid()["result"]["cells"]
+    if "untransported_std" not in cells[0]:
+        raise SystemExit("the headline grid carries no transport ablation")
     lines = [
         r"\footnotesize",
         r"\setlength{\tabcolsep}{3pt}",
@@ -1377,8 +1393,9 @@ def table_estimator_forecast() -> None:
         cells = record["result"].get("cells", [])
         config = record["manifest"]["config"]
         name = config.get("estimator", "rloo")
-        if cells:
+        if cells and name != "rloo":
             by_estimator[name] = cells
+    by_estimator["rloo"] = headline_grid()["result"]["cells"]
     if len(by_estimator) < 2:
         raise SystemExit("no cross-estimator sweep")
     lines = [

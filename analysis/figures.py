@@ -16,6 +16,7 @@ import numpy as np
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
+from caliper.analysis import grids  # noqa: E402
 from caliper.runtime import io  # noqa: E402
 
 FIGURES = Path(__file__).resolve().parents[1] / "paper" / "figures"
@@ -241,7 +242,7 @@ def figure_real_model() -> None:
 
 def figure_teaser() -> None:
     """Page one: the forecast works, and the model it replaces does not."""
-    cells = largest("p2_metric_forecast", "predicted_std", minimum=100)
+    cells = grids.forecast_grid()["result"]["cells"]
     models = latest("p1_propagation", "propagated_kl")
     fig, axes = plt.subplots(1, 2, figsize=(7.1, 2.65))
 
@@ -532,7 +533,7 @@ def figure_real_seeds() -> None:
 
 def figure_forecast() -> None:
     """Forecast against realised spread, and where each update's share of it was injected."""
-    cells = largest("p2_metric_forecast", "predicted_std", minimum=100)
+    cells = grids.forecast_grid()["result"]["cells"]
     bands = sorted({c["band"] for c in cells})
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.1))
 

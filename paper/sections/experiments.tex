@@ -50,11 +50,15 @@ $47$.
 
 Table~\ref{tab:forecast} reports a median absolute error of $\numForecastMedian\times$ and a worst case of
 $\numForecastWorst\times$, and the forecast lands inside the measured $95\%$ interval in $\numForecastInside$ of $\numForecastSettings$
-settings. That last count says the point forecast is consistent with the interval a finite number
+settings. The grid uses a pool of $\numForecastHeadlinePool$ prompts; the same $\numForecastSettings$
+settings on a pool of $\numForecastReplicatePool$, run as a replicate, give
+$\numForecastReplicateMedian\times$, $\numForecastReplicateWorst\times$ and
+$\numForecastReplicateInside$ of $\numForecastSettings$. That last count says the point forecast is consistent with the interval a finite number
 of seeds puts on the measured spread. It is not the coverage of an interval the forecast itself
 produces, which is a quantity this method does not yet report.
 Two things in the breakdown are worth noting. The two policy shapes agree with each other
-at $\numForecastMedian\times$ against $1.10\times$, so the result is not a property of one tabular family.
+to within a hundredth at the median (Table~\ref{tab:forecast}), so the result is not a property of
+one tabular family.
 And accuracy is flat in run length at the median but that consistency is not: $90$ of $96$ settings at
 $\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
 where Section~\ref{sec:exp-linearity} says it should.
@@ -705,17 +709,25 @@ direction, and nothing that depends on knowing the answer.
 
 \paragraph{It detects failure without predicting it.} Over the $\numDiagCells$ settings of
 Section~\ref{sec:exp-forecast}, $C$ correlates only weakly with the size of the forecast error, at
-a rank correlation of $0.28$. As a detector of the tail it is much better: the area under the ROC
-curve for flagging a setting whose forecast is wrong by more than $1.2\times$ is
-$\numDiagAurocLow$, over $\numDiagFailsLow$ such settings, and for more than $1.3\times$ it is
-$\numDiagAurocHigh$ over $\numDiagFailsHigh$. That is the same shape as the pairwise residual,
-which bounds the worst case rather than setting the accuracy, and it is what an abstention rule
-needs: not how wrong a forecast will be, but whether to report it.
+a rank correlation of $\numDiagRank$. As a detector of the tail it is better than chance and no
+better than modest: the area under the ROC curve for flagging a setting whose forecast is wrong
+by more than $1.2\times$ is $\numDiagAurocLow$, over $\numDiagFailsLow$ such settings, and for
+more than $1.3\times$ it is $\numDiagAurocHigh$ over $\numDiagFailsHigh$. On the replicate grid at
+a pool of $\numForecastReplicatePool$ prompts the same two figures are $\numDiagReplicateAurocLow$
+and $\numDiagReplicateAurocHigh$, so the ranking is real but its strength moves with the sample.
 
-\paragraph{Refusing a fifth of the grid buys back the whole tail.} Accepting only the settings
-whose residual falls below $\numDiagThreshold$, which is $\numDiagCoverage\%$ of them, caps the
-worst forecast error at $\numDiagWorstKept\times$ against $\numDiagWorstAll\times$ for accepting
-everything. We fix that threshold here, on this grid, and do not touch it again.
+\paragraph{It does not bound the worst case.} Accepting only the settings whose residual falls
+below $\numDiagThreshold$, which is $\numDiagCoverage\%$ of them, leaves the worst forecast error
+at $\numDiagWorstKept\times$, exactly what accepting everything gives: the single worst setting
+sits at the $\numDiagWorstPercentile$th percentile of the residual, inside the accepted set. The
+replicate grid behaves the same way ($\numDiagReplicateWorstKept\times$ against
+$\numDiagReplicateWorstAll\times$). An earlier version of this paper calibrated the rule on a
+$96$-setting grid, where refusing a fifth did cap the tail, and said so; that did not survive
+doubling the grid, and we withdraw it. On a grid generated from a different environment seed,
+with the threshold held fixed, the rule accepts $\numDiagOtherEnvCoverage\%$ and refuses the worst
+setting there, at $\numDiagOtherEnvWorstAll\times$, but still accepts one at
+$\numDiagOtherEnvWorstKept\times$. We fix the threshold here, on the headline grid, and do not
+touch it again.
 
 \paragraph{Applied unchanged, it refuses both pretrained runs.} On Qwen2.5-0.5B the residual is
 $\numAbstainSmall$, and on Qwen2.5-7B under Adam it is $\numAbstainLarge$, against a threshold of
