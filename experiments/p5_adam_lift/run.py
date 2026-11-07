@@ -57,8 +57,11 @@ def monte_carlo(policy, accepts, weights, cfg, settings, seeds, rng_seed, start)
             )
             moment = settings.beta1 * state.moment + (1 - settings.beta1) * grad
             second = settings.beta2 * state.second + (1 - settings.beta2) * grad**2
-            hat_m = moment / (1 - settings.beta1 ** (t + 1))
-            hat_v = second / (1 - settings.beta2 ** (t + 1))
+            if settings.bias_correction:
+                hat_m = moment / (1 - settings.beta1 ** (t + 1))
+                hat_v = second / (1 - settings.beta2 ** (t + 1))
+            else:
+                hat_m, hat_v = moment, second
             move = settings.step_size * hat_m / (np.sqrt(hat_v) + settings.epsilon)
             state = type(state)(state.policy.perturbed(move), moment, second, t + 1)
         finals.append(state.policy)
@@ -83,7 +86,12 @@ def main() -> None:
     ap.add_argument("--step-size", nargs="+", type=float, default=[3e-2, 1e-1])
     ap.add_argument("--bands", nargs="+", default=["easy", "mixed", "hard"])
     ap.add_argument("--estimator", default="rloo")
-    ap.add_argument("--warmup", type=int, default=5)
+    ap.add_argument("--warmup", type=int, default=5,
+                    help="updates on mean gradients before the recursion starts; 0 starts Adam "
+                         "cold, as the pretrained runs do")
+    ap.add_argument("--no-bias-correction", action="store_true",
+                    help="Adam without bias correction, which is MLX's default and what the "
+                         "pretrained runs used")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -95,7 +103,7 @@ def main() -> None:
         args.bands, args.steps, args.prompts, args.step_size
     ):
         policy, accepts = build(args.vocab, args.length, args.pool, BANDS[band], 1.0, args.seed)
-        settings = AdamSettings(step_size=eta)
+        settings = AdamSettings(step_size=eta, bias_correction=not args.no_bias_correction)
         cfg = {"steps": steps, "prompts": prompts, "group_size": args.group_size}
         dim = policy.dim
 
@@ -143,6 +151,7 @@ def main() -> None:
         cells.append({
             "band": band, "steps": steps, "prompts": prompts, "step_size": eta,
             "warmup": args.warmup,
+            "bias_correction": settings.bias_correction,
             "measured_kl": measured, "lifted_kl": lifted_kl, "momentum_kl": momentum_kl,
             "final_metric": float(np.mean(accepts @ state.policy.sequence_probs())),
             "parameters_only_kl": flat_kl, "walk_kl": walk_kl,
