@@ -117,3 +117,22 @@ def test_the_tables_and_the_prose_quote_the_same_grid():
     inside_quoted = re.search(r"numForecastInside\}\{(\d+)\}", macros).group(1)
     assert inside_table.group(1) == inside_quoted
     assert inside_table.group(2) == str(quoted)
+
+
+def test_the_cheap_form_never_asks_for_a_jacobian_vector_product():
+    class Counting(LinearUpdate):
+        calls = 0
+
+        def jacobian_vector(self, direction):
+            Counting.calls += 1
+            return super().jacobian_vector(direction)
+
+    rng = np.random.default_rng(3)
+    jacobian = -np.eye(4) + 0.1 * rng.normal(size=(4, 4))
+    covariance = np.eye(4)
+    updates = [Counting(jacobian, covariance, 0.3, 8) for _ in range(5)]
+    gradient = rng.normal(size=4)
+    cheap = run_backward(gradient, updates, transport=False)
+    assert Counting.calls == 0
+    expected = 5 * 0.3**2 * float(gradient @ covariance @ gradient) / 8
+    assert cheap.variance == pytest.approx(expected, rel=1e-12)
