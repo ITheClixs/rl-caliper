@@ -529,6 +529,92 @@ def diagnostic_macros(cells: list[dict], prefix: str, cut: float | None = None) 
     return macros
 
 
+HELDOUT_LABEL = {
+    "fixed": "fixed budget",
+    "constant": "one deviation for every recipe",
+    "empirical": "deviation from spent seeds",
+    "frozen": "closed form, no run",
+    "adjoint": "adjoint forecast",
+    "oracle": "measured deviation",
+}
+
+
+def heldout_record() -> dict:
+    """The sizing benchmark with thresholds chosen before grading (`s13_sizing/heldout.py`)."""
+    records = io.load_all("s15_sizing_heldout")
+    if not records:
+        raise SystemExit("s13_sizing/heldout.py has not been run")
+    return records[-1]["result"]["results"]
+
+
+def heldout_macros() -> dict[str, str]:
+    results = heldout_record()
+    macros: dict[str, str] = {}
+    for tag, key in (("Strict", "margin=4,target=0.001"), ("Loose", "margin=4,target=0.01"),
+                     ("TieLoose", "margin=2,target=0.01")):
+        row = results[key]
+        held, plain = row["held_out"], row["nominal"]
+        adjoint = held["adjoint"]
+        macros |= {
+            f"Held{tag}Pairs": f"{row['pairs']}",
+            f"Held{tag}AdjointRuns": f"{adjoint['runs']:.2f}",
+            f"Held{tag}AdjointMistakes": f"{100 * adjoint['mistakes']:.3f}",
+            f"Held{tag}UncappedFixedRuns": f"{row['uncapped_fixed_runs']:.0f}",
+            f"Held{tag}UncappedGain": f"{row['uncapped_fixed_runs'] / adjoint['runs']:.1f}",
+            f"Nominal{tag}AdjointRuns": f"{plain['adjoint']['runs']:.2f}",
+            f"Nominal{tag}AdjointMistakes": f"{100 * plain['adjoint']['mistakes']:.3f}",
+            f"Nominal{tag}ConstantMistakes": f"{100 * plain['constant']['mistakes']:.3f}",
+            f"Nominal{tag}EmpiricalMistakes": f"{100 * plain['empirical']['mistakes']:.3f}",
+            f"Nominal{tag}FrozenRuns": f"{plain['frozen']['runs']:.0f}",
+        }
+        for name in ("fixed", "constant", "empirical", "frozen", "oracle"):
+            title = name.capitalize()
+            lo, hi = held[name]["ratio_interval"]
+            macros |= {
+                f"Held{tag}{title}Gain": f"{held[name]['ratio_to_adjoint']:.2f}",
+                f"Held{tag}{title}Lo": f"{lo:.2f}",
+                f"Held{tag}{title}Hi": f"{hi:.2f}",
+            }
+    return macros
+
+
+def table_heldout() -> None:
+    """Runs and realised mistakes when each policy's threshold is set before it is graded."""
+    results = heldout_record()
+    columns = ("margin=4,target=0.01", "margin=4,target=0.001")
+    lines = [
+        r"\footnotesize",
+        r"\setlength{\tabcolsep}{3pt}",
+        r"\begin{tabular}{@{}lcccc@{}}",
+        r"\toprule",
+        r" & \multicolumn{2}{c}{target $1\%$} & \multicolumn{2}{c}{target $0.1\%$} \\",
+        r"\cmidrule(lr){2-3}\cmidrule(l){4-5}",
+        r"threshold set on other tasks & runs & mistakes & runs & mistakes \\",
+        r"\midrule",
+    ]
+    for name, label in HELDOUT_LABEL.items():
+        cells = []
+        for key in columns:
+            value = results[key]["held_out"][name]
+            cells += [f"{value['runs']:.2f}", f"{100 * value['mistakes']:.2f}\\%"]
+        lines.append(f"{label} & " + " & ".join(cells) + r" \\")
+    lines += [r"\midrule", r"textbook threshold, no tuning & & & & \\"]
+    for name in ("constant", "frozen", "adjoint"):
+        cells = []
+        for key in columns:
+            value = results[key]["nominal"][name]
+            cells += [f"{value['runs']:.2f}", f"{100 * value['mistakes']:.2f}\\%"]
+        lines.append(f"\\quad {HELDOUT_LABEL[name]} & " + " & ".join(cells) + r" \\")
+    uncapped = [f"{results[key]['uncapped_fixed_runs']:.0f}" for key in columns]
+    lines += [
+        r"\midrule",
+        f"fixed budget, no cap (normal approx.) & {uncapped[0]} & & {uncapped[1]} & \\\\",
+        r"\bottomrule",
+        r"\end{tabular}",
+    ]
+    write("heldout", "\n".join(lines))
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -1038,6 +1124,7 @@ def table_numbers() -> None:
 
     if not macros:
         raise SystemExit("no records to build paper macros from")
+    macros |= heldout_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"
@@ -1485,6 +1572,7 @@ def main() -> None:
         ("spectrum", table_spectrum),
         ("null", table_null),
         ("sizing", table_sizing),
+        ("heldout", table_heldout),
         ("numbers", table_numbers),
     ):
         try:

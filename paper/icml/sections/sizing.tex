@@ -22,10 +22,9 @@ normally done, or to spend seeds building a variance estimate before the compari
 Sections~\ref{sec:theory} and \ref{sec:estimation} supply $\sigma_A$ and $\sigma_B$ from the first
 run of each arm, so \eqref{eq:stop} is available from $k=1$.
 
-Note what \eqref{eq:stop} does \emph{not} require. Multiplying every $\sigma$ by a common factor is
-undone by dividing $z$ by the same factor, so a forecast uniformly off by a constant reaches the
-same operating points as one that is not, provided $z$ ranges widely enough to allow the move. What
-matters is the \emph{relative} deviation across configurations.
+Multiplying every $\sigma$ by a common factor is undone by dividing $z$ by it, so if $z$ can be
+tuned, only the \emph{relative} deviation across configurations matters. Tuning $z$ needs
+comparisons whose outcome is known; Section~\ref{sec:heldout} asks what remains without them.
 
 \subsection{Setup}
 
@@ -48,7 +47,7 @@ its mistake rate at $\numSizeTarget\%$, both arms counted.
 
 \begin{table}[t]
   \centering \small
-  \input{../tables/sizing}
+  \resizebox{\columnwidth}{!}{\input{../tables/sizing}}
   \caption{Runs needed to hold the mistake rate at $\numSizeTarget\%$ over $\numSizePairs$
   comparisons, both arms counted, with $95\%$ intervals from resampling the comparisons. The
   forecast is not better than knowing the deviation; it is not measurably worse, which is the
@@ -67,52 +66,65 @@ its mistake rate at $\numSizeTarget\%$, both arms counted.
   \label{fig:sizing}
 \end{figure}
 
-\subsection{Result}
+\subsection{Result, with $z$ read in sample}
 
-The adjoint forecast reaches $\numSizeAdjointRuns$ runs and the ceiling, a rule handed the realised
-deviation, reaches $\numSizeOracleRuns$: the same policy to within resampling error, at
-$\numSizeOracleGain\times$ $[\numSizeOracleLo, \numSizeOracleHi]$. Fixed-budget practice needs
-$\numSizeFixedRuns$ runs for the same reliability, $\numSizeFixedGain\times$
-$[\numSizeFixedLo, \numSizeFixedHi]$ more. Estimating the deviation from spent seeds costs
-$\numSizeEmpiricalGain\times$ $[\numSizeEmpiricalLo, \numSizeEmpiricalHi]$, and most of that is
-structural rather than statistical: that rule cannot stop at one seed per arm however large the
-lead, so four runs are committed before any comparison can be decided.
+The adjoint forecast reaches $\numSizeAdjointRuns$ runs and a rule handed the realised deviation
+$\numSizeOracleRuns$, the same to within resampling error ($\numSizeOracleGain\times$
+$[\numSizeOracleLo, \numSizeOracleHi]$). A fixed budget needs $\numSizeFixedRuns$ runs,
+$\numSizeFixedGain\times$ $[\numSizeFixedLo, \numSizeFixedHi]$ more, and estimating the deviation
+from spent seeds $\numSizeEmpiricalGain\times$ more, mostly because that rule cannot stop at one
+seed per arm. An earlier version graded against all $\numSizeSeeds$ seeds, a policy's own
+included; that leak favours the baselines that draw the most seeds and cut the fixed-budget gap to
+$\numSizeOverlapFixed\times$. The frozen forecast \eqref{eq:frozen}, with no stored run and no
+backward pass, reaches $\numSizeFrozenRuns$ runs, within $\numSizeFrozenGain\times$ of the adjoint:
+most of the saving does not need Theorem~\ref{thm:adjoint}.
 
-Grading against all $\numSizeSeeds$ seeds instead, so a policy's own seeds are part of the answer,
-cuts the advantage over a fixed budget to $\numSizeOverlapFixed\times$. The overlap helps a policy
-in proportion to how many seeds it draws, so it favours the baselines that draw the most, and the
-headline numbers are the ones without it.
+\subsection{Setting the threshold before the comparison}
+\label{sec:heldout}
 
-Note which predictor does the work. The frozen forecast \eqref{eq:frozen} uses the step size, the
-run length and the two noise traces, with no stored trajectory and no backward pass. It reaches
-$\numSizeFrozenRuns$ runs, within $\numSizeFrozenGain\times$ of the adjoint and still
-$\numSizeFrozenVsFixed\times$ better than a fixed budget. The bulk of the saving does not require
-Theorem~\ref{thm:adjoint} at all, and the backward pass buys the last $\numSizeFrozenGain\times$.
-That is the cheap half a practitioner would deploy first.
+Those numbers read every policy at the threshold meeting the target on the comparisons it is graded
+on: even-handed, but not something a practitioner can do. Table~\ref{tab:heldout} repeats the
+benchmark two ways one could. Either the threshold, or for a fixed budget the seed count, is the
+cheapest meeting the target on the other eleven tasks and is applied unchanged to the twelfth; or
+there is no tuning, and the rule stops once the lead clears the one-sided normal quantile of the
+target. Intervals resample the twelve tasks, since comparisons inside a task share arms.
 
-\subsection{The other decision, where it helps less}
+\begin{table}[t]
+  \centering
+  \resizebox{\columnwidth}{!}{\input{../tables/heldout}}
+  \caption{Runs per comparison and realised mistake rate over $\numHeldLoosePairs$ comparisons with
+  no threshold read off the comparisons graded. Upper block: threshold fitted on the other eleven
+  tasks. Lower block: the textbook threshold. At $0.1\%$ the fixed budget sits at the $16$-seed
+  cap; the last row extrapolates it without one.}
+  \label{tab:heldout}
+\end{table}
 
-Sizing is not the only use of a deviation. The other is choosing: run each of several
-configurations once and keep the one with the most gain per unit of noise and rollout. Reporting
-only the decision that flatters the forecast would misrepresent it, so we measure both on the same
-grid, with seeds split three ways and never reused across roles. One pilot supplies the observed
-gain, a disjoint pool supplies whatever deviation a policy is entitled to, and a third reserved set
-scores the choice. That last separation matters: letting the scoring seeds also set the deviation
-makes an oracle look unbeatable, since its denominator then shares noise with the one it is graded
-against, and an earlier version of this experiment did exactly that.
+Thresholds chosen on other tasks transfer: realised mistake rates land at the target. At $0.1\%$
+the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs and a fixed budget
+$\numHeldStrictFixedGain\times$ as many, but that budget is pinned at the cap; uncapped, the normal
+approximation puts it at $\numHeldStrictUncappedFixedRuns$ runs, $\numHeldStrictUncappedGain\times$ the
+forecast. At $1\%$ the saving is $\numHeldLooseFixedGain\times$ over a fixed budget and
+$\numHeldLooseEmpiricalGain\times$ over spent seeds. Against the closed form it is
+$\numHeldStrictFrozenGain\times$ $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$, an interval
+containing one: once $z$ can be learned on other tasks, the stored run adds little to a forecast
+that only has to rank.
 
-Over $\numPickTasks$ tasks the share of the best achievable value the choice keeps is
-$\numPickConstant\%$ with one deviation for every recipe, $\numPickFrozen\%$ frozen,
-$\numPickAdjoint\%$ adjoint and $\numPickOracle\%$ with the measured deviation: the forecast
-recovers $\numPickGain$ points $[\numPickGainLo, \numPickGainHi]$ of the
-$\numPickOraclePoints$ available, a share of $\numPickShare$.
+What the stored run buys is the absolute scale. At the textbook threshold the closed form never
+stops, its scale being off by $\numSizeFrozenScale\times$, while the adjoint forecast decides in
+$\numNominalLooseAdjointRuns$ runs with $\numNominalLooseAdjointMistakes\%$ mistakes for a $1\%$
+target. One deviation for every recipe costs the same runs with $\numNominalLooseConstantMistakes\%$
+mistakes, and is not available in practice: it is the median measured spread, which takes the
+replicates the forecast is meant to replace. Keeping near-ties (a margin of two standard errors
+instead of four) puts every policy at the cap at $0.1\%$; at $1\%$ the textbook-threshold adjoint
+rule then realises $\numNominalTieLooseAdjointMistakes\%$.
 
-The forecast is close to the ceiling in both decisions, but the ceilings differ. Choosing has only
-$\numPickOraclePoints$ points of headroom at all, because a single pilot's observed gain is noisy
-and that noise limits the choice whatever denominator is used. Sizing has no competing term: the
-run count scales as $(\sigma/\mu)^2$, the deviation enters squared, and at one run per arm there is
-no alternative estimate of it. That asymmetry, not the quality of the forecast, is why the two
-numbers differ, and it is why we lead with sizing.
+The other use of a deviation is choosing: run several configurations once and keep the one with the
+most gain per unit of noise. With seeds split three ways, never reused across roles, the choice
+keeps $\numPickConstant\%$ of the best achievable value with one deviation for every recipe and
+$\numPickAdjoint\%$ with the forecast, against $\numPickOracle\%$ with the measured deviation: the
+forecast recovers $\numPickGain$ points $[\numPickGainLo, \numPickGainHi]$ of
+$\numPickOraclePoints$. Choosing has little headroom because one pilot's observed gain is itself
+noisy; sizing has none competing, since the run count scales as $(\sigma/\mu)^2$.
 
 \subsection{How wrong the forecast may be}
 
@@ -120,10 +132,12 @@ On a pretrained model the forecast is accurate only in some regimes (Section~\re
 corrupt it on purpose and rerun the benchmark: a lognormal multiplicative error of controlled
 median magnitude, and separately a systematic scale error.
 
-The scale error does nothing. Over $\numTolScaleRange$-fold changes in scale the runs needed are
-identical to the digits we print, a factor of $\numTolScaleSpread$, because $z$ absorbs it exactly
-as \eqref{eq:stop} says. A forecast used this way does not need to be calibrated, which is worth
-stating plainly because it is the opposite of what reporting an error bar requires.
+The scale error does nothing here. Over $\numTolScaleRange$-fold changes in scale the runs needed
+are identical to the digits we print, a factor of $\numTolScaleSpread$, because $z$ absorbs it
+exactly as \eqref{eq:stop} says. That holds only because this benchmark reads $z$ off the graded
+comparisons; with the textbook threshold a scale error is not absorbed, which is why the closed form
+never stops in Table~\ref{tab:heldout}. Calibration is free only to someone who already has
+comparisons with known outcomes to set $z$ on.
 
 Relative error is what costs, and it costs less than we expected. At the $\numTolTarget\%$ target
 the runs needed rise from $\numTolClean$ at the measured accuracy to $\numTolRunsOneHalf$ at a
@@ -133,15 +147,13 @@ in the range we corrupted, which extends to $\numTolTested\times$. At a looser
 $\numTolLooseTarget\%$ target, where a fixed budget needs only $\numTolLooseFixed$ runs, the
 break-even is $\numTolLooseBreakeven\times$.
 
-That the tolerance widens as the reliability demanded goes up is not a paradox. A fixed budget
-scales badly with the target, because it carries every comparison to the same depth; a stopping
-rule spends deeply only where it must, and a corrupted deviation degrades that allocation without
-destroying it. The number to quote is therefore the looser one, $\numTolLooseBreakeven\times$,
-since that is where the condition binds first.
+The tolerance widens with the reliability demanded because a fixed budget carries every comparison
+to the same depth, so the binding number is the looser one.
 
-That break-even is the honest statement of scope, and it is wider than the errors
-we measure on a pretrained model: all $\numSweepBands$ regimes of Section~\ref{sec:real}, at
-$\numSweepErrors$, sit inside it. What does not is the corpus whose reward groups go unanimous,
-missed by twenty-five, where the run has stopped injecting seed noise and there is nothing for a
-local covariance model to be accurate about.
+That break-even, measured with $z$ read in sample, is the statement of scope. The
+$\numSweepBands$ pre-specified regimes of Section~\ref{sec:real}, at $\numSweepErrors$, sit inside
+it. Two of our pretrained results do not: the corpus whose reward groups go unanimous, missed by
+twenty-five although its measured seed spread is the largest we report, and Qwen2.5-7B under Adam,
+short by between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. Where the forecast
+misses that badly, a forecast-driven stopping rule would stop too early.
 
