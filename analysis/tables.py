@@ -1634,9 +1634,12 @@ def report_missing_macros() -> None:
     A number quoted in the text but never generated is a LaTeX error deep in a log. Saying so
     here, next to the run that would supply it, is the more useful place to find out.
     """
-    sections = sorted((TABLES.parent / "sections").glob("*.tex"))
+    paper = TABLES.parent
+    sources = [paper / "main.tex", paper / "icml" / "main.tex"]
+    sources += sorted((paper / "sections").glob("*.tex"))
+    sources += sorted((paper / "icml" / "sections").glob("*.tex"))
     used = set()
-    for path in sections + [TABLES.parent / "main.tex"]:
+    for path in sources:
         used |= set(re.findall(r"\\num[A-Za-z]+", path.read_text()))
     defined = set(re.findall(r"\\num[A-Za-z]+", (TABLES / "numbers.tex").read_text()))
     missing = sorted(name.lstrip("\\") for name in used - defined)
