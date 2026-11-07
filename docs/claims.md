@@ -61,6 +61,10 @@ Legend for strength:
 | the forecast underpredicts on a real model by ~25x | `s7`: cheap form 0.0025 against a measured seed term of 0.0631 [0.0350, 0.0735] | measured |
 | the transport is not reproducible on a real model | `s7`: two initialisations give 0.0225 and 0.0040 with transport (5.7x apart), 0.0056 and 0.0025 without (2.2x) | measured |
 | real RLVR runs end in groups, not scattered | `s7` at 0.5B: 3 runs within 0.008 of each other near 0.35, 5 spread over 0.204-0.300 | observed |
+| at 0.5B the seed spread is mostly per prompt, not seed-level skill | `s16`: 66% of the across-seed variance is on the diagonal of the prompt covariance; the better half of seeds is better on 17 prompts and worse on 12 | observed |
+| at 7B under Adam it is mostly shared | `s16`: 60% off-diagonal; better half better on 6 prompts, worse on 0 | observed |
+| the run each failed forecast was made from is saturated on every held-out prompt | `s16`: 48 of 48 prompts at 16/16 or 0/16 in both, while later seeds differ on 45 and 48 of them | observed |
+| ~~endpoint saturation predicts a forecast shortfall~~ | not tested: two runs, and the prospective sweep did not store per-prompt endpoints | negative |
 | ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 | at 7B under Adam the spread is 56% of the effect | `s7`: 10 runs, 0.203 -> 0.362, resolved seed sd 0.0892 [0.0398, 0.1194] | measured |

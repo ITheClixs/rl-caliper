@@ -615,6 +615,29 @@ def table_heldout() -> None:
     write("heldout", "\n".join(lines))
 
 
+def saturation_macros() -> dict[str, str]:
+    """Where the pretrained seed spread lives (`s16_saturation/analyse.py`)."""
+    records = io.load_all("s16_saturation")
+    if not records:
+        raise SystemExit("s16_saturation/analyse.py has not been run")
+    macros: dict[str, str] = {}
+    for tag, row in records[-1]["result"].items():
+        title = tag.capitalize()
+        later = row["later_saturated_share"]
+        macros |= {
+            f"Sat{title}PerPrompt": f"{100 * row['per_prompt_share']:.0f}",
+            f"Sat{title}Shared": f"{100 * row['shared_share']:.0f}",
+            f"Sat{title}Better": f"{row['high_half_better']}",
+            f"Sat{title}Worse": f"{row['high_half_worse']}",
+            f"Sat{title}Anchor": f"{row['anchor_saturated']}",
+            f"Sat{title}Prompts": f"{row['prompts']}",
+            f"Sat{title}Moved": f"{row['anchor_saturated_moved']}",
+            f"Sat{title}LaterLow": f"{100 * min(later):.0f}",
+            f"Sat{title}LaterHigh": f"{100 * max(later):.0f}",
+        }
+    return macros
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -1125,6 +1148,7 @@ def table_numbers() -> None:
     if not macros:
         raise SystemExit("no records to build paper macros from")
     macros |= heldout_macros()
+    macros |= saturation_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"

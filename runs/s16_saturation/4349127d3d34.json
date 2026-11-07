@@ -1,0 +1,79 @@
+{
+  "manifest": {
+    "git_sha": "09d22c5ae9d61d796cba1026b84a1bc31358716f",
+    "git_dirty": false,
+    "config_hash": "4349127d3d34",
+    "config": {
+      "records": {
+        "small": [
+          "s7_real_forecast",
+          "1d3f31eda6cd"
+        ],
+        "large": [
+          "s7_real_forecast",
+          "107b7137ba01"
+        ]
+      }
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794091899.505009,
+    "wall_clock": 1794091899.521825
+  },
+  "result": {
+    "small": {
+      "record": "1d3f31eda6cd",
+      "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
+      "forecast_std": 0.003971589220959081,
+      "seed_std": 0.0630981043655548,
+      "seeds": 8,
+      "prompts": 48,
+      "total_std": 0.0635720007122127,
+      "per_prompt_share": 0.6588906868033081,
+      "shared_share": 0.3411093131966919,
+      "binomial_share": 0.015843621399176954,
+      "high_half_better": 17,
+      "high_half_worse": 12,
+      "anchor_saturated": 48,
+      "later_saturated_share": [
+        0.3333333333333333,
+        0.9375,
+        0.3125,
+        0.4166666666666667,
+        0.9791666666666666,
+        0.875,
+        0.6041666666666666
+      ],
+      "anchor_saturated_moved": 45,
+      "variance_on_anchor_saturated": 1.0
+    },
+    "large": {
+      "record": "107b7137ba01",
+      "model": "mlx-community/Qwen2.5-7B-Instruct-4bit",
+      "forecast_std": 0.0006627441143035818,
+      "seed_std": 0.08918082721962377,
+      "seeds": 10,
+      "prompts": 48,
+      "total_std": 0.08932424531324767,
+      "per_prompt_share": 0.4017410028119534,
+      "shared_share": 0.5982589971880465,
+      "binomial_share": 0.0032086016021759005,
+      "high_half_better": 6,
+      "high_half_worse": 0,
+      "anchor_saturated": 48,
+      "later_saturated_share": [
+        0.8958333333333334,
+        0.9375,
+        0.7083333333333334,
+        0.9583333333333334,
+        0.6041666666666666,
+        1.0,
+        1.0,
+        0.7708333333333334,
+        0.875
+      ],
+      "anchor_saturated_moved": 48,
+      "variance_on_anchor_saturated": 1.0
+    }
+  }
+}

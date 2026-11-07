@@ -77,10 +77,10 @@ with the size of the evaluation rollout and can be estimated by splitting it, wh
 
 \paragraph{And on a real model it underpredicts, by a lot.} Section~\ref{sec:exp-real} runs the
 whole thing on Qwen2.5-0.5B and the estimator we recommend comes out a factor of twenty-five
-short, the transported one sixteen. The reason is not
-subtle: the eight runs end in groups rather than scattered around one, and a linearised model
-predicts the spread of a unimodal perturbation. What survives the failure is narrower than we
-first wrote. The share of prompts whose group is not unanimous falls from about a half to under
+short, the transported one sixteen. The run the forecast was made from has
+saturated every held-out prompt, so its local sensitivity is near zero, while later seeds differ
+in which way each prompt collapses: a discrete outcome a linearised model has no term for
+(Section~\ref{sec:exp-real}). What survives the failure is narrower than we first wrote. The share of prompts whose group is not unanimous falls from about a half to under
 $5\%$ by the fifth update, and a unanimous group carries no count-based advantage at all, so the
 run stops injecting seed noise there. That is measured directly and does not depend on the
 forecast. The forecast's own kernel puts $\numRealFirstHalfShare\%$ of its predicted variance

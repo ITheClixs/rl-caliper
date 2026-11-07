@@ -123,8 +123,7 @@ most gain per unit of noise. With seeds split three ways, never reused across ro
 keeps $\numPickConstant\%$ of the best achievable value with one deviation for every recipe and
 $\numPickAdjoint\%$ with the forecast, against $\numPickOracle\%$ with the measured deviation: the
 forecast recovers $\numPickGain$ points $[\numPickGainLo, \numPickGainHi]$ of
-$\numPickOraclePoints$. Choosing has little headroom because one pilot's observed gain is itself
-noisy; sizing has none competing, since the run count scales as $(\sigma/\mu)^2$.
+$\numPickOraclePoints$. Choosing has little headroom because one pilot's gain is itself noisy.
 
 \subsection{How wrong the forecast may be}
 
