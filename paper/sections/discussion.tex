@@ -163,11 +163,12 @@ Section~\ref{sec:exp-adam} gives the corrected numbers by band.
 \eqref{eq:seed-recursion} requires runs to stay close enough that the mean gradient field is
 locally linear over the distance seed noise moves them. Section~\ref{sec:exp-linearity} measures
 that between pairs of runs, and Section~\ref{sec:exp-abstain} builds the version a single run can
-compute about itself. Within the enumerable grid it works: it flags forecasts wrong by more than
-$1.3\times$ with an AUROC of $\numDiagAurocHigh$, and refusing the fifth of settings with the
-largest residual caps the worst error at $\numDiagWorstKept$ against $\numDiagWorstAll$. On a grid
-generated from a different environment seed it still accepts $78\%$ and still cuts the tail,
-though the accepted worst case rises to $1.58\times$, so the calibration figure was optimistic.
+compute about itself. Within the enumerable grid it ranks failures above chance, flagging
+forecasts wrong by more than $1.3\times$ with an AUROC of $\numDiagAurocHigh$ ($\numDiagReplicateAurocHigh$
+on the replicate grid), but it does not bound the worst case: refusing the fifth of settings with
+the largest residual leaves the worst error at $\numDiagWorstKept\times$, unchanged, because the
+worst setting is not among those refused. A claim that it caps the tail, made on a smaller grid,
+is withdrawn.
 
 Its absolute scale does not transfer to pretrained models, and we say that plainly rather than
 presenting two correct refusals as validation. Every real-model residual we measure lies between

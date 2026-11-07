@@ -39,7 +39,8 @@ Legend for strength:
 
 | claim | evidence | strength |
 |---|---|---|
-| rollout sampling dominates prompt selection | `p3_memory_sources`, exact decomposition of `Sigma_t` | exact |
+| over the grid as a whole, rollout sampling outweighs prompt selection (median share 78%) | `p3_memory_sources`, exact decomposition of `Sigma_t` | measured |
+| ~~rollout sampling dominates at every group size~~ | withdrawn: the share is 46% at `G=16`, so the majority changes hands between `G=8` and `G=16` | negative |
 | the share is monotone in `G` (93% at 2, 46% at 16) | same, 288 settings | measured |
 | the prompt count cannot change the mix | both terms carry `1/P` | exact |
 | there is no short memory horizon | `p3`: 95% of variance spans a median 1.00 of the run | negative |
@@ -68,10 +69,10 @@ Legend for strength:
 | one prospective pretrained forecast is inside 1.5x | `s11` band 0.85: frozen 0.0205 against measured 0.0253, error 1.24x, 12 held-out seeds | measured |
 | ~~more stochastic support gives a better forecast~~ | withdrawn: four pre-specified bands give 1.66, 2.13, 2.80, 1.24 with no trend | negative |
 | ~~the overprediction is metric-gradient estimation bias~~ | withdrawn: cross-fitting two independent gradients moves 0.0604 to 0.0616 | negative |
-| the diagnostic refuses the accurate run too | `s11` band 0.85 residual 8.0 against a threshold of 0.0275 | measured |
-| a one-run residual flags the settings where the forecast fails | `p2`: AUROC 0.94 for errors past 1.3x over 96 settings | measured |
-| refusing the worst fifth caps the error at 1.29x | `p2`: against 1.56x for accepting every setting | measured |
-| the same threshold refuses both pretrained runs | `s9`: residual 2.0 at 0.5B and 160.5 at 7B against 0.0275 | measured |
+| the diagnostic refuses the accurate run too | `s11` band 0.85 residual 8.0 against a threshold of 0.0300 | measured |
+| a one-run residual ranks the settings where the forecast fails above chance | `p2`: AUROC 0.74 for errors past 1.3x on the 192-setting headline grid, 0.87 on the pool-16 replicate | measured |
+| ~~refusing the worst fifth caps the error at 1.29x~~ | withdrawn: true on the first 96-setting grid only. On both 192-setting grids the worst setting sits at the 62nd-64th residual percentile and is accepted, so the worst error is unchanged (1.58x, 1.48x) | negative |
+| the same threshold refuses both pretrained runs | `s9`: residual 2.0 at 0.5B and 160.5 at 7B against 0.0300 | measured |
 | no pretrained regime the diagnostic accepts | not found; both real runs are refused | negative |
 | the forecast is short by 3.1x to 17x at 7B under Adam | `s7`: 0.0207 against 0.0892, half-samples 0.0052/0.0287 | measured |
 | ~~short by 38x at 7B~~ | withdrawn: that forecast carried no adjoint between updates, worth 16x in variance on the exact tier | negative |
