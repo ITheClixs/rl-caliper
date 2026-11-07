@@ -1208,8 +1208,9 @@ def experiment(name: str, require=None):
     """The one record matching a named experiment, or None.
 
     `require` names result fields that must be present, so a caller asking for a measured spread
-    cannot be handed a forecast-only run. Matching more than one record is an error rather than a
-    coin toss: it means the identity is under-specified.
+    cannot be handed a forecast-only run. When several records share the identity, the one with
+    the most held-out seeds wins, and among those the most recent: `io.load_all` returns records
+    oldest first and the sort is stable, so the choice does not depend on file order.
     """
     spec = EXPERIMENTS[name]
     hits = []
@@ -1228,10 +1229,43 @@ def experiment(name: str, require=None):
         hits.append(record)
     if not hits:
         return None
-    if len({id(h) for h in hits}) > 1 and len(hits) > 1:
-        # several runs share the identity; keep the one with the most seeds, and say so
-        hits.sort(key=lambda r: len(r["result"].get("held_out_scores", [])))
+    hits.sort(key=lambda r: len(r["result"].get("held_out_scores", [])))
     return hits[-1]
+
+
+def cheap_variants(chosen: dict, records: list[dict]) -> dict:
+    """The untransported forecasts that can stand beside `chosen`, keyed by `variance_prompts`.
+
+    A variant must be the same model, optimiser and run length as `chosen`, held at `grad M`,
+    and must have recorded the adapter initialisation it started from. Runs made before the
+    initialisation was recorded are excluded rather than silently pooled with the rest, and the
+    survivors are required to agree on that checksum, so the comparison between them varies the
+    one thing it means to vary. Records are taken oldest first, so where two share a key the
+    later one is kept.
+    """
+    config = chosen["manifest"]["config"]
+    identity = (config.get("model"), config.get("optimiser", "sgd"), config.get("steps"))
+    variants = [
+        record
+        for record in records
+        if (
+            record["manifest"]["config"].get("model"),
+            record["manifest"]["config"].get("optimiser", "sgd"),
+            record["manifest"]["config"].get("steps"),
+        )
+        == identity
+        and not record["result"].get("transport", True)
+        and len(record["result"].get("kernel", [])) >= 8
+        and record["result"].get("init_checksum") is not None
+    ]
+    if not variants:
+        return {}
+    origin = variants[-1]["result"]["init_checksum"]
+    return {
+        record["manifest"]["config"].get("variance_prompts"): record["result"]
+        for record in variants
+        if record["result"]["init_checksum"] == origin
+    }
 
 
 def table_real_forecast() -> None:
@@ -1241,25 +1275,8 @@ def table_real_forecast() -> None:
         raise SystemExit("no 0.5B forecast with a measured spread")
     result = chosen["result"]
     observed = result["observed_spread"]
-    # Only forecasts that started from the same adapters can be compared. Runs made before the
-    # initialisation was recorded are excluded rather than silently pooled with the rest, and the
-    # survivors are required to agree on the checksum, so the comparison between them varies the
-    # one thing it means to vary.
-    variants = [
-        record
-        for record in io.load_all("s7_real_forecast")
-        if not record["result"].get("transport", True)
-        and len(record["result"].get("kernel", [])) >= 8
-        and record["result"].get("init_checksum") is not None
-    ]
-    cheap = {}
-    if variants:
-        origin = variants[-1]["result"]["init_checksum"]
-        for record in variants:
-            if record["result"]["init_checksum"] != origin:
-                continue
-            prompts = record["manifest"]["config"].get("variance_prompts")
-            cheap[prompts] = record["result"]
+    # only forecasts of the same model that started from the same adapters can be compared
+    cheap = cheap_variants(chosen, io.load_all("s7_real_forecast"))
     lines = [
         r"\setlength{\tabcolsep}{4pt}",
         r"\begin{tabular}{@{}lc@{}}",
