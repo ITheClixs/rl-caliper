@@ -274,10 +274,20 @@ def table_optimum() -> None:
     write("optimum", "\n".join(lines))
 
 
+_GRADED: dict[int, dict] = {}
+
+
+def _graded(pool: int) -> dict:
+    """A grid with its measured spreads over the later seeds only, computed once per run."""
+    if pool not in _GRADED:
+        _GRADED[pool] = grids.exclude_anchor(grids.forecast_grid(pool))
+    return _GRADED[pool]
+
+
 def headline_grid():
     """The prospective forecast grid the paper's headline numbers come from. See `grids`."""
     try:
-        return grids.forecast_grid(grids.HEADLINE_POOL)
+        return _graded(grids.HEADLINE_POOL)
     except LookupError as error:
         raise SystemExit(str(error)) from error
 
@@ -285,7 +295,7 @@ def headline_grid():
 def replicate_grid():
     """The same grid on a smaller prompt pool, quoted as a replicate of the headline."""
     try:
-        return grids.forecast_grid(grids.REPLICATE_POOL)
+        return _graded(grids.REPLICATE_POOL)
     except LookupError as error:
         raise SystemExit(str(error)) from error
 
@@ -1506,7 +1516,9 @@ def table_estimator_forecast() -> None:
         name = config.get("estimator", "rloo")
         if cells and name != "rloo":
             by_estimator[name] = cells
-    by_estimator["rloo"] = headline_grid()["result"]["cells"]
+    # the other estimators' sub-grids were run before per-seed scores were stored, so their spread
+    # includes the anchor; compare RLOO on the same footing rather than on the stricter one
+    by_estimator["rloo"] = grids.forecast_grid()["result"]["cells"]
     if len(by_estimator) < 2:
         raise SystemExit("no cross-estimator sweep")
     lines = [

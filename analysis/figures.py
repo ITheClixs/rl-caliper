@@ -242,7 +242,7 @@ def figure_real_model() -> None:
 
 def figure_teaser() -> None:
     """Page one: the forecast works, and the model it replaces does not."""
-    cells = grids.forecast_grid()["result"]["cells"]
+    cells = grids.exclude_anchor(grids.forecast_grid())["result"]["cells"]
     models = latest("p1_propagation", "propagated_kl")
     fig, axes = plt.subplots(1, 2, figsize=(7.1, 2.65))
 
@@ -533,7 +533,7 @@ def figure_real_seeds() -> None:
 
 def figure_forecast() -> None:
     """Forecast against realised spread, and where each update's share of it was injected."""
-    cells = grids.forecast_grid()["result"]["cells"]
+    cells = grids.exclude_anchor(grids.forecast_grid())["result"]["cells"]
     bands = sorted({c["band"] for c in cells})
     fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.1))
 
@@ -740,7 +740,7 @@ def figure_sizing() -> None:
     The whole comparison is visible here: policies are curves, not points, and what separates them
     is how far left a curve sits at a fixed height.
     """
-    from analysis.tables import sizing_record
+    from tables import sizing_record  # a sibling script, importable when this one runs
 
     record = sizing_record()
     if record is None:

@@ -60,7 +60,8 @@ seed agree and that two seeds do not.
 \paragraph{What each thing costs.} Everything here ran on one Apple M4 laptop with $24$\,GB of
 unified memory, and the costs are worth stating because they bound what a reader can repeat. The
 enumerable-policy experiments are CPU work and finish in minutes; the $\numForecastSettings$-setting
-forecast grid, which trains $\numForecastSeeds$ runs in each of them, takes about half an hour. The
+forecast grid, which trains an anchor and $\numForecastSeeds$ further runs in each of them, takes
+about half an hour. The
 populations of small transformers take a few hours each. On the pretrained models the arithmetic
 changes: a single Qwen2.5-0.5B run of twelve updates takes about three minutes and its backward
 pass about ten, while one Qwen2.5-7B run of twenty updates takes around an hour, so the eight-seed

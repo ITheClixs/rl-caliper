@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from caliper.analysis.uncertainty import spread_interval
 from caliper.runtime import io
 
 STORE = "p2_metric_forecast"
@@ -43,3 +44,25 @@ def forecast_grid(
             f"{MINIMUM_CELLS}+ settings, found {len(hits)}"
         )
     return hits[0]
+
+
+def exclude_anchor(record: dict[str, Any], n_boot: int = 4000) -> dict[str, Any]:
+    """The same grid with each measured spread taken over the seeds trained after the forecast.
+
+    `seed_scores[0]` is the run the forecast was made from. Counting it among the seeds the
+    forecast is graded against makes the predictor one of its own targets, which the protocol
+    rules out; the stored per-seed scores let that be undone without retraining. Returns a new
+    record and leaves the stored one untouched.
+    """
+    cells = []
+    for cell in record["result"]["cells"]:
+        later = cell["seed_scores"][1:]
+        measured = spread_interval(later, n_boot=n_boot, seed=0)
+        cells.append({
+            **cell,
+            "measured_std": measured["std"],
+            "measured_lo": measured["lo"],
+            "measured_hi": measured["hi"],
+            "seeds": len(later),
+        })
+    return {**record, "result": {**record["result"], "cells": cells}}

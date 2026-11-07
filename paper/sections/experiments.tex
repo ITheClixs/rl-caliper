@@ -16,8 +16,8 @@ a single Apple M4 laptop with $24$\,GB of memory.
 This is the experiment the paper is for, and its protocol is prospective by construction. In each
 of $\numForecastSettings$ settings one run is trained and frozen; the states it passed through are carried backwards
 through \eqref{eq:adjoint} to produce a forecast of the across-seed standard deviation of the final
-pass rate; the forecast is recorded; and only then are the remaining seeds of the
-$\numForecastSeeds$ trained and their spread measured. Nothing about the outcome is available when the prediction is made.
+pass rate; the forecast is recorded; and only then are $\numForecastSeeds$ further seeds
+trained and their spread measured, without the anchor. Nothing about the outcome is available when the prediction is made.
 
 The enumerable policy is used because there the reported number is the exact pass rate rather than
 an estimate of it, so the measured spread is the spread of the quantity itself and not of a finite
@@ -59,8 +59,9 @@ produces, which is a quantity this method does not yet report.
 Two things in the breakdown are worth noting. The two policy shapes agree with each other
 to within a hundredth at the median (Table~\ref{tab:forecast}), so the result is not a property of
 one tabular family.
-And accuracy is flat in run length at the median but that consistency is not: $90$ of $96$ settings at
-$\eta = 0.5$ against $72$ of $96$ at $\eta = 1.5$, which is the linearisation showing up exactly
+And accuracy is flat in run length at the median but that consistency is not: the forecast lands
+inside the measured interval far more often at $\eta = 0.5$ than at $\eta = 1.5$
+(Table~\ref{tab:forecast}), which is the linearisation showing up exactly
 where Section~\ref{sec:exp-linearity} says it should.
 
 To make the deliverable concrete: one setting in the middle of the grid, at twenty-five updates,
