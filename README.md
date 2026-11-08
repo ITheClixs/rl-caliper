@@ -34,8 +34,8 @@ the normal quantile of the mistake rate you will tolerate.
 
 | setting | what was compared | result |
 |---|---|---|
-| enumerable policies, exact inputs, at most 25 updates | forecast frozen before 47 further seeds were trained, 192 settings | median error **1.10x**, worst 1.56x, inside the measured 95% interval in 162 of 192 |
-| Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen forecast against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
+| enumerable policies, exact inputs, at most 25 updates | forecast frozen before 47 further seeds were trained, 192 settings | median error **1.10x** (1.11x in the cheap form used on real models), worst 1.56x, inside the measured 95% interval in 162 of 192 |
+| Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen cheap forecast (no transport) against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
 | Qwen2.5-0.5B, corpus whose reward groups go unanimous | cheap forecast against 8 seeds | **25x short** |
 | Qwen2.5-7B (4-bit, LoRA) under Adam | lifted forecast against 10 seeds | **3.1x to 17x short** |
 | sizing a comparison (enumerable tier, clear pairs only) | runs per comparison, both arms, to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs; a fixed budget measured below its cap needs 5.6x to 8.2x as many over 3 seed splits, and estimating the spread from spent seeds 2.12x as many |

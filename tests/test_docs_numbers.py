@@ -118,8 +118,9 @@ CHECKS = [
                          "remaining five spread from {RealRestLow} to {RealRestHigh}."),
     ("docs/claims.md", "cheap form {RealCheapForecast} against a measured seed term of "
                        "{RealSeedPart} [{RealSeedLo}, {RealSeedHi}]"),
-    ("README.md", "median error **{ForecastMedian}x**, worst {ForecastWorst}x, inside the measured "
-                  "95% interval in {ForecastInside} of {ForecastSettings}"),
+    ("README.md", "median error **{ForecastMedian}x** ({ForecastHeldMedian}x in the cheap form used "
+                  "on real models), worst {ForecastWorst}x, inside the measured 95% interval in "
+                  "{ForecastInside} of {ForecastSettings}"),
     ("README.md", "against the value measured over {ForecastSeeds} seeds trained afterwards"),
     ("README.md", "errors {SweepErrors}"),
     ("README.md", "**{AdamScaleShortfallLow}x to {AdamScaleShortfallHigh}x short**"),
