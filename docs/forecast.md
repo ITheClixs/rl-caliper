@@ -154,9 +154,10 @@ What survives is the localisation. The kernel puts 90% of the variance in the fi
 and the run stops injecting any after the fifth update, which reproduces across reruns.
 
 **Withdrawn.** An earlier version reported that the outcome is largely settled by the first few
-batches, on a correlation of 0.88 between early pass rate and final score. Three runs of the same
-experiment gave 0.88, 0.65 and 0.44, the bootstrap interval at eight runs spans [-0.19, +0.96], and
-at 7B the correlation is +0.07. The claim is not supported. The uncertainty is made early and then amplified, which is what a spectral radius
+batches, on a correlation of 0.88 between early pass rate and final score. That launch stored no
+training traces, so the number cannot be checked; the two released launches that did give +0.44
+and +0.65, the bootstrap interval at eight runs spans [-0.19, +0.96], and at 7B the correlation is
++0.11. The claim is not supported. The uncertainty is made early and then amplified, which is what a spectral radius
 above one predicts. The amplification is not linear, and that is what the forecast misses.
 
 ## 7. Boundaries

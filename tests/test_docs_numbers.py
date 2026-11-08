@@ -25,6 +25,13 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("docs/forecast.md", "the two released launches that did give {EarlyCorrelation} and "
+                         "{EarlyCorrelationRepeat}, the bootstrap interval at eight runs spans "
+                         "[{EarlyCorrelationLow}, {EarlyCorrelationHigh}], and at 7B the "
+                         "correlation is {EarlyCorrelationBig}."),
+    ("docs/claims.md", "give {EarlyCorrelation} and {EarlyCorrelationRepeat} (a third"),
+    ("docs/claims.md", "interval [{EarlyCorrelationLow}, {EarlyCorrelationHigh}]; "
+                       "{EarlyCorrelationBig} at 7B"),
     ("docs/claims.md", "median {RealJvpLow} and {RealJvpHigh} in the two released records"),
     ("docs/claims.md", "give {UnseededTransported} and {RealTransportedForecast} with transport "
                        "({UnseededTransportedFactor}x apart), {UnseededCheap} and "

@@ -984,7 +984,14 @@ def hand_typed_macros() -> dict[str, str]:
             "RealSizeMeanGap": f"{max(means) - min(means):.3f}",
             "RealSizeDevLow": f"{min(measured):.3f}",
             "RealSizeDevHigh": f"{max(measured):.3f}",
+            "RealSizeTrackCorrelation":
+                f"{np.corrcoef(np.log(forecast), np.log(measured))[0, 1]:.2f}",
         }
+    # the same correlation on the exact tier's headline grid, which the text compares it with
+    cells = headline_grid()["result"]["cells"]
+    exact = np.corrcoef(np.log([c["predicted_std"] for c in cells]),
+                        np.log([c["measured_std"] for c in cells]))[0, 1]
+    macros["ForecastLogCorrelation"] = f"{exact:.2f}"
     return macros
 
 
@@ -1155,6 +1162,11 @@ def table_numbers() -> None:
             "TraceRuns": f"{scores.size}",
             "TraceWindow": f"{window}",
         }
+        # the one other 0.5B launch that stored its training traces
+        repeat = only("s7_real_forecast", label="qwen2.5-0.5b-traces")["result"]
+        traces = np.array(repeat["train_traces"], dtype=float)
+        again = np.corrcoef(traces[:, :window].mean(axis=1), repeat["held_out_scores"])[0, 1]
+        macros["EarlyCorrelationRepeat"] = f"{again:+.2f}"
 
     # the same correlation at seven billion parameters, from the training trace the run logged
     big = [

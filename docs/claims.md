@@ -83,7 +83,7 @@ Legend for strength:
 | ~~at 0.5B the spread is mostly prompts flipping independently~~ | withdrawn: prompts sharing an answer correlate 0.90 across seeds and others -0.33; the per-prompt share was the residual of those blocks | negative |
 | ~~the stored endpoint is locally flat, so the forecast sees nothing~~ | withdrawn: 16/16 from 16 samples allows p near 0.84, and the stored metric-gradient norm (0.45) is not near zero | negative |
 | the 7B forecast is not reproducible from its own run | `s7`: two repeats from the same run give 0.00066 and 0.451, a factor of 681 | measured |
-| ~~which mode a run lands in is decided early~~ | withdrawn: three reruns gave 0.88, 0.65, 0.44; interval [-0.19, +0.96]; +0.11 at 7B | negative |
+| ~~which mode a run lands in is decided early~~ | withdrawn: the two released launches with training traces give +0.44 and +0.65 (a third, quoted earlier at 0.88, stored none); interval [-0.19, +0.96]; +0.11 at 7B | negative |
 | the sqrt(KL) route to outcome spread does not hold | fitted exponent +0.10, CI [-0.03, +0.45] against +0.5 | negative |
 | at 7B under Adam the spread is 56% of the effect | `s7`: 10 runs, 0.203 -> 0.362, resolved seed sd 0.0892 [0.0398, 0.1194] | measured |
 | ~~finite corpus raises G*~~ | withdrawn: the budget fixes R = PG, so the correction is a function of G; it lowers G* by sqrt((N-1)/N) | negative |
