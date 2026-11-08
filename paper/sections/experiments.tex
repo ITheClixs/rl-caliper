@@ -430,8 +430,17 @@ be trusted.
 
 One caveat is structural. Adam's map is singular at $v = 0$: the derivative of
 $1/(\sqrt{v} + \epsilon)$ diverges there, and a recursion started at initialisation is not
-linearisable at all. We warm the moments on mean gradients before propagating, which every run does
-anyway, and every seed shares the warmed state so the covariance still starts at zero.
+linearisable at all. The sweep above therefore warms the moments on mean gradients for five
+updates before propagating, and every seed shares the warmed state, so the covariance still starts
+at zero. That is a choice the pretrained runs of Section~\ref{sec:exp-adam-scale} did not make:
+they use MLX's Adam from a zero state and without bias correction, where the first update is close
+to $\eta\,\mathrm{sign}(\hat g)\sqrt{(1-\beta_2)^{-1}}(1-\beta_1)$ and its derivative with respect
+to the gradient nearly vanishes. Rerunning this sweep in that regime
+(\texttt{--warmup 0 --no-bias-correction}) takes the lifted forecast from a median error of
+$\numAdamLiftWarmMedian\times$ to $\numAdamLiftColdRawMedian\times$, with a worst case of
+$\numAdamLiftColdRawWorst\times$ in either direction; starting cold but with bias correction gives
+$\numAdamLiftColdMedian\times$ and a worst of $\numAdamLiftColdWorst\times$. The lift is validated
+only for an optimiser whose state has been warmed.
 
 \begin{table}[t]
   \centering
@@ -795,8 +804,12 @@ linear field.
 
 Section~\ref{sec:exp-real} makes the forecast under plain ascent, which is the update the
 recursion is written for. A practitioner uses Adam. Section~\ref{sec:exp-adam} shows the lift to
-$z = (\theta, m, v)$ holds where the moments are exact, so the remaining question is whether it
-survives on a pretrained model, and this section answers it. Under the cheap form the injected
+$z = (\theta, m, v)$ holds where the moments are exact and warmed, so the remaining question is
+whether it survives on a pretrained model. One answer is already in hand: these runs start Adam
+cold and without bias correction, the regime in which the same lift fails on the exact tier
+($\numAdamLiftColdRawMedian\times$ median, $\numAdamLiftColdRawWorst\times$ worst;
+Section~\ref{sec:exp-adam}), so what follows tests the lift outside the conditions it was
+validated under. Under the cheap form the injected
 term enters through $B = \partial\Phi/\partial\hat{g}$, which for Adam is diagonal and analytic,
 so the forecast is the same backward pass with the metric direction scaled by the optimiser's own
 preconditioner at each update.

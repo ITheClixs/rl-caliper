@@ -335,14 +335,44 @@ def table_forecast() -> None:
     write("forecast", "\n".join(lines))
 
 
+def adam_lift_record(warmup: int, bias_correction: bool) -> dict:
+    """The full exact-tier Adam sweep run with a given warm-up and bias correction.
+
+    The validated sweep warms the moments for five updates and corrects for bias; the cold
+    variants match what the pretrained runs did. Selected by identity, so adding a variant
+    cannot replace the table the paper quotes.
+    """
+    hits = [
+        r for r in io.load_all("p5_adam_lift")
+        if len(r["result"].get("cells", [])) >= 8
+        and r["manifest"]["config"].get("warmup") == warmup
+        and (not r["manifest"]["config"].get("no_bias_correction", False)) == bias_correction
+    ]
+    if len(hits) != 1:
+        raise SystemExit(f"expected one Adam sweep at warmup {warmup}, bias correction "
+                         f"{bias_correction}; found {len(hits)}")
+    return hits[0]
+
+
+def adam_cold_macros() -> dict[str, str]:
+    """The lifted forecast's error when Adam starts cold, with and without bias correction."""
+    macros: dict[str, str] = {}
+    for tag, warmup, corrected in (("Warm", 5, True), ("Cold", 0, True), ("ColdRaw", 0, False)):
+        cells = adam_lift_record(warmup, corrected)["result"]["cells"]
+        error = np.array([
+            max(c["lifted_kl"] / c["measured_kl"], c["measured_kl"] / c["lifted_kl"])
+            for c in cells
+        ])
+        macros |= {
+            f"AdamLift{tag}Median": f"{np.median(error):.2f}",
+            f"AdamLift{tag}Worst": f"{error.max():.{0 if error.max() >= 100 else 2}f}",
+        }
+    return macros
+
+
 def table_adam_lift() -> None:
     """How well each model of Adam's seed divergence does, overall and by pool."""
-    runs = [
-        r for r in io.load_all("p5_adam_lift") if len(r["result"].get("cells", [])) >= 8
-    ]
-    if not runs:
-        raise SystemExit("no Adam lift sweep")
-    cells = runs[-1]["result"]["cells"]
+    cells = adam_lift_record(5, True)["result"]["cells"]
     measured = np.array([c["measured_kl"] for c in cells])
     lines = [
         r"\setlength{\tabcolsep}{4pt}",
@@ -1218,6 +1248,7 @@ def table_numbers() -> None:
         raise SystemExit("no records to build paper macros from")
     macros |= heldout_macros()
     macros |= saturation_macros()
+    macros |= adam_cold_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"
