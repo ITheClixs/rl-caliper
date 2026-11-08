@@ -25,6 +25,19 @@ def collapse(outputs: list[dict]) -> tuple[str, float]:
     return str(values[counts.argmax()]), float(counts.max() / len(modes))
 
 
+def split_prompts(runs: list[list[dict]], firm: float = 0.9) -> int:
+    """Prompts on which at least two runs answer firmly, with different answers.
+
+    This is the criterion committed in docs/predictions.md before the band-0.60 result: a run
+    is firm on a prompt when one string is at least `firm` of its samples.
+    """
+    count = 0
+    for j in range(len(runs[0])):
+        answers = {run[j]["mode"] for run in runs if run[j]["share"] >= firm}
+        count += len(answers) >= 2
+    return count
+
+
 def explained(scores: np.ndarray, shares: np.ndarray) -> float:
     """Squared correlation between a run's collapse share and its held-out score."""
     if scores.size < 3 or np.std(shares) == 0 or np.std(scores) == 0:
@@ -59,6 +72,8 @@ def main() -> None:
             "collapsed_seeds": int((shares >= 0.5).sum()),
             "seeds": int(shares.size),
             "share_explains_score": explained(scores, shares),
+            "split_prompts": split_prompts([result["anchor_outputs"]] + result["seed_outputs"]),
+            "prompts": len(result["anchor_outputs"]),
             "commonest_answer_share": float(
                 np.max(np.unique(answers, return_counts=True)[1]) / answers.size),
         }
@@ -69,6 +84,7 @@ def main() -> None:
         print(f"  later seeds: median share {100 * row['median_seed_share']:.0f}%, "
               f"{row['collapsed_seeds']} of {row['seeds']} above half; answers "
               f"{row['seed_answers']}")
+        print(f"  split prompts: {row['split_prompts']} of {row['prompts']}")
         print(f"  share explains {100 * row['share_explains_score']:.0f}% of the score variance; "
               f"the commonest correct answer covers {100 * row['commonest_answer_share']:.0f}% "
               f"of prompts")
