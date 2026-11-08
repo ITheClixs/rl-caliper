@@ -800,7 +800,15 @@ def shortfall_macros() -> dict[str, str]:
     # the three highest held-out scores sit together; the text quotes them and the rest's range
     scores = sorted(result["held_out_scores"])
     cluster, rest = scores[-3:], scores[:-3]
+    # the share of groups that are not unanimous: present early, then gone
+    live = np.array(result["live_share"])
+    late = live[4:]
     macros = {
+        "RealLiveEarlyLow": f"{live[:4].min():.2f}",
+        "RealLiveEarlyHigh": f"{live[:4].max():.2f}",
+        "RealLiveLateZero": f"{int((late == 0).sum())}",
+        "RealLiveLateCount": f"{late.size}",
+        "RealLiveLateMax": f"{late.max():.3f}",
         "RealShortCheap": f"{measured / cheap:.0f}",
         "RealShortTransported": f"{measured / result['predicted_std']:.0f}",
         "RealCheapForecast": f"{cheap:.4f}",

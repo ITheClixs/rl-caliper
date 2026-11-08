@@ -502,8 +502,9 @@ under common random numbers.
 Two diagnostics came back before the comparison did, and both matter more than the comparison.
 
 The first is that the run stops injecting almost immediately. The fraction of prompts whose group
-is not unanimous falls from $0.5$ over the first four updates to essentially zero, so
-$\Sigma_t \approx 0$ from update five onwards and the forecast is, in effect, made from four
+is not unanimous is between $\numRealLiveEarlyLow$ and $\numRealLiveEarlyHigh$ over the first four
+updates and zero in $\numRealLiveLateZero$ of the remaining $\numRealLiveLateCount$ (the other is
+$\numRealLiveLateMax$), so $\Sigma_t \approx 0$ from update five onwards and the forecast is, in effect, made from four
 updates out of twelve (Figure~\ref{fig:real-forecast}). This is the sampling collapse of
 Section~\ref{sec:metric} happening at a step size we chose to be conservative, on a task chosen to
 be hard for the model.
