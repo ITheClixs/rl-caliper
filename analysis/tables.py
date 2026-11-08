@@ -776,6 +776,34 @@ def shortfall_macros() -> dict[str, str]:
     return macros
 
 
+def collapse_sweep_macros() -> dict[str, str]:
+    """The collapse test on two support-sweep bands (`s16_saturation/sweep.py`).
+
+    Selected by the labels it was run on, so a later sweep over other bands cannot replace it.
+    """
+    labels = ["modes-band-0.85", "modes-band-0.60"]
+    result = only("s16_sweep", labels=labels)["result"]
+    macros = {}
+    for tag, label in zip(("Held", "Missed"), labels, strict=True):
+        row = result[label]
+        macros |= {
+            f"Collapse{tag}Band": label.rsplit("-", 1)[1],
+            f"Collapse{tag}Error": f"{row['error']:.2f}",
+            f"Collapse{tag}Split": f"{row['split_prompts']}",
+            f"Collapse{tag}Shared": f"{row['shared_prompts']}",
+            f"Collapse{tag}Constant": f"{row['collapsed_seeds']}",
+            f"Collapse{tag}AnchorPrompts": f"{round(row['anchor_share'] * row['prompts'])}",
+        }
+    held = result[labels[0]]
+    macros |= {
+        "CollapsePrompts": f"{held['prompts']}",
+        "CollapseSeeds": f"{held['seeds']}",
+        # the refutation bound committed in docs/predictions.md: band 0.85's split share
+        "CollapseSplitBound": f"{100 * held['split_prompts'] / held['prompts']:.0f}",
+    }
+    return macros
+
+
 def estimated_macros() -> dict[str, str]:
     """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
     result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
@@ -1376,6 +1404,7 @@ def table_numbers() -> None:
     macros |= adam_cold_macros()
     macros |= estimated_macros()
     macros |= shortfall_macros()
+    macros |= collapse_sweep_macros()
     macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [

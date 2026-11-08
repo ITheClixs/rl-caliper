@@ -583,9 +583,27 @@ that reaches one cannot leave it. The seed spread is which constant a run is abs
 discrete outcome that a linearisation about one run, already absorbed, has no term for. That also
 qualifies everything else measured on this task: much of the held-out gain is guessing, and the
 forecasts made here, which differ by a factor of $\numModeLargeRepeatRatio$ between two repeats from
-the same $7$B run, describe runs in a degenerate regime. The corpora of
-Section~\ref{sec:exp-support} were built differently and did not store per-prompt outcomes, so
-whether their runs collapse the same way we cannot say.
+the same $7$B run, describe runs in a degenerate regime.
+
+\paragraph{Collapse does not explain the support sweep.} Two corpora of
+Section~\ref{sec:exp-support} were rerun with every run's answers stored, and the reruns
+reproduce the original held-out scores run for run. At live probability $\numCollapseHeldBand$,
+where the forecast held, $\numCollapseHeldConstant$ of $\numCollapseSeeds$ later runs answer ``1'' on most prompts, as the
+anchor does on $\numCollapseHeldAnchorPrompts$ of $\numCollapsePrompts$; the collapse is there but
+shared, and it carries almost none of the spread. That suggested that collapse defeats the forecast
+only when the answer a run is absorbed into depends on its seed. Before the second rerun finished
+we recorded a prediction with a refutation criterion (\texttt{docs/predictions.md}): the band at
+$\numCollapseMissedBand$, where the forecast missed by $\numCollapseMissedError\times$, would have
+more than $\numCollapseSplitBound\%$ of prompts on which two runs commit firmly to different
+answers. It has $\numCollapseMissedSplit$ of $\numCollapsePrompts$, against
+$\numCollapseHeldSplit$, and the prediction is refuted. It should not have been made in that form.
+The forecast at $\numCollapseMissedBand$ is too large, and seed-dependent collapse adds spread, so
+it could only ever have made a forecast too small. Looked at after the result, that band hardly
+collapses at all: $\numCollapseMissedConstant$ of its runs give one answer to more than half of the
+prompts, and every run agrees firmly on $\numCollapseMissedShared$ prompt against
+$\numCollapseHeldShared$ at $\numCollapseHeldBand$. Collapse accounts for the shortfall on the
+counting corpus and for none of the sweep's errors; the overpredictions in its two middle bands
+remain unexplained.
 
 \paragraph{Whether the outcome is decided early, which we cannot establish.} It is tempting to read
 the grouping off the start of each run, and the data invite it: the pass rate a run achieves on its

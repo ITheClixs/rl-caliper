@@ -90,6 +90,8 @@ Legend for strength:
 | the fixed-budget finite-corpus optimum is 1 + sqrt((N-1)tau_w/(N tau_b)) | `b1`: matches brute force over feasible G to 0.02 | exact |
 | one prospective pretrained forecast is inside 1.5x | `s11` band 0.85: frozen 0.0205 against measured 0.0253, error 1.24x, 12 held-out seeds | measured |
 | ~~more stochastic support gives a better forecast~~ | withdrawn: four pre-specified bands give 1.66, 2.13, 2.80, 1.24 with no trend | negative |
+| in the support sweep the forecast is too large in the two middle bands, too small at the ends | `s11`: forecast over measured 0.60, 2.13, 2.80, 0.81 | measured |
+| ~~seed-dependent collapse explains the sweep's misses~~ | refuted by a prediction committed before the run (`docs/predictions.md`): band 0.60 splits on 3 of 64 prompts against 5 at band 0.85, and its forecast is too large, which collapse cannot cause | negative |
 | ~~the overprediction is metric-gradient estimation bias~~ | withdrawn: cross-fitting two independent gradients moves 0.0604 to 0.0616 | negative |
 | the diagnostic refuses the accurate run too | `s11` band 0.85 residual 8.0 against a threshold of 0.0300 | measured |
 | a one-run residual ranks the settings where the forecast fails above chance | `p2`: AUROC 0.78 for errors past 1.3x on the 192-setting headline grid, 0.85 on the pool-16 replicate | measured |

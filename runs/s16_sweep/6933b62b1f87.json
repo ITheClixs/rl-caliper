@@ -1,0 +1,109 @@
+{
+  "manifest": {
+    "git_sha": "cfcdfb09f676f9b68462cb6462c99c079a8e5d8f",
+    "git_dirty": true,
+    "config_hash": "6933b62b1f87",
+    "config": {
+      "labels": [
+        "modes-band-0.85",
+        "modes-band-0.60"
+      ]
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794135860.36558,
+    "wall_clock": 1794135860.391575
+  },
+  "result": {
+    "modes-band-0.85": {
+      "record": "0cda7569af39",
+      "ratio": 0.8095541415842673,
+      "error": 1.2352478341263713,
+      "anchor_answer": "1",
+      "anchor_share": 0.59375,
+      "anchor_score": 0.5703125,
+      "seed_answers": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "seed_shares": [
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375,
+        0.59375
+      ],
+      "median_seed_share": 0.59375,
+      "collapsed_seeds": 12,
+      "seeds": 12,
+      "share_explains_score": NaN,
+      "split_prompts": 5,
+      "shared_prompts": 26,
+      "ratio_direction": "too small",
+      "prompts": 64,
+      "commonest_answer_share": 0.359375
+    },
+    "modes-band-0.60": {
+      "record": "1cf5314a230d",
+      "ratio": 2.7983717101082677,
+      "error": 2.7983717101082677,
+      "anchor_answer": "1",
+      "anchor_share": 0.453125,
+      "anchor_score": 0.3994140625,
+      "seed_answers": [
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1",
+        "2",
+        "1",
+        "1",
+        "1",
+        "1",
+        "1"
+      ],
+      "seed_shares": [
+        0.453125,
+        0.46875,
+        0.453125,
+        0.4375,
+        0.453125,
+        0.453125,
+        0.453125,
+        0.453125,
+        0.453125,
+        0.453125,
+        0.453125,
+        0.453125
+      ],
+      "median_seed_share": 0.453125,
+      "collapsed_seeds": 0,
+      "seeds": 12,
+      "share_explains_score": 0.07056046877543273,
+      "split_prompts": 3,
+      "shared_prompts": 1,
+      "ratio_direction": "too large",
+      "prompts": 64,
+      "commonest_answer_share": 0.234375
+    }
+  }
+}

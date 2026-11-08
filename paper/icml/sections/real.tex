@@ -18,7 +18,8 @@ $\numSweepErrors$; the best, on the band at $\numSweepWinBand$, meets a criterio
 declared before the sweep ran, forecasting $\numSweepWinForecast$ against a measured
 $\numSweepWinMeasured$ $[\numSweepWinLow, \numSweepWinHigh]$ on a gain of $\numSweepWinGain$. So
 local covariance forecasting can be quantitatively accurate on a pretrained model, though not
-reliably so.
+reliably so. Nor is collapse the cause: at $\numCollapseMissedBand$, where the forecast is
+$\numCollapseMissedError\times$ too large, runs barely collapse, refuting a prediction we recorded beforehand.
 
 All four sit inside the $\numTolLooseBreakeven\times$ break-even of Section~\ref{sec:sizing},
 which was measured with $z$ read in sample. That is the narrow sense in which these results are

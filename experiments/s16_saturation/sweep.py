@@ -38,6 +38,20 @@ def split_prompts(runs: list[list[dict]], firm: float = 0.9) -> int:
     return count
 
 
+def shared_prompts(runs: list[list[dict]], firm: float = 0.9) -> int:
+    """Prompts on which every run answers firmly with the same string.
+
+    Not part of the committed criterion: added after the band-0.60 forecast turned out to be too
+    large rather than too small. Runs absorbed into one shared answer have no spread to show on
+    that prompt, whatever a linearised forecast carried forward for it.
+    """
+    count = 0
+    for j in range(len(runs[0])):
+        firm_answers = [run[j]["mode"] for run in runs if run[j]["share"] >= firm]
+        count += len(firm_answers) == len(runs) and len(set(firm_answers)) == 1
+    return count
+
+
 def explained(scores: np.ndarray, shares: np.ndarray) -> float:
     """Squared correlation between a run's collapse share and its held-out score."""
     if scores.size < 3 or np.std(shares) == 0 or np.std(scores) == 0:
@@ -73,12 +87,15 @@ def main() -> None:
             "seeds": int(shares.size),
             "share_explains_score": explained(scores, shares),
             "split_prompts": split_prompts([result["anchor_outputs"]] + result["seed_outputs"]),
+            "shared_prompts": shared_prompts([result["anchor_outputs"]] + result["seed_outputs"]),
+            "ratio_direction": "too large" if result["ratio"] > 1 else "too small",
             "prompts": len(result["anchor_outputs"]),
             "commonest_answer_share": float(
                 np.max(np.unique(answers, return_counts=True)[1]) / answers.size),
         }
         row = out[label]
-        print(f"{label}: forecast error {row['error']:.2f}x")
+        print(f"{label}: forecast error {row['error']:.2f}x ({row['ratio_direction']})")
+        print(f"  shared prompts (post hoc): {row['shared_prompts']} of {row['prompts']}")
         print(f"  anchor answers {row['anchor_answer']!r} on {100 * row['anchor_share']:.0f}% "
               f"of prompts (score {row['anchor_score']:.3f})")
         print(f"  later seeds: median share {100 * row['median_seed_share']:.0f}%, "

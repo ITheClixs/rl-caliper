@@ -25,6 +25,17 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("README.md", "where it is {CollapseMissedError}x too large (band {CollapseMissedBand}) they "
+                  "barely collapse"),
+    ("README.md", "({CollapseMissedSplit} of {CollapsePrompts} against {CollapseHeldSplit};"),
+    ("docs/claims.md", "band {CollapseMissedBand} splits on {CollapseMissedSplit} of "
+                       "{CollapsePrompts} prompts against {CollapseHeldSplit} at band "
+                       "{CollapseHeldBand}"),
+    ("docs/claims.md", "`s11`: forecast over measured {SweepRatios} | measured |"),
+    ("docs/predictions.md", "Band {CollapseMissedBand} has {CollapseMissedSplit} split prompts "
+                            "of {CollapsePrompts}"),
+    ("docs/predictions.md", "Only {CollapseMissedShared} prompt gets the same firm answer from "
+                            "every run, against {CollapseHeldShared} at band {CollapseHeldBand}."),
     ("docs/forecast.md", "| measured spread across runs | {RealObservedSpread} |"),
     ("docs/forecast.md", "| evaluation (binomial) part | {RealBinomialPart} |"),
     ("docs/forecast.md", "| seed part, by subtraction | {RealSeedPart}, interval [{RealSeedLo}, "

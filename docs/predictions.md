@@ -25,4 +25,23 @@ original forecast missed by 2.80x, has a larger share of split prompts than band
 **What would refute it.** A split share at or below 8% on band 0.60, with the forecast still missing
 by more than 1.5x.
 
-**Result.** Pending: recorded when the run finishes.
+**Result (2026-11-08, after the run). Refuted.** Band 0.60 has 3 split prompts of 64 (5%), fewer
+than band 0.85's 5, and the forecast still misses by 2.80x (`runs/s16_sweep/6933b62b1f87.json`,
+from `experiments/s16_saturation/sweep.py`). The rerun reproduces the original band-0.60 scores
+run for run, so this is the same miss the sweep reported.
+
+**What the prediction got wrong before the run.** At band 0.60 the forecast is too large (ratio
+of forecast to measured spread 2.80), not too small. Seed-dependent collapse adds spread that a
+linearisation cannot see, so it can only make a forecast too small. It could never have explained
+this miss, and checking the sign of the ratio before writing the prediction would have shown that.
+
+**Looked at after the result, not predicted.** Band 0.60 barely collapses at all. Its anchor answers
+"1" on 29 of 64 prompts and no later run gives one answer to more than half of them. Only 1 prompt
+gets the same firm answer from every run, against 26 at band 0.85. The forecast was accurate where
+runs were absorbed into a shared answer and too large where they were not. That is one pair of
+bands, observed after the fact. It is not a finding until a band that was not used to suggest it
+is tested.
+
+**What stands.** Constant-answer collapse explains the 25x shortfall on the counting task of
+Section 6 and nothing in the support sweep. The 2.80x and 2.13x overpredictions in the two middle
+bands remain unexplained.

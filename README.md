@@ -58,6 +58,13 @@ so the group-baselined update is zero and the run cannot leave it. The spread is
 run is absorbed into, a discrete outcome that a linearisation about one absorbed run cannot see,
 and it also means much of the measured "learning" on that task is guessing.
 
+That explanation does not reach the support sweep. Two of its corpora were rerun with every
+answer recorded. Where the forecast held (band 0.85) the runs collapse, but onto the same answer;
+where it is 2.80x too large (band 0.60) they barely collapse at all. A prediction committed before
+the second rerun finished, that band 0.60 would split on more prompts than band 0.85, was refuted
+(3 of 64 against 5; [`docs/predictions.md`](docs/predictions.md)), and the sweep's errors remain
+unexplained.
+
 `docs/claims.md` indexes every claim in the paper against the experiment that supports it and how
 strongly, including the claims that were withdrawn and why.
 

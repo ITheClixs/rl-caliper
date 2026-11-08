@@ -6,11 +6,9 @@ after every seed and stopping on the first crossing inflates the error of a fixe
 its nominal $z$ carries no coverage guarantee and we claim none. What we report is the mistake rate
 the rule realises, measured against an ordering fixed on seeds no policy may draw. Every policy is
 graded the same way and separated at a common realised rate, so the comparison does not rest on the
-boundary being calibrated; substituting a sequentially valid boundary would move all of these
-policies together, and we would expect it to change the constants and not the ordering. We have not
-verified that. Pairs whose ordering is ambiguous are excluded, so the benchmark says nothing about
-near-ties, where the honest answer is to keep training whatever rule is in use. And the decision is
-over one scalar metric.
+boundary being calibrated; a sequentially valid boundary would move all of them together, which we
+expect but have not verified. Pairs whose ordering is ambiguous are excluded, so the benchmark says nothing about
+near-ties, where the honest answer is to keep training whatever rule is in use.
 
 \paragraph{Scale.} The largest model is a $4$-bit $7$B with $\numAdamScaleSeeds$ seeds, on one
 laptop, and the exact tier where the forecast is validated is the furthest from a frontier run.
@@ -30,5 +28,4 @@ run costs little, but on a pretrained model they face the same sparse sample, un
 \paragraph{Claims we withdrew.} A predicted square-root relation between policy divergence and
 outcome spread is not supported by our data. Nor is a short memory horizon: in $\numTiltedEarly$ of
 $\numMemorySettings$ settings more of the final variance was injected in the first half of the run.
-Token-level advantage reshaping, length normalisation and clipping fall outside the estimator
-family \eqref{eq:family} and are not covered.
+Token-level reshaping, length normalisation and clipping are outside \eqref{eq:family}.
