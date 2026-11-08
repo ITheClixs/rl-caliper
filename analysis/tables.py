@@ -823,6 +823,34 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+def linearity_macros() -> dict[str, str]:
+    """The two-run linearity residual against forecast error (`p4_linearity`, the 36-cell sweep).
+
+    Its own record: an earlier version quoted the headline median here because the two numbers
+    happened to agree, and the sentence followed the headline when that moved.
+    """
+    from scipy.stats import spearmanr
+
+    cells = only("p4_linearity", seeds=48, bands=["easy", "mixed", "hard"])["result"]["cells"]
+    residual = np.array([c["median_residual"] for c in cells])
+    error = np.array([max(c["ratio"], 1 / c["ratio"]) for c in cells])
+    step = np.array([c["step_size"] for c in cells])
+    macros = {
+        "LinearityCells": f"{len(cells)}",
+        "LinearityRank": f"{spearmanr(residual, error)[0]:.2f}",
+        "LinearitySmallStep": f"{np.median(residual[step == step.min()]):.3f}",
+        "LinearityLargeStep": f"{np.median(residual[step == step.max()]):.3f}",
+        "LinearityLargeStepPercent": f"{100 * np.median(residual[step == step.max()]):.0f}",
+        "LinearityStepFactor": f"{step.max() / step.min():.0f}",
+        "LinearityWorstBelow": f"{error[residual < 0.05].max():.2f}",
+        "LinearityWorstAbove": f"{error[residual >= 0.05].max():.2f}",
+    }
+    for tag, lo, hi in (("A", 0, 0.05), ("B", 0.05, 0.12), ("C", 0.12, 0.25), ("D", 0.25, np.inf)):
+        inside = (residual >= lo) & (residual < hi)
+        macros[f"LinearityBucket{tag}"] = f"{np.median(error[inside]):.2f}"
+    return macros
+
+
 def estimated_macros() -> dict[str, str]:
     """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
     result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
@@ -1435,6 +1463,7 @@ def table_numbers() -> None:
     macros |= estimated_macros()
     macros |= shortfall_macros()
     macros |= collapse_sweep_macros()
+    macros |= linearity_macros()
     macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [

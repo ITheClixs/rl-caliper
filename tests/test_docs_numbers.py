@@ -25,6 +25,14 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("docs/claims.md", "`p4_linearity`, rank correlation {LinearityRank} | measured |"),
+    ("docs/claims.md", "the residual does bound the worst case ({LinearityWorstBelow}x vs "
+                       "{LinearityWorstAbove}x)"),
+    ("docs/forecast.md", "from {LinearitySmallStep} to {LinearityLargeStep} as the step size "
+                         "grows eightfold"),
+    ("docs/forecast.md", "the rank correlation between them is {LinearityRank}. The residual "
+                         "bounds the worst case ({LinearityWorstBelow}x below 5%, about "
+                         "{LinearityWorstAbove}x above)"),
     ("README.md", "where it is {CollapseMissedError}x too large (band {CollapseMissedBand}) they "
                   "barely collapse"),
     ("README.md", "({CollapseMissedSplit} of {CollapsePrompts} against {CollapseHeldSplit};"),
