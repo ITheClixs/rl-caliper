@@ -1029,7 +1029,13 @@ def table_numbers() -> None:
             "SpectrumShareLow": f"{100 * shares.min():.0f}",
             "SpectrumShareHigh": f"{100 * shares.max():.0f}",
             "SpectrumFastest": f"{np.nanmin(fastest):.3f}",
+            # what the leading eigenvalue compounds to over a twenty-five-update run
+            "SpectrumGrowthRun": f"{radii.max() ** 25:.1f}",
         }
+        mixed = sorted((c for c in cells if c["band"] == "mixed"), key=lambda c: c["update"])
+        if mixed:
+            macros["SpectrumMixedStart"] = f"{100 * mixed[0]['contracted_share']:.0f}"
+            macros["SpectrumMixedEnd"] = f"{100 * mixed[-1]['contracted_share']:.0f}"
 
     memory = [
         r for r in io.load_all("p3_memory_sources") if len(r["result"].get("cells", [])) >= 100
