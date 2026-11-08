@@ -75,6 +75,8 @@ def main() -> None:
                 "exact_tau_w_scaled": float(exact_tau_w),
                 "crossed_tau_w_scaled": float(est.tau_w_scaled),
                 "exact_ratio": float(exact_tau_w / exact.tau_b),
+                # the alternative the paper argues against, stored so its numbers are generated
+                "subtractive_g_star": float(subtractive_g),
             }
         )
         print(
