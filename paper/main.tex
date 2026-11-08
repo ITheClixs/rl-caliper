@@ -106,9 +106,8 @@
 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \footnotetext[1]{Department of Computer Science, ETH Z\"urich, 8092 Zurich, Switzerland.}
-\footnotetext[2]{ETH Z\"urich neither endorsed, supervised nor funded this work; the author was
-enrolled as an undergrad at the programme BSc Computer Science during this research, hence the
-affiliation.}
+\footnotetext[2]{ETH Z\"urich neither endorsed, supervised nor funded this work; the author was an
+undergraduate in its BSc Computer Science programme during this research, hence the affiliation.}
 \renewcommand{\thefootnote}{\arabic{footnote}}
 
 
@@ -127,6 +126,13 @@ affiliation.}
 \input{sections/applications}
 \input{sections/related}
 \input{sections/discussion}
+
+\paragraph{How this work was done.} The author chose the research questions, decided which
+experiments to run, judged the results, decided which claims to keep, correct or withdraw, and
+derived and checked parts of the theory. AI coding agents (Claude Code) wrote most of the code and
+much of the text, ran the experiment sweeps under that direction, and in a later revision found
+several of the errors this version corrects. Every number in the tables and in the generated macros
+is computed from the stored run records released with the code.
 
 \bibliography{refs}
 

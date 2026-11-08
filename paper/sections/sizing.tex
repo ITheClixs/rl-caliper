@@ -107,8 +107,8 @@ without it.
 The ordering of the six tracks how accurately each predicts the deviation, which is the result
 rather than a coincidence, and it is what makes the next question the operative one.
 
-Note which predictor is doing the work. The frozen forecast is the closed form of
-Section~\ref{sec:estimation}: the step size, the run length and the two noise traces, with no
+Note which predictor is doing the work. The closed form of Section~\ref{sec:estimation}
+(called the frozen forecast in the tables, since it is fixed before any run): the step size, the run length and the two noise traces, with no
 stored trajectory, no backward pass and no adjoint. It reaches $\numSizeFrozenRuns$ runs, within
 $\numSizeFrozenGain\times$ of the adjoint and still $\numSizeFrozenVsFixed\times$ better than a fixed budget. On the
 exact models those traces are computed in closed form; on a trained model they come from the
