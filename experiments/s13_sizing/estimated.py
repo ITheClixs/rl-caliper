@@ -34,9 +34,12 @@ def estimated_deviation(cell: dict, pool: int, seed: int) -> float:
                             cell["diversity"], 0)
     prompts = [make_prompt(policy, a) for a in accepts]
     rng = np.random.default_rng(seed)
+    # a batch larger than the pool has to repeat prompts, as the trainer's own batches do; the
+    # repeats bias tau_b down a little, which is part of what a run's own estimate would carry
+    replace = cell["prompts"] > len(prompts)
     estimate = average([
         simulate_split_batch(prompts, "rloo", cell["prompts"], cell["group_size"], rng,
-                             matrix=None, blocks=2)
+                             matrix=None, blocks=2, replace=replace)
         for _ in range(cell["steps"])
     ])
     spread = max(estimate.tau_b + estimate.tau_w / (cell["group_size"] - 1), FLOOR)
