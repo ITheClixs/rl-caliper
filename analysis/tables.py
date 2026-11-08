@@ -385,6 +385,25 @@ def adam_cold_macros() -> dict[str, str]:
             f"AdamLift{tag}Median": f"{np.median(error):.2f}",
             f"AdamLift{tag}Worst": f"{error.max():.{0 if error.max() >= 100 else 2}f}",
         }
+    # the warmed sweep's other models and its bands, on the table's geometric-median convention
+    cells = adam_lift_record(5, True)["result"]["cells"]
+
+    def log_error(subset: list[dict], key: str) -> np.ndarray:
+        return np.abs(np.log(np.array([c[key] / c["measured_kl"] for c in subset])))
+
+    for tag, key, places in (("Frozen", "momentum_kl", 2), ("Params", "parameters_only_kl", 1),
+                             ("Walk", "walk_kl", 1)):
+        median = np.exp(np.median(log_error(cells, key)))
+        macros[f"AdamLift{tag}Median"] = f"{median:.{places}f}"
+    for band in ("hard", "mixed", "easy"):
+        subset = [c for c in cells if c["band"] == band]
+        error = log_error(subset, "lifted_kl")
+        tag = band.capitalize()
+        macros |= {
+            f"AdamLift{tag}Median": f"{np.exp(np.median(error)):.2f}",
+            f"AdamLift{tag}Worst": f"{np.exp(error.max()):.1f}",
+            f"AdamLift{tag}Top": f"{max(c['final_metric'] for c in subset):.2f}",
+        }
     return macros
 
 
@@ -832,6 +851,9 @@ def hand_typed_macros() -> dict[str, str]:
     cells = headline_grid()["result"]["cells"]
     shift = np.abs(np.log([c["predicted_std"] / c["untransported_std"] for c in cells]))
     macros["TransportShiftPercent"] = f"{100 * (np.exp(np.median(shift)) - 1):.0f}"
+    held_over_carried = [c["untransported_std"] / c["predicted_std"] for c in cells]
+    macros["TransportHeldLow"] = f"{min(held_over_carried):.2f}"
+    macros["TransportHeldHigh"] = f"{max(held_over_carried):.2f}"
 
     rows = only("a5_estimator", batches=2500)["result"]["rows"]
     error = [abs(r["crossed_g_star"] / r["exact_g_star"] - 1) for r in rows]
@@ -1133,6 +1155,14 @@ def table_numbers() -> None:
             "SweepRatios": ", ".join(f"{o['ratio']:.2f}" for o in bands),
             "SweepHalfLow": f"{min(halves):.2f}",
             "SweepHalfHigh": f"{max(halves):.2f}",
+            "SweepRealised": ", ".join(f"{o['anchor_live_share']:.2f}" for o in bands),
+        }
+        # the band that learns most spends its own support along the anchor run
+        fastest = max(bands, key=lambda o: o["observed_spread"]["mean"] - o["base_pass_rate"])
+        macros |= {
+            "SweepFastBand": fastest["label"].split("-")[1],
+            "SweepFastStart": f"{fastest['anchor_trace'][0]['live_share']:.2f}",
+            "SweepFastEnd": f"{fastest['anchor_trace'][-1]['live_share']:.2f}",
         }
         if inside:
             won = inside[0]

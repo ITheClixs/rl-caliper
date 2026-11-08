@@ -90,7 +90,7 @@ the injected term and discarding everything the trajectory does to it.
 \end{table}
 
 It does not, at these horizons (Table~\ref{tab:transport}). The two agree to a median of $\numTransportShiftPercent\%$ in
-the forecast itself (extremes $0.72$ to $1.05$), the median error is $\numForecastMedian\times$
+the forecast itself (held over carried, $\numTransportHeldLow$ to $\numTransportHeldHigh$), the median error is $\numForecastMedian\times$
 carried against $\numForecastHeldMedian\times$ held, and they land inside the measured interval in
 $\numForecastInside$ and $\numForecastHeldInside$ settings. What carrying it back buys is the tail:
 at $T=25$ and $\eta = 1.5$ the worst case is $\numForecastWorst\times$ carried against
@@ -455,16 +455,16 @@ only for an optimiser whose state has been warmed.
 \end{table}
 
 The optimiser state is where almost all of the difficulty lives. Ignoring it underpredicts by
-$24.6\times$ at the median, which is barely better than assuming noise accumulates without any
-filtering at all ($24.2\times$): a recursion on $\theta$ alone cannot see that a perturbation to
+$\numAdamLiftParamsMedian\times$ at the median, which is barely better than assuming noise accumulates without any
+filtering at all ($\numAdamLiftWalkMedian\times$): a recursion on $\theta$ alone cannot see that a perturbation to
 one gradient is still moving the parameters twenty updates later through $m$ and $v$. Carrying the
-full state brings that to $1.10\times$ at the median and $1.8\times$ at worst, and freezing the
-second moment at its mean trajectory rather than propagating it costs little, $1.21\times$.
+full state brings that to $\numAdamLiftWarmMedian\times$ at the median and $\numAdamLiftWarmWorst\times$ at worst, and freezing the
+second moment at its mean trajectory rather than propagating it costs little, $\numAdamLiftFrozenMedian\times$.
 
 What matters more is that the lift no longer degrades where the metric saturates. Splitting by
-pool, the median error is $1.06\times$ on the hard band, $1.13\times$ on the intermediate band
-where the learning signal is live, and $1.10\times$ on the easy band where the pass rate reaches
-$0.72$ and $\E_x[p(1-p)]$ is collapsing. The worst case on that easy band is $1.8\times$.
+pool, the median error is $\numAdamLiftHardMedian\times$ on the hard band, $\numAdamLiftMixedMedian\times$ on the intermediate band
+where the learning signal is live, and $\numAdamLiftEasyMedian\times$ on the easy band where the pass rate reaches
+$\numAdamLiftEasyTop$ and $\E_x[p(1-p)]$ is collapsing. The worst case on that easy band is $\numAdamLiftEasyWorst\times$.
 
 An earlier version of this work reported the opposite, a median of $8.0\times$ on the easy band and
 a worst case two orders of magnitude out, and attributed it to Adam's normalisation being a
@@ -692,9 +692,9 @@ but these experiments do not attribute the remaining error to it uniquely, and w
 they do.
 
 Two features of the sweep are worth recording rather than explaining. Support is endogenous: the
-realised shares are $0.11$, $0.48$, $0.62$ and $0.54$, so the two highest bands reverse, and
+realised shares are $\numSweepRealised$, so the two highest bands reverse, and
 Figure~\ref{fig:support} shows why. The band that learns fastest consumes its own support, falling
-from $0.88$ to about $0.4$, while the lowest band simply stays low throughout. A mean over a run is
+from $\numSweepFastStart$ to $\numSweepFastEnd$ along its anchor run, while the lowest band simply stays low throughout. A mean over a run is
 not the treatment we intended to apply, and a corpus that sustains a low share is not the same
 object as one that starts high and collapses.
 
