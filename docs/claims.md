@@ -28,10 +28,12 @@ Legend for strength:
 |---|---|---|
 | with thresholds read in sample, the forecast needs 9.57x fewer runs than a fixed budget at 0.1% | `s13_sizing`; the fixed budget sits at its 32-run cap, which inflates the ratio | measured |
 | with thresholds chosen on other tasks, the forecast needs 3.14 runs at 0.1% | `s15_sizing_heldout`, leave-one-task-out over 12 tasks, intervals resample tasks | measured |
-| that is 4.5x fewer than an uncapped fixed budget | normal approximation on held-out seeds; the measured budget hits the cap | measured |
+| a fixed budget measured below its cap needs 5.6x to 8.2x as many | `s15` with 24/24 seed splits, 3 splits: 15.3 to 23.3 runs against 2.75 to 2.86 | measured |
+| ~~that is 4.5x fewer than an uncapped fixed budget~~ | withdrawn: a normal approximation on selection-inflated gaps; it said 10 where the measured budget needs 15.3 to 23.3 | negative |
 | and 2.12x fewer than estimating the deviation from spent seeds | `s15` | measured |
 | the free closed form is within 1.11x of the forecast once its threshold is learned | `s15`: [0.97, 1.28], an interval containing one | measured |
-| the stored run's contribution is absolute scale | `s15`: at the textbook threshold the closed form never stops (scale off 84x); the forecast decides in 4.37 runs with 0.001% mistakes at a 1% target | measured |
+| the stored run's scale replaces one learned factor | `s15`: at the textbook threshold the closed form never stops (scale off 84x); with one scale learned on other tasks it decides in 4.64 runs, the forecast in 4.37 runs with 0.001% mistakes at a 1% target | measured |
+| no policy settles near-ties within the seeds available | `s15` at a 2 SE margin: every policy hits the cap at 0.1%, and at 1% all end near a 1% floor | measured |
 | ~~a forecast used for sizing does not need to be calibrated~~ | withdrawn: true only where the threshold is tuned on comparisons with known outcomes | negative |
 | ~~the break-even is wider than every pretrained error~~ | withdrawn: the unanimous corpus (25x) and 7B under Adam (3.1-17x) are outside it | negative |
 

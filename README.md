@@ -36,14 +36,15 @@ the normal quantile of the mistake rate you will tolerate.
 | Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen forecast against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
 | Qwen2.5-0.5B, corpus whose reward groups go unanimous | cheap forecast against 8 seeds | **25x short** |
 | Qwen2.5-7B (4-bit, LoRA) under Adam | lifted forecast against 10 seeds | **3.1x to 17x short** |
-| sizing a comparison (enumerable tier, 1020 comparisons) | runs per comparison, both arms, to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs, against 14 for an uncapped fixed budget (extrapolated; the measured one hits its 32-run cap) and 2.12x as many from spent seeds |
+| sizing a comparison (enumerable tier, clear pairs only) | runs per comparison, both arms, to reach a 0.1% mistake rate, thresholds chosen on other tasks | **3.14** runs; a fixed budget measured below its cap needs 5.6x to 8.2x as many over 3 seed splits, and estimating the spread from spent seeds 2.12x as many |
 
-Two things the sizing benchmark shows that the headline does not. A closed form that needs no
+Three things the sizing benchmark shows that the headline does not. A closed form that needs no
 stored run comes within 1.11x of the forecast once its stopping threshold has been learned on other
 tasks, so on this tier the backward pass adds little to *ranking* configurations. What the stored
-run adds is an *absolute* scale: with the textbook threshold and no calibration the closed form never
-stops (its scale is off by 84x), while the forecast decides in 4.37 runs with a 0.001% mistake rate
-for a 1% target.
+run's scale buys is that one learned factor: at the textbook threshold the uncalibrated closed form
+never stops (its scale is off by 84x), the closed form with one scale learned elsewhere decides in
+4.64 runs, and the forecast in 4.37 runs, about twice the tuned cost either way. And near-ties are
+settled by no policy within the 48 seeds per configuration we have.
 
 Why it fails on pretrained models, as far as the records show: on the counting task those runs
 use, most runs learn to answer one constant whatever they are asked. The run the forecast was made

@@ -142,29 +142,44 @@ share arms and are not independent.
   \label{tab:heldout}
 \end{table}
 
-Thresholds chosen on other tasks transfer: realised mistake rates land at the target for every
-policy. At $0.1\%$ the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs and a fixed budget
+Thresholds chosen on other tasks transfer: realised mistake rates land near the target, the
+largest overshoot being the single deviation for every recipe at $0.12\%$ for a $0.1\%$ target. At
+$0.1\%$ the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs and a fixed budget
 $\numHeldStrictFixedGain\times$ $[\numHeldStrictFixedLo, \numHeldStrictFixedHi]$ as many, but that
-budget is pinned at the cap; without one, the normal approximation puts it at
-$\numHeldStrictUncappedFixedRuns$ runs, $\numHeldStrictUncappedGain\times$ the forecast, and that is
-the comparison we would quote. At $1\%$ the saving is $\numHeldLooseFixedGain\times$ over a fixed
-budget and $\numHeldLooseEmpiricalGain\times$ over a rule that estimates the deviation from spent
-seeds. Against the closed form it is $\numHeldStrictFrozenGain\times$
+budget is pinned at its cap. A normal approximation on the ordering seeds puts the uncapped budget
+at $\numHeldStrictUncappedFixedRuns$ runs, but those gaps are inflated by the selection of clear
+pairs, so we measured it instead: splitting the seeds $24/24$, so that a fixed budget can stop
+below a cap of $24$ per arm, it needs $\numSplitFixedRunsLow$ to $\numSplitFixedRunsHigh$ runs over
+$\numSplitCount$ truth/available splits, $\numSplitFixedGainLow$ to $\numSplitFixedGainHigh\times$ the
+forecast's $\numSplitAdjointRunsLow$ to $\numSplitAdjointRunsHigh$, where the approximation said
+$\numSplitUncappedApprox$. At $1\%$ the saving is $\numHeldLooseFixedGain\times$ over a fixed budget
+and $\numHeldLooseEmpiricalGain\times$ over a rule that estimates the deviation from spent seeds.
+Against the closed form it is $\numHeldStrictFrozenGain\times$
 $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$ at $0.1\%$ and $\numHeldLooseFrozenGain\times$ at
-$1\%$: once a threshold can be learned from comparisons on other tasks, the stored run adds little
-to a forecast that only has to rank configurations.
+$1\%$ ($\numSplitFrozenGainLow$ to $\numSplitFrozenGainHigh\times$ over the $24/24$ splits): once a
+threshold can be learned from comparisons on other tasks, the stored run adds little to a forecast
+that only has to rank. The closed form is fed the exact noise traces here; with traces estimated
+from a run it would face the same sparse-group problem as the forecast on a pretrained model, and
+we have not measured that version. Two caveats on the strict target come from the design: the
+adjoint's mistakes there come from a handful of comparisons in half the tasks, and a call that runs
+to the cap is never wrong, because at four standard errors the sixteen available seeds always agree
+with the ordering seeds.
 
-What the stored run does buy is the absolute scale. With the textbook threshold and nothing
-learned, the closed form never stops, because its scale is off by a factor of
-$\numSizeFrozenScale$, while the adjoint forecast decides in $\numNominalLooseAdjointRuns$ runs with
-a realised mistake rate of $\numNominalLooseAdjointMistakes\%$ against a $1\%$ target. A single
-deviation for every recipe costs the same runs but makes $\numNominalLooseConstantMistakes\%$
-mistakes, and it is not available in practice: we set it to the median measured spread, which
-takes the replicates the forecast exists to avoid. When near-ties are kept, ordering pairs at two
-standard errors rather than four ($\numHeldTieLoosePairs$ pairs), every policy runs into the cap at
-$0.1\%$ and the tuned policies other than the fixed budget are within ten per cent of each other at
-$1\%$; the textbook-threshold adjoint rule then realises $\numNominalTieLooseAdjointMistakes\%$
-mistakes for a $1\%$ target.
+At the textbook threshold the uncalibrated closed form never stops, because its scale is off by a
+factor of $\numSizeFrozenScale$. Given one scale factor learned on other tasks it decides in
+$\numNominalLooseCalibratedRuns$ runs with a realised mistake rate of
+$\numNominalLooseCalibratedMistakes\%$ against a $1\%$ target, and the adjoint forecast in
+$\numNominalLooseAdjointRuns$ runs with $\numNominalLooseAdjointMistakes\%$. What the stored run's
+scale buys, then, is that one factor: it lets the textbook threshold be used without comparisons on
+other tasks to learn it from. Both textbook rules spend about twice the tuned runs, and their low
+realised rates reflect how clear the selected pairs are as much as the forecast. A single deviation
+for every recipe costs $\numNominalLooseConstantRuns$ runs with $\numNominalLooseConstantMistakes\%$
+mistakes; it needs measured spreads from replicates of at least one recipe. When near-ties are
+kept, ordering pairs at two standard errors rather than four ($\numHeldTieLoosePairs$ pairs), every
+policy runs into the cap at $0.1\%$, and at $1\%$ every policy is left at a floor of about $1\%$
+mistakes on the comparisons whose available seeds contradict the ordering seeds. Within the seeds we
+have, no policy settles near-ties, and the result we quote is for comparisons whose ordering is
+clear.
 
 \subsection{The procedure, stated so it can be followed}
 \label{sec:protocol}

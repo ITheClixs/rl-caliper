@@ -65,13 +65,13 @@
   exact, and frozen before the remaining seeds existed, it has a median error of
   $\numForecastMedian\times$ over $\numForecastSettings$ settings.
 
-  Used to size comparisons, with every stopping threshold chosen on other tasks before it is
-  applied, it settles comparisons at a $\numSizeTarget\%$ mistake rate in
-  $\numHeldStrictAdjointRuns$ runs, against $\numHeldStrictUncappedFixedRuns$ for a fixed budget and
-  $\numHeldStrictEmpiricalGain\times$ as many when the deviation is estimated from spent seeds. A
-  closed form that needs no run comes within $\numHeldStrictFrozenGain\times$ once its threshold is
-  learned; what the stored run adds is an absolute scale, which lets the textbook threshold be used
-  with no calibration.
+  Used to size comparisons whose ordering is clear, with every stopping threshold chosen on other
+  tasks before it is applied, it reaches a $\numSizeTarget\%$ mistake rate in
+  $\numHeldStrictAdjointRuns$ runs, $\numSplitFixedGainLow$ to $\numSplitFixedGainHigh\times$ fewer
+  than a fixed budget measured below its cap and $\numHeldStrictEmpiricalGain\times$ fewer than
+  estimating the deviation from spent seeds. A closed form that needs no run comes within
+  $\numHeldStrictFrozenGain\times$ once its threshold is learned on other tasks; the stored run's
+  scale replaces that learning. Near-ties are settled by no policy within the seeds we have.
 
   On pretrained models accuracy is regime-dependent. Across $\numSweepBands$ pre-specified regimes
   on Qwen2.5-0.5B the frozen forecast misses by factors of $\numSweepErrors$, inside the

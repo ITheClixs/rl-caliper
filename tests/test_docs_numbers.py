@@ -30,13 +30,14 @@ CHECKS = [
     ("README.md", "against the value measured over {ForecastSeeds} seeds trained afterwards"),
     ("README.md", "errors {SweepErrors}"),
     ("README.md", "**{AdamScaleShortfallLow}x to {AdamScaleShortfallHigh}x short**"),
-    ("README.md", "**{HeldStrictAdjointRuns}** runs, against {HeldStrictUncappedFixedRuns} for an "
-                  "uncapped fixed budget (extrapolated; the measured one hits its 32-run cap) and "
-                  "{HeldStrictEmpiricalGain}x as many from spent seeds"),
+    ("README.md", "**{HeldStrictAdjointRuns}** runs; a fixed budget measured below its cap needs "
+                  "{SplitFixedGainLow}x to {SplitFixedGainHigh}x as many over {SplitCount} seed "
+                  "splits, and estimating the spread from spent seeds {HeldStrictEmpiricalGain}x"),
+    ("README.md", "the closed form with one scale learned elsewhere decides in "
+                  "{NominalLooseCalibratedRuns} runs, and the forecast in "
+                  "{NominalLooseAdjointRuns}"),
     ("README.md", "comes within {HeldStrictFrozenGain}x of the forecast"),
     ("README.md", "its scale is off by {SizeFrozenScale}x"),
-    ("README.md", "decides in {NominalLooseAdjointRuns} runs with a {NominalLooseAdjointMistakes}% "
-                  "mistake rate"),
     ("README.md", "AUROC {DiagAurocHigh}"),
     ("docs/forecast.md", "Median absolute error **{ForecastMedian}x**, worst **{ForecastWorst}x**; "
                          "forecast inside the measured 95% interval in **{ForecastInside} of "
@@ -59,11 +60,15 @@ CHECKS = [
     ("docs/claims.md", "the worst error is unchanged ({DiagWorstAll}x)"),
     ("docs/claims.md", "thresholds read in sample, the forecast needs {SizeFixedGain}x fewer runs"),
     ("docs/claims.md", "the forecast needs {HeldStrictAdjointRuns} runs at 0.1%"),
-    ("docs/claims.md", "that is {HeldStrictUncappedGain}x fewer than an uncapped fixed budget"),
+    ("docs/claims.md", "needs {SplitFixedGainLow}x to {SplitFixedGainHigh}x as many | `s15` with "
+                       "24/24 seed splits, {SplitCount} splits: {SplitFixedRunsLow} to "
+                       "{SplitFixedRunsHigh} runs against {SplitAdjointRunsLow} to "
+                       "{SplitAdjointRunsHigh}"),
     ("docs/claims.md", "and {HeldStrictEmpiricalGain}x fewer than estimating the deviation"),
     ("docs/claims.md", "within {HeldStrictFrozenGain}x of the forecast once its threshold is "
                        "learned | `s15`: [{HeldStrictFrozenLo}, {HeldStrictFrozenHi}]"),
-    ("docs/claims.md", "scale off {SizeFrozenScale}x); the forecast decides in "
+    ("docs/claims.md", "scale off {SizeFrozenScale}x); with one scale learned on other tasks it "
+                       "decides in {NominalLooseCalibratedRuns} runs, the forecast in "
                        "{NominalLooseAdjointRuns} runs with {NominalLooseAdjointMistakes}% "
                        "mistakes"),
 ]

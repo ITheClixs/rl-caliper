@@ -99,24 +99,23 @@ target. Intervals resample the twelve tasks, since comparisons inside a task sha
   \label{tab:heldout}
 \end{table}
 
-Thresholds chosen on other tasks transfer: realised mistake rates land at the target. At $0.1\%$
-the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs and a fixed budget
-$\numHeldStrictFixedGain\times$ as many, but that budget is pinned at the cap; uncapped, the normal
-approximation puts it at $\numHeldStrictUncappedFixedRuns$ runs, $\numHeldStrictUncappedGain\times$ the
-forecast. At $1\%$ the saving is $\numHeldLooseFixedGain\times$ over a fixed budget and
-$\numHeldLooseEmpiricalGain\times$ over spent seeds. Against the closed form it is
-$\numHeldStrictFrozenGain\times$ $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$, an interval
-containing one: once $z$ can be learned on other tasks, the stored run adds little to a forecast
-that only has to rank.
+Thresholds chosen on other tasks transfer: realised mistake rates land near the target. At $0.1\%$
+the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs; the fixed budget sits at its cap here,
+so we also split the seeds $24/24$, where it can be measured below a cap: over $\numSplitCount$
+splits it needs $\numSplitFixedRunsLow$ to $\numSplitFixedRunsHigh$ runs, $\numSplitFixedGainLow$ to
+$\numSplitFixedGainHigh\times$ the forecast. Against the closed
+form, which here is fed the exact noise traces, it is $\numHeldStrictFrozenGain\times$
+$[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$: once $z$ can be learned on other tasks, the
+stored run adds little to a forecast that only has to rank.
 
-What the stored run buys is the absolute scale. At the textbook threshold the closed form never
-stops, its scale being off by $\numSizeFrozenScale\times$, while the adjoint forecast decides in
-$\numNominalLooseAdjointRuns$ runs with $\numNominalLooseAdjointMistakes\%$ mistakes for a $1\%$
-target. One deviation for every recipe costs the same runs with $\numNominalLooseConstantMistakes\%$
-mistakes, and is not available in practice: it is the median measured spread, which takes the
-replicates the forecast is meant to replace. Keeping near-ties (a margin of two standard errors
-instead of four) puts every policy at the cap at $0.1\%$; at $1\%$ the textbook-threshold adjoint
-rule then realises $\numNominalTieLooseAdjointMistakes\%$.
+At the textbook threshold the uncalibrated closed form never stops, its scale off by
+$\numSizeFrozenScale\times$; given one scale learned on other tasks it decides in
+$\numNominalLooseCalibratedRuns$ runs with $\numNominalLooseCalibratedMistakes\%$ mistakes at a $1\%$
+target, and the adjoint forecast in $\numNominalLooseAdjointRuns$ with
+$\numNominalLooseAdjointMistakes\%$. The stored run's scale stands in for that one learned factor,
+and both textbook rules spend about twice the tuned runs. Keeping near-ties (two standard errors
+instead of four) puts every policy at the cap at $0.1\%$; no policy settles near-ties with the
+seeds we have.
 
 The other use of a deviation is choosing: run several configurations once and keep the one with the
 most gain per unit of noise. With seeds split three ways, never reused across roles, the choice
