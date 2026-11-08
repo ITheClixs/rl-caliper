@@ -97,3 +97,43 @@ knowable before the run, and they are the reason part 2 should have been expecte
 explains the 25x shortfall on the counting task of Section 6. It explains no error in the sweep,
 in either direction. The overpredictions at bands 0.35 and 0.60 remain unexplained, and we have no
 third candidate we would commit to.
+
+## 2026-11-08: the sweep's misses belong to the corpus, not to the run that was the anchor
+
+**Observed so far.** Each band's forecast was frozen from one anchor run (run 0). Its only check on
+its own precision is the half-sample split of the prompts the injected term is estimated from, and
+both halves share the anchor's trajectory and the metric gradient estimated at its end. At band 0.60
+the halves agree to within 2% (0.110 and 0.109) while the forecast is 2.80x the measured spread.
+Three corpora in the middle of the support range (bands 0.35 and 0.60, and the mixed corpus of
+Section 6) were all too large, each from its own anchor. Against that, on band 0.85's corpus the
+s11 sizing runs froze 0.0438 at learning rate 2.5e-4 and 0.0205 at 5e-4, where the measured spread
+halves (0.0135 and 0.0247) as a linear forecast says it should. Something in the forecast moves a
+lot between nearby trajectories, and nothing so far measures how much.
+
+**Test.** Every s11 run is reproducible from its index, so validation seed k can be retrained with
+its states kept and the forecast the protocol would have frozen from it computed, with the same
+estimation keys (`experiments/s19_anchor_spread/run.py`). Each is graded against the resolved spread
+over the other twelve runs. Runs 0 to 3 on bands 0.60 and 0.85. Those leave-one-out spreads are
+already known from the records: 0.0391, 0.0390, 0.0371, 0.0381 at band 0.60; 0.0253, 0.0274,
+0.0276, 0.0268 at band 0.85.
+
+**Validity check, not part of the prediction.** Run 0 must reproduce its held-out scores and the
+frozen forecast (0.1095 and 0.0205). If it does not, the script is wrong and nothing below is graded.
+
+**Hypothesis.** The sweep's pattern is a property of the corpora: another anchor on the same corpus
+would have missed the same way.
+
+**Prediction.**
+1. Band 0.60: at least three of the four forecasts exceed 1.5x their leave-one-out spread.
+2. Band 0.85: at least three of the four forecasts are within 1.5x of theirs.
+
+**What would refute it.** Either part failing. Each part is reported on its own. Not predicted, but
+reported whatever it shows: the ratio of the largest to the smallest forecast on each band, and two
+more forecasts from run 0 with other estimation keys, which hold the trajectory fixed.
+
+**Confounds checked before the run.** The anchors differ only in their sampling keys, and the
+estimation keys are held fixed, so a difference between anchors comes from the trajectory, or from
+the same keys drawing differently on different states. The leave-one-out spreads overlap in eleven
+of their twelve runs, so the four gradings within a band are not independent.
+
+**Result.** Pending: recorded when both bands finish.
