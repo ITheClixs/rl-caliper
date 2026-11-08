@@ -24,8 +24,8 @@ $\numAdamScaleSeeds$ seeds costs. A diagnostic consuming half the experiment it 
 a diagnostic at this scale. What limits it is how well a sparse sample pins down a variance to
 which most prompts contribute exactly zero; an estimator that spends its rollouts finding the live
 groups is the obvious next thing to build, and we have not built it. The closed form
-\eqref{eq:frozen} avoids the backward pass, but its two noise traces would have to be estimated from
-the same sparse sample on a pretrained model, and we have not tested that version.
+\eqref{eq:frozen} avoids the backward pass, and on the exact tier estimating its traces from one
+run costs little, but on a pretrained model they face the same sparse sample, untested.
 
 \paragraph{Claims we withdrew.} A predicted square-root relation between policy divergence and
 outcome spread is not supported by our data. Nor is a short memory horizon: in $\numTiltedEarly$ of

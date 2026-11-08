@@ -104,8 +104,8 @@ the adjoint forecast needs $\numHeldStrictAdjointRuns$ runs; the fixed budget si
 so we also split the seeds $24/24$, where it can be measured below a cap: over $\numSplitCount$
 splits it needs $\numSplitFixedRunsLow$ to $\numSplitFixedRunsHigh$ runs, $\numSplitFixedGainLow$ to
 $\numSplitFixedGainHigh\times$ the forecast. Against the closed
-form, which here is fed the exact noise traces, it is $\numHeldStrictFrozenGain\times$
-$[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$: once $z$ can be learned on other tasks, the
+form it is $\numHeldStrictFrozenGain\times$ $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$
+with exact noise traces and $\numEstStrictGain\times$ with traces estimated from one run: once $z$ can be learned on other tasks, the
 stored run adds little to a forecast that only has to rank.
 
 At the textbook threshold the uncalibrated closed form never stops, its scale off by

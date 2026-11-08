@@ -158,9 +158,16 @@ Against the closed form it is $\numHeldStrictFrozenGain\times$
 $[\numHeldStrictFrozenLo, \numHeldStrictFrozenHi]$ at $0.1\%$ and $\numHeldLooseFrozenGain\times$ at
 $1\%$ ($\numSplitFrozenGainLow$ to $\numSplitFrozenGainHigh\times$ over the $24/24$ splits): once a
 threshold can be learned from comparisons on other tasks, the stored run adds little to a forecast
-that only has to rank. The closed form is fed the exact noise traces here; with traces estimated
-from a run it would face the same sparse-group problem as the forecast on a pretrained model, and
-we have not measured that version. Two caveats on the strict target come from the design: the
+that only has to rank. The closed form is fed the exact noise traces there. Estimating them
+instead with the split estimator of Section~\ref{sec:estimation}, averaged over one run's worth of
+batches at each configuration's own prompt count and group size
+(\texttt{experiments/s13\_sizing/estimated.py}), puts the estimate within $\numEstVsExactMedian\times$
+of the exact closed form at the median, with $\numEstFloored$ of $\numEstConfigurations$
+configurations estimating a spread that is not positive, and moves the held-out cost to
+$\numEstStrictGain\times$ $[\numEstStrictLo, \numEstStrictHi]$ the forecast's runs at $0.1\%$ and
+$\numEstLooseGain\times$ at $1\%$. On this tier estimating the traces costs a little; on a
+pretrained model the same estimate would face the sparse groups the forecast does, which we have
+not measured. Two caveats on the strict target come from the design: the
 adjoint's mistakes there come from a handful of comparisons in half the tasks, and a call that runs
 to the cap is never wrong, because at four standard errors the sixteen available seeds always agree
 with the ordering seeds.

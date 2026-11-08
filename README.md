@@ -42,7 +42,8 @@ the normal quantile of the mistake rate you will tolerate.
 
 Three things the sizing benchmark shows that the headline does not. A closed form that needs no
 stored run comes within 1.11x of the forecast once its stopping threshold has been learned on other
-tasks, so on this tier the backward pass adds little to *ranking* configurations. What the stored
+tasks (1.18x with its noise traces estimated from one run rather than computed exactly), so on
+this tier the backward pass adds little to *ranking* configurations. What the stored
 run's scale buys is that one learned factor: at the textbook threshold the uncalibrated closed form
 never stops (its scale is off by 84x), the closed form with one scale learned elsewhere decides in
 4.64 runs, and the forecast in 4.37 runs, about twice the tuned cost either way. And near-ties are

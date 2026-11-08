@@ -32,6 +32,7 @@ Legend for strength:
 | ~~that is 4.5x fewer than an uncapped fixed budget~~ | withdrawn: a normal approximation on selection-inflated gaps; it said 10 where the measured budget needs 15.3 to 23.3 | negative |
 | and 2.12x fewer than estimating the deviation from spent seeds | `s15` | measured |
 | the free closed form is within 1.11x of the forecast once its threshold is learned | `s15`: [0.97, 1.28], an interval containing one | measured |
+| with traces estimated from one run it is within 1.18x | `s18_sizing_estimated`: [1.00, 1.42] at 0.1%, 1.04x at 1%; 1 of 192 configurations estimates a non-positive spread | measured |
 | the stored run's scale replaces one learned factor | `s15`: at the textbook threshold the closed form never stops (scale off 84x); with one scale learned on other tasks it decides in 4.64 runs, the forecast in 4.37 runs with 0.001% mistakes at a 1% target | measured |
 | no policy settles near-ties within the seeds available | `s15` at a 2 SE margin: every policy hits the cap at 0.1%, and at 1% all end near a 1% floor | measured |
 | ~~a forecast used for sizing does not need to be calibrated~~ | withdrawn: true only where the threshold is tuned on comparisons with known outcomes | negative |

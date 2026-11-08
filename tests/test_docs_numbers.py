@@ -37,6 +37,10 @@ CHECKS = [
                   "{NominalLooseCalibratedRuns} runs, and the forecast in "
                   "{NominalLooseAdjointRuns}"),
     ("README.md", "comes within {HeldStrictFrozenGain}x of the forecast"),
+    ("README.md", "({EstStrictGain}x with its noise traces estimated from one run"),
+    ("docs/claims.md", "with traces estimated from one run it is within {EstStrictGain}x | "
+                       "`s18_sizing_estimated`: [{EstStrictLo}, {EstStrictHi}] at 0.1%, "
+                       "{EstLooseGain}x at 1%; {EstFloored} of {EstConfigurations}"),
     ("README.md", "its scale is off by {SizeFrozenScale}x"),
     ("README.md", "AUROC {DiagAurocHigh}"),
     ("docs/forecast.md", "Median absolute error **{ForecastMedian}x**, worst **{ForecastWorst}x**; "

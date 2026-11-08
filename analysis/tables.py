@@ -743,6 +743,28 @@ def saturation_macros() -> dict[str, str]:
     return macros
 
 
+def estimated_macros() -> dict[str, str]:
+    """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
+    result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
+    macros = {
+        "EstVsExactMedian": f"{result['estimated_vs_exact_median']:.2f}",
+        "EstFloored": f"{result['floored']}",
+        "EstConfigurations": f"{result['configurations']}",
+    }
+    for tag, key in (("Strict", "margin=4,target=0.001"), ("Loose", "margin=4,target=0.01")):
+        held = result["results"][key]["held_out"]["estimated"]
+        plain = result["results"][key]["nominal"]["estimated_calibrated"]
+        lo, hi = held["ratio_interval"]
+        macros |= {
+            f"Est{tag}Gain": f"{held['ratio_to_adjoint']:.2f}",
+            f"Est{tag}Lo": f"{lo:.2f}",
+            f"Est{tag}Hi": f"{hi:.2f}",
+            f"Est{tag}Mistakes": f"{100 * held['mistakes']:.3f}",
+            f"Est{tag}NominalRuns": f"{plain['runs']:.2f}",
+        }
+    return macros
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -1271,6 +1293,7 @@ def table_numbers() -> None:
     macros |= heldout_macros()
     macros |= saturation_macros()
     macros |= adam_cold_macros()
+    macros |= estimated_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"

@@ -1,0 +1,353 @@
+{
+  "manifest": {
+    "git_sha": "690042dcbceca60a0bc04f0de7604d7c35642a00",
+    "git_dirty": true,
+    "config_hash": "a83864d581bb",
+    "config": {
+      "pool": 24,
+      "cells": 192,
+      "cap": 16,
+      "orders": 400,
+      "margin": 4.0,
+      "holdout": 32,
+      "targets": [
+        0.01,
+        0.001
+      ],
+      "grid": 161,
+      "bootstrap": 2000,
+      "seed": 0
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794127867.9458282,
+    "wall_clock": 1794127917.842707
+  },
+  "result": {
+    "results": {
+      "margin=4,target=0.01": {
+        "held_out": {
+          "fixed": {
+            "runs": 6.0,
+            "mistakes": 0.009098039215686275,
+            "ratio_to_adjoint": 2.6912218674968997,
+            "ratio_interval": [
+              2.6529450310992706,
+              2.728302782562952
+            ]
+          },
+          "constant": {
+            "runs": 2.4660882352941176,
+            "mistakes": 0.009813725490196079,
+            "ratio_to_adjoint": 1.1061317643333948,
+            "ratio_interval": [
+              1.0207104891950791,
+              1.211468395772096
+            ]
+          },
+          "empirical": {
+            "runs": 4.048490196078431,
+            "mistakes": 0.010245098039215686,
+            "ratio_to_adjoint": 1.8158975576721808,
+            "ratio_interval": [
+              1.7898484246258954,
+              1.841017625604167
+            ]
+          },
+          "frozen": {
+            "runs": 2.2995098039215685,
+            "mistakes": 0.009612745098039215,
+            "ratio_to_adjoint": 1.0314151781395389,
+            "ratio_interval": [
+              0.9942103255165979,
+              1.0755456571106212
+            ]
+          },
+          "calibrated": {
+            "runs": 2.289892156862745,
+            "mistakes": 0.00981372549019608,
+            "ratio_to_adjoint": 1.02710130779311,
+            "ratio_interval": [
+              0.9881464160283109,
+              1.0728090769795304
+            ]
+          },
+          "adjoint": {
+            "runs": 2.2294705882352943,
+            "mistakes": 0.009823529411764705,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 2.2201372549019607,
+            "mistakes": 0.009480392156862746,
+            "ratio_to_adjoint": 0.9958136548727825,
+            "ratio_interval": [
+              0.9904022624750475,
+              1.001460982014362
+            ]
+          },
+          "estimated": {
+            "runs": 2.3180343137254904,
+            "mistakes": 0.009840686274509805,
+            "ratio_to_adjoint": 1.039724105784368,
+            "ratio_interval": [
+              0.9900861294093353,
+              1.1004220480565252
+            ]
+          },
+          "estimated_calibrated": {
+            "runs": 2.3360245098039214,
+            "mistakes": 0.009762254901960784,
+            "ratio_to_adjoint": 1.0477933739655065,
+            "ratio_interval": [
+              0.9924522320030487,
+              1.115842547246897
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 4.360274509803921,
+            "mistakes": 0.002181372549019608,
+            "ratio_to_adjoint": 0.997400803306519,
+            "ratio_interval": [
+              0.8595073622767437,
+              1.1659320282195125
+            ]
+          },
+          "empirical": {
+            "runs": 5.394754901960784,
+            "mistakes": 0.0019362745098039217,
+            "ratio_to_adjoint": 1.2340353481779833,
+            "ratio_interval": [
+              1.163892713152203,
+              1.3190855893300073
+            ]
+          },
+          "frozen": {
+            "runs": 32.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 7.319911999587358,
+            "ratio_interval": [
+              6.737173837728275,
+              8.054010107437104
+            ]
+          },
+          "calibrated": {
+            "runs": 4.642970588235294,
+            "mistakes": 0.00012745098039215687,
+            "ratio_to_adjoint": 1.0620667538298345,
+            "ratio_interval": [
+              0.8923415843792396,
+              1.2666940701515388
+            ]
+          },
+          "adjoint": {
+            "runs": 4.371637254901961,
+            "mistakes": 9.803921568627451e-06,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 4.313549019607843,
+            "mistakes": 6.372549019607843e-05,
+            "ratio_to_adjoint": 0.9867124759198668,
+            "ratio_interval": [
+              0.9546995604649423,
+              1.0247450513604426
+            ]
+          },
+          "estimated": {
+            "runs": 32.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 7.319911999587358,
+            "ratio_interval": [
+              6.737173837728275,
+              8.054010107437104
+            ]
+          },
+          "estimated_calibrated": {
+            "runs": 5.04613725490196,
+            "mistakes": 4.1666666666666665e-05,
+            "ratio_to_adjoint": 1.154290020116302,
+            "ratio_interval": [
+              0.9699343032464305,
+              1.3773365583690367
+            ]
+          }
+        }
+      },
+      "margin=4,target=0.001": {
+        "held_out": {
+          "fixed": {
+            "runs": 32.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 10.198215312320341,
+            "ratio_interval": [
+              9.586949016670665,
+              10.881141756865885
+            ]
+          },
+          "constant": {
+            "runs": 6.235343137254902,
+            "mistakes": 0.0011911764705882352,
+            "ratio_to_adjoint": 1.9871678706226408,
+            "ratio_interval": [
+              1.5568635247229652,
+              2.5338306454148523
+            ]
+          },
+          "empirical": {
+            "runs": 6.6622941176470585,
+            "mistakes": 0.001019607843137255,
+            "ratio_to_adjoint": 2.1232346839303116,
+            "ratio_interval": [
+              2.007965010509581,
+              2.259043492539014
+            ]
+          },
+          "frozen": {
+            "runs": 3.480529411764706,
+            "mistakes": 0.0008333333333333333,
+            "ratio_to_adjoint": 1.1092246356887543,
+            "ratio_interval": [
+              0.9709614907695134,
+              1.280698525631038
+            ]
+          },
+          "calibrated": {
+            "runs": 3.4718627450980395,
+            "mistakes": 0.000803921568627451,
+            "ratio_to_adjoint": 1.1064626190416675,
+            "ratio_interval": [
+              0.9666629344679215,
+              1.2780702623420013
+            ]
+          },
+          "adjoint": {
+            "runs": 3.137803921568628,
+            "mistakes": 0.0009754901960784314,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 3.219705882352941,
+            "mistakes": 0.0008627450980392156,
+            "ratio_to_adjoint": 1.026101682205614,
+            "ratio_interval": [
+              1.0142660827013261,
+              1.0401064934174222
+            ]
+          },
+          "estimated": {
+            "runs": 3.7128088235294117,
+            "mistakes": 0.001156862745098039,
+            "ratio_to_adjoint": 1.1832507436198663,
+            "ratio_interval": [
+              0.9953116184746973,
+              1.4163078785253178
+            ]
+          },
+          "estimated_calibrated": {
+            "runs": 3.722132352941177,
+            "mistakes": 0.001159313725490196,
+            "ratio_to_adjoint": 1.1862220986327392,
+            "ratio_interval": [
+              0.9934077849906318,
+              1.4161760313865472
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 5.773441176470588,
+            "mistakes": 0.0010784313725490198,
+            "ratio_to_adjoint": 0.9681901357854397,
+            "ratio_interval": [
+              0.7944636078228609,
+              1.163932698508328
+            ]
+          },
+          "empirical": {
+            "runs": 6.300764705882353,
+            "mistakes": 0.0011519607843137256,
+            "ratio_to_adjoint": 1.0566208349020698,
+            "ratio_interval": [
+              0.9925146201470124,
+              1.1304347890978337
+            ]
+          },
+          "frozen": {
+            "runs": 32.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 5.36631159790806,
+            "ratio_interval": [
+              5.004285153634526,
+              5.807244845799616
+            ]
+          },
+          "calibrated": {
+            "runs": 6.226176470588235,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.0441125938981222,
+            "ratio_interval": [
+              0.8431359211043846,
+              1.2584080350994462
+            ]
+          },
+          "adjoint": {
+            "runs": 5.963127450980392,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 5.872588235294118,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 0.9848168236499141,
+            "ratio_interval": [
+              0.9413300816139945,
+              1.0352196191311642
+            ]
+          },
+          "estimated": {
+            "runs": 32.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 5.36631159790806,
+            "ratio_interval": [
+              5.004285153634526,
+              5.807244845799616
+            ]
+          },
+          "estimated_calibrated": {
+            "runs": 6.897872549019608,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.156754170646736,
+            "ratio_interval": [
+              0.9443341843658676,
+              1.393234375946177
+            ]
+          }
+        }
+      }
+    },
+    "estimated_vs_exact_median": 1.1191648230607179,
+    "estimated_vs_exact_worst": 223693.4914135779,
+    "floored": 1,
+    "configurations": 192,
+    "source": "2c066737397a"
+  }
+}
