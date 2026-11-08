@@ -777,6 +777,52 @@ def estimated_macros() -> dict[str, str]:
     return macros
 
 
+def hand_typed_macros() -> dict[str, str]:
+    """Numbers the eight-page text used to type by hand, now computed from their records."""
+    macros: dict[str, str] = {}
+    cells = headline_grid()["result"]["cells"]
+    shift = np.abs(np.log([c["predicted_std"] / c["untransported_std"] for c in cells]))
+    macros["TransportShiftPercent"] = f"{100 * (np.exp(np.median(shift)) - 1):.0f}"
+
+    rows = only("a5_estimator", batches=2500)["result"]["rows"]
+    error = [abs(r["crossed_g_star"] / r["exact_g_star"] - 1) for r in rows]
+    ratios = [r["exact_ratio"] for r in rows]
+    # the example quoted is the most homogeneous pool in the broad band
+    example = min((r for r in rows if r["band"] == "broad"), key=lambda r: r["diversity"])
+    hard = min((r for r in rows if r["band"] == "hard"), key=lambda r: r["diversity"])
+    g_star = [r["exact_g_star"] for r in rows]
+    tau_b_error = [abs(r["crossed_tau_b"] / r["exact_tau_b"] - 1) for r in rows]
+    tau_w_error = [abs(r["crossed_tau_w_scaled"] / r["exact_tau_w_scaled"] - 1) for r in rows]
+    macros |= {
+        "EstimatorGStarWorst": f"{100 * max(error):.1f}",
+        "EstimatorTauBError": f"{100 * np.median(tau_b_error):.1f}",
+        "EstimatorTauWError": f"{100 * np.median(tau_w_error):.1f}",
+        "EstimatorGStarLow": f"{min(g_star):.1f}",
+        "EstimatorGStarHigh": f"{max(g_star):.1f}",
+        "SubtractiveHardExample": f"{hard['subtractive_g_star']:.1f}",
+        "SubtractiveHardExact": f"{hard['exact_g_star']:.1f}",
+        "EstimatorGStarError": f"{100 * np.median(error):.1f}",
+        "EstimatorRatioRange": f"{max(ratios) / min(ratios):.0f}",
+        "SubtractiveExample": f"{example['subtractive_g_star']:.1f}",
+        "SubtractiveExact": f"{example['exact_g_star']:.1f}",
+    }
+
+    record = real_sizing_record()
+    if record is not None:
+        arms = record["result"]["arms"]
+        forecast = [a["adjoint"] for a in arms]
+        measured = [a["oracle"] for a in arms]
+        means = [float(np.mean(a["scores"])) for a in arms]
+        macros |= {
+            "RealSizeTrackForecast": f"{max(forecast) / min(forecast):.1f}",
+            "RealSizeTrackMeasured": f"{max(measured) / min(measured):.1f}",
+            "RealSizeMeanGap": f"{max(means) - min(means):.3f}",
+            "RealSizeDevLow": f"{min(measured):.3f}",
+            "RealSizeDevHigh": f"{max(measured):.3f}",
+        }
+    return macros
+
+
 def table_numbers() -> None:
     """Numbers quoted in the paper's prose, as macros, so they are not transcribed by hand."""
     macros: dict[str, str] = {}
@@ -1307,6 +1353,7 @@ def table_numbers() -> None:
     macros |= adam_cold_macros()
     macros |= estimated_macros()
     macros |= shortfall_macros()
+    macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"

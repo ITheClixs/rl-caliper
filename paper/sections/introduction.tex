@@ -77,7 +77,7 @@ be carried against the gradient of the reported metric instead of being formed.
   because expansion is slow relative to run length, not because every direction shrinks.
 
   \item \textbf{An honest accounting of what the backward pass buys.} Holding the adjoint at
-  $\nabla M$ instead of carrying it back changes the forecast by a median of $2\%$ and the median
+  $\nabla M$ instead of carrying it back changes the forecast by a median of $\numTransportShiftPercent\%$ and the median
   error not at all, so the Hessian-vector products, two of the three passes per update, are
   unnecessary over runs of this length. The recursion explains why: most of the spectrum of $A_t$
   sits within $10^{-4}$ of one and $\nabla M$ points into that part of it. We recommend the cheap

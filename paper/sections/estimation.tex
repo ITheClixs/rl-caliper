@@ -34,9 +34,10 @@ Getting this right requires handling three biases, each easy to walk into.
 subtracting the within-prompt part differences two large, highly correlated quantities. On
 homogeneous pools it returns a negative $\tau_b$ and an infinite $G^{\star}$; where it returns something
 finite, it compresses the answer toward the middle of the range. Measured against exactly known
-values over pools whose noise ratio spans a factor of $26$, \eqref{eq:estimators} recovers $G^{\star}$
-to a median error of $1.3\%$ and a worst case of $6.2\%$, while the subtractive form reports
-$6.1$ where the truth is $9.4$ and $6.9$ where the truth is $15.2$.
+values over pools whose noise ratio spans a factor of $\numEstimatorRatioRange$, \eqref{eq:estimators} recovers $G^{\star}$
+to a median error of $\numEstimatorGStarError\%$ and a worst case of $\numEstimatorGStarWorst\%$, while the subtractive
+form reports $\numSubtractiveExample$ where the truth is $\numSubtractiveExact$ and $\numSubtractiveHardExample$ where the
+truth is $\numSubtractiveHardExact$.
 
 \paragraph{The probe measures a half-sized estimator.} One calibration batch supplies two
 independent estimates per prompt by splitting the group in two, so the advantages inside each half

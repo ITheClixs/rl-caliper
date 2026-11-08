@@ -252,7 +252,7 @@ it than let a reader discover it.
 
 It is also usually unnecessary. Section~\ref{sec:exp-forecast} ablates the transport, holding
 $b$ at $\nabla M(\theta_T)$ instead of carrying it back, and finds the forecast changes by a
-median of $2\%$ and the median error not at all, over runs of ten and twenty-five updates. The
+median of $\numTransportShiftPercent\%$ and the median error not at all, over runs of ten and twenty-five updates. The
 reason is in the spectrum: most of $A_t$ sits within $10^{-4}$ of one and $\nabla M$ points into
 that part of it, so $\Phi_{T,t}$ is close to the identity along the one direction the forecast
 needs. What we recommend, then, is the cheap estimator,

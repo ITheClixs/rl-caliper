@@ -84,12 +84,12 @@ the injected term and discarding everything the trajectory does to it.
   \centering
   \input{tables/transport}
   \caption{Forecast error with the adjoint carried back against held at $\nabla M$. Carrying it
-  changes the forecast by a median of $2\%$ and buys only the worst case, and only where the run is
+  changes the forecast by a median of $\numTransportShiftPercent\%$ and buys only the worst case, and only where the run is
   long and the step large.}
   \label{tab:transport}
 \end{table}
 
-It does not, at these horizons (Table~\ref{tab:transport}). The two agree to a median of $2\%$ in
+It does not, at these horizons (Table~\ref{tab:transport}). The two agree to a median of $\numTransportShiftPercent\%$ in
 the forecast itself (extremes $0.72$ to $1.05$), the median error is $\numForecastMedian\times$
 carried against $\numForecastHeldMedian\times$ held, and they land inside the measured interval in
 $\numForecastInside$ and $\numForecastHeldInside$ settings. What carrying it back buys is the tail:
@@ -407,9 +407,10 @@ The forecast needs one scalar per update, but the batch-allocation results of
 Section~\ref{sec:applications} need the two traces separately, and the same estimator supplies
 both. Figure~\ref{fig:estimator-accuracy} compares the group size recovered by the estimator of
 Section~\ref{sec:estimation} against the exactly known value, over pools whose noise ratio spans a
-factor of $26$ and whose $G^{\star}$ runs from $3.8$ to $15.2$. The median error in $G^{\star}$ is $1.3\%$
-and the worst is $6.2\%$, using $2500$ batches of $32$ prompts split into $K = 8$ blocks; the
-individual traces are recovered to $2.1\%$ ($\tau_w$) and $3.4\%$ ($\tau_b$) at the median.
+factor of $\numEstimatorRatioRange$ and whose $G^{\star}$ runs from $\numEstimatorGStarLow$ to $\numEstimatorGStarHigh$. The median error in $G^{\star}$ is $\numEstimatorGStarError\%$
+and the worst is $\numEstimatorGStarWorst\%$, using $2500$ batches of $32$ prompts split into $K = 8$ blocks; the
+individual traces are recovered to $\numEstimatorTauWError\%$ ($\tau_w$) and $\numEstimatorTauBError\%$ ($\tau_b$) at the
+median.
 
 \begin{figure}[t]
   \centering
@@ -949,7 +950,8 @@ compressed range, but it is the right ordering from one run each.
 \paragraph{The benchmark built on it is underpowered, and we report it as such.} Only
 $\numRealSizePairs$ of the $\numRealSizeAllPairs$ recipe pairs are ordered unambiguously at
 $\numRealSizeMargin$ standard errors; the median pair is separated by $1.5$. The six recipes differ
-in mean by at most $0.025$ while their per-recipe deviations run from $0.010$ to $0.049$, so most
+in mean by at most $\numRealSizeMeanGap$ while their per-recipe deviations run from $\numRealSizeDevLow$ to
+$\numRealSizeDevHigh$, so most
 of these pairs are genuine near-ties at sixteen seeds. That fact is worth stating on its own, since
 it is the paper's premise showing up in the data: at this scale, most of the recipe choices a
 practitioner would actually weigh are not resolvable by the seed counts anyone runs.

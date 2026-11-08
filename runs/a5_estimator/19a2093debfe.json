@@ -1,6 +1,7 @@
 {
   "manifest": {
-    "git_sha": "68fb3cbf0afb8675ef0eb3c1eb9ca9adf2f8dbec",
+    "git_sha": "7b4a6412eb6cf936c7e10f776984d6c42d732317",
+    "git_dirty": false,
     "config_hash": "19a2093debfe",
     "config": {
       "batches": 2500,
@@ -12,8 +13,9 @@
       "seed": 0
     },
     "python": "3.12.13",
-    "platform": "macOS-26.0.1-arm64-arm-64bit",
-    "wall_clock": 1787495318.267458
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794128277.2140448,
+    "wall_clock": 1794128350.747332
   },
   "result": {
     "rows": [
@@ -21,166 +23,181 @@
         "band": "broad",
         "diversity": 0.03,
         "exact_g_star": 9.420003741616501,
-        "crossed_g_star": 9.219169415325503,
+        "crossed_g_star": 9.227207724743323,
         "exact_tau_b": 0.0004049315673132526,
-        "crossed_tau_b": 0.00042233214970034466,
+        "crossed_tau_b": 0.0004215072822204612,
         "exact_tau_w_scaled": 0.028708215883133947,
         "crossed_tau_w_scaled": 0.028530541049041132,
-        "exact_ratio": 70.89646300883587
+        "exact_ratio": 70.89646300883587,
+        "subtractive_g_star": 6.076513337877489
       },
       {
         "band": "broad",
         "diversity": 0.08,
-        "exact_g_star": 8.34163727578364,
-        "crossed_g_star": 8.298469065018304,
-        "exact_tau_b": 0.0010283775659944339,
-        "crossed_tau_b": 0.0010637771179390024,
+        "exact_g_star": 8.341637275783647,
+        "crossed_g_star": 8.30560693378052,
+        "exact_tau_b": 0.001028377565994432,
+        "crossed_tau_b": 0.001061699428255528,
         "exact_tau_w_scaled": 0.05542917842045199,
         "crossed_tau_w_scaled": 0.05666490793361206,
-        "exact_ratio": 53.899637889175814
+        "exact_ratio": 53.899637889175914,
+        "subtractive_g_star": 5.873480523466096
       },
       {
         "band": "broad",
         "diversity": 0.2,
         "exact_g_star": 6.5154004827924386,
-        "crossed_g_star": 6.5654625839805805,
+        "crossed_g_star": 6.570905580473624,
         "exact_tau_b": 0.0019953490008523204,
-        "crossed_tau_b": 0.001980549669351377,
+        "crossed_tau_b": 0.001976681408278425,
         "exact_tau_w_scaled": 0.060697803239900955,
         "crossed_tau_w_scaled": 0.061346285735843345,
-        "exact_ratio": 30.41964248558707
+        "exact_ratio": 30.41964248558707,
+        "subtractive_g_star": 5.221284550991424
       },
       {
         "band": "broad",
         "diversity": 0.5,
         "exact_g_star": 6.201935805552749,
-        "crossed_g_star": 5.949219246333205,
+        "crossed_g_star": 5.954059559711401,
         "exact_tau_b": 0.002539658067258196,
-        "crossed_tau_b": 0.002830465541287276,
+        "crossed_tau_b": 0.0028249372882769496,
         "exact_tau_w_scaled": 0.06872349301119414,
         "crossed_tau_w_scaled": 0.0693316056769102,
-        "exact_ratio": 27.060136125091724
+        "exact_ratio": 27.060136125091724,
+        "subtractive_g_star": 4.924482456322232
       },
       {
         "band": "broad",
         "diversity": 1.0,
         "exact_g_star": 3.7722039673060572,
-        "crossed_g_star": 3.804353981639889,
+        "crossed_g_star": 3.8070966267762074,
         "exact_tau_b": 0.005525165231344617,
-        "crossed_tau_b": 0.005542894364095281,
+        "crossed_tau_b": 0.0055320683985404075,
         "exact_tau_w_scaled": 0.042461529292677574,
         "crossed_tau_w_scaled": 0.04359154538966227,
-        "exact_ratio": 7.685114836347443
+        "exact_ratio": 7.685114836347443,
+        "subtractive_g_star": 3.5684787690616298
       },
       {
         "band": "hard",
         "diversity": 0.03,
-        "exact_g_star": 15.1697928890588,
-        "crossed_g_star": 15.191738851642619,
-        "exact_tau_b": 0.00030329488920042056,
-        "crossed_tau_b": 0.0003109448982910846,
-        "exact_tau_w_scaled": 0.060896466994530565,
+        "exact_g_star": 15.169792889058794,
+        "crossed_g_star": 15.205618306159483,
+        "exact_tau_b": 0.0003032948892004207,
+        "crossed_tau_b": 0.0003103375840366098,
+        "exact_tau_w_scaled": 0.060896466994530545,
         "crossed_tau_w_scaled": 0.06262599767336234,
-        "exact_ratio": 200.7830305188213
+        "exact_ratio": 200.78303051882114,
+        "subtractive_g_star": 6.934291250284839
       },
       {
         "band": "hard",
         "diversity": 0.08,
         "exact_g_star": 9.995319902928484,
-        "crossed_g_star": 10.400540929939915,
-        "exact_tau_b": 0.0007266619698263935,
-        "crossed_tau_b": 0.0006944354606391226,
+        "crossed_g_star": 10.409734615198287,
+        "exact_tau_b": 0.0007266619698263934,
+        "crossed_tau_b": 0.0006930791413800618,
         "exact_tau_w_scaled": 0.05879842019821385,
         "crossed_tau_w_scaled": 0.061367379554789867,
-        "exact_ratio": 80.91578015602131
+        "exact_ratio": 80.91578015602133,
+        "subtractive_g_star": 6.323975205606528
       },
       {
         "band": "hard",
         "diversity": 0.2,
         "exact_g_star": 5.802076464359534,
-        "crossed_g_star": 5.997837834160409,
+        "crossed_g_star": 6.002725696291121,
         "exact_tau_b": 0.0023536757767625887,
-        "crossed_tau_b": 0.002264581527879687,
-        "exact_tau_w_scaled": 0.0542756183540616,
+        "crossed_tau_b": 0.002260158517083047,
+        "exact_tau_w_scaled": 0.05427561835406158,
         "crossed_tau_w_scaled": 0.05656558477561727,
-        "exact_ratio": 23.05993836955577
+        "exact_ratio": 23.059938369555763,
+        "subtractive_g_star": 4.942345520333786
       },
       {
         "band": "hard",
         "diversity": 0.5,
-        "exact_g_star": 4.868799900685656,
-        "crossed_g_star": 4.842914825512316,
-        "exact_tau_b": 0.003345283222684071,
-        "crossed_tau_b": 0.003418389001520536,
+        "exact_g_star": 4.868799900685655,
+        "crossed_g_star": 4.84667317831816,
+        "exact_tau_b": 0.0033452832226840714,
+        "crossed_tau_b": 0.003411712460501941,
         "exact_tau_w_scaled": 0.05007090355375413,
         "crossed_tau_w_scaled": 0.05048274948155436,
-        "exact_ratio": 14.967612671545341
+        "exact_ratio": 14.96761267154534,
+        "subtractive_g_star": 4.299594569268485
       },
       {
         "band": "hard",
         "diversity": 1.0,
         "exact_g_star": 4.285691860846724,
-        "crossed_g_star": 4.28191192212544,
+        "crossed_g_star": 4.2851216167039325,
         "exact_tau_b": 0.004536144649950965,
-        "crossed_tau_b": 0.004612739954595084,
+        "crossed_tau_b": 0.004603730696871266,
         "exact_tau_w_scaled": 0.0489711788838609,
         "crossed_tau_w_scaled": 0.04968357233837084,
-        "exact_ratio": 10.795771004434409
+        "exact_ratio": 10.795771004434409,
+        "subtractive_g_star": 3.9280347579149995
       },
       {
         "band": "easy",
         "diversity": 0.03,
-        "exact_g_star": 13.931236877443238,
-        "crossed_g_star": 13.072444742448473,
-        "exact_tau_b": 0.00030136301353915387,
-        "crossed_tau_b": 0.0003559177056979534,
+        "exact_g_star": 13.931236877443235,
+        "crossed_g_star": 13.084251537194472,
+        "exact_tau_b": 0.000301363013539154,
+        "crossed_tau_b": 0.0003552225539290122,
         "exact_tau_w_scaled": 0.05039298503536663,
         "crossed_tau_w_scaled": 0.05187284235882854,
-        "exact_ratio": 167.21688718054793
+        "exact_ratio": 167.21688718054787,
+        "subtractive_g_star": 6.735585641265079
       },
       {
         "band": "easy",
         "diversity": 0.08,
         "exact_g_star": 8.973842448335748,
-        "crossed_g_star": 8.74926597948048,
-        "exact_tau_b": 0.0002499894840238454,
-        "crossed_tau_b": 0.0002673574306539658,
-        "exact_tau_w_scaled": 0.01589487221920619,
+        "crossed_g_star": 8.756844725526026,
+        "exact_tau_b": 0.00024998948402384547,
+        "crossed_tau_b": 0.0002668352481722198,
+        "exact_tau_w_scaled": 0.015894872219206192,
         "crossed_tau_w_scaled": 0.016055114012180034,
-        "exact_ratio": 63.58216339088106
+        "exact_ratio": 63.58216339088106,
+        "subtractive_g_star": 6.018024369622385
       },
       {
         "band": "easy",
         "diversity": 0.2,
         "exact_g_star": 7.826629801840004,
-        "crossed_g_star": 8.059214475280646,
+        "crossed_g_star": 8.066118354168122,
         "exact_tau_b": 0.0009059315442666758,
-        "crossed_tau_b": 0.0008692257758223712,
+        "crossed_tau_b": 0.0008675280692289683,
         "exact_tau_w_scaled": 0.04221901401899572,
         "crossed_tau_w_scaled": 0.04331570130366436,
-        "exact_ratio": 46.60287445137009
+        "exact_ratio": 46.60287445137009,
+        "subtractive_g_star": 5.767632317539887
       },
       {
         "band": "easy",
         "diversity": 0.5,
         "exact_g_star": 4.668564922919933,
-        "crossed_g_star": 4.691255916524602,
+        "crossed_g_star": 4.694865947623615,
         "exact_tau_b": 0.002245195206694044,
-        "crossed_tau_b": 0.002257308199897909,
-        "exact_tau_w_scaled": 0.030216664656448716,
+        "crossed_tau_b": 0.0022528993948199836,
+        "exact_tau_w_scaled": 0.03021666465644871,
         "crossed_tau_w_scaled": 0.0307566599722815,
-        "exact_ratio": 13.458368593678538
+        "exact_ratio": 13.458368593678536,
+        "subtractive_g_star": 4.206448407835726
       },
       {
         "band": "easy",
         "diversity": 1.0,
         "exact_g_star": 4.434940260156145,
-        "crossed_g_star": 4.490428172140772,
+        "crossed_g_star": 4.49384179464088,
         "exact_tau_b": 0.0029625309451014677,
-        "crossed_tau_b": 0.002930747148503705,
+        "crossed_tau_b": 0.0029250230329792835,
         "exact_tau_w_scaled": 0.03495435334088283,
         "crossed_tau_w_scaled": 0.035705552833466755,
-        "exact_ratio": 11.798814590841559
+        "exact_ratio": 11.798814590841559,
+        "subtractive_g_star": 4.068837186995652
       }
     ]
   }

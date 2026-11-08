@@ -31,11 +31,11 @@ $\numRealSizeRecipes$ recipes on one corpus at a matched rollout budget of $64$ 
 crossing $(P,G) \in \{(16,4),(8,8)\}$ with three learning rates spanning a factor of four:
 $\numRealSizeRuns$ training runs. The forecast holds up, at a median error of
 $\numRealSizeError\times$ and a worst of $\numRealSizeErrorWorst\times$, all six inside the
-break-even, tracking $3.0\times$ of the $4.7\times$ spread in measured deviation across recipes.
+break-even, tracking $\numRealSizeTrackForecast\times$ of the $\numRealSizeTrackMeasured\times$ spread in measured deviation across recipes.
 
 The benchmark does not. Only $\numRealSizePairs$ of $\numRealSizeAllPairs$ pairs are ordered
 unambiguously at $\numRealSizeMargin$ standard errors, because the recipes differ in mean by at
-most $0.025$ while their deviations run from $0.010$ to $0.049$: most are genuine near-ties at
+most $\numRealSizeMeanGap$ while their deviations run from $\numRealSizeDevLow$ to $\numRealSizeDevHigh$: most are genuine near-ties at
 sixteen seeds, which is the paper's premise appearing in its own data. On four comparisons a
 stopping rule beats a fixed budget by $\numRealSizeFixedGain$
 $[\numRealSizeFixedLo, \numRealSizeFixedHi]$ and nothing else separates, the ordering among the
