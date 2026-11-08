@@ -823,6 +823,29 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+def example_macros() -> dict[str, str]:
+    """The one setting the text walks through, graded like the headline (anchor excluded)."""
+
+    def sci(value: float, digits: int) -> str:
+        mantissa, exponent = f"{value:.{digits}e}".split("e")
+        return f"{mantissa}\\times10^{{{int(exponent)}}}"
+
+    cell = next(
+        c for c in headline_grid()["result"]["cells"]
+        if (c["steps"], c["prompts"], c["group_size"], c["band"], c["step_size"], c["vocab"],
+            c["length"], c["diversity"]) == (25, 32, 8, "mixed", 0.5, 3, 3, 1.0)
+    )
+    return {
+        "ExampleScore": f"{cell['mean_score']:.3f}",
+        "ExampleForecast": sci(cell["predicted_std"], 2),
+        "ExampleMeasured": sci(cell["measured_std"], 2),
+        "ExampleLo": sci(cell["measured_lo"], 1),
+        "ExampleHi": sci(cell["measured_hi"], 1),
+        "ExampleSeeds": f"{cell['seeds']}",
+        "ExampleBand": f"{2 * cell['predicted_std']:.3f}",
+    }
+
+
 def linearity_macros() -> dict[str, str]:
     """The two-run linearity residual against forecast error (`p4_linearity`, the 36-cell sweep).
 
@@ -1464,6 +1487,7 @@ def table_numbers() -> None:
     macros |= shortfall_macros()
     macros |= collapse_sweep_macros()
     macros |= linearity_macros()
+    macros |= example_macros()
     macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [
