@@ -394,7 +394,7 @@ Two things follow. The derivation asks for more than the result needs, since a $
 from linearity costs nothing at the median, so the honest statement of the assumption is that it
 bounds the worst case rather than setting the accuracy. And $\varepsilon$ is worth logging anyway,
 because it is the quantity that separates the regime where the forecast has a worst case of
-$1.2\times$ from the regime where it has one of $1.6\times$, and computing it costs one extra
+$\numLinearityWorstBelow\times$ from the regime where it has one of $\numLinearityWorstAbove\times$, and computing it costs one extra
 gradient evaluation per checkpoint once a second run exists. Making it available before that
 second run is what Section~\ref{sec:discussion} lists first among the things we would build next.
 
@@ -478,9 +478,11 @@ a worst case two orders of magnitude out, and attributed it to Adam's normalisat
 nonlinearity that a linear recursion cannot contain. That diagnosis was wrong, and the cause was
 ours. Adam is handed a stochastic gradient, so the mean of its second-moment update is
 $\beta_2 v + (1-\beta_2)\E[\hat{g}^2]$ with $\E[\hat{g}^2] = \gbar^2 + \operatorname{diag}\Sigma$.
-Squaring the mean gradient instead, which is what we did, discards the gradient variance. On these
-pools that variance is between $6.5$ and $15$ times the term that was kept, so $v$ was far too
-small along the whole mean trajectory and every step taken from it was correspondingly too large.
+Squaring the mean gradient instead, which is what we did, discards the gradient variance. Along
+the mean trajectories of this grid that variance is between $\numAdamVarianceShareLow$ and
+$\numAdamVarianceShareHigh$ times the term that was kept (the median over updates in each
+setting), and at least $\numAdamVarianceShareSmallBatch$ times at eight prompts per update, so $v$
+was far too small along the whole mean trajectory and every step taken from it was correspondingly too large.
 The error was largest exactly where $\gbar \to 0$ and the variance is all that remains, which is
 why it looked like a saturation effect. Correcting the mean map removes it.
 

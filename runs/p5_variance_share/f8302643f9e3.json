@@ -1,0 +1,257 @@
+{
+  "manifest": {
+    "git_sha": "cc8d9b755c0637b379d659abd87addc5b504bebc",
+    "git_dirty": true,
+    "config_hash": "f8302643f9e3",
+    "config": {
+      "vocab": 3,
+      "length": 3,
+      "pool": 16,
+      "steps": [
+        10,
+        25
+      ],
+      "prompts": [
+        8,
+        32
+      ],
+      "group_size": 8,
+      "step_size": [
+        0.03,
+        0.1
+      ],
+      "bands": [
+        "easy",
+        "mixed",
+        "hard"
+      ],
+      "estimator": "rloo",
+      "warmup": 5,
+      "seed": 0
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794147165.6953862,
+    "wall_clock": 1794147188.956464
+  },
+  "result": {
+    "cells": [
+      {
+        "band": "easy",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 6.846361483032657,
+        "min_ratio": 6.114308859147867,
+        "max_ratio": 7.690112114128061
+      },
+      {
+        "band": "easy",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 9.052733756255554,
+        "min_ratio": 6.114308859147867,
+        "max_ratio": 13.115555246106497
+      },
+      {
+        "band": "easy",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 1.7996804756972702,
+        "min_ratio": 1.5285772147869667,
+        "max_ratio": 2.1298150887127756
+      },
+      {
+        "band": "easy",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 2.717474030579763,
+        "min_ratio": 1.5285772147869667,
+        "max_ratio": 5.109123173825303
+      },
+      {
+        "band": "easy",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 7.753855821567979,
+        "min_ratio": 6.114308859147867,
+        "max_ratio": 9.734232614020447
+      },
+      {
+        "band": "easy",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 13.468118210392014,
+        "min_ratio": 6.114308859147867,
+        "max_ratio": 30.56564752737957
+      },
+      {
+        "band": "easy",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 2.155488741942052,
+        "min_ratio": 1.5285772147869667,
+        "max_ratio": 3.03652048365876
+      },
+      {
+        "band": "easy",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 5.375129120608658,
+        "min_ratio": 1.5285772147869667,
+        "max_ratio": 22.420989837757396
+      },
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 5.717523622635273,
+        "min_ratio": 5.397247554695271,
+        "max_ratio": 6.05505521619182
+      },
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 5.118787316813208,
+        "min_ratio": 4.960977170886414,
+        "max_ratio": 6.05505521619182
+      },
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 1.385451897530152,
+        "min_ratio": 1.2782675450038647,
+        "max_ratio": 1.513763804047955
+      },
+      {
+        "band": "mixed",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 1.3429061363452757,
+        "min_ratio": 1.2397947077569742,
+        "max_ratio": 1.6336659382719942
+      },
+      {
+        "band": "mixed",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 5.376005005466409,
+        "min_ratio": 4.917254027419248,
+        "max_ratio": 6.05505521619182
+      },
+      {
+        "band": "mixed",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 5.605370060990687,
+        "min_ratio": 4.960977170886414,
+        "max_ratio": 9.222212989447176
+      },
+      {
+        "band": "mixed",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 1.2723913186407474,
+        "min_ratio": 1.216043054549337,
+        "max_ratio": 1.513763804047955
+      },
+      {
+        "band": "mixed",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 1.695870382083939,
+        "min_ratio": 1.2397947077569742,
+        "max_ratio": 5.697454177183554
+      },
+      {
+        "band": "hard",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 15.120832831300099,
+        "min_ratio": 14.29780845953839,
+        "max_ratio": 15.777499883667844
+      },
+      {
+        "band": "hard",
+        "steps": 10,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 16.491161711637513,
+        "min_ratio": 14.29780845953839,
+        "max_ratio": 16.88988377211038
+      },
+      {
+        "band": "hard",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 3.880842081984374,
+        "min_ratio": 3.5744521148845974,
+        "max_ratio": 4.063358230469631
+      },
+      {
+        "band": "hard",
+        "steps": 10,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 4.0589173820638464,
+        "min_ratio": 3.5744521148845974,
+        "max_ratio": 4.183427361603551
+      },
+      {
+        "band": "hard",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.03,
+        "median_ratio": 15.816439801553846,
+        "min_ratio": 14.29780845953839,
+        "max_ratio": 16.480384883574096
+      },
+      {
+        "band": "hard",
+        "steps": 25,
+        "prompts": 8,
+        "step_size": 0.1,
+        "median_ratio": 16.20454449467321,
+        "min_ratio": 14.29780845953839,
+        "max_ratio": 16.88988377211038
+      },
+      {
+        "band": "hard",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.03,
+        "median_ratio": 4.0338731094363,
+        "min_ratio": 3.5744521148845974,
+        "max_ratio": 4.106679356903083
+      },
+      {
+        "band": "hard",
+        "steps": 25,
+        "prompts": 32,
+        "step_size": 0.1,
+        "median_ratio": 3.9324356794571482,
+        "min_ratio": 3.5744521148845974,
+        "max_ratio": 4.183427361603551
+      }
+    ]
+  }
+}

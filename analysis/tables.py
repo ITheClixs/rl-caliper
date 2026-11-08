@@ -850,6 +850,18 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+def variance_share_macros() -> dict[str, str]:
+    """What squaring the mean gradient dropped from Adam's second moment, on the p5 grid."""
+    cells = only("p5_variance_share", prompts=[8, 32], step_size=[0.03, 0.1])["result"]["cells"]
+    medians = np.array([c["median_ratio"] for c in cells])
+    small = [c["median_ratio"] for c in cells if c["prompts"] == min(c["prompts"] for c in cells)]
+    return {
+        "AdamVarianceShareLow": f"{medians.min():.1f}",
+        "AdamVarianceShareHigh": f"{medians.max():.1f}",
+        "AdamVarianceShareSmallBatch": f"{min(small):.1f}",
+    }
+
+
 def reconvergence_macros() -> dict[str, str]:
     """Divergence between seeds on the from-scratch transformers: does it settle, how its level
     scales with batch and drift target, and whether outcome spread follows it."""
@@ -1665,6 +1677,7 @@ def table_numbers() -> None:
     macros |= collapse_sweep_macros()
     macros |= absorption_test_macros()
     macros |= reconvergence_macros()
+    macros |= variance_share_macros()
     macros |= linearity_macros()
     macros |= example_macros()
     macros |= real_seed_macros()
