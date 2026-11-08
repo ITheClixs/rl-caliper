@@ -28,7 +28,7 @@ from caliper.runtime import io
 FLOOR = 1e-12  # a noisy estimate can go negative; the deviation needs a positive spread
 
 
-def estimated_deviation(cell: dict, pool: int, seed: int) -> float:
+def estimated_deviation(cell: dict, pool: int, seed: int) -> tuple[float, bool]:
     """The closed form with tau_b and tau_w estimated from one run's worth of batches."""
     policy, accepts = build(cell["vocab"], cell["length"], pool, BANDS[cell["band"]],
                             cell["diversity"], 0)
@@ -42,8 +42,9 @@ def estimated_deviation(cell: dict, pool: int, seed: int) -> float:
                              matrix=None, blocks=2, replace=replace)
         for _ in range(cell["steps"])
     ])
-    spread = max(estimate.tau_b + estimate.tau_w / (cell["group_size"] - 1), FLOOR)
-    return cell["step_size"] * np.sqrt(cell["steps"] / cell["prompts"]) * np.sqrt(spread)
+    raw = estimate.tau_b + estimate.tau_w / (cell["group_size"] - 1)
+    spread = max(raw, FLOOR)
+    return cell["step_size"] * np.sqrt(cell["steps"] / cell["prompts"]) * np.sqrt(spread), raw <= 0
 
 
 def calibrate_estimated(arms: list[dict]) -> None:
@@ -70,8 +71,11 @@ def main() -> None:
 
     record = load_grid(args.cells, args.pool)
     arms = collect(record, args.pool)
+    floored = 0
     for index, (arm, cell) in enumerate(zip(arms, record["result"]["cells"], strict=True)):
-        arm["estimated"] = estimated_deviation(cell, args.pool, args.seed + 1009 * index)
+        arm["estimated"], negative = estimated_deviation(cell, args.pool, args.seed + 1009 * index)
+        floored += int(negative)
+    print(f"{floored} of {len(arms)} configurations estimate a non-positive spread")
     calibrate_estimated(arms)
     relative = np.array([
         max(a["estimated"] / a["frozen"], a["frozen"] / a["estimated"]) for a in arms])
@@ -117,6 +121,8 @@ def main() -> None:
         "results": results,
         "estimated_vs_exact_median": float(np.median(relative)),
         "estimated_vs_exact_worst": float(relative.max()),
+        "floored": floored,
+        "configurations": len(arms),
         "source": record["manifest"]["config_hash"],
     })
     print(f"\nwrote {path}")
