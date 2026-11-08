@@ -1348,6 +1348,12 @@ def table_numbers() -> None:
         if "count_letter" in large:
             # the saturation run's task, at the size it was run at
             macros["ScanLargeCountLetter"] = f"{large['count_letter']['mean']:.2f}"
+        # the families the text names as moving out of, and into, the band with scale
+        for family, tag in (("add_two", "AddTwo"), ("sort_digits", "SortDigits"),
+                            ("sort_words", "SortWords")):
+            if family in large and family in small:
+                macros[f"ScanLarge{tag}"] = f"{large[family]['mean']:.3f}"
+                macros[f"ScanSmall{tag}"] = f"{small[family]['mean']:.3f}"
         # the rung where a graded family falls off the cliff
         rungs = [(k, v["mean"]) for k, v in large.items() if k.startswith("sort_digits_")]
         if len(rungs) >= 2:
