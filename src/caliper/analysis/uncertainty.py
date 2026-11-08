@@ -141,14 +141,14 @@ def resolved_spread_interval(
     """Across-run spread of a reported score with the evaluation's own noise removed.
 
     `per_prompt[r, q]` is run r's pass rate on evaluation question q, estimated from `samples`
+    responses. The spread across runs contains a binomial term that has nothing to do with the
+    seed; it is subtracted in variance. The subtraction is only valid when each run drew its own
+    evaluation randomness, since it assumes that noise is independent between runs.
+
     `p_hat (1 - p_hat)` estimates `p (1 - p)` with a factor `(S-1)/S`, so the variance of a rate
     measured from `S` responses is recovered by dividing by `S - 1` rather than by `S`. Dividing
     by `S` understates the evaluation term and leaves a seed term that is correspondingly too
     large, by 12.5% in variance at eight samples per question.
-
-    responses. The spread across runs contains a binomial term that has nothing to do with the
-    seed; it is subtracted in variance. The subtraction is only valid when each run drew its own
-    evaluation randomness, since it assumes that noise is independent between runs.
 
     The interval is a bootstrap over runs, recomputing both terms inside each resample, because
     the point estimate is a difference of two noisy quantities and at the run counts anyone
