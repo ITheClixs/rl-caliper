@@ -28,6 +28,22 @@ def latest(name: str, key: str, container: str = "cells") -> list[dict]:
     return runs[-1]["result"][container]
 
 
+def only(store: str, **config) -> dict:
+    """The one record of `store` whose configuration has every given value.
+
+    Stores accumulate reruns and variants; quoting the newest one means a later run silently
+    replaces the number in the paper. This is the alternative: name the configuration, and fail
+    if it does not pick out exactly one record.
+    """
+    hits = [
+        r for r in io.load_all(store)
+        if all(r["manifest"]["config"].get(k) == v for k, v in config.items())
+    ]
+    if len(hits) != 1:
+        raise SystemExit(f"{store}: {config} matches {len(hits)} records, not one")
+    return hits[0]
+
+
 def write(name: str, body: str) -> None:
     TABLES.mkdir(parents=True, exist_ok=True)
     (TABLES / f"{name}.tex").write_text(body)
@@ -57,7 +73,8 @@ def table_exact_agreement() -> None:
 
 
 def table_transfer() -> None:
-    rows = latest("b3_batch_transfer", "best_step_size", container="rows")
+    # 24 probe repeats; the 8-repeat run is the earlier, noisier version of the same sweep
+    rows = only("b3_batch_transfer", probe_repeats=24)["result"]["rows"]
     reference_step = int(np.argmax(rows[0]["step_gain"]))
     reference_drift = int(np.argmax(rows[0]["drift_gain"]))
     lines = [
@@ -212,7 +229,8 @@ def table_diagnosis() -> None:
 
 
 def table_adam() -> None:
-    runs = [r for r in io.load_all("b6_adam") if "cells" in r["result"]]
+    # the rerun with primed batches and a measurement floor, the version the paper describes
+    runs = [only("b6_adam", prime_batches=16, measurement_floor=0.01)]
     if not runs:
         raise SystemExit("no optimiser comparison run")
     cells = runs[-1]["result"]["cells"]
@@ -697,12 +715,8 @@ def table_heldout() -> None:
 
 def saturation_macros() -> dict[str, str]:
     """What the pretrained runs collapse to (`s16_saturation/analyse.py`)."""
-    records = io.load_all("s16_saturation")
-    if not records:
-        raise SystemExit("s16_saturation/analyse.py has not been run")
-    result = records[-1]["result"]
-    if "small" not in result or "modes" not in result["small"]:
-        raise SystemExit("s16_saturation predates the mode analysis; rerun it")
+    # the mode analysis; the store also keeps the earlier, withdrawn saturation analysis
+    result = only("s16_saturation", held_out_seed=9001)["result"]
     names = {"small": "Small", "large": "Large", "small_rerun": "SmallRerun",
              "small_traces": "SmallTraces"}
     macros: dict[str, str] = {}
@@ -833,11 +847,10 @@ def table_numbers() -> None:
             if name:
                 macros[f"RolloutShareG{name}"] = f"{100 * np.median(values):.0f}"
 
-    propagation = [
-        r for r in io.load_all("p1_propagation") if len(r["result"].get("cells", [])) >= 8
-    ]
+    # the same 54-setting grid the propagation table reports, not whichever pilot ran last
+    propagation = [only("p1_propagation", steps=25)]
     if propagation:
-        cells = propagation[-1]["result"]["cells"]
+        cells = propagation[0]["result"]["cells"]
         measured = np.array([c["measured_kl"] for c in cells])
         summary = {}
         for key, name in (("propagated_kl", "Propagated"), ("walk_kl", "Walk"),
@@ -849,13 +862,11 @@ def table_numbers() -> None:
         summary["PropagatedPercent"] = f"{100 * (float(summary['PropagatedMedian']) - 1):.0f}"
         macros |= summary
 
-    traced = [
-        r
-        for r in io.load_all("s7_real_forecast")
-        if r["result"].get("train_traces") and len(r["result"].get("held_out_scores", [])) >= 4
-    ]
-    if traced:
-        outcome = traced[-1]["result"]
+    # the 0.5B forecast run of Section 6; the store also holds the 7B run, which has traces too and
+    # had been quoted here as though it were the 0.5B one
+    traced = [experiment("real_05b_sgd", require=("train_traces",))]
+    if traced[0] is not None:
+        outcome = traced[0]["result"]
         traces = np.array(outcome["train_traces"], dtype=float)
         scores = np.array(outcome["held_out_scores"], dtype=float)
         window = min(3, traces.shape[1])
@@ -994,6 +1005,8 @@ def table_numbers() -> None:
         }
         if inside:
             won = inside[0]
+            won_halves = max(won["predicted_half_samples"]) / max(
+                min(won["predicted_half_samples"]), 1e-12)
             macros |= {
                 "SweepWinBand": won["label"].split("-")[1],
                 "SweepWinForecast": f"{won['predicted_std']:.4f}",
@@ -1002,11 +1015,15 @@ def table_numbers() -> None:
                 "SweepWinHigh": f"{won['resolved_interval']['hi']:.4f}",
                 "SweepWinRatio": f"{max(won['ratio'], 1 / won['ratio']):.2f}",
                 "SweepWinResidual": f"{won['curvature_residual']:.1f}",
+                "SweepWinHalfRatio": f"{won_halves:.2f}",
                 "SweepWinGain": f"{won['observed_spread']['mean'] - won['base_pass_rate']:.3f}",
             }
 
     # the difficulty scan: where each family sits for each policy, on the live-group coordinate
     scans = [r for r in io.load_all("s10_difficulty") if r["result"].get("families")]
+    # where two scans of one model cover the same family, the larger scan is the later and more
+    # complete survey; merge in increasing size so it wins whatever order the records load in
+    scans.sort(key=lambda r: (len(r["result"]["families"]), r["manifest"]["config_hash"]))
     if scans:
         by_model = {}
         for record in scans:
@@ -1032,11 +1049,16 @@ def table_numbers() -> None:
             macros["ScanCliffHigh"] = f"{max(m for _, m in rungs):.3f}"
             macros["ScanCliffLow"] = f"{min(m for _, m in rungs):.3f}"
 
-    # the prospective test on a corpus of genuinely mixed prompts
+    # the prospective test on a corpus of genuinely mixed prompts. The store also holds the support
+    # sweep, the pretrained sizing recipes and a two-step smoke run, and taking the newest record
+    # had quoted each of those here in turn; the run this paragraph describes is selected by label.
     mixed = [
         r for r in io.load_all("s11_prospective")
-        if r["result"].get("resolved_std") is not None
+        if r["result"].get("label") == "qwen2.5-0.5b-mixed"
+        and r["result"].get("resolved_std") is not None
     ]
+    if len(mixed) > 1:
+        raise SystemExit("more than one record labelled qwen2.5-0.5b-mixed")
     if mixed:
         outcome = mixed[-1]["result"]
         spread = outcome["resolved_std"]
@@ -1410,6 +1432,10 @@ EXPERIMENTS = {
         "model": "mlx-community/Qwen2.5-0.5B-Instruct-bf16",
         "optimiser": "sgd",
         "steps": 12,
+        # the launch after the transport sign fix (0f4c098): the earlier launch predates it, and
+        # the traces run skipped the forecast
+        "label": "qwen2.5-0.5b",
+        "skip_forecast": False,
     },
     "real_7b_adam": {
         "store": "s7_real_forecast",
@@ -1456,6 +1482,8 @@ def experiment(name: str, require=None):
         if config.get("steps") != spec["steps"]:
             continue
         if spec.get("label") and config.get("label") != spec["label"]:
+            continue
+        if "skip_forecast" in spec and config.get("skip_forecast") != spec["skip_forecast"]:
             continue
         if any(record["result"].get(field) is None for field in (require or ())):
             continue
@@ -1645,7 +1673,8 @@ def table_propagation() -> None:
     pool is homogeneous and the objective supplies real curvature. That is what the recursion
     predicts, so the breakdown is the finding rather than a caveat on it.
     """
-    runs = [r for r in io.load_all("p1_propagation") if len(r["result"]["cells"]) >= 8]
+    # the 54-setting grid at 25 updates; the smaller runs in the store are its pilots
+    runs = [only("p1_propagation", steps=25)]
     if not runs:
         raise SystemExit("no propagation validation run")
     cells = runs[-1]["result"]["cells"]
@@ -1721,7 +1750,7 @@ def report_missing_macros() -> None:
     sources += sorted((paper / "sections").glob("*.tex"))
     sources += sorted((paper / "icml" / "sections").glob("*.tex"))
     used = set()
-    for path in sources:
+    for path in (p for p in sources if p.exists()):
         used |= set(re.findall(r"\\num[A-Za-z]+", path.read_text()))
     defined = set(re.findall(r"\\num[A-Za-z]+", (TABLES / "numbers.tex").read_text()))
     missing = sorted(name.lstrip("\\") for name in used - defined)

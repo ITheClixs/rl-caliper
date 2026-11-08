@@ -28,8 +28,11 @@ packages = ["src/caliper"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q -m 'not mlx'"
-markers = ["mlx: needs MLX and a downloaded model; Apple Silicon only"]
+addopts = "-q -m 'not mlx and not slow'"
+markers = [
+    "mlx: needs MLX and a downloaded model; Apple Silicon only",
+    "slow: regenerates every table; run with -m slow",
+]
 filterwarnings = ["ignore::DeprecationWarning"]
 
 [tool.ruff]
