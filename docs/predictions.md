@@ -73,4 +73,27 @@ The cut is halfway between the two bands already seen (26 and 1).
 **What would refute it.** Either part failing. Each part is reported on its own, and the
 hypothesis holds only if both do.
 
-**Result.** Pending: recorded when both runs finish.
+**Result (2026-11-08, after the runs). Refuted.** Both reruns reproduce their original held-out
+scores run for run, and the forecasts are unchanged (ratios 2.13 and 0.60).
+1. Band 0.35 has 1 shared prompt of 64, within the bound of 13. This part holds.
+2. Band 0.15 has 2 shared prompts of 64, short of the 14 it needed. This part fails.
+
+Across the four bands in order of live probability (0.15, 0.35, 0.60, 0.85) the shared counts are
+2, 1, 1, 26 (`runs/s16_sweep/59f833094a47.json`, from `experiments/s16_saturation/sweep.py`). Band
+0.15's forecast is not too large: it is 0.028 against a measured seed term whose interval is
+[0.010, 0.070], so that band does not even show a resolved miss. Yet its runs share almost no
+answers. Shared answers separate band 0.85 from the other three. They do not separate the
+forecasts that are too large from those that are not.
+
+**What the prediction got wrong before the run.** The sign was stated and checked this time. The
+pattern came from two bands that differed in more than how much their runs shared: band 0.85 is the
+easiest corpus and band 0.60 a harder one. A cut halfway between two points cannot tell the variable
+it names from whatever else separates them. Runs are absorbed into one shared answer where one
+answer is right often enough to be rewarded: the commonest correct answer covers 36% of band 0.85's
+prompts and 3% of band 0.15's. Those shares are fixed by how the corpora were built, so they were
+knowable before the run, and they are the reason part 2 should have been expected to fail.
+
+**What stands.** Two predictions about collapse have now failed on the support sweep. Collapse
+explains the 25x shortfall on the counting task of Section 6. It explains no error in the sweep,
+in either direction. The overpredictions at bands 0.35 and 0.60 remain unexplained, and we have no
+third candidate we would commit to.

@@ -839,6 +839,40 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+# the second collapse test (docs/predictions.md), committed before bands 0.15 and 0.35 were rerun:
+# the band whose forecast is too large has at most 13 shared prompts, the other at least 14
+ABSORPTION_TEST = {"Over": ("modes-band-0.35", 13), "Under": ("modes-band-0.15", 14)}
+
+
+def absorption_test_macros() -> dict[str, str]:
+    """Shared answers on all four support-sweep bands, and the two bands the second test named.
+
+    Selected by its four labels, so it cannot replace the two-band record of the first test.
+    """
+    labels = [f"modes-band-{b}" for b in ("0.15", "0.35", "0.60", "0.85")]
+    result = only("s16_sweep", labels=labels)["result"]
+    macros = {"AbsorbShared": ", ".join(str(result[label]["shared_prompts"]) for label in labels)}
+    for tag, (label, bound) in ABSORPTION_TEST.items():
+        row = result[label]
+        macros |= {
+            f"Absorb{tag}Band": label.rsplit("-", 1)[1],
+            f"Absorb{tag}Shared": f"{row['shared_prompts']}",
+            f"Absorb{tag}Ratio": f"{row['ratio']:.2f}",
+            f"Absorb{tag}Bound": f"{bound}",
+        }
+    # how often one answer is right: what the corpora's construction fixed before any run
+    for tag, label in (("Top", labels[-1]), ("Under", ABSORPTION_TEST["Under"][0])):
+        macros[f"Absorb{tag}Commonest"] = f"{100 * result[label]['commonest_answer_share']:.0f}"
+    # the band predicted to share many answers: is its miss even resolved?
+    under = only("s11_prospective", label=ABSORPTION_TEST["Under"][0])["result"]
+    macros |= {
+        "AbsorbUnderForecast": f"{under['predicted_std']:.3f}",
+        "AbsorbUnderLow": f"{under['resolved_interval']['lo']:.3f}",
+        "AbsorbUnderHigh": f"{under['resolved_interval']['hi']:.3f}",
+    }
+    return macros
+
+
 def sci_plain(value: float, digits: int = 2) -> str:
     """Scientific notation for use inside math mode, without the dollar signs."""
     mantissa, exponent = f"{value:.{digits}e}".split("e")
@@ -1589,6 +1623,7 @@ def table_numbers() -> None:
     macros |= estimated_macros()
     macros |= shortfall_macros()
     macros |= collapse_sweep_macros()
+    macros |= absorption_test_macros()
     macros |= linearity_macros()
     macros |= example_macros()
     macros |= real_seed_macros()

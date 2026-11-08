@@ -25,6 +25,23 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("README.md", "held at band {AbsorbOverBand} ({AbsorbOverShared} shared prompt) and failed at "
+                  "band {AbsorbUnderBand} ({AbsorbUnderShared}, where it needed "
+                  "{AbsorbUnderBound})"),
+    ("docs/claims.md", "band {AbsorbOverBand} has {AbsorbOverShared} shared prompt (at most "
+                       "{AbsorbOverBound} predicted), band {AbsorbUnderBand} has "
+                       "{AbsorbUnderShared} (at least {AbsorbUnderBound} predicted); the four "
+                       "bands have {AbsorbShared}"),
+    ("docs/predictions.md", "Band {AbsorbOverBand} has {AbsorbOverShared} shared prompt of "
+                            "{CollapsePrompts}, within the bound of {AbsorbOverBound}."),
+    ("docs/predictions.md", "Band {AbsorbUnderBand} has {AbsorbUnderShared} shared prompts of "
+                            "{CollapsePrompts}, short of the {AbsorbUnderBound} it needed."),
+    ("docs/predictions.md", "(ratios {AbsorbOverRatio} and {AbsorbUnderRatio})"),
+    ("docs/predictions.md", "the shared counts are {AbsorbShared}"),
+    ("docs/predictions.md", "it is {AbsorbUnderForecast} against a measured seed term whose "
+                            "interval is [{AbsorbUnderLow}, {AbsorbUnderHigh}]"),
+    ("docs/predictions.md", "the commonest correct answer covers {AbsorbTopCommonest}% of band "
+                            "0.85's prompts and {AbsorbUnderCommonest}% of band 0.15's"),
     ("docs/forecast.md", "the two released launches that did give {EarlyCorrelation} and "
                          "{EarlyCorrelationRepeat}, the bootstrap interval at eight runs spans "
                          "[{EarlyCorrelationLow}, {EarlyCorrelationHigh}], and at 7B the "
@@ -50,7 +67,8 @@ CHECKS = [
                          "{LinearityWorstAbove}x above)"),
     ("README.md", "where it is {CollapseMissedError}x too large (band {CollapseMissedBand}) they "
                   "barely collapse"),
-    ("README.md", "({CollapseMissedSplit} of {CollapsePrompts} against {CollapseHeldSplit};"),
+    ("README.md", "failed ({CollapseMissedSplit} of {CollapsePrompts} against "
+                  "{CollapseHeldSplit})"),
     ("docs/claims.md", "band {CollapseMissedBand} splits on {CollapseMissedSplit} of "
                        "{CollapsePrompts} prompts against {CollapseHeldSplit} at band "
                        "{CollapseHeldBand}"),

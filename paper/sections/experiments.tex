@@ -589,9 +589,9 @@ qualifies everything else measured on this task: much of the held-out gain is gu
 forecasts made here, which differ by a factor of $\numModeLargeRepeatRatio$ between two repeats from
 the same $7$B run, describe runs in a degenerate regime.
 
-\paragraph{Collapse does not explain the support sweep.} Two corpora of
-Section~\ref{sec:exp-support} were rerun with every run's answers stored, and the reruns
-reproduce the original held-out scores run for run. At live probability $\numCollapseHeldBand$,
+\paragraph{Collapse does not explain the support sweep.} The four corpora of
+Section~\ref{sec:exp-support} were rerun with every run's answers stored, two at a time, and the
+reruns reproduce the original held-out scores run for run. At live probability $\numCollapseHeldBand$,
 where the forecast held, $\numCollapseHeldConstant$ of $\numCollapseSeeds$ later runs answer ``1'' on most prompts, as the
 anchor does on $\numCollapseHeldAnchorPrompts$ of $\numCollapsePrompts$; the collapse is there but
 shared, and it carries almost none of the spread. That suggested that collapse defeats the forecast
@@ -605,8 +605,16 @@ The forecast at $\numCollapseMissedBand$ is too large, and seed-dependent collap
 it could only ever have made a forecast too small. Looked at after the result, that band hardly
 collapses at all: $\numCollapseMissedConstant$ of its runs give one answer to more than half of the
 prompts, and every run agrees firmly on $\numCollapseMissedShared$ prompt against
-$\numCollapseHeldShared$ at $\numCollapseHeldBand$. Collapse accounts for the shortfall on the
-counting corpus and for none of the sweep's errors; the overpredictions in its two middle bands
+$\numCollapseHeldShared$ at $\numCollapseHeldBand$. That suggested a second pattern, again
+recorded before its runs: the forecast is too large where runs are not absorbed into shared
+answers. Band $\numAbsorbOverBand$, where the forecast is $\numAbsorbOverRatio$ times the measured
+spread, would have at most $\numAbsorbOverBound$ prompts on which every run agrees firmly, and band
+$\numAbsorbUnderBand$, where it is $\numAbsorbUnderRatio$ times, at least $\numAbsorbUnderBound$.
+The first part holds with $\numAbsorbOverShared$ and the second fails with $\numAbsorbUnderShared$;
+across the four bands the counts are $\numAbsorbShared$. Shared answers mark the one corpus where a
+single answer is right often enough to be rewarded, not the forecasts that are too large, and the
+corpora's construction made that knowable before the run. Collapse accounts for the shortfall on
+the counting corpus and for none of the sweep's errors; the overpredictions in its two middle bands
 remain unexplained.
 
 \paragraph{Whether the outcome is decided early, which we cannot establish.} It is tempting to read
