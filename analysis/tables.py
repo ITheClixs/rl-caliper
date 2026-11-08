@@ -544,22 +544,55 @@ HELDOUT_LABEL = {
     "constant": "one deviation for every recipe",
     "empirical": "deviation from spent seeds",
     "frozen": "closed form, no run",
+    "calibrated": "closed form, one scale from other tasks",
     "adjoint": "adjoint forecast",
     "oracle": "measured deviation",
 }
 
 
+def heldout_runs(holdout: int, cap: int) -> list[dict]:
+    """Held-out sizing records with a given seed split, one per truth/available draw."""
+    return [
+        r for r in io.load_all("s15_sizing_heldout")
+        if r["manifest"]["config"]["holdout"] == holdout and r["manifest"]["config"]["cap"] == cap
+    ]
+
+
 def heldout_record() -> dict:
-    """The sizing benchmark with thresholds chosen before grading (`s13_sizing/heldout.py`)."""
-    records = io.load_all("s15_sizing_heldout")
-    if not records:
-        raise SystemExit("s13_sizing/heldout.py has not been run")
-    return records[-1]["result"]["results"]
+    """The held-out benchmark on the split `s13_sizing/run.py` uses (32 seeds fix the ordering,
+    16 per arm available, seed 0), chosen by identity rather than by load order."""
+    hits = [r for r in heldout_runs(32, 16) if r["manifest"]["config"]["seed"] == 0]
+    if len(hits) != 1:
+        raise SystemExit(f"expected one held-out sizing record at 32/16, seed 0; found {len(hits)}")
+    return hits[0]["result"]["results"]
+
+
+def split_rows(key: str) -> list[dict]:
+    """The 24/24 splits, where a fixed budget can be measured below its cap."""
+    return [r["result"]["results"][key] for r in heldout_runs(24, 24)]
 
 
 def heldout_macros() -> dict[str, str]:
     results = heldout_record()
     macros: dict[str, str] = {}
+    splits = split_rows("margin=4,target=0.001")
+    if splits:
+        fixed = [row["held_out"]["fixed"]["runs"] for row in splits]
+        adjoint = [row["held_out"]["adjoint"]["runs"] for row in splits]
+        gain = [row["held_out"]["fixed"]["ratio_to_adjoint"] for row in splits]
+        frozen = [row["held_out"]["frozen"]["ratio_to_adjoint"] for row in splits]
+        macros |= {
+            "SplitCount": f"{len(splits)}",
+            "SplitFixedRunsLow": f"{min(fixed):.1f}",
+            "SplitFixedRunsHigh": f"{max(fixed):.1f}",
+            "SplitAdjointRunsLow": f"{min(adjoint):.2f}",
+            "SplitAdjointRunsHigh": f"{max(adjoint):.2f}",
+            "SplitFixedGainLow": f"{min(gain):.1f}",
+            "SplitFixedGainHigh": f"{max(gain):.1f}",
+            "SplitFrozenGainLow": f"{min(frozen):.2f}",
+            "SplitFrozenGainHigh": f"{max(frozen):.2f}",
+            "SplitUncappedApprox": f"{splits[0]['uncapped_fixed_runs']:.0f}",
+        }
     for tag, key in (("Strict", "margin=4,target=0.001"), ("Loose", "margin=4,target=0.01"),
                      ("TieLoose", "margin=2,target=0.01")):
         row = results[key]
@@ -576,6 +609,9 @@ def heldout_macros() -> dict[str, str]:
             f"Nominal{tag}ConstantMistakes": f"{100 * plain['constant']['mistakes']:.3f}",
             f"Nominal{tag}EmpiricalMistakes": f"{100 * plain['empirical']['mistakes']:.3f}",
             f"Nominal{tag}FrozenRuns": f"{plain['frozen']['runs']:.0f}",
+            f"Nominal{tag}CalibratedRuns": f"{plain['calibrated']['runs']:.2f}",
+            f"Nominal{tag}CalibratedMistakes": f"{100 * plain['calibrated']['mistakes']:.3f}",
+            f"Nominal{tag}ConstantRuns": f"{plain['constant']['runs']:.2f}",
         }
         for name in ("fixed", "constant", "empirical", "frozen", "oracle"):
             title = name.capitalize()
@@ -609,16 +645,20 @@ def table_heldout() -> None:
             cells += [f"{value['runs']:.2f}", f"{100 * value['mistakes']:.2f}\\%"]
         lines.append(f"{label} & " + " & ".join(cells) + r" \\")
     lines += [r"\midrule", r"textbook threshold, no tuning & & & & \\"]
-    for name in ("constant", "frozen", "adjoint"):
+    for name in ("constant", "frozen", "calibrated", "adjoint"):
         cells = []
         for key in columns:
             value = results[key]["nominal"][name]
             cells += [f"{value['runs']:.2f}", f"{100 * value['mistakes']:.2f}\\%"]
         lines.append(f"\\quad {HELDOUT_LABEL[name]} & " + " & ".join(cells) + r" \\")
-    uncapped = [f"{results[key]['uncapped_fixed_runs']:.0f}" for key in columns]
+    measured = []
+    for key in columns:
+        runs = [row["held_out"]["fixed"]["runs"] for row in split_rows(key)]
+        measured.append(f"{min(runs):.1f}--{max(runs):.1f}" if runs else "--")
     lines += [
         r"\midrule",
-        f"fixed budget, no cap (normal approx.) & {uncapped[0]} & & {uncapped[1]} & \\\\",
+        f"fixed budget, 24-seed cap, {len(heldout_runs(24, 24))} splits & {measured[0]} & & "
+        f"{measured[1]} & \\\\",
         r"\bottomrule",
         r"\end{tabular}",
     ]

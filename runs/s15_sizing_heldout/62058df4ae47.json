@@ -1,0 +1,542 @@
+{
+  "manifest": {
+    "git_sha": "34bcfe37998ef6a0a54d9fe9f9add7cd461effc9",
+    "git_dirty": false,
+    "config_hash": "62058df4ae47",
+    "config": {
+      "pool": 24,
+      "cells": 192,
+      "cap": 24,
+      "orders": 400,
+      "margins": [
+        4.0,
+        2.0
+      ],
+      "holdout": 24,
+      "targets": [
+        0.01,
+        0.001
+      ],
+      "grid": 161,
+      "bootstrap": 2000,
+      "seed": 1
+    },
+    "python": "3.12.13",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "started_at": 1794093262.111506,
+    "wall_clock": 1794093315.7046459
+  },
+  "result": {
+    "results": {
+      "margin=4,target=0.01": {
+        "pairs": 1000,
+        "tasks": 12,
+        "held_out": {
+          "fixed": {
+            "runs": 4.0,
+            "mistakes": 0.00911,
+            "ratio_to_adjoint": 1.9078144078144075,
+            "ratio_interval": [
+              1.8881707393928684,
+              1.9286823986403099
+            ]
+          },
+          "constant": {
+            "runs": 2.16867,
+            "mistakes": 0.010105000000000001,
+            "ratio_to_adjoint": 1.0343549679487178,
+            "ratio_interval": [
+              1.013150743374863,
+              1.058740943761007
+            ]
+          },
+          "empirical": {
+            "runs": 4.000109999999999,
+            "mistakes": 0.009085,
+            "ratio_to_adjoint": 1.907866872710622,
+            "ratio_interval": [
+              1.8882442811616371,
+              1.9287099745118936
+            ]
+          },
+          "frozen": {
+            "runs": 2.1161899999999996,
+            "mistakes": 0.010205,
+            "ratio_to_adjoint": 1.0093244429181927,
+            "ratio_interval": [
+              0.9963669090306232,
+              1.0245730692482728
+            ]
+          },
+          "calibrated": {
+            "runs": 2.1163000000000003,
+            "mistakes": 0.010605,
+            "ratio_to_adjoint": 1.009376907814408,
+            "ratio_interval": [
+              0.9947560053019187,
+              1.0255013616680222
+            ]
+          },
+          "adjoint": {
+            "runs": 2.0966400000000003,
+            "mistakes": 0.010105000000000001,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 2.0922,
+            "mistakes": 0.01009,
+            "ratio_to_adjoint": 0.9978823260073258,
+            "ratio_interval": [
+              0.9952478022640611,
+              1.001192534732574
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 4.06092,
+            "mistakes": 0.0009699999999999999,
+            "ratio_to_adjoint": 0.9474251505388135,
+            "ratio_interval": [
+              0.8064712207564816,
+              1.1362140132641254
+            ]
+          },
+          "empirical": {
+            "runs": 5.226490000000001,
+            "mistakes": 0.00066,
+            "ratio_to_adjoint": 1.2193562234763562,
+            "ratio_interval": [
+              1.163400574879869,
+              1.2822865101853202
+            ]
+          },
+          "frozen": {
+            "runs": 48.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 11.198547921619497,
+            "ratio_interval": [
+              10.157811418252066,
+              12.396270163532213
+            ]
+          },
+          "calibrated": {
+            "runs": 4.58355,
+            "mistakes": 0.000185,
+            "ratio_to_adjoint": 1.0693563401278967,
+            "ratio_interval": [
+              0.8898848132881636,
+              1.3056792175005347
+            ]
+          },
+          "adjoint": {
+            "runs": 4.28627,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 4.208,
+            "mistakes": 1e-05,
+            "ratio_to_adjoint": 0.9817393677953092,
+            "ratio_interval": [
+              0.9487689816543329,
+              1.018838114777444
+            ]
+          }
+        },
+        "uncapped_fixed_runs": 4.0,
+        "adjoint_cap_share": 0.002
+      },
+      "margin=4,target=0.001": {
+        "pairs": 1000,
+        "tasks": 12,
+        "held_out": {
+          "fixed": {
+            "runs": 19.308,
+            "mistakes": 0.00103,
+            "ratio_to_adjoint": 6.745906966018907,
+            "ratio_interval": [
+              6.0711200543284205,
+              7.461861574995137
+            ]
+          },
+          "constant": {
+            "runs": 4.06034,
+            "mistakes": 0.0010049999999999998,
+            "ratio_to_adjoint": 1.4186179765074172,
+            "ratio_interval": [
+              1.1915503722938863,
+              1.721936051458794
+            ]
+          },
+          "empirical": {
+            "runs": 4.8600699999999994,
+            "mistakes": 0.0010350000000000001,
+            "ratio_to_adjoint": 1.6980308715734156,
+            "ratio_interval": [
+              1.632731521255756,
+              1.764107479265667
+            ]
+          },
+          "frozen": {
+            "runs": 3.14119,
+            "mistakes": 0.0010249999999999999,
+            "ratio_to_adjoint": 1.097481639868911,
+            "ratio_interval": [
+              0.9845492277195009,
+              1.2318518661602644
+            ]
+          },
+          "calibrated": {
+            "runs": 3.22742,
+            "mistakes": 0.0008900000000000001,
+            "ratio_to_adjoint": 1.1276090252884163,
+            "ratio_interval": [
+              0.9868988231789487,
+              1.296698026382353
+            ]
+          },
+          "adjoint": {
+            "runs": 2.8621800000000004,
+            "mistakes": 0.0008950000000000001,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 2.8809099999999996,
+            "mistakes": 0.0009149999999999999,
+            "ratio_to_adjoint": 1.0065439629932427,
+            "ratio_interval": [
+              0.9754841642796586,
+              1.0424023415581243
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 5.67812,
+            "mistakes": 0.00031000000000000005,
+            "ratio_to_adjoint": 0.9717816190313195,
+            "ratio_interval": [
+              0.7957967131165564,
+              1.1968540059777835
+            ]
+          },
+          "empirical": {
+            "runs": 6.122310000000001,
+            "mistakes": 0.00035000000000000005,
+            "ratio_to_adjoint": 1.047802498716413,
+            "ratio_interval": [
+              1.000335586468476,
+              1.0933469709964705
+            ]
+          },
+          "frozen": {
+            "runs": 48.0,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 8.214958069484855,
+            "ratio_interval": [
+              7.634804094169937,
+              8.958200379536096
+            ]
+          },
+          "calibrated": {
+            "runs": 6.3045,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.0789833989389013,
+            "ratio_interval": [
+              0.8348744312545942,
+              1.3718534472011292
+            ]
+          },
+          "adjoint": {
+            "runs": 5.843,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 5.7598400000000005,
+            "mistakes": 0.0,
+            "ratio_to_adjoint": 0.9857675851446176,
+            "ratio_interval": [
+              0.9419722997739407,
+              1.0321416369831462
+            ]
+          }
+        },
+        "uncapped_fixed_runs": 10.0,
+        "adjoint_cap_share": 0.01
+      },
+      "margin=2,target=0.01": {
+        "pairs": 1108,
+        "tasks": 12,
+        "held_out": {
+          "fixed": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.1642240159292745,
+            "ratio_interval": [
+              1.0,
+              1.5299745046635485
+            ]
+          },
+          "constant": {
+            "runs": 42.486624548736465,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0304989303210264,
+            "ratio_interval": [
+              1.0,
+              1.0984244320064314
+            ]
+          },
+          "empirical": {
+            "runs": 43.71237364620939,
+            "mistakes": 0.012621841155234657,
+            "ratio_to_adjoint": 1.0602290665039766,
+            "ratio_interval": [
+              0.9956709341913017,
+              1.2027798323340773
+            ]
+          },
+          "frozen": {
+            "runs": 41.981028880866425,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0182358757609409,
+            "ratio_interval": [
+              1.0,
+              1.0588497922719953
+            ]
+          },
+          "calibrated": {
+            "runs": 42.0795036101083,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0206243475264725,
+            "ratio_interval": [
+              1.0,
+              1.0665577339739314
+            ]
+          },
+          "adjoint": {
+            "runs": 41.22917870036101,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 41.18009025270758,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 0.9988093760486914,
+            "ratio_interval": [
+              0.9961576853710178,
+              1.0
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 6.46860108303249,
+            "mistakes": 0.014201263537906137,
+            "ratio_to_adjoint": 0.9237928661100268,
+            "ratio_interval": [
+              0.7979437343027075,
+              1.0633091884145764
+            ]
+          },
+          "empirical": {
+            "runs": 7.283537906137185,
+            "mistakes": 0.014995487364620941,
+            "ratio_to_adjoint": 1.040175498745885,
+            "ratio_interval": [
+              0.9950699401356461,
+              1.0973630328590758
+            ]
+          },
+          "frozen": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 6.854968640683847,
+            "ratio_interval": [
+              6.30077661710271,
+              7.548383510732314
+            ]
+          },
+          "calibrated": {
+            "runs": 7.334765342960289,
+            "mistakes": 0.013772563176895307,
+            "ratio_to_adjoint": 1.0474913835993225,
+            "ratio_interval": [
+              0.898554915384115,
+              1.208713566359925
+            ]
+          },
+          "adjoint": {
+            "runs": 7.002220216606498,
+            "mistakes": 0.013131768953068593,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 6.936119133574007,
+            "mistakes": 0.013018953068592059,
+            "ratio_to_adjoint": 0.9905599822645215,
+            "ratio_interval": [
+              0.9652353694941042,
+              1.0209203320651996
+            ]
+          }
+        },
+        "uncapped_fixed_runs": 12.0,
+        "adjoint_cap_share": 0.005415162454873646
+      },
+      "margin=2,target=0.001": {
+        "pairs": 1108,
+        "tasks": 12,
+        "held_out": {
+          "fixed": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "constant": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "empirical": {
+            "runs": 47.81210288808664,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 0.9960854768351384,
+            "ratio_interval": [
+              0.995319997635003,
+              0.9970004773871962
+            ]
+          },
+          "frozen": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "calibrated": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "adjoint": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          }
+        },
+        "nominal": {
+          "constant": {
+            "runs": 8.772608303249097,
+            "mistakes": 0.013203971119133575,
+            "ratio_to_adjoint": 0.950080003753383,
+            "ratio_interval": [
+              0.8220582888326252,
+              1.0948029269737336
+            ]
+          },
+          "empirical": {
+            "runs": 8.88413357400722,
+            "mistakes": 0.0141471119133574,
+            "ratio_to_adjoint": 0.9621582735219343,
+            "ratio_interval": [
+              0.9228481378925552,
+              1.0023102223105798
+            ]
+          },
+          "frozen": {
+            "runs": 48.0,
+            "mistakes": 0.01263537906137184,
+            "ratio_to_adjoint": 5.198435699365736,
+            "ratio_interval": [
+              4.887570948330427,
+              5.5699056078169145
+            ]
+          },
+          "calibrated": {
+            "runs": 9.572328519855596,
+            "mistakes": 0.012996389891696752,
+            "ratio_to_adjoint": 1.0366902979932107,
+            "ratio_interval": [
+              0.8649377776779241,
+              1.2175265153455181
+            ]
+          },
+          "adjoint": {
+            "runs": 9.233546931407943,
+            "mistakes": 0.012644404332129964,
+            "ratio_to_adjoint": 1.0,
+            "ratio_interval": [
+              1.0,
+              1.0
+            ]
+          },
+          "oracle": {
+            "runs": 9.1539440433213,
+            "mistakes": 0.012644404332129964,
+            "ratio_to_adjoint": 0.9913789480166203,
+            "ratio_interval": [
+              0.9654810027858931,
+              1.0218702742944255
+            ]
+          }
+        },
+        "uncapped_fixed_runs": 38.0,
+        "adjoint_cap_share": 0.03429602888086643
+      }
+    },
+    "source": "2c066737397a"
+  }
+}
