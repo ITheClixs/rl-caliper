@@ -250,7 +250,7 @@ Without one it grows by a factor of $\numNullCoin$ over the same $\numNullUpdate
 move. At the end of the run the two differ by a factor of $\numNullGap$.
 
 The control that matters is the step size. Mean realised drift per update is
-$6.10\times10^{-3}$ in the learning condition against $5.17\times10^{-3}$ in the null: the runs that
+$\numNullDriftLearning$ in the learning condition against $\numNullDriftCoin$ in the null: the runs that
 end up closer together are the ones that moved \emph{further} per update. Whatever brings them back
 is not smaller steps.
 
@@ -270,14 +270,15 @@ batch of sequences.
   \label{fig:real-seeds}
 \end{figure}
 
-Divergence reaches $1.22\times10^{-1}$ at ten updates and is $8.9\times10^{-2}$ at forty, with a
-tail slope of $+0.14$ against the $+1$ accumulation requires. Two caveats belong with that number.
+Divergence reaches $\numRealSeedsTen$ at ten updates and is $\numRealSeedsEnd$ at forty, with a
+tail slope of $\numRealSeedsTailSlope$ against the $+1$ accumulation requires. Two caveats belong with that number.
 The fifteen pairwise distances come from six runs and are not independent, so intervals are
 resampled over runs; doing so roughly doubles the standard error against treating the pairs as
 independent. And once that is done the intervals at ten and forty updates overlap heavily, so the
 apparent peak-and-fall is not resolved at six seeds. What the experiment supports is the weaker
-statement that divergence does not accumulate on a pretrained model either. The six runs finish
-within $0.835 \pm 0.044$ of each other in pass rate.
+statement that divergence does not accumulate on a pretrained model either. The released record
+is a rescoring of the stored checkpoints and does not carry the runs' training pass rates, so we
+quote none.
 
 \begin{figure*}[t]
   \centering

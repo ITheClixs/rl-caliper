@@ -823,13 +823,26 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+def sci_plain(value: float, digits: int = 2) -> str:
+    """Scientific notation for use inside math mode, without the dollar signs."""
+    mantissa, exponent = f"{value:.{digits}e}".split("e")
+    return f"{mantissa}\\times10^{{{int(exponent)}}}"
+
+
+def real_seed_macros() -> dict[str, str]:
+    """Divergence between six pretrained runs differing only in rollout randomness (`s3`)."""
+    result = only("s3_real_seeds", seeds=6, steps=40)["result"]
+    rows = {r["step"]: r["pairwise_kl"] for r in result["rows"]}
+    return {
+        "RealSeedsTen": sci_plain(rows[10]),
+        "RealSeedsEnd": sci_plain(rows[max(rows)], 1),
+        "RealSeedsTailSlope": f"{result['tail_slope']:+.2f}",
+    }
+
+
 def example_macros() -> dict[str, str]:
     """The one setting the text walks through, graded like the headline (anchor excluded)."""
-
-    def sci(value: float, digits: int) -> str:
-        mantissa, exponent = f"{value:.{digits}e}".split("e")
-        return f"{mantissa}\\times10^{{{int(exponent)}}}"
-
+    sci = sci_plain
     cell = next(
         c for c in headline_grid()["result"]["cells"]
         if (c["steps"], c["prompts"], c["group_size"], c["band"], c["step_size"], c["vocab"],
@@ -1000,6 +1013,8 @@ def table_numbers() -> None:
             "NullUpdates": f"{left['step'][-1]}",
             "NullPassStart": f"{left['pass_rate'][0]:.2f}",
             "NullPassEnd": f"{left['pass_rate'][-1]:.2f}",
+            "NullDriftLearning": sci_plain(np.mean(left["drift"])),
+            "NullDriftCoin": sci_plain(np.mean(right["drift"])),
         }
 
     spectrum = [r for r in io.load_all("p6_spectrum") if len(r["result"].get("cells", [])) >= 6]
@@ -1496,6 +1511,7 @@ def table_numbers() -> None:
     macros |= collapse_sweep_macros()
     macros |= linearity_macros()
     macros |= example_macros()
+    macros |= real_seed_macros()
     macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [
