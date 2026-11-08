@@ -25,6 +25,29 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("README.md", "fitted exponent `{SpreadExponent}` against a predicted `+0.5`"),
+    ("docs/results-seeds.md", "| tail slope of divergence against updates | "
+                              "{ReconvergenceSlopeLow} to {ReconvergenceSlopeHigh}, median "
+                              "{ReconvergenceSlopeMedian} |"),
+    ("docs/results-seeds.md", "exponent in P {LevelBatch}, 95% CI [{LevelBatchLow}, "
+                              "{LevelBatchHigh}]"),
+    ("docs/results-seeds.md", "exponent in drift {LevelDrift}, 95% CI [{LevelDriftLow}, "
+                              "{LevelDriftHigh}]"),
+    ("docs/results-seeds.md", "fitted exponent {SpreadExponent}, 95% CI [{SpreadExponentLow}, "
+                              "{SpreadExponentHigh}]"),
+    ("docs/theory-seeds.md", "(fitted exponent {SpreadExponent}, 95% CI [{SpreadExponentLow}, "
+                             "{SpreadExponentHigh}] against a predicted +0.5)"),
+    ("docs/theory-seeds.md", "Tail slopes from {ReconvergenceSlopeLow} to "
+                             "{ReconvergenceSlopeHigh} reject accumulation."),
+    ("docs/theory-seeds.md", "give exponent {LevelBatch} in `P` (95% CI [{LevelBatchLow}, "
+                             "{LevelBatchHigh}]) and {LevelDrift} in `D` (95% CI "
+                             "[{LevelDriftLow}, {LevelDriftHigh}])"),
+    ("docs/claims.md", "tail slopes {ReconvergenceSlopeLow} to {ReconvergenceSlopeHigh} "
+                       "against +1"),
+    ("docs/claims.md", "fitted exponent {SpreadExponent}, CI [{SpreadExponentLow}, "
+                       "{SpreadExponentHigh}] against +0.5"),
+    ("docs/claims.md", "exponents with intervals: {LevelBatch} [{LevelBatchLow}, "
+                       "{LevelBatchHigh}], {LevelDrift} [{LevelDriftLow}, {LevelDriftHigh}]"),
     ("README.md", "held at band {AbsorbOverBand} ({AbsorbOverShared} shared prompt) and failed at "
                   "band {AbsorbUnderBand} ({AbsorbUnderShared}, where it needed "
                   "{AbsorbUnderBound})"),

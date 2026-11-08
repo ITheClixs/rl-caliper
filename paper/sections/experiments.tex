@@ -286,23 +286,26 @@ quote none.
   \caption{\textbf{Left:} divergence between seeds against update count on transformers trained
   from scratch, with the slope a random walk would require. It settles instead. \textbf{Centre:}
   the level against the number of prompts, compared at matched pass rate rather than matched step
-  count, with the drift target controlled for. \textbf{Right:} the level against the drift target.
-  Fitted exponents are $-0.61$ and $+0.59$ against the $-1/2$ and $+1/2$ that
+  count, one line per drift target. A joint fit gives exponents of $\numLevelBatch$ in the batch
+  and $\numLevelDrift$ in the drift target against the $-1/2$ and $+1/2$ that
   $Q_t \propto \eta^2\Sigma/P$ requires; both intervals contain those values and the first also
-  contains zero.}
+  contains zero. \textbf{Right:} the spread in pass rate against that divergence. Its fitted
+  exponent is $\numSpreadExponent$ against the $1/2$ an earlier version predicted, a relation we
+  withdraw.}
   \label{fig:reconvergence}
 \end{figure*}
 
 \paragraph{Bounded, not proven stationary.} Across the settings in which a run is still learning,
-the log-log slope of divergence against update count runs from $-1.15$ to $+0.26$, against the
+the log-log slope of divergence against update count runs from $\numReconvergenceSlopeLow$ to $\numReconvergenceSlopeHigh$, against the
 $+1$ that accumulation requires. That rejects accumulation. It does not establish stationarity in
 the strict sense: $\mathcal{J}_t$, $\Sigma_t$ and $\eta_t$ all move during training, so the level that
 \eqref{eq:unrolled} converges to is itself slowly varying, and we describe the divergence as
 bounded rather than stationary throughout.
 
 \paragraph{How the level scales.} Compared at matched pass rate rather than matched step count,
-a log-log fit over nine settings gives an exponent of $-0.61$ in the batch, $95\%$ CI
-$[-1.42, +0.24]$, and $+0.59$ in the drift target, $95\%$ CI $[+0.27, +1.04]$, with $R^2 = 0.70$.
+a log-log fit over $\numLevelSettings$ settings gives an exponent of $\numLevelBatch$ in the
+batch, $95\%$ CI $[\numLevelBatchLow, \numLevelBatchHigh]$, and $\numLevelDrift$ in the drift
+target, $95\%$ CI $[\numLevelDriftLow, \numLevelDriftHigh]$, with $R^2 = \numLevelRsq$.
 Both intervals contain the values $-1/2$ and $+1/2$ that follow from
 $Q_t \propto \eta^2\Sigma/P$, and the batch interval also contains zero. Nine settings are too few
 to pin a two-dimensional scaling law, and we report the intervals rather than the point estimates
@@ -310,7 +313,8 @@ for that reason.
 
 \paragraph{Why the route through policy divergence was abandoned.} An earlier version of this work
 predicted that the spread in final task performance would follow $\sqrt{\KL_\infty}$. It does not,
-in our data: the fitted exponent is $+0.10$ with $95\%$ CI $[-0.03, +0.45]$ against a predicted
+in our data: the fitted exponent is $\numSpreadExponent$ with $95\%$ CI
+$[\numSpreadExponentLow, \numSpreadExponentHigh]$ against a predicted
 $+0.5$, and the interval contains zero. Policy divergence and outcome spread are positively
 associated across our settings, but these experiments do not establish the predicted relation, and
 we withdraw it.

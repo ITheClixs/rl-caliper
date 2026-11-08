@@ -15,8 +15,9 @@ import numpy as np
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.ticker  # noqa: E402
 
-from caliper.analysis import grids  # noqa: E402
+from caliper.analysis import grids, reconvergence  # noqa: E402
 from caliper.runtime import io  # noqa: E402
 
 FIGURES = Path(__file__).resolve().parents[1] / "paper" / "figures"
@@ -387,54 +388,10 @@ def figure_allocation() -> None:
     plt.close(fig)
 
 
-def _contraction_cells():
-    """Every stored contraction sweep, restricted to updates that are still learning."""
-    cells = []
-    for run in io.load_all("s1_contraction"):
-        for cell in run["result"]["cells"]:
-            history = cell["history"]
-            if "true_spread" not in history:
-                continue  # an early run that measured spread without the noise correction
-            pass_rate = np.array(history["pass_mean"])
-            drift = np.array(history["drift"])
-            keep = (pass_rate < 0.85) & (drift < 3 * cell["drift_target"])
-            if keep.sum() >= 4:
-                cells.append((cell, keep))
-    if not cells:
-        raise SystemExit("no contraction runs")
-    return cells
-
-
-def _matched_progress(cells, target=0.60):
-    """One summary per setting: divergence and outcome spread at a common pass rate.
-
-    Trajectory points within a setting cannot be pooled -- the divergence is already at its
-    stationary value and what varies along a trajectory is measurement noise, not signal. Settings
-    also differ in their noise scale, so they are compared where the policies are equally good.
-    """
-    rows = []
-    for cell, keep in cells:
-        pass_rate = np.array(cell["history"]["pass_mean"])[keep]
-        kl = np.array(cell["history"]["pairwise_kl"])[keep]
-        spread = np.array(cell["history"]["true_spread"])[keep]
-        if not (pass_rate.min() <= target <= pass_rate.max()):
-            continue
-        rows.append(
-            {
-                "prompts": cell["prompts"],
-                "drift": cell["drift_target"],
-                "critical_batch": cell.get("critical_batch", float("nan")),
-                "kl": float(np.interp(target, pass_rate, kl)),
-                "spread": float(np.interp(target, pass_rate, spread)),
-            }
-        )
-    return rows
-
-
 def figure_reconvergence() -> None:
-    """Divergence settles; the level scales as predicted; the outcome spread follows."""
-    cells = _contraction_cells()
-    rows = _matched_progress(cells)
+    """Divergence settles; its level scales roughly as predicted; spread barely tracks it."""
+    cells = reconvergence.contraction_cells()
+    rows = reconvergence.matched_progress(cells)
     fig, axes = plt.subplots(1, 3, figsize=(10.4, 2.8))
 
     ax = axes[0]
@@ -484,19 +441,27 @@ def figure_reconvergence() -> None:
     good = (x > 0) & (y > 0)
     x, y = x[good], y[good]
     ax.scatter(x, y, s=30, color=PALETTE[0])
-    slope, intercept = np.polyfit(np.log(x), np.log(y), 1)
-    resid = np.log(y) - np.polyval([slope, intercept], np.log(x))
-    r2 = 1 - (resid**2).sum() / ((np.log(y) - np.log(y).mean()) ** 2).sum()
+    fit = reconvergence.spread_fit(rows)
+    intercept, slope = fit["beta"]
     grid = np.geomspace(x.min(), x.max(), 20)
     ax.plot(grid, np.exp(intercept) * grid**slope, color="0.35", lw=1.2,
-            label=rf"fit $\propto \mathrm{{KL}}^{{{slope:.2f}}}$, $R^2={r2:.2f}$")
+            label=rf"fit $\propto \mathrm{{KL}}^{{{slope:.2f}}}$, $R^2={fit['r2']:.2f}$")
     ax.plot(grid, y[0] * (grid / x[0]) ** 0.5, ":", color="0.55", lw=1.2,
-            label=r"theory $\mathrm{KL}^{1/2}$")
+            label=r"withdrawn prediction $\mathrm{KL}^{1/2}$")
     ax.set_xscale("log")
     ax.set_yscale("log")
     ax.legend(frameon=False, fontsize=6.5)
     style(ax, "divergence at matched progress", "spread in pass rate")
-    ax.set_title("outcome spread follows", fontsize=8.5)
+    ax.set_title(r"outcome spread does not follow $\mathrm{KL}^{1/2}$", fontsize=8.5)
+
+    # on these narrow log ranges the default minor labels collide: label 1, 2 and 5 per decade
+    for axis in (axes[1].yaxis, axes[2].xaxis, axes[2].yaxis):
+        axis.set_major_locator(matplotlib.ticker.LogLocator(base=10, subs=(1.0, 2.0, 5.0)))
+        axis.set_major_formatter(matplotlib.ticker.LogFormatterSciNotation(labelOnlyBase=False))
+        axis.set_minor_formatter(matplotlib.ticker.NullFormatter())
+    axes[1].xaxis.set_major_locator(matplotlib.ticker.FixedLocator([8, 16, 32, 64]))
+    axes[1].xaxis.set_major_formatter(matplotlib.ticker.ScalarFormatter())
+    axes[1].xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
     fig.tight_layout()
     save(fig, "reconvergence.pdf")

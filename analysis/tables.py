@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from caliper.analysis import grids
+from caliper.analysis import grids, reconvergence
 from caliper.analysis.efficiency import optimal_group_size
 from caliper.runtime import io
 
@@ -850,6 +850,35 @@ def collapse_sweep_macros() -> dict[str, str]:
     return macros
 
 
+def reconvergence_macros() -> dict[str, str]:
+    """Divergence between seeds on the from-scratch transformers: does it settle, how its level
+    scales with batch and drift target, and whether outcome spread follows it."""
+    cells = reconvergence.contraction_cells()
+    rows = reconvergence.matched_progress(cells)
+    slopes = reconvergence.tail_slopes(cells)
+    level = reconvergence.level_fit(rows)
+    spread = reconvergence.spread_fit(rows)
+    signed = "{:+.2f}".format
+    return {
+        "ReconvergenceSettings": f"{len(slopes)}",
+        "ReconvergenceSlopeLow": signed(slopes.min()),
+        "ReconvergenceSlopeHigh": signed(slopes.max()),
+        "ReconvergenceSlopeMedian": signed(np.median(slopes)),
+        "LevelSettings": f"{level['n']}",
+        "LevelBatch": signed(level["beta"][1]),
+        "LevelBatchLow": signed(level["lo"][1]),
+        "LevelBatchHigh": signed(level["hi"][1]),
+        "LevelDrift": signed(level["beta"][2]),
+        "LevelDriftLow": signed(level["lo"][2]),
+        "LevelDriftHigh": signed(level["hi"][2]),
+        "LevelRsq": f"{level['r2']:.2f}",
+        "SpreadExponent": signed(spread["beta"][1]),
+        "SpreadExponentLow": signed(spread["lo"][1]),
+        "SpreadExponentHigh": signed(spread["hi"][1]),
+        "SpreadRsq": f"{spread['r2']:.2f}",
+    }
+
+
 # the second collapse test (docs/predictions.md), committed before bands 0.15 and 0.35 were rerun:
 # the band whose forecast is too large has at most 13 shared prompts, the other at least 14
 ABSORPTION_TEST = {"Over": ("modes-band-0.35", 13), "Under": ("modes-band-0.15", 14)}
@@ -1635,6 +1664,7 @@ def table_numbers() -> None:
     macros |= shortfall_macros()
     macros |= collapse_sweep_macros()
     macros |= absorption_test_macros()
+    macros |= reconvergence_macros()
     macros |= linearity_macros()
     macros |= example_macros()
     macros |= real_seed_macros()
