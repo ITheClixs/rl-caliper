@@ -45,3 +45,32 @@ is tested.
 **What stands.** Constant-answer collapse explains the 25x shortfall on the counting task of
 Section 6 and nothing in the support sweep. The 2.80x and 2.13x overpredictions in the two middle
 bands remain unexplained.
+
+## 2026-11-08: the forecast is too large where runs are not absorbed into shared answers
+
+**Observed so far.** The pattern comes from two bands, seen after the refutation above. A prompt is
+*shared* when every run (anchor and later seeds) answers it with one string at least 90% of the time
+and all those strings agree (`shared_prompts` in `experiments/s16_saturation/sweep.py`). Band 0.85
+has 26 shared prompts of 64, and its forecast is about right (forecast over measured 0.81). Band
+0.60 has 1 of 64, and its forecast is too large (2.80).
+
+**Hypothesis.** Whether the forecast is too large tracks how many prompts the runs are absorbed
+into together. Few shared prompts go with a forecast that is too large; many go with one that is
+not too large. This is an empirical pattern with no mechanism behind it. The sign is part of the
+claim, because the last entry failed on exactly that.
+
+**What is already known and what is not.** Bands 0.15 and 0.35 were run in the original sweep, so
+their ratios are fixed. Band 0.15 is 0.60, too small. Band 0.35 is 2.13, too large. The reruns are
+deterministic: band 0.85's and band 0.60's reproduced their scores run for run. The original runs
+stored no answers, so neither band's shared count has been seen.
+
+**Prediction.** Rerun with `--record-outputs` (labels `modes-band-0.15` and `modes-band-0.35`):
+1. band 0.35, where the forecast is too large, has at most 13 shared prompts of 64;
+2. band 0.15, where it is not too large, has at least 14.
+
+The cut is halfway between the two bands already seen (26 and 1).
+
+**What would refute it.** Either part failing. Each part is reported on its own, and the
+hypothesis holds only if both do.
+
+**Result.** Pending: recorded when both runs finish.
