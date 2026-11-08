@@ -51,7 +51,10 @@ def optimiser_moments(trainer, order):
     return out
 
 
-def evaluate(trainer, items, samples, key):
+def evaluate(trainer, items, samples, key, outputs=None):
+    """Held-out pass rate per prompt. If `outputs` is a list, each prompt's most frequent decoded
+    answer and the share of samples giving it are appended to it, which is what shows whether a
+    run has collapsed onto one answer whatever it is asked."""
     rates = []
     for item in items:
         key, sub = mx.random.split(key, 2)
@@ -61,9 +64,12 @@ def evaluate(trainer, items, samples, key):
             trainer.config.temperature, sub, eos_id=trainer.tokenizer.eos_token_id,
         )
         mx.eval(responses)
-        rates.append(float(np.mean([
-            exact_match(trainer._trim(list(r)), item["answer"]) for r in np.array(responses)
-        ])))
+        texts = [trainer._trim(list(r)) for r in np.array(responses)]
+        rates.append(float(np.mean([exact_match(t, item["answer"]) for t in texts])))
+        if outputs is not None:
+            values, counts = np.unique([t.strip() for t in texts], return_counts=True)
+            outputs.append({"mode": str(values[counts.argmax()]),
+                            "share": float(counts.max() / len(texts))})
     return np.array(rates), key
 
 
@@ -115,6 +121,9 @@ def main() -> None:
     ap.add_argument("--checkpoints", type=int, default=4)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--store", default="runs/s11_prospective")
+    ap.add_argument("--record-outputs", action="store_true",
+                    help="evaluate the anchor too, and store every run's per-prompt pass rates "
+                         "and most frequent answers, so collapse onto one answer can be checked")
     args = ap.parse_args()
 
     store = Path(args.store)
@@ -150,6 +159,13 @@ def main() -> None:
               f"{info['reward_variance']:9.4f}  {info['gradient_norm']:.3e}", flush=True)
     print(f"anchor trained in {(time.time() - started) / 60:.1f} min, "
           f"mean live share {live:.3f}", flush=True)
+
+    anchor_rates, anchor_outputs = None, []
+    if args.record_outputs:
+        # the anchor's own endpoint, evaluated before the forecast and never used by it
+        anchor_rates, _ = evaluate(trainer, held_out, args.eval_samples, mx.random.key(555),
+                                   outputs=anchor_outputs)
+        print(f"anchor held out {anchor_rates.mean():.4f}", flush=True)
 
     prediction = forecast(
         trainer, states, corpus, held_out, args.learning_rate, args.prompts,
@@ -202,11 +218,15 @@ def main() -> None:
     del trainer
 
     # ---- only now, the seeds the prediction will be judged against ----
-    scores, per_prompt = [], []
+    scores, per_prompt, seed_outputs = [], [], []
     for s in range(1, args.seeds + 1):
         started = time.time()
         run, _, _, seed_live, _, _ = train_run(args.model, config, corpus, initial, s)
-        rates, _ = evaluate(run, held_out, args.eval_samples, mx.random.key(555 + 101 * s))
+        outputs = [] if args.record_outputs else None
+        rates, _ = evaluate(run, held_out, args.eval_samples, mx.random.key(555 + 101 * s),
+                            outputs=outputs)
+        if outputs is not None:
+            seed_outputs.append(outputs)
         scores.append(float(rates.mean()))
         per_prompt.append(rates.tolist())
         print(f"seed {s:2d}: held out {rates.mean():.4f}  live {seed_live:.2f}  "
@@ -234,6 +254,14 @@ def main() -> None:
         "binomial_variance": resolved["binomial"] ** 2,
         "ratio": float(ratio),
         "eval_key_per_seed": True,
+        **({
+            "held_out_answers": [item["answer"] for item in held_out],
+            "held_out_families": [item.get("family") for item in held_out],
+            "anchor_per_prompt": anchor_rates.tolist(),
+            "anchor_outputs": anchor_outputs,
+            "per_prompt": per_prompt,
+            "seed_outputs": seed_outputs,
+        } if args.record_outputs else {}),
     })
 
 
