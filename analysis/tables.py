@@ -743,6 +743,18 @@ def saturation_macros() -> dict[str, str]:
     return macros
 
 
+def shortfall_macros() -> dict[str, str]:
+    """How far short the 0.5B forecasts are, cheap and transported, as the text quotes them."""
+    chosen = experiment("real_05b_sgd", require=("resolved_std",))
+    measured = chosen["result"]["resolved_std"]
+    cheap = cheap_variants(chosen, io.load_all("s7_real_forecast"))[None]["predicted_std"]
+    return {
+        "RealShortCheap": f"{measured / cheap:.0f}",
+        "RealShortTransported": f"{measured / chosen['result']['predicted_std']:.0f}",
+        "RealCheapForecast": f"{cheap:.4f}",
+    }
+
+
 def estimated_macros() -> dict[str, str]:
     """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
     result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
@@ -1294,6 +1306,7 @@ def table_numbers() -> None:
     macros |= saturation_macros()
     macros |= adam_cold_macros()
     macros |= estimated_macros()
+    macros |= shortfall_macros()
     command = chr(92) + "newcommand"
     lines = [
         command + "{" + chr(92) + "num" + name + "}{" + value + "}"

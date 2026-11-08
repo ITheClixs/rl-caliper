@@ -53,7 +53,7 @@ of the reported metric rather than being formed.
   \item \textbf{An honest boundary} (Section~\ref{sec:real}). On Qwen2.5-0.5B accuracy is
   regime-dependent: across $\numSweepBands$ pre-specified regimes the errors are
   $\numSweepErrors$, all inside the break-even above. Outside it, on a task where most runs learn to
-  answer one constant whatever they are asked, the forecast is short by twenty-five, and at $7$B under Adam the forecast is short by between
+  answer one constant whatever they are asked, the forecast is short by $\numRealShortCheap\times$, and at $7$B under Adam the forecast is short by between
   $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
 \end{itemize}
 

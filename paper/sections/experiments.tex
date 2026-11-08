@@ -530,7 +530,7 @@ but name, and the quantity that is badly estimated is one the forecast barely us
 $0.0077$ is the evaluation's own binomial noise, leaving a seed term of $0.0631$ with an interval of
 $[0.0350,\ 0.0735]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run is the
 cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what
-the noisy directional derivative leaves available. It is $0.0025$, short by a factor of twenty-five.
+the noisy directional derivative leaves available. It is $\numRealCheapForecast$, short by a factor of $\numRealShortCheap$.
 
 Taking the transport anyway gives $0.0040$, and repeating the experiment says how far either
 number can be trusted. Before the adapter initialisation was seeded, each launch of this
@@ -547,7 +547,7 @@ An explanation that would have been comfortable is ruled out by the same table. 
 is estimated from a batch of eight prompts, and once most groups are unanimous that sample is
 mostly zeros, so it could be biased low. Re-estimating it from sixty-four prompts, from the same
 initialisation and changing nothing else, moves the forecast from $0.0025$ to $0.0026$, about five
-percent where a factor of twenty-five is needed. Measured on those sixty-four prompts the share of
+percent where a factor of $\numRealShortCheap$ is needed. Measured on those sixty-four prompts the share of
 prompts whose group is not unanimous still reaches zero at the fifth update and never exceeds five
 percent afterwards, so the collapse is not a small-batch artefact either. The shortfall is not an
 estimation problem.
@@ -616,7 +616,7 @@ is a statement about the experiment we could afford rather than about the method
 \label{sec:exp-support}
 
 Sections~\ref{sec:exp-real} and~\ref{sec:exp-adam-scale} report the forecast short by
-twenty-five and by three to seventeen, and read that as the runs leaving the regime a local model
+$\numRealShortCheap\times$ and by three to seventeen, and read that as the runs leaving the regime a local model
 describes. Both runs share something we did not control for. A count-based advantage is
 identically zero on a unanimous group, so a prompt contributes to the seed spread only when its
 group contains both a success and a failure. For a prompt the policy passes with probability $p$
@@ -641,7 +641,7 @@ before any replica exists, and evaluated against $\numMixedSeeds$ independently 
 exclude the anchor. It is $\numMixedForecast$ where the measured seed term is
 $\numMixedResolved$, a ratio of $\numMixedRatio$, and two disjoint half-sample estimates of the
 injected term agree to $\numMixedHalfRatio$. The corresponding figures on the saturating corpus were
-twenty-five and $5.5$. The learning is not sacrificed for it: the pass rate goes from
+$\numRealShortCheap\times$ and $5.5$. The learning is not sacrificed for it: the pass rate goes from
 $\numMixedBase$ to $\numMixedMean$, a larger improvement than any other real-model run here.
 
 The three quantities moving together is what the claim rests on, rather than the ratio alone. We
@@ -771,7 +771,7 @@ touch it again.
 $\numAbstainSmall$, and on Qwen2.5-7B under Adam it is $\numAbstainLarge$, against a threshold of
 $\numDiagThreshold$ and a grid whose whole range is $\numDiagLow$ to $\numDiagHigh$. Both are
 refused, by factors of about seventy and six thousand. Those are the two runs whose forecasts
-Sections~\ref{sec:exp-real} and~\ref{sec:exp-adam-scale} report as short by twenty-five and by
+Sections~\ref{sec:exp-real} and~\ref{sec:exp-adam-scale} report as short by $\numRealShortCheap\times$ and by
 between $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$, so the rule declines exactly
 the numbers that should not be believed, having been given no information about them.
 

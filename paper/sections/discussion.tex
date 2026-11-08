@@ -76,8 +76,8 @@ so a noisy metric gradient makes the forecast too large, never too small. The se
 with the size of the evaluation rollout and can be estimated by splitting it, which we did not do.
 
 \paragraph{And on a real model it underpredicts, by a lot.} Section~\ref{sec:exp-real} runs the
-whole thing on Qwen2.5-0.5B and the estimator we recommend comes out a factor of twenty-five
-short, the transported one sixteen. Most of those runs, the one the forecast was
+whole thing on Qwen2.5-0.5B and the estimator we recommend comes out $\numRealShortCheap\times$
+short, the transported one $\numRealShortTransported\times$. Most of those runs, the one the forecast was
 made from included, learn to answer one constant to every prompt, and which constant a run falls
 into is most of the spread: a discrete outcome a linearised model has no term for
 (Section~\ref{sec:exp-real}). What survives the failure is narrower than we first wrote. The share of prompts whose group is not unanimous falls from about a half to under
@@ -85,7 +85,7 @@ $5\%$ by the fifth update, and a unanimous group carries no count-based advantag
 run stops injecting seed noise there. That is measured directly and does not depend on the
 forecast. The forecast's own kernel puts $\numRealFirstHalfShare\%$ of its predicted variance
 before the same point, which is consistent with it, but the kernel belongs to the model whose
-magnitude is wrong by twenty-five, so we do not read it as establishing where the actual seed
+magnitude is wrong by $\numRealShortCheap\times$, so we do not read it as establishing where the actual seed
 variance was created. Doing that needs an experiment that randomises one block of updates at a
 time, which we did not run.
 assumption that the amplification stays linear. At a step size small enough to keep it

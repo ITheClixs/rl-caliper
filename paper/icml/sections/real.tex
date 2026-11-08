@@ -2,7 +2,7 @@
 \label{sec:real}
 
 Run end to end on Qwen2.5-0.5B with LoRA, the cheap estimator \eqref{eq:cheap} is a factor of
-twenty-five short of the measured spread and the transported one sixteen. On Qwen2.5-7B under Adam,
+$\numRealShortCheap$ short of the measured spread and the transported one $\numRealShortTransported$. On Qwen2.5-7B under Adam,
 with the recursion lifted to the optimiser state $z = (\theta, m, v)$, it is short by between
 $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. On the exact models the lift gives
 $\numAdamLiftWarmMedian\times$ with Adam's moments warmed, but started cold and without bias
