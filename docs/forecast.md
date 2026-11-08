@@ -145,7 +145,7 @@ about 5% where a factor of 25 is needed. The share of prompts with a mixed group
 not a small-sample artefact. The shortfall is not an estimation problem.
 
 The reason is the outcome distribution. Three runs land at 0.346, 0.353 and 0.354, within 0.008 of
-each other, while the remaining five spread from 0.204 to 0.300. Whether that is exactly two modes
+each other, while the remaining five spread from 0.204 to 0.299. Whether that is exactly two modes
 is not something eight runs can settle, but the runs plainly end in groups rather than scattered
 about a centre. A linearised model predicts the spread of a unimodal perturbation about one
 trajectory; a standard deviation is the wrong summary of this outcome for anyone.

@@ -25,6 +25,17 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("docs/forecast.md", "| measured spread across runs | {RealObservedSpread} |"),
+    ("docs/forecast.md", "| evaluation (binomial) part | {RealBinomialPart} |"),
+    ("docs/forecast.md", "| seed part, by subtraction | {RealSeedPart}, interval [{RealSeedLo}, "
+                         "{RealSeedHi}] |"),
+    ("docs/forecast.md", "| forecast, cheap form, `Sigma` from 64 prompts | {RealCheapWide} |"),
+    ("docs/forecast.md", "| forecast, with transport | {RealTransportedForecast} |"),
+    ("docs/forecast.md", "Three runs land at {RealClusterLow}, {RealClusterMid} and "
+                         "{RealClusterHigh}, within {RealClusterWidth} of each other, while the "
+                         "remaining five spread from {RealRestLow} to {RealRestHigh}."),
+    ("docs/claims.md", "cheap form {RealCheapForecast} against a measured seed term of "
+                       "{RealSeedPart} [{RealSeedLo}, {RealSeedHi}]"),
     ("README.md", "median error **{ForecastMedian}x**, worst {ForecastWorst}x, inside the measured "
                   "95% interval in {ForecastInside} of {ForecastSettings}"),
     ("README.md", "against the value measured over {ForecastSeeds} seeds trained afterwards"),

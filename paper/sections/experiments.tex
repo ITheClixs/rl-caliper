@@ -527,13 +527,13 @@ but name, and the quantity that is badly estimated is one the forecast barely us
   \label{tab:real-forecast}
 \end{table}
 
-\paragraph{What the comparison says.} The eight runs realise a spread of $0.0636$, of which
-$0.0077$ is the evaluation's own binomial noise, leaving a seed term of $0.0631$ with an interval of
-$[0.0350,\ 0.0735]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run is the
+\paragraph{What the comparison says.} The eight runs realise a spread of $\numRealObservedSpread$, of which
+$\numRealBinomialPart$ is the evaluation's own binomial noise, leaving a seed term of $\numRealSeedPart$ with an interval of
+$[\numRealSeedLo,\ \numRealSeedHi]$ (Table~\ref{tab:real-forecast}). The forecast a practitioner would run is the
 cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} recommends and what
 the noisy directional derivative leaves available. It is $\numRealCheapForecast$, short by a factor of $\numRealShortCheap$.
 
-Taking the transport anyway gives $0.0040$, and repeating the experiment says how far either
+Taking the transport anyway gives $\numRealTransportedForecast$, and repeating the experiment says how far either
 number can be trusted. Before the adapter initialisation was seeded, each launch of this
 configuration started from its own draw, and those launches produced transported forecasts of
 $0.0225$ and $0.0040$, a factor of $5.7$ apart, and cheap forecasts of $0.0056$ and $0.0025$, a
@@ -547,15 +547,15 @@ and dropping it leaves a quantity that still moves by a factor of two between in
 An explanation that would have been comfortable is ruled out by the same table. The injected term
 is estimated from a batch of eight prompts, and once most groups are unanimous that sample is
 mostly zeros, so it could be biased low. Re-estimating it from sixty-four prompts, from the same
-initialisation and changing nothing else, moves the forecast from $0.0025$ to $0.0026$, about five
+initialisation and changing nothing else, moves the forecast from $\numRealCheapForecast$ to $\numRealCheapWide$, about five
 percent where a factor of $\numRealShortCheap$ is needed. Measured on those sixty-four prompts the share of
 prompts whose group is not unanimous still reaches zero at the fifth update and never exceeds five
 percent afterwards, so the collapse is not a small-batch artefact either. The shortfall is not an
 estimation problem.
 
 The reason for the shortfall is visible without any statistics. The eight held-out scores are not
-scattered around a centre. Three of them sit at $0.346$, $0.353$ and $0.354$, within $0.008$ of
-each other, and the remaining five are spread from $0.204$ to $0.300$
+scattered around a centre. Three of them sit at $\numRealClusterLow$, $\numRealClusterMid$ and $\numRealClusterHigh$, within $\numRealClusterWidth$ of
+each other, and the remaining five are spread from $\numRealRestLow$ to $\numRealRestHigh$
 (Figure~\ref{fig:real-forecast}, right). A linearised model predicts the spread of a unimodal
 perturbation about one trajectory, and this is not that. Whether it is exactly two modes we would
 not claim from eight runs, and the grouping is not identical between reruns; what is stable across
@@ -662,7 +662,9 @@ group size, evaluation set and forecast procedure fixed. The corpora and the lau
 all four conditions were written before any of them ran.
 
 The forecast errors are $\numSweepErrors$, in that order. They are not monotone in support, and
-the middle bands are the worst. Half-sample disagreement stays between $\numSweepHalfLow$ and
+the middle bands are the worst. They also do not point the same way: as ratios of forecast to
+measured spread they are $\numSweepRatios$, so the forecast is too small in the lowest and highest
+bands and too large in the two middle ones. Half-sample disagreement stays between $\numSweepHalfLow$ and
 $\numSweepHalfHigh$ in every band, including the one whose live share averaged $0.11$. We
 therefore withdraw the reading that sparse stochastic support is the dominant determinant of
 either estimator stability or forecast error: it is not, on this model. Taken with the

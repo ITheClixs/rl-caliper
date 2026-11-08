@@ -746,13 +746,34 @@ def saturation_macros() -> dict[str, str]:
 def shortfall_macros() -> dict[str, str]:
     """How far short the 0.5B forecasts are, cheap and transported, as the text quotes them."""
     chosen = experiment("real_05b_sgd", require=("resolved_std",))
-    measured = chosen["result"]["resolved_std"]
-    cheap = cheap_variants(chosen, io.load_all("s7_real_forecast"))[None]["predicted_std"]
-    return {
+    result = chosen["result"]
+    measured = result["resolved_std"]
+    variants = cheap_variants(chosen, io.load_all("s7_real_forecast"))
+    cheap = variants[None]["predicted_std"]
+    band = result["resolved_interval"]
+    # the three highest held-out scores sit together; the text quotes them and the rest's range
+    scores = sorted(result["held_out_scores"])
+    cluster, rest = scores[-3:], scores[:-3]
+    macros = {
         "RealShortCheap": f"{measured / cheap:.0f}",
-        "RealShortTransported": f"{measured / chosen['result']['predicted_std']:.0f}",
+        "RealShortTransported": f"{measured / result['predicted_std']:.0f}",
         "RealCheapForecast": f"{cheap:.4f}",
+        "RealTransportedForecast": f"{result['predicted_std']:.4f}",
+        "RealObservedSpread": f"{result['observed_spread']['std']:.4f}",
+        "RealBinomialPart": f"{np.sqrt(result['binomial_variance']):.4f}",
+        "RealSeedPart": f"{measured:.4f}",
+        "RealSeedLo": f"{band['lo']:.4f}",
+        "RealSeedHi": f"{band['hi']:.4f}",
+        "RealClusterLow": f"{cluster[0]:.3f}",
+        "RealClusterMid": f"{cluster[1]:.3f}",
+        "RealClusterHigh": f"{cluster[2]:.3f}",
+        "RealClusterWidth": f"{cluster[2] - cluster[0]:.3f}",
+        "RealRestLow": f"{rest[0]:.3f}",
+        "RealRestHigh": f"{rest[-1]:.3f}",
     }
+    if 64 in variants:
+        macros["RealCheapWide"] = f"{variants[64]['predicted_std']:.4f}"
+    return macros
 
 
 def estimated_macros() -> dict[str, str]:
@@ -1080,6 +1101,8 @@ def table_numbers() -> None:
             "SweepWorst": f"{max(errors):.2f}",
             "SweepInside": f"{len(inside)}",
             "SweepErrors": ", ".join(f"{e:.2f}" for e in errors),
+            # forecast over measured, so the direction of each miss is visible
+            "SweepRatios": ", ".join(f"{o['ratio']:.2f}" for o in bands),
             "SweepHalfLow": f"{min(halves):.2f}",
             "SweepHalfHigh": f"{max(halves):.2f}",
         }
