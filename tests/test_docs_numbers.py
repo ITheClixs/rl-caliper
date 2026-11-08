@@ -42,6 +42,13 @@ CHECKS = [
                             "interval is [{AbsorbUnderLow}, {AbsorbUnderHigh}]"),
     ("docs/predictions.md", "the commonest correct answer covers {AbsorbTopCommonest}% of band "
                             "0.85's prompts and {AbsorbUnderCommonest}% of band 0.15's"),
+    ("docs/claims.md", "median {AdamLiftWarmMedian}x with the curvature blocks, "
+                       "{AdamLiftBareMedian}x without (worst {AdamLiftWarmWorst}x and "
+                       "{AdamLiftBareWorst}x)"),
+    ("docs/claims.md", "worth {AdamLiftParamsMedian}x in variance on the exact tier with theta "
+                       "alone, {AdamLiftWalkMedian}x with no transport at all"),
+    ("docs/theory-seeds.md", "median {AdamLiftBareMedian}x without them, {AdamLiftWarmMedian}x "
+                             "with"),
     ("docs/forecast.md", "the two released launches that did give {EarlyCorrelation} and "
                          "{EarlyCorrelationRepeat}, the bootstrap interval at eight runs spans "
                          "[{EarlyCorrelationLow}, {EarlyCorrelationHigh}], and at 7B the "

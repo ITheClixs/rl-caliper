@@ -128,11 +128,14 @@ Measured against 48 independent Adam runs over 24 settings (`experiments/p5_adam
 | second moment frozen | 1.21x | 1.6x |
 | theta block only | 24.60x | 73.7x |
 | accumulation | 24.22x | 73.8x |
+| lifted, without the blocks that need the Jacobian of the mean update | 1.07x | 1.9x |
 
-Readings. The optimiser state is nearly the whole problem: a recursion on `theta` alone is barely
+Readings. The optimiser state is nearly the whole problem: a recursion on `theta` alone is no
 better than assuming noise accumulates unfiltered. Dropping the blocks that need the Jacobian of
-the mean update costs nothing measurable, 1.10x either way, which is what makes the lift affordable
-on a real model where that Jacobian cannot be estimated.
+the mean update costs nothing systematic (median 1.07x without them, 1.10x with; worst 1.9x and
+1.8x), which is what makes the lift affordable on a real model where that Jacobian cannot be
+estimated. That row is a rerun of the sweep with one more model (`--curvature-free`), and it
+reproduces the other four rows to rounding.
 
 An earlier version of this table reported 2.61x for the lift and 8x on the saturating band, and
 attributed the latter to Adam's normalisation being a nonlinearity a linear recursion cannot hold.

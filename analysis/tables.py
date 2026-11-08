@@ -389,6 +389,17 @@ def adam_cold_macros() -> dict[str, str]:
             f"AdamLift{tag}Median": f"{np.median(error):.2f}",
             f"AdamLift{tag}Worst": f"{error.max():.{0 if error.max() >= 100 else 2}f}",
         }
+    # the lift without the blocks that need the Jacobian of the mean update: a rerun of the warmed
+    # sweep with one more model, which reproduces the other models' values to rounding
+    bare = only("p5_adam_lift", curvature_free=True, warmup=5, no_bias_correction=False)
+    error = np.array([
+        max(c["curvature_free_kl"] / c["measured_kl"], c["measured_kl"] / c["curvature_free_kl"])
+        for c in bare["result"]["cells"]
+    ])
+    macros |= {
+        "AdamLiftBareMedian": f"{np.median(error):.2f}",
+        "AdamLiftBareWorst": f"{error.max():.2f}",
+    }
     # the warmed sweep's other models and its bands, on the table's geometric-median convention
     cells = adam_lift_record(5, True)["result"]["cells"]
 

@@ -9,6 +9,8 @@ against independently trained runs:
   parameters    the parameter block of the same operators, as though the optimiser state did not
                 carry a perturbation forward
   accumulation  no contraction at all
+  curvature-free  with --curvature-free, the lift without the blocks that need the Jacobian of the
+                mean update, which is the form a real model can afford
 
 If the optimiser state matters, the second of these should be wrong in a specific direction.
 
@@ -92,6 +94,9 @@ def main() -> None:
     ap.add_argument("--no-bias-correction", action="store_true",
                     help="Adam without bias correction, which is MLX's default and what the "
                          "pretrained runs used")
+    ap.add_argument("--curvature-free", action="store_true",
+                    help="also propagate the lift without its Jacobian blocks; a separate record, "
+                         "so the validated sweep is not replaced")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -117,6 +122,7 @@ def main() -> None:
         transfers, injections = [], []
         # the same recursion on theta alone, which is what ignoring the optimiser state gives
         momentum_cov = np.zeros((size, size))
+        bare_cov = np.zeros((size, size))
         flat = np.zeros((dim, dim))
         walk = np.zeros((dim, dim))
         for _ in range(steps):
@@ -132,6 +138,11 @@ def main() -> None:
             momentum_cov = (
                 slow_transfer @ momentum_cov @ slow_transfer.T + slow_injection
             )
+            if args.curvature_free:
+                bare_transfer, bare_injection = transfer_and_injection(
+                    state, accepts, weights, prompts, settings, carry_curvature=False
+                )
+                bare_cov = bare_transfer @ bare_cov @ bare_transfer.T + bare_injection
 
             block = transfer[:dim, :dim]
             unit = injection[:dim, :dim]
@@ -155,6 +166,8 @@ def main() -> None:
             "measured_kl": measured, "lifted_kl": lifted_kl, "momentum_kl": momentum_kl,
             "final_metric": float(np.mean(accepts @ state.policy.sequence_probs())),
             "parameters_only_kl": flat_kl, "walk_kl": walk_kl,
+            **({"curvature_free_kl": float(np.trace(metric @ bare_cov[:dim, :dim]))}
+               if args.curvature_free else {}),
         })
         print(f"{band:>6s} {steps:4d} {prompts:4d} {eta:6.3f} {measured:10.3e} "
               f"{lifted_kl:10.3e} {momentum_kl:10.3e} {flat_kl:10.3e} {walk_kl:10.3e}",
@@ -164,7 +177,9 @@ def main() -> None:
     measured = np.array([c["measured_kl"] for c in cells])
     for key, label in [("lifted_kl", "lifted"), ("momentum_kl", "momentum only"),
                        ("parameters_only_kl", "parameters only"),
-                       ("walk_kl", "accumulation")]:
+                       ("walk_kl", "accumulation"), ("curvature_free_kl", "curvature-free")]:
+        if key not in cells[0]:
+            continue
         ratio = np.array([c[key] for c in cells]) / measured
         error = np.abs(np.log(ratio))
         print(f"{label:>16s}: median {np.exp(np.median(error)):7.2f}x  "

@@ -870,9 +870,10 @@ model might plausibly be wrong by, rather than the two orders of magnitude we pr
 shortfall at $\numAdamScaleStatelessShortfall$ and read it as evidence that the runs had left the
 regime a local model can describe. The forecast behind it applied Adam's preconditioner to each
 update's injection but then discarded the adjoint, carrying nothing from one update to the next.
-The exact tier says what that costs: on the same grid, a recursion carrying no state is wrong by a
-factor of $16.1$ in variance where the dynamics are perfectly local and the full lift is right to
-$1.10\times$. Almost all of the $\numAdamScaleStatelessShortfall$ was therefore ours. Carrying
+The exact tier says what that costs: on the same grid, a recursion on $\theta$ alone, carrying no
+optimiser state, is wrong by a factor of $\numAdamLiftParamsMedian$ in variance where the dynamics
+are perfectly local, no better than summing the injections with no contraction at all
+($\numAdamLiftWalkMedian$), while the full lift is right to $\numAdamLiftWarmMedian\times$. Almost all of the $\numAdamScaleStatelessShortfall$ was therefore ours. Carrying
 Adam's moments backwards on the identical trajectory and the identical prompt sample moves the
 forecast from $\numAdamScaleStateless$ to $\numAdamScaleForecast$, a factor of
 $\numAdamScaleStateGain$, and the conclusion the earlier number supported does not survive it.
@@ -881,10 +882,12 @@ $\numAdamScaleStateGain$, and the conclusion the earlier number supported does n
 $z = (\theta, m, v)$ has three blocks that require the Jacobian of the mean update, and all three
 sit in the column that differentiates with respect to $\theta$. That Jacobian is the one quantity a
 real model cannot supply: Section~\ref{sec:exp-real} measures independent estimates of it agreeing
-to a cosine of about a tenth. Dropping those blocks leaves couplings that are diagonal and
-analytic, costing one extra vector per update and no rollouts at all. On the exact grid it costs
-nothing measurable, $1.10\times$ either way, so the accuracy the lift buys comes from carrying the
-optimiser state and not from the curvature. That is convenient, since the curvature is the half we
+to a median cosine of $\numRealJvpLow$ and $\numRealJvpHigh$ in the two runs that stored it. Dropping those blocks leaves
+couplings that are diagonal and analytic, costing one extra vector per update and no rollouts at
+all. On the exact grid it costs nothing systematic: the median error is
+$\numAdamLiftBareMedian\times$ without the blocks against $\numAdamLiftWarmMedian\times$ with them,
+and the worst $\numAdamLiftBareWorst\times$ against $\numAdamLiftWarmWorst\times$. The accuracy the
+lift buys comes from carrying the optimiser state and not from the curvature. That is convenient, since the curvature is the half we
 could not have had.
 
 \paragraph{The estimate of the injected term is now the binding constraint.} Carrying the state
