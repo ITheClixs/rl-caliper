@@ -1,5 +1,7 @@
 # caliper
 
+[![ci](https://github.com/ITheClixs/rl-caliper/actions/workflows/ci.yml/badge.svg)](https://github.com/ITheClixs/rl-caliper/actions/workflows/ci.yml)
+
 How much would an RL post-training score move if you reran it with a different seed, and can one
 run tell you before you pay for the others?
 
