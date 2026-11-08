@@ -489,7 +489,7 @@ map is the mean of the stochastic map and not the map evaluated at the mean grad
 
 We ran the forecast end to end on Qwen2.5-0.5B-Instruct with LoRA adapters, twelve updates of plain
 gradient ascent, which is the update the recursion is written for, on a task the base model passes
-at $0.16$, and afterwards trained seven more seeds and measured what they did. The backward pass is
+at $\numRealBasePass$, and afterwards trained seven more seeds and measured what they did. The backward pass is
 the one in Algorithm~\ref{alg:forecast}, with the mean update field estimated from fresh rollouts
 under common random numbers.
 
@@ -503,10 +503,10 @@ Section~\ref{sec:metric} happening at a step size we chose to be conservative, o
 be hard for the model.
 
 The second is that the directional derivative is not reliably estimated. Taking $J b$ twice from
-independent draws of prompts gives two vectors whose cosine has a median between $0.07$ and $0.5$
-depending on the run: mostly noise at this batch size. On its own that would sink the
+independent draws of prompts gives two vectors whose cosine has a median of $\numRealJvpLow$ and
+$\numRealJvpHigh$ in the two launches that stored it: mostly noise at this batch size. On its own that would sink the
 method. It does not, because Section~\ref{sec:exp-forecast} has already established that the
-transport is worth about $2\%$: what we report is the cheap estimator of \eqref{eq:cheap} in all
+transport is worth about $\numTransportShiftPercent\%$: what we report is the cheap estimator of \eqref{eq:cheap} in all
 but name, and the quantity that is badly estimated is one the forecast barely uses.
 
 \begin{figure}[t]
@@ -537,13 +537,14 @@ cheap form of \eqref{eq:cheap}, which is what Section~\ref{sec:exp-forecast} rec
 the noisy directional derivative leaves available. It is $\numRealCheapForecast$, short by a factor of $\numRealShortCheap$.
 
 Taking the transport anyway gives $\numRealTransportedForecast$, and repeating the experiment says how far either
-number can be trusted. Before the adapter initialisation was seeded, each launch of this
-configuration started from its own draw, and those launches produced transported forecasts of
-$0.0225$ and $0.0040$, a factor of $5.7$ apart, and cheap forecasts of $0.0056$ and $0.0025$, a
-factor of $2.2$ apart. Neither form is stable under a change of initialisation, and the transported
-one is far less so. The transport is worth $2\%$ where it can be computed exactly; here it is
-estimated from vectors whose cosine with an independent estimate of themselves is between $0.07$
-and $0.21$, and compounding twelve such corrections moves $\|b\|$ by an amount that does not
+number can be trusted. A launch made before the adapter initialisation was seeded started from
+a different draw and otherwise the same configuration. It gave a transported forecast of
+$\numUnseededTransported$ against $\numRealTransportedForecast$, a factor of
+$\numUnseededTransportedFactor$, and a cheap one of $\numUnseededCheap$ against
+$\numRealCheapForecast$, a factor of $\numUnseededCheapFactor$. Neither form is stable under a change of initialisation, and the transported
+one is far less so. The transport is worth $\numTransportShiftPercent\%$ where it can be computed exactly; here it is
+estimated from vectors whose cosine with an independent estimate of themselves has a median of $\numRealJvpLow$
+and $\numRealJvpHigh$ in the two launches that stored it, and compounding twelve such corrections moves $\|b\|$ by an amount that does not
 reproduce. On a real model the transport is not a small correction badly estimated, it is unusable,
 and dropping it leaves a quantity that still moves by a factor of two between initialisations.
 

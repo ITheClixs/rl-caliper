@@ -74,9 +74,9 @@ Legend for strength:
 | a collapsed policy injects nothing | count-based advantage is zero on a unanimous group | exact |
 | RLVR collapses sampling within a few updates on a real model | `s7`: live share reaches zero at update five and stays under 5% after, at 8 and at 64 prompts | measured |
 | a saturated metric cannot see a seed difference | `s6_saturation`: 0 of 32 prompts disagree, policies differ by up to 8e-2 | observed |
-| the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.07-0.5 over four runs | observed |
+| the real-model directional derivative is noise-dominated | `s7`: cosine between independent estimates, median 0.12 and 0.21 in the two released records that store it (an earlier range of 0.07-0.5 over four runs has no released record behind it) | observed |
 | the forecast underpredicts on a real model by ~25x | `s7`: cheap form 0.0025 against a measured seed term of 0.0631 [0.0350, 0.0735] | measured |
-| the transport is not reproducible on a real model | `s7`: two initialisations give 0.0225 and 0.0040 with transport (5.7x apart), 0.0056 and 0.0025 without (2.2x) | measured |
+| the transport is not reproducible on a real model | `s7`: an unseeded launch and the seeded one give 0.0225 and 0.0040 with transport (5.7x apart), 0.0056 and 0.0025 without (2.2x) | measured |
 | real RLVR runs end in groups, not scattered | `s7` at 0.5B: 3 runs within 0.008 of each other near 0.35, 5 spread over 0.204-0.300 | observed |
 | on the counting task most pretrained runs answer one constant to every prompt | `s16`: at 0.5B 5 of 8 runs (6 and 5 of 8 in two earlier launches), at 7B 4 of 10; every anchor answers "1" | measured |
 | which constant a run falls into is most of the 0.5B seed spread | `s16`: the mode label explains 94% of the score variance (99% and 81% in the earlier launches); 40% at 7B | measured |

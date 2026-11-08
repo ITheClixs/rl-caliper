@@ -25,6 +25,14 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("docs/claims.md", "median {RealJvpLow} and {RealJvpHigh} in the two released records"),
+    ("docs/claims.md", "give {UnseededTransported} and {RealTransportedForecast} with transport "
+                       "({UnseededTransportedFactor}x apart), {UnseededCheap} and "
+                       "{RealCheapForecast} without ({UnseededCheapFactor}x)"),
+    ("docs/forecast.md", "the transported forecast gives {UnseededTransported} and "
+                         "{RealTransportedForecast} ({UnseededTransportedFactor}x apart) and the "
+                         "cheap form {UnseededCheap} and {RealCheapForecast} "
+                         "({UnseededCheapFactor}x)"),
     ("docs/claims.md", "`p4_linearity`, rank correlation {LinearityRank} | measured |"),
     ("docs/claims.md", "the residual does bound the worst case ({LinearityWorstBelow}x vs "
                        "{LinearityWorstAbove}x)"),

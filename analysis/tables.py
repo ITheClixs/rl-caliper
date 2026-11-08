@@ -829,6 +829,36 @@ def sci_plain(value: float, digits: int = 2) -> str:
     return f"{mantissa}\\times10^{{{int(exponent)}}}"
 
 
+# 0.5B launches made before commit 9685905 seeded the LoRA initialisation. Their configuration is
+# the seeded run's, so only the record identifies them.
+UNSEEDED_LAUNCH = {"transported": "098b39058393", "cheap": "f15376bf503a"}
+
+
+def launch_macros() -> dict[str, str]:
+    """How far the 0.5B forecasts move between an unseeded launch and the seeded one."""
+    records = {r["manifest"]["config_hash"]: r for r in io.load_all("s7_real_forecast")}
+    chosen = experiment("real_05b_sgd", require=("resolved_std",))
+    seeded = {
+        "transported": chosen["result"]["predicted_std"],
+        "cheap": cheap_variants(chosen, io.load_all("s7_real_forecast"))[None]["predicted_std"],
+    }
+    macros = {}
+    for kind, tag in (("transported", "Transported"), ("cheap", "Cheap")):
+        other = records[UNSEEDED_LAUNCH[kind]]["result"]["predicted_std"]
+        macros[f"Unseeded{tag}"] = f"{other:.4f}"
+        factor = max(other, seeded[kind]) / min(other, seeded[kind])
+        macros[f"Unseeded{tag}Factor"] = f"{factor:.1f}"
+    # agreement of two independent J b estimates, in every launch that stored it
+    medians = [
+        float(np.nanmedian(r["result"]["jvp_agreement"])) for r in records.values()
+        if r["result"].get("label") == "qwen2.5-0.5b" and r["result"].get("jvp_agreement")
+    ]
+    macros["RealJvpLow"] = f"{min(medians):.2f}"
+    macros["RealJvpHigh"] = f"{max(medians):.2f}"
+    macros["RealBasePass"] = f"{chosen['result']['base_pass_rate']:.2f}"
+    return macros
+
+
 def real_seed_macros() -> dict[str, str]:
     """Divergence between six pretrained runs differing only in rollout randomness (`s3`)."""
     result = only("s3_real_seeds", seeds=6, steps=40)["result"]
@@ -1518,6 +1548,7 @@ def table_numbers() -> None:
     macros |= linearity_macros()
     macros |= example_macros()
     macros |= real_seed_macros()
+    macros |= launch_macros()
     macros |= hand_typed_macros()
     command = chr(92) + "newcommand"
     lines = [
