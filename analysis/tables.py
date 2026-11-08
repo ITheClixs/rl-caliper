@@ -1060,6 +1060,14 @@ def table_numbers() -> None:
             error = np.abs(np.log(np.array([c[key] for c in cells]) / measured))
             summary[f"{name}Median"] = f"{np.exp(np.median(error)):.2f}"
             summary[f"{name}Worst"] = f"{np.exp(error.max()):.1f}"
+            # the most homogeneous pool, and the most heterogeneous as a percentage
+            alike = min(c["diversity"] for c in cells)
+            unalike = max(c["diversity"] for c in cells)
+            for tag, value in (("Alike", alike), ("Unalike", unalike)):
+                mask = np.array([c["diversity"] == value for c in cells])
+                summary[f"{name}{tag}"] = f"{np.exp(np.median(error[mask])):.2f}"
+            summary[f"{name}UnalikePercent"] = (
+                f"{100 * (float(summary[f'{name}Unalike']) - 1):.0f}")
         summary["PropagationSettings"] = f"{len(cells)}"
         summary["PropagatedPercent"] = f"{100 * (float(summary['PropagatedMedian']) - 1):.0f}"
         macros |= summary
