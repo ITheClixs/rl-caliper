@@ -663,8 +663,9 @@ The forecast is computed from one anchor run, frozen to disk with the accept-or-
 before any replica exists, and evaluated against $\numMixedSeeds$ independently trained seeds that
 exclude the anchor. It is $\numMixedForecast$ where the measured seed term is
 $\numMixedResolved$, a ratio of $\numMixedRatio$, and two disjoint half-sample estimates of the
-injected term agree to $\numMixedHalfRatio$. The corresponding figures on the saturating corpus were
-$\numRealShortCheap\times$ and $5.5$. The learning is not sacrificed for it: the pass rate goes from
+injected term agree to $\numMixedHalfRatio$. On the saturating corpus the forecast was
+$\numRealShortCheap\times$ short at this size, and at $7$B its two half-samples disagreed by
+$\numAdamScaleHalfRatio\times$. The learning is not sacrificed for it: the pass rate goes from
 $\numMixedBase$ to $\numMixedMean$, a larger improvement than any other real-model run here.
 
 The three quantities moving together is what the claim rests on, rather than the ratio alone. We
@@ -687,7 +688,7 @@ The forecast errors are $\numSweepErrors$, in that order. They are not monotone 
 the middle bands are the worst. They also do not point the same way: as ratios of forecast to
 measured spread they are $\numSweepRatios$, so the forecast is too small in the lowest and highest
 bands and too large in the two middle ones. Half-sample disagreement stays between $\numSweepHalfLow$ and
-$\numSweepHalfHigh$ in every band, including the one whose live share averaged $0.11$. We
+$\numSweepHalfHigh$ in every band, including the one whose live share averaged $\numSweepRealisedLowest$. We
 therefore withdraw the reading that sparse stochastic support is the dominant determinant of
 either estimator stability or forecast error: it is not, on this model. Taken with the
 cross-fitting result below, two candidate explanations of the original discrepancy are eliminated.
@@ -881,7 +882,7 @@ could not have had.
 \paragraph{The estimate of the injected term is now the binding constraint.} Carrying the state
 concentrates the kernel on the first two updates, where a perturbation has the longest to act
 through the moments, and those are estimated from the same sparse sample as everything else. The
-half-sample disagreement accordingly rises from $2.4\times$ without the state to
+half-sample disagreement accordingly rises from $\numAdamScaleStatelessHalfRatio\times$ without the state to
 $\numAdamScaleHalfRatio\times$ with it. The accuracy problem and the estimation problem have
 swapped places: what limits this forecast is no longer the recursion but how well
 $\numAdamScaleWidePrompts$ prompts pin down a variance when roughly a tenth of groups contribute
@@ -931,7 +932,8 @@ same model under the same optimiser, twelve updates rather than twenty.
 \end{table}
 
 \paragraph{The metric went blind.} On counting a letter in a word, a task the base model already
-passes at $0.41$, twenty updates take the held-out pass rate to $\numSatScore$ and
+passes at $\numScanLargeCountLetter$ on the prompts of the difficulty scan
+(Section~\ref{sec:exp-support}), twenty updates take the held-out pass rate to $\numSatScore$ and
 drive every held-out prompt to a unanimous sample. All $\numSatPrompts$ of them return a measured
 rate $\hat{p}$ of exactly $0$ or exactly $1$: eight samples, one answer. Eight samples cannot
 distinguish $\hat{p} = 1$ from a true rate of, say, $0.9$, which is unanimous $43\%$ of the time,
@@ -939,7 +941,7 @@ so what is established is that the evaluation has stopped separating the runs, n
 response distribution has collapsed to a point. Two runs differing only in rollout randomness
 report \emph{the same number to the last decimal} and agree on
 $\numSatPrompts$ of $\numSatPrompts$ prompts individually, while their policies differ by between
-$1.8\times10^{-5}$ and $7.7\times10^{-2}$ in KL and that difference does not accumulate over the
+$\numSatKLlowMath$ and $\numSatKLhighMath$ in KL and that difference does not accumulate over the
 run.
 
 This is worth being precise about, because the two readings are opposite. It is not that the seeds
@@ -974,7 +976,7 @@ compressed range, but it is the right ordering from one run each.
 
 \paragraph{The benchmark built on it is underpowered, and we report it as such.} Only
 $\numRealSizePairs$ of the $\numRealSizeAllPairs$ recipe pairs are ordered unambiguously at
-$\numRealSizeMargin$ standard errors; the median pair is separated by $1.5$. The six recipes differ
+$\numRealSizeMargin$ standard errors; the median pair is separated by $\numRealSizeMedianSeparation$. The six recipes differ
 in mean by at most $\numRealSizeMeanGap$ while their per-recipe deviations run from $\numRealSizeDevLow$ to
 $\numRealSizeDevHigh$, so most
 of these pairs are genuine near-ties at sixteen seeds. That fact is worth stating on its own, since

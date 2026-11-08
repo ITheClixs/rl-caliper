@@ -7,6 +7,7 @@ Nothing in paper/tables is edited by hand.
 
 from __future__ import annotations
 
+import itertools
 import json
 import re
 from pathlib import Path
@@ -365,6 +366,9 @@ def adam_lift_record(warmup: int, bias_correction: bool) -> dict:
         if len(r["result"].get("cells", [])) >= 8
         and r["manifest"]["config"].get("warmup") == warmup
         and (not r["manifest"]["config"].get("no_bias_correction", False)) == bias_correction
+        # the curvature-free rerun repeats the validated sweep with one more model; it is read
+        # by its own selector, not as a second copy of this one
+        and not r["manifest"]["config"].get("curvature_free", False)
     ]
     if len(hits) != 1:
         raise SystemExit(f"expected one Adam sweep at warmup {warmup}, bias correction "
@@ -473,10 +477,12 @@ def _half_sample(record):
     stored = record["result"].get("split_variance")
     if stored and all(v == v for v in stored):
         return [float(np.sqrt(max(v, 0.0))) for v in stored]
+    # runs that predate split_variance logged their halves; match the log to the run's own label
+    # suffix only, so a record with no log of its own gets None rather than another run's halves
     label = str(record["manifest"]["config"].get("label", ""))
     for path in sorted((TABLES.parents[1] / "runs" / "logs").glob("*.split.json")):
         blob = json.loads(path.read_text())
-        if label.split("-")[-1] in blob["source"] or "wide" in blob["source"]:
+        if label.split("-")[-1] in blob["source"]:
             return [float(v) for v in blob["half_sample_std"]]
     return None
 
@@ -513,6 +519,16 @@ def table_sizing() -> None:
         r"\end{tabular}",
     ]
     write("sizing", chr(10).join(body))
+
+
+def pair_separations(arms: list[dict]) -> list[float]:
+    """How many standard errors apart each pair of recipes' mean scores are."""
+    out = []
+    for first, second in itertools.combinations(arms, 2):
+        a, b = np.asarray(first["scores"]), np.asarray(second["scores"])
+        error = np.sqrt(a.var(ddof=1) / a.size + b.var(ddof=1) / b.size)
+        out.append(float(abs(a.mean() - b.mean()) / error))
+    return out
 
 
 def real_sizing_record():
@@ -1247,6 +1263,9 @@ def table_numbers() -> None:
             }
         if stateless:
             bare = stateless["result"]["predicted_std"]
+            bare_halves = sorted(_half_sample(stateless) or [])
+            if bare_halves:
+                macros["AdamScaleStatelessHalfRatio"] = f"{bare_halves[1] / bare_halves[0]:.1f}"
             macros |= {
                 "AdamScaleStateless": f"{bare:.5f}",
                 "AdamScaleStatelessShortfall": f"{spread / bare:.0f}",
@@ -1278,6 +1297,7 @@ def table_numbers() -> None:
             "SweepHalfLow": f"{min(halves):.2f}",
             "SweepHalfHigh": f"{max(halves):.2f}",
             "SweepRealised": ", ".join(f"{o['anchor_live_share']:.2f}" for o in bands),
+            "SweepRealisedLowest": f"{min(o['anchor_live_share'] for o in bands):.2f}",
         }
         # the band that learns most spends its own support along the anchor run
         fastest = max(bands, key=lambda o: o["observed_spread"]["mean"] - o["base_pass_rate"])
@@ -1325,6 +1345,9 @@ def table_numbers() -> None:
             "ScanSmallUsable": f"{sum(1 for r in small.values() if r['in_band'] >= 0.2)}",
             "ScanLargeUsable": f"{sum(1 for r in large.values() if r['in_band'] >= 0.2)}",
         }
+        if "count_letter" in large:
+            # the saturation run's task, at the size it was run at
+            macros["ScanLargeCountLetter"] = f"{large['count_letter']['mean']:.2f}"
         # the rung where a graded family falls off the cliff
         rungs = [(k, v["mean"]) for k, v in large.items() if k.startswith("sort_digits_")]
         if len(rungs) >= 2:
@@ -1405,6 +1428,8 @@ def table_numbers() -> None:
             "SatDegenerate": f"{100 * result['degenerate_fraction']:.0f}",
             "SatKLlow": f"{min(divergences):.1e}".replace("e-0", "e-"),
             "SatKLhigh": f"{max(divergences):.1e}".replace("e-0", "e-"),
+            "SatKLlowMath": sci_plain(min(divergences), 1),
+            "SatKLhighMath": sci_plain(max(divergences), 1),
         }
 
     sizing = sizing_record()
@@ -1472,6 +1497,7 @@ def table_numbers() -> None:
             "RealSizeSeeds": f"{result['seeds']}",
             "RealSizeRuns": f"{result['recipes'] * (result['seeds'] + 1)}",
             "RealSizePairs": f"{result['pairs'][margin]}",
+            "RealSizeMedianSeparation": f"{np.median(pair_separations(result['arms'])):.1f}",
             "RealSizeAllPairs": f"{result['recipes'] * (result['recipes'] - 1) // 2}",
             "RealSizeMargin": f"{float(margin):g}",
             "RealSizeError": f"{result['forecast_error']['median']:.2f}",
