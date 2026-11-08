@@ -11,10 +11,13 @@ forecast held should show less of it than the band where it failed.
 
 from __future__ import annotations
 
+import argparse
+
 import numpy as np
 
 from caliper.runtime import io
 
+# the first test (docs/predictions.md); the second passes all four bands with --labels
 LABELS = ("modes-band-0.85", "modes-band-0.60")
 
 
@@ -60,10 +63,13 @@ def explained(scores: np.ndarray, shares: np.ndarray) -> float:
 
 
 def main() -> None:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--labels", nargs="+", default=list(LABELS))
+    labels = ap.parse_args().labels
     records = {r["result"]["label"]: r for r in io.load_all("s11_prospective")
-               if r["result"].get("label") in LABELS}
+               if r["result"].get("label") in labels}
     out = {}
-    for label in LABELS:
+    for label in labels:
         if label not in records:
             print(f"{label}: not run yet")
             continue
@@ -105,9 +111,12 @@ def main() -> None:
         print(f"  share explains {100 * row['share_explains_score']:.0f}% of the score variance; "
               f"the commonest correct answer covers {100 * row['commonest_answer_share']:.0f}% "
               f"of prompts")
-    if out:
-        path = io.save("s16_sweep", {"labels": list(LABELS)}, out)
+    # a record named by its labels must hold all of them, or a dry run would stand in for the test
+    if len(out) == len(labels):
+        path = io.save("s16_sweep", {"labels": list(labels)}, out)
         print(f"wrote {path}")
+    else:
+        print("not saved: some bands have not run")
 
 
 if __name__ == "__main__":
