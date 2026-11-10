@@ -193,4 +193,64 @@ source of error that this test cannot see. A pass here licenses the test on a pr
 does not replace it. For a policy of length one the two coincide exactly, which is a unit test and
 not evidence.
 
+**Result.** Mixed: two of the three parts fail on a clause each, and the reason the second failed
+turned out to be the measurement (`runs/p7_learning_regime/d9ac6f7bcf36.json`, 384 settings, 354 of
+them learning and only 7 stationary, because this environment learns faster than the exploratory
+one).
+
+1. Failed on its first clause, held on its second. On the learning settings the forecast of
+   Theorem 2 has a median error of 1.59x, not the 2x predicted. It is within 1.5x in 48% of them,
+   more than 5x off in 30% (a quarter was predicted), and 653x off at worst. Holding the adjoint
+   fixed is worse at the median (2.63x).
+2. Held on its first two clauses, failed on its third. The simulated seeds have a median error of
+   1.24x and are within 1.5x in 78% of the learning settings, but 25 of the 354 are beyond 3x, where
+   none was predicted, the worst at 51x.
+3. Held, on seven settings: median 1.10x for the simulated seeds against 1.20x for the forecast.
+
+**What the 25 misses are.** In every one of them the simulated seeds spread *more* than the 47
+real ones, in settings where the 47 nearly agree (a measured deviation between 0.0001 and 0.005).
+That pattern has two readings, and they were told apart after the fact by training 1500 real seeds
+in each of the 25 settings (not stored as a record; `far` is the share of seeds ending more than
+0.01 from the median). In 23 of them the 1500 seeds contain a few runs, between 0.1% and 12%, that
+end somewhere else, and the deviation over 1500 seeds is 3 to 37 times the deviation over 47. The
+simulated seeds are within 2.3x of the 1500-seed deviation in those 23. In the other two, 1500
+seeds show no such runs and the simulated spread is 3x and 17x too large. So most of what part 2
+counted as the surrogate's error was the yardstick's: a deviation measured from 47 seeds misses
+outcomes that occur in one run in a hundred, and those outcomes are most of the variance. The
+forecast of Theorem 2 agrees with the 47-seed number in those settings for the same reason the
+47-seed number is wrong. It describes the majority outcome only.
+
+This was found by looking at failures, on settings chosen because they failed, so it is not a
+confirmation of anything. The entry below tests it.
+
+## 2026-11-10: against 500 seeds, the simulated seeds hold and a 47-seed deviation does not
+
+**Observed so far.** The entry above. Its grading used 47 seeds per setting, and in 23 of the 25
+settings where the simulated seeds looked worst, 1500 real seeds sided with the simulation.
+
+**Test.** The same script and grid on an environment neither earlier run touched (environment seed
+2718), with 500 seeds trained after the anchor instead of 47. Everything is graded against the
+deviation over those 500. The deviation over the first 47 of them is graded the same way, as the
+yardstick the entry above used.
+
+**Hypothesis.** In the learning regime the distribution of a run's score over seeds has rare
+outcomes that carry most of its variance. Seeds simulated in the tangent model reproduce them;
+a few dozen real seeds, and a linearisation about one run, do not.
+
+**Prediction.** On the learning settings (anchor gain at least 0.05):
+1. Simulated seeds: median error at most 1.3x, at least 75% within 1.5x, at most 5% beyond 3x.
+2. The forecast of Theorem 2: beyond 3x in at least 35% of them. Against 47 seeds it was 34%; the
+   larger sample should count more of its misses, not fewer.
+3. The first 47 seeds: their deviation is less than half the 500-seed deviation in at least 10% of
+   the learning settings.
+
+**What would refute it.** Any part failing. Part 3 failing would mean the rare outcomes were
+particular to the settings picked out above, and the 23 of 25 a selection effect.
+
+**Confounds checked before the run.** The 500-seed deviation is itself an estimate, and a heavy
+tail makes it a noisy one: an outcome that occurs once in a thousand runs is missed by 500 seeds
+more often than not. Part 1 allows for that with its 5%. The two settings above where 1500 seeds
+showed nothing say the surrogate also invents rare outcomes sometimes, so part 1 is not expected
+to hold with room to spare.
+
 **Result.** Pending.
