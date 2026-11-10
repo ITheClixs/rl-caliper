@@ -290,6 +290,68 @@ Section~\ref{sec:exp-seeds} tests it. Second, restricting $\Sigma_t$ to one of i
 attributes the answer by origin, since $\Sigma_b$ is which prompts were drawn and $\Sigma_w$ is
 which responses were sampled. The two shares are exact and sum to one.
 
+\subsection{Linearising the model instead of the run}
+\label{sec:tangent}
+
+Everything above linearises the training dynamics about one trajectory. A different linearisation
+is available, and it fails differently. Fix reference parameters $\theta_0$, the point runs start
+from, and write $\score_0(x,y) := \nabla_\theta \log \pi_{\theta_0}(y \mid x)$ for the score there.
+The \emph{tangent policy} is
+\begin{equation}
+  \label{eq:tangent}
+  \pi'_{\vartheta}(y \mid x)
+  \;=\; \frac{\pi_{\theta_0}(y \mid x)\,\exp\!\big(\score_0(x,y)^{\!\top}\vartheta\big)}
+             {Z_x(\vartheta)},
+  \qquad \pi'_0 = \pi_{\theta_0},
+\end{equation}
+an exponential family whose sufficient statistics are the frozen scores. Its own score is
+$\score_0(x,y) - \E_{\pi'_\vartheta}[\score_0(x,\cdot)]$, so an update of $\vartheta$ by any
+estimator of \eqref{eq:family} needs the sampled responses, their rewards and inner products
+between frozen scores, and no pass through the model. A seed is then \emph{simulated} rather than
+trained: draw the batch, draw each group from $\pi'_\vartheta$, apply the estimator's table, update
+$\vartheta$. Which prompts are drawn, which responses are sampled, the estimator's weights, the
+normalisation, and the fact that a unanimous group contributes nothing are all kept exactly. What
+is given up is the movement of the scores.
+
+\begin{proposition}[When a simulated seed is a real one]
+  \label{prop:tangent}
+  Suppose that for every prompt the log-probabilities are affine in the parameters up to a
+  normaliser,
+  $\log \policy(y \mid x) = \log \pi_{\theta_0}(y \mid x) + \score_0(x,y)^{\!\top}(\theta - \theta_0)
+  - c_x(\theta)$.
+  Then for any estimator of \eqref{eq:family}, the run $\theta_{t+1} = \theta_t + \eta\ghat_t$
+  started at $\theta_0$ and the tangent run started at $\vartheta_0 = 0$ have the same law:
+  $(\theta_t - \theta_0)_{t \le T} \overset{d}{=} (\vartheta_t)_{t \le T}$. In particular
+  $M(\theta_T)$ has the distribution of its tangent counterpart, not only its variance.
+\end{proposition}
+
+\begin{proof}
+  Normalisation forces $c_x(\theta) = \log Z_x(\theta - \theta_0)$, so
+  $\policy = \pi'_{\theta - \theta_0}$, and differentiating gives
+  $\nabla_\theta \log \policy(y \mid x) = \score_0(x,y) - \E_{\policy}[\score_0(x,\cdot)]$, which is
+  the tangent score at $\vartheta = \theta - \theta_0$. The two runs are therefore Markov chains
+  with the same starting point, the same sampling distribution in every state and the same update
+  map, hence the same transition kernel.
+\end{proof}
+
+A softmax over a single decision satisfies the hypothesis. An autoregressive policy does not,
+because its normaliser is applied token by token and depends on the prefix, and neither does a
+network. There the scores move: the tangent run is exact in its first update, where the frozen
+scores are the real ones, and departs as they drift. Equation \eqref{eq:tangent} is the lazy or
+tangent-kernel approximation \citep{jacot2018ntk, chizat2019lazy, lee2019wide} applied to the
+log-probability of each response, and prompt-based fine-tuning of language models is often well
+described by it \citep{malladi2023kernel}. What is different here is the use it is put to.
+
+Theorem~\ref{thm:adjoint} is exact in the model and first-order in the distance between runs. It
+needs one run, and it inherits that run's blind spot: when the run saturates,
+$\nabla M(\theta_T) \to 0$ and the forecast vanishes with it, wherever the other seeds went.
+Equation \eqref{eq:tangent} is first-order in the model and exact in the distance between runs.
+Simulated seeds may end arbitrarily far apart, and a run that has collapsed onto one response is a
+state of the surrogate like any other. It needs no run at all. Its cost is one backward pass per
+prompt and candidate response to obtain $\score_0$, after which the Gram matrix of those scores is
+all a simulated update touches. The two approximations fail in different places, and
+Section~\ref{sec:exp-learning} measures both on the same settings.
+
 \subsection{Where the argument stops}
 
 Everything above linearises the update around the shared trajectory, which requires the two runs to

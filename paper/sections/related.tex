@@ -57,6 +57,19 @@ is variance rather than gradient. The step that makes it cheap here is
 Proposition~\ref{prop:potential}, which is specific to the estimators RLVR uses and removes the
 transpose an adjoint would otherwise need.
 
+\paragraph{Linearised models and simulated training.} That a network trained with small steps
+behaves like its linearisation at initialisation is the tangent-kernel or lazy regime
+\citep{jacot2018ntk, lee2019wide, chizat2019lazy}, and \citet{malladi2023kernel} show that
+prompt-based fine-tuning of language models often sits close enough to it for the kernel to
+predict the fine-tuned model's accuracy. That literature uses the linearisation to predict where
+\emph{one} run ends. Section~\ref{sec:tangent} uses it to draw \emph{many}: the object simulated is
+the stochastic policy-gradient run itself, with its sampling kept, and the quantity read off is the
+spread between seeds, which a deterministic kernel regression does not have. Closest in spirit is
+Simfluence \citep{guu2023simfluence}, which fits a simulator of supervised fine-tuning runs from
+observed runs in order to attribute a loss trajectory to training examples; ours is derived from
+the scores at the starting point with no run observed, and its target is across-seed variance under
+reinforcement learning.
+
 \paragraph{Uncertainty in a reported number.} Practice for benchmark error bars is to treat the
 evaluation set as the only source of randomness and report a binomial or bootstrap interval over
 questions \citep{miller2024adding}. That is the right interval for a fixed model and the wrong one

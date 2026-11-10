@@ -1027,6 +1027,83 @@ def linearity_macros() -> dict[str, str]:
     return macros
 
 
+LEARNING_GAIN = 0.05  # an anchor gaining at least this much in pass rate is "learning"
+STATIONARY_GAIN = 0.02  # and one gaining less than this is "stationary"; both fixed before p7 ran
+
+
+def learning_cells() -> list[dict]:
+    """Every setting of the learning-regime grid, graded against the seeds trained afterwards."""
+    cells = []
+    for cell in only("p7_learning_regime", seed=OTHER_ENV_SEED, pool=16)["result"]["cells"]:
+        measured = float(np.std(cell["seed_scores"][1:], ddof=1))
+        row = {**cell, "measured_std": measured}
+        for key in ("predicted_std", "untransported_std", "tangent_std"):
+            ratio = cell[key] / measured
+            row[key + "_error"] = max(ratio, 1 / ratio) if ratio > 0 else np.inf
+        cells.append(row)
+    return cells
+
+
+def perfect_forecast_error(seeds: int) -> float:
+    """Median error a forecast equal to the true deviation would score against `seeds` seeds.
+
+    The measured deviation is itself an estimate. For normal scores `s^2 / sigma^2` is chi-square
+    over its degrees of freedom, and the median of `max(s / sigma, sigma / s)` follows from that.
+    """
+    from scipy.optimize import brentq
+    from scipy.stats import chi2
+
+    dof = seeds - 1
+
+    def excess(m: float) -> float:
+        return chi2.cdf(dof * np.exp(2 * m), dof) - chi2.cdf(dof * np.exp(-2 * m), dof) - 0.5
+
+    return float(np.exp(brentq(excess, 1e-6, 2.0)))
+
+
+def learning_regime_macros() -> dict[str, str]:
+    """How far the headline grid's runs move, and what happens to each estimator when they move
+    further (`p7_learning_regime`, the test recorded in docs/predictions.md before it ran)."""
+    macros = {}
+    for tag, grid in (("Headline", headline_grid()), ("Replicate", replicate_grid())):
+        gains = np.array([
+            c["forecast_trajectory"][-1] - c["forecast_trajectory"][0]
+            for c in grid["result"]["cells"]
+        ])
+        macros[f"{tag}GainMedian"] = f"{np.median(gains):.3f}"
+        macros[f"{tag}GainMax"] = f"{gains.max():.3f}"
+
+    cells = learning_cells()
+    gain = np.array([c["anchor_gain"] for c in cells])
+    groups = {"Learning": gain >= LEARNING_GAIN, "Stationary": gain < STATIONARY_GAIN}
+    columns = {"Carried": "predicted_std_error", "Held": "untransported_std_error",
+               "Tangent": "tangent_std_error"}
+    macros |= {
+        "LearnSettings": f"{len(cells)}",
+        "LearnSeeds": f"{cells[0]['seeds'] - 1}",
+        "LearnSimulated": f"{cells[0]['tangent_seeds']}",
+        "LearnGainCut": f"{LEARNING_GAIN:.2f}",
+        "LearnStationaryCut": f"{STATIONARY_GAIN:.2f}",
+        "LearnGainMax": f"{gain.max():.2f}",
+        "LearnFloor": f"{perfect_forecast_error(cells[0]['seeds'] - 1):.2f}",
+        "LearnMeasuredLow": sci_plain(min(c["measured_std"] for c in cells)),
+        "LearnMeasuredHigh": sci_plain(max(c["measured_std"] for c in cells)),
+    }
+    for group, mask in groups.items():
+        macros[f"Learn{group}Count"] = f"{int(mask.sum())}"
+        for column, key in columns.items():
+            error = np.array([c[key] for c in cells])[mask]
+            name = f"Learn{group}{column}"
+            macros[f"{name}Median"] = f"{np.median(error):.2f}"
+            macros[f"{name}Within"] = f"{100 * np.mean(error <= 1.5):.0f}"
+            macros[f"{name}OverFive"] = f"{100 * np.mean(error > 5):.0f}"
+            macros[f"{name}OverThree"] = f"{int(np.sum(error > 3))}"
+            finite = error[np.isfinite(error)]
+            macros[f"{name}Worst"] = f"{finite.max():.3g}" if finite.size else "0"
+            macros[f"{name}Zero"] = f"{int(np.sum(~np.isfinite(error)))}"
+    return macros
+
+
 def estimated_macros() -> dict[str, str]:
     """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
     result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
@@ -1685,6 +1762,7 @@ def table_numbers() -> None:
     macros |= collapse_sweep_macros()
     macros |= absorption_test_macros()
     macros |= reconvergence_macros()
+    macros |= learning_regime_macros()
     macros |= variance_share_macros()
     macros |= linearity_macros()
     macros |= example_macros()

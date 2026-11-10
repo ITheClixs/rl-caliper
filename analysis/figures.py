@@ -749,10 +749,52 @@ def figure_sizing() -> None:
     plt.close(fig)
 
 
+def figure_learning() -> None:
+    """Forecast over measured spread against how far the anchor run moved, for the forecast
+    carried back along one run and for seeds simulated in the tangent model at the start."""
+    hits = [
+        r for r in io.load_all("p7_learning_regime")
+        if r["manifest"]["config"].get("seed") == 991 and r["manifest"]["config"].get("pool") == 16
+    ]
+    if len(hits) != 1:
+        raise SystemExit(f"expected one learning-regime grid, found {len(hits)}")
+    cells = hits[0]["result"]["cells"]
+    gain = np.array([c["anchor_gain"] for c in cells])
+    measured = np.array([np.std(c["seed_scores"][1:], ddof=1) for c in cells])
+    bands = sorted({c["band"] for c in cells})
+    floor = 1e-3
+    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.0), sharey=True)
+    panels = (
+        ("predicted_std", "linearised about one run (Theorem 2)"),
+        ("tangent_std", "seeds simulated in the tangent model, no run"),
+    )
+    for ax, (key, title) in zip(axes, panels, strict=True):
+        ratio = np.array([c[key] for c in cells]) / measured
+        for band, colour, marker in zip(bands, PALETTE, "os^", strict=True):
+            mask = np.array([c["band"] == band for c in cells])
+            shown = np.maximum(ratio[mask], floor)
+            ax.scatter(gain[mask], shown, s=9, color=colour, marker=marker, alpha=0.7,
+                       linewidths=0, label=band)
+        ax.axhline(1.0, color="0.25", lw=1.0, zorder=0)
+        for factor in (1.5, 1 / 1.5):
+            ax.axhline(factor, color="0.6", lw=0.8, ls=":", zorder=0)
+        ax.set_yscale("log")
+        ax.set_ylim(floor * 0.7, 30)
+        style(ax, "pass rate gained by the anchor run", "", title)
+    axes[0].set_ylabel("forecast / measured s.d.")
+    axes[0].legend(fontsize=7, frameon=False, loc="lower left")
+    axes[0].annotate(f"points at {floor:g} are at or below it", xy=(0.98, 0.03),
+                     xycoords="axes fraction", ha="right", fontsize=6.5, color="0.35")
+    fig.tight_layout()
+    save(fig, "learning.pdf")
+    plt.close(fig)
+
+
 def main() -> None:
     FIGURES.mkdir(parents=True, exist_ok=True)
     for name, fn in [
         ("forecast", figure_forecast),
+        ("learning", figure_learning),
         ("sources", figure_sources),
         ("null", figure_null),
         ("real_forecast", figure_real_forecast),
