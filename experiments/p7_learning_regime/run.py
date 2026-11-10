@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import itertools
+from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
@@ -45,6 +46,67 @@ def train_one(policy, accepts, cfg, seed):
     return states, trainer.objective()
 
 
+def run_cell(task: tuple) -> tuple[dict, str]:
+    """One setting, start to finish. Settings share nothing, so they can run in any order and in
+    separate processes; every random stream is named by the setting's own index and seed."""
+    index, (vocab, length), diversity, band, steps, prompts, group, eta, args = task
+    policy, accepts = build(vocab, length, args.pool, BANDS[band], diversity, args.seed)
+    weights = weight_table(args.estimator, group)
+    cfg = RunConfig(
+        estimator=args.estimator, n_prompts=prompts, group_size=group, steps=steps,
+        initial_step_size=eta, controller_gain=0.0, measure_every=steps,
+    )
+
+    # (1) the anchor, and the two forecasts and the diagnostic that rest on it alone
+    states, first_score = train_one(policy, accepts, cfg, args.seed + 1)
+    carried = forecast(policy, accepts, args.estimator, group, prompts, eta, steps, states=states)
+    held = forecast(policy, accepts, args.estimator, group, prompts, eta, steps, states=states,
+                    transport=False)
+    residual = float(np.mean([
+        run_residual(state, accepts, weights, prompts, group, eta,
+                     np.random.default_rng(args.seed + 4241 + i))
+        for i, state in enumerate(states[:-1])
+    ]))
+
+    # (2) seeds simulated in the tangent model at the start: no run enters this at all
+    pool = np.arange(accepts.shape[0])
+    simulated = simulate(
+        reference_model(policy, accepts),
+        Recipe(eta, prompts, group, steps, weights),
+        pool, pool, args.simulated_seeds,
+        np.random.default_rng(args.seed + 60_000 + index),
+    )
+
+    # (3) only now, the seeds all of the above are graded against
+    scores = [first_score]
+    for s in range(1, args.seeds):
+        scores.append(train_one(policy, accepts, cfg, args.seed + 1 + 7919 * s)[1])
+    measured = float(np.std(scores[1:], ddof=1))
+    start = metric_value(policy, accepts)
+
+    cell = {
+        "vocab": vocab, "length": length, "diversity": diversity, "band": band,
+        "steps": steps, "prompts": prompts, "group_size": group, "step_size": eta,
+        "start": start,
+        "anchor_gain": first_score - start,
+        "predicted_std": carried.std,
+        "untransported_std": held.std,
+        "curvature_residual": residual,
+        "tangent_std": simulated.std,
+        "tangent_mean": float(simulated.scores.mean()),
+        "tangent_deciles": np.quantile(simulated.scores, DECILES).tolist(),
+        "tangent_seeds": args.simulated_seeds,
+        # the anchor first, then the seeds trained after it
+        "seed_scores": scores,
+        "seeds": len(scores),
+    }
+    line = (f"{vocab}x{length:<3d} {diversity:4.1f} {band:>5s} {steps:3d} {prompts:3d} "
+            f"{group:2d} {eta:5.1f} {first_score - start:+6.3f} {measured:9.2e} "
+            f"{carried.std / measured:8.2f} {held.std / measured:6.2f} "
+            f"{simulated.std / measured:8.2f}")
+    return cell, line
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--shapes", nargs="+", default=["3x3", "4x2"])
@@ -59,6 +121,8 @@ def main() -> None:
     ap.add_argument("--estimator", default="rloo")
     ap.add_argument("--simulated-seeds", type=int, default=2000)
     ap.add_argument("--seed", type=int, default=991)
+    ap.add_argument("--workers", type=int, default=1,
+                    help="processes to spread the settings over; the results do not depend on it")
     args = ap.parse_args()
 
     shapes = [tuple(int(v) for v in shape.split("x")) for shape in args.shapes]
@@ -66,68 +130,18 @@ def main() -> None:
         shapes, args.diversity, args.bands, args.steps, args.prompts, args.group_size,
         args.step_size,
     )
-    cells = []
+    tasks = [(index, *setting, args) for index, setting in enumerate(grid)]
     print(f"{'shape':>5s} {'div':>4s} {'band':>5s} {'T':>3s} {'P':>3s} {'G':>2s} {'eta':>5s} "
           f"{'gain':>6s} {'measured':>9s} {'carried':>8s} {'held':>6s} {'tangent':>8s}")
-    for index, ((vocab, length), diversity, band, steps, prompts, group, eta) in enumerate(grid):
-        policy, accepts = build(vocab, length, args.pool, BANDS[band], diversity, args.seed)
-        weights = weight_table(args.estimator, group)
-        cfg = RunConfig(
-            estimator=args.estimator, n_prompts=prompts, group_size=group, steps=steps,
-            initial_step_size=eta, controller_gain=0.0, measure_every=steps,
-        )
+    cells = []
+    with ProcessPoolExecutor(max_workers=args.workers) as executor:
+        for cell, line in executor.map(run_cell, tasks):
+            cells.append(cell)
+            print(line, flush=True)
 
-        # (1) the anchor, and the two forecasts and the diagnostic that rest on it alone
-        states, first_score = train_one(policy, accepts, cfg, args.seed + 1)
-        carried = forecast(policy, accepts, args.estimator, group, prompts, eta, steps,
-                           states=states)
-        held = forecast(policy, accepts, args.estimator, group, prompts, eta, steps,
-                        states=states, transport=False)
-        residual = float(np.mean([
-            run_residual(state, accepts, weights, prompts, group, eta,
-                         np.random.default_rng(args.seed + 4241 + i))
-            for i, state in enumerate(states[:-1])
-        ]))
-
-        # (2) seeds simulated in the tangent model at the start: no run enters this at all
-        pool = np.arange(accepts.shape[0])
-        simulated = simulate(
-            reference_model(policy, accepts),
-            Recipe(eta, prompts, group, steps, weights),
-            pool, pool, args.simulated_seeds,
-            np.random.default_rng(args.seed + 60_000 + index),
-        )
-
-        # (3) only now, the seeds all of the above are graded against
-        scores = [first_score]
-        for s in range(1, args.seeds):
-            scores.append(train_one(policy, accepts, cfg, args.seed + 1 + 7919 * s)[1])
-        later = np.array(scores[1:])
-        measured = float(later.std(ddof=1))
-        start = metric_value(policy, accepts)
-
-        cells.append({
-            "vocab": vocab, "length": length, "diversity": diversity, "band": band,
-            "steps": steps, "prompts": prompts, "group_size": group, "step_size": eta,
-            "start": start,
-            "anchor_gain": first_score - start,
-            "predicted_std": carried.std,
-            "untransported_std": held.std,
-            "curvature_residual": residual,
-            "tangent_std": simulated.std,
-            "tangent_mean": float(simulated.scores.mean()),
-            "tangent_deciles": np.quantile(simulated.scores, DECILES).tolist(),
-            "tangent_seeds": args.simulated_seeds,
-            # the anchor first, then the seeds trained after it
-            "seed_scores": scores,
-            "seeds": len(scores),
-        })
-        print(f"{vocab}x{length:<3d} {diversity:4.1f} {band:>5s} {steps:3d} {prompts:3d} "
-              f"{group:2d} {eta:5.1f} {first_score - start:+6.3f} {measured:9.2e} "
-              f"{carried.std / measured:8.2f} {held.std / measured:6.2f} "
-              f"{simulated.std / measured:8.2f}", flush=True)
-
-    path = io.save("p7_learning_regime", vars(args), {"cells": cells})
+    # how many processes ran it is not part of what was run
+    config = {key: value for key, value in vars(args).items() if key != "workers"}
+    path = io.save("p7_learning_regime", config, {"cells": cells})
     print(f"wrote {path}")
 
 
