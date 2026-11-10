@@ -57,15 +57,22 @@ class TangentModel:
 
     def probabilities(self, theta: np.ndarray, prompts: np.ndarray) -> np.ndarray:
         """pi'(. | x) for `theta` of shape (seeds, dim) and `prompts` of shape (seeds, n)."""
-        logits = self.base[prompts] + np.einsum("snck,sk->snc", self.features[prompts], theta)
-        logits = logits - logits.max(axis=2, keepdims=True)
-        weights = np.exp(logits)
-        return weights / weights.sum(axis=2, keepdims=True)
+        tilt = np.einsum("snck,sk->snc", self.features[prompts], theta)
+        return _normalised(self.base[prompts] + tilt)
 
     def pass_rates(self, theta: np.ndarray, prompts: np.ndarray) -> np.ndarray:
-        """Pass probability of each listed prompt under each seed's parameters: (seeds, n)."""
-        tiled = np.broadcast_to(prompts, (theta.shape[0], prompts.size))
-        return (self.probabilities(theta, tiled) * self.rewards[tiled]).sum(axis=2)
+        """Pass probability of each listed prompt under each seed's parameters: (seeds, n).
+
+        The prompts are the same for every seed here, so their scores are not copied per seed.
+        """
+        tilt = np.einsum("nck,sk->snc", self.features[prompts], theta)
+        probs = _normalised(self.base[prompts][None] + tilt)
+        return (probs * self.rewards[prompts][None]).sum(axis=2)
+
+
+def _normalised(logits: np.ndarray) -> np.ndarray:
+    weights = np.exp(logits - logits.max(axis=-1, keepdims=True))
+    return weights / weights.sum(axis=-1, keepdims=True)
 
 
 @dataclass(frozen=True)
