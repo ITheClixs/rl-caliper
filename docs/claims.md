@@ -89,6 +89,12 @@ Legend for strength:
 | ~~finite corpus raises G*~~ | withdrawn: the budget fixes R = PG, so the correction is a function of G; it lowers G* by sqrt((N-1)/N) | negative |
 | the fixed-budget finite-corpus optimum is 1 + sqrt((N-1)tau_w/(N tau_b)) | `b1`: matches brute force over feasible G to 0.02 | exact |
 | one prospective pretrained forecast is inside 1.5x | `s11` band 0.85: frozen 0.0205 against measured 0.0253, error 1.24x, 12 held-out seeds | measured |
+| the headline grid tests the forecast where runs barely move | `p2`: the anchor runs gain a median of 0.009 in pass rate and at most 0.036 (0.069 on the replicate) | measured |
+| the one-run forecast fails once runs learn, with exact inputs | `p7_learning_regime`, 500 seeds per setting: beyond 3x in 44.1% of 354 learning settings (too small in 149, too large in 7), worst 1715x; cheap form median 2.72x | measured |
+| seeds simulated in the tangent model at the start estimate the spread with no run trained | `p7_learning_regime`: median error 1.27x, within 1.5x in 74.9% and beyond 3x in 4.8% of the same settings; the deviation over ten real seeds is within 1.5x in 73.7% and beyond 3x in 11.3% | measured, enumerable tier only |
+| a simulated seed has the law of a real one when log-probabilities are affine in the parameters | Proposition (tangent model); `tests/test_tangent.py` checks a one-token softmax step by step and the first update of any policy | exact |
+| ~~no simulated spread is beyond 3x~~, ~~the forecast's median error is at least 2x where runs learn~~, ~~47 seeds understate the deviation by half in a tenth of learning settings~~ | refuted by predictions committed before their runs (`docs/predictions.md`): 25 of 354, then 17 of 354; 1.59x; 5.1% | negative |
+| simulated seeds work on a pretrained model | not run: `experiments/s20_tangent_real/run.py`, prediction recorded as pending | untested |
 | ~~more stochastic support gives a better forecast~~ | withdrawn: four pre-specified bands give 1.66, 2.13, 2.80, 1.24 with no trend | negative |
 | in the support sweep the forecast is too large in the two middle bands, too small at the ends | `s11`: forecast over measured 0.60, 2.13, 2.80, 0.81 | measured |
 | ~~seed-dependent collapse explains the sweep's misses~~ | refuted by a prediction committed before the run (`docs/predictions.md`): band 0.60 splits on 3 of 64 prompts against 5 at band 0.85, and its forecast is too large, which collapse cannot cause | negative |

@@ -34,7 +34,9 @@ the normal quantile of the mistake rate you will tolerate.
 
 | setting | what was compared | result |
 |---|---|---|
-| enumerable policies, exact inputs, at most 25 updates | forecast frozen before 47 further seeds were trained, 192 settings | median error **1.10x** (1.11x in the cheap form used on real models), worst 1.56x, inside the measured 95% interval in 162 of 192 |
+| enumerable policies, exact inputs, at most 25 updates, runs gaining at most 0.036 in pass rate | forecast frozen before 47 further seeds were trained, 192 settings | median error **1.10x** (1.11x in the cheap form used on real models), worst 1.56x, inside the measured 95% interval in 162 of 192 |
+| the same tier with the step size raised until runs learn (354 settings gaining at least 0.05), 500 seeds each | the same forecast from one run | more than 3x off in **44.1%** of settings, up to 1715x short |
+| the same 354 settings | seeds simulated in the tangent model at the starting policy, no run trained | within 1.5x in **74.9%** (the deviation over ten real seeds: 73.7%), beyond 3x in 4.8% |
 | Qwen2.5-0.5B, four pre-specified corpora, prospective | frozen cheap forecast (no transport) against 12 held-out seeds | errors 1.66, 2.13, 2.80, 1.24 |
 | Qwen2.5-0.5B, corpus whose reward groups go unanimous | cheap forecast against 8 seeds | **25x short** |
 | Qwen2.5-7B (4-bit, LoRA) under Adam | lifted forecast against 10 seeds | **3.1x to 17x short** |
@@ -58,6 +60,24 @@ so the group-baselined update is zero and the run cannot leave it. The spread is
 run is absorbed into, a discrete outcome that a linearisation about one absorbed run cannot see,
 and it also means much of the measured "learning" on that task is guessing.
 
+The same failure can be produced where every input is exact. The enumerable settings behind the
+1.10x barely learn: their runs gain at most 0.036 in pass rate, against up to 0.28 for the
+pretrained sweep. Raising the step size until enumerable runs gain as much breaks the forecast with
+nothing estimated. On 354 such settings, each graded against 500 seeds, it is more than 3x off in
+44.1%, nearly always short, because a run that has saturated has a zero metric gradient and the
+spread is which outcome each seed saturated onto. So the shortfall is a property of linearising
+about one run, not of pretrained models.
+
+What survives those settings linearises the model instead of the run. `caliper.tangent` freezes
+the scores at the starting policy and simulates seeds in the resulting exponential family, keeping
+the sampling, the estimator's weights and the saturation exact, with no pass through the model.
+With no run trained, the spread of the simulated seeds is within 1.5x in 74.9% of those settings,
+about what the deviation over ten real seeds achieves, and beyond 3x in 4.8%. Two grids were run
+with predictions committed first; four of the six recorded parts failed, three of them on one
+clause, and [`docs/predictions.md`](docs/predictions.md) says which. This is validated on the
+enumerable tier only, where a tabular policy and its tangent model span the same family. The test
+on a pretrained model is recorded there with its thresholds and has not been run.
+
 That explanation does not reach the support sweep. Its four corpora were rerun with every answer
 recorded. Where the forecast held (band 0.85) the runs collapse, but onto the same answer;
 where it is 2.80x too large (band 0.60) they barely collapse at all. Two predictions were committed
@@ -72,6 +92,11 @@ strongly, including the claims that were withdrawn and why.
 
 ## What is not established
 
+* That simulated seeds work on a network. They are exact for a softmax over one decision and are
+  tested on enumerable policies only; a transformer's log-probabilities are not affine in its
+  parameters, and that error is unmeasured.
+* That the one-run forecast holds once a run learns. Its 1.10x is for runs gaining at most 0.036 in
+  pass rate; where enumerable runs gain 0.05 or more it is beyond 3x in 44.1% of settings.
 * Anything at frontier scale. Every experiment runs on one laptop; the largest model is a 4-bit 7B
   with LoRA, and every pretrained forecast spans at most 12 updates.
 * That the forecast is accurate on pretrained models in general. It is inside 1.5x in one of four
@@ -89,6 +114,7 @@ strongly, including the claims that were withdrawn and why.
 ```
 src/caliper/
   forecast.py   the backward pass, as a protocol any trainer can implement
+  tangent.py    seeds simulated in the tangent model of a policy, no run needed
   objectives/   the estimator family as a (G+1) x 2 weight table
   exact/        enumerable policies: exact scores, Fisher, moments, a trainer,
                 the covariance recursion, the adjoint, and Adam's lifted state
@@ -134,8 +160,24 @@ Adam's moments backwards and cross-fits the injected term, which the protocol do
 The full backward pass costs three passes per stored update. The cheap form (`transport=False`)
 holds `b` at `grad M` instead of carrying it back: one extra pass per update and no
 Hessian-vector products. On the exact tier it changes the forecast by a median of 2% at runs of up
-to 25 updates, so it is the recommended starting point. The normal interval assumes the seed
+to 25 updates that barely move, so it is the recommended starting point there; neither form holds
+once a run learns (see above). The normal interval assumes the seed
 distribution is normal, which the pretrained runs show it need not be.
+
+When runs move far, simulate the seeds instead. `caliper.tangent` needs, per prompt, a set of
+candidate responses with their log-probabilities, scores and rewards at the starting parameters:
+
+```python
+from caliper.tangent import Recipe, TangentModel, simulate
+
+model = TangentModel(base=log_probs, features=scores, rewards=passes)  # (prompts, candidates[, dim])
+recipe = Recipe(step_size, n_prompts, group_size, steps, weight_table("rloo", group_size))
+seeds = simulate(model, recipe, train_prompts, eval_prompts, seeds=2000, rng=rng)
+seeds.std          # across-seed s.d. of the score, from simulated runs
+seeds.pass_rates   # where each simulated run left each evaluation prompt
+```
+
+`caliper.exact.tangent.reference_model` builds that model for an enumerable policy.
 
 ## Running it
 
@@ -144,6 +186,7 @@ uv venv --python 3.12
 uv pip install -e ".[dev]"
 uv run pytest                                      # includes the exactness tests
 uv run python experiments/p2_metric_forecast/run.py  # the forecast, tested prospectively
+uv run python experiments/p7_learning_regime/run.py --workers 8  # where it breaks, and simulated seeds
 uv run python experiments/s13_sizing/run.py          # sizing, thresholds read in sample
 uv run python experiments/s13_sizing/heldout.py      # sizing, thresholds set before grading
 uv run python experiments/s16_saturation/analyse.py  # where the pretrained seed spread is

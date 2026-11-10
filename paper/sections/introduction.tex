@@ -111,6 +111,22 @@ be carried against the gradient of the reported metric instead of being formed.
   point, but whether the actual seed variance is distributed the same way we did not test.
 
 
+  \item \textbf{The boundary reproduced where everything is exact, and an estimator that crosses
+  it} (Sections~\ref{sec:tangent} and~\ref{sec:exp-learning}). The enumerable settings above gain
+  at most $\numHeadlineGainMax$ in pass rate. Raising the step size until runs gain more breaks the
+  forecast with every input exact: it is more than $3\times$ off in
+  $\numRegradeCarriedOverThree\%$ of $\numRegradeLearningCount$ settings and short by up to
+  $\numRegradeCarriedWorst\times$ once a policy has collapsed, so the failures on pretrained models
+  are failures of linear response about one run and need nothing else. Linearising the model
+  instead of the run gives a surrogate in which seeds can be simulated with the sampling, the
+  estimator and the saturation kept exact and no pass through the model; it is exact for a softmax
+  over one decision (Proposition~\ref{prop:tangent}). Made before any run is trained, its spread is
+  within $1.5\times$ of the deviation over $\numRegradeSeeds$ real seeds in
+  $\numRegradeTangentWithin\%$ of those settings, against $\numRegradeTenWithin\%$ for the
+  deviation over ten real seeds and $\numRegradeCarriedWithin\%$ for the forecast. Two grids were
+  run with their predictions recorded first; four of the six recorded parts failed, three on one
+  clause, and we report which. On a network the surrogate is untested.
+
   \item \textbf{A metric can go blind before the seeds agree.} At $7$B on a task the base model
   already mostly passes, twenty updates collapse the response distribution: every held-out prompt
   scores exactly $0$ or $1$, two seeds report the same number to the last decimal, and their

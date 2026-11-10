@@ -96,3 +96,33 @@ Because $\lambda$ depends on $\theta$ only through $p_x$, $\lambda(p_x)\nabla p_
 exactly the difficulty reweighting the estimator applies. For RLOO the potential is the pass rate
 itself. The practical consequence is that the backward pass needs no transpose and can be run with
 the same code path as the forward one.
+
+\subsection{Linearising the model instead of the run}
+\label{sec:tangent}
+
+Theorem~\ref{thm:adjoint} is exact in the model and first-order in the distance between runs, and
+it inherits its one run's blind spot: at a run that has saturated, $\nabla M(\theta_T) = 0$ and the
+forecast vanishes, wherever the other seeds went. The opposite linearisation is available. With
+$\score_0(x,y) := \nabla_\theta\log\pi_{\theta_0}(y \mid x)$ the score at the starting parameters,
+the \emph{tangent policy}
+\begin{equation}
+  \label{eq:tangent}
+  \pi'_{\vartheta}(y \mid x) \;\propto\;
+  \pi_{\theta_0}(y \mid x)\,\exp\!\big(\score_0(x,y)^{\!\top}\vartheta\big)
+\end{equation}
+is an exponential family in the frozen scores. Updating $\vartheta$ with an estimator of
+\eqref{eq:family} needs sampled responses, their rewards and inner products of frozen scores, and
+no pass through the model, so seeds can be \emph{simulated} by the thousand with the sampling, the
+estimator's weights and the saturation all kept exactly.
+
+\begin{proposition}[When a simulated seed is a real one]
+  \label{prop:tangent}
+  If $\log\policy(y \mid x)$ is affine in $\theta$ up to a per-prompt normaliser, the run from
+  $\theta_0$ and the tangent run from $\vartheta_0 = 0$ have the same law, so $M(\theta_T)$ has the
+  distribution of its simulated counterpart.
+\end{proposition}
+
+Both are then Markov chains with one transition kernel. A softmax over one decision qualifies. A
+network does not: there a simulated run is exact in its first update and drifts as the scores
+move. This is the tangent-kernel approximation \citep{jacot2018ntk, malladi2023kernel}, used to
+draw many runs instead of predicting one.

@@ -68,6 +68,14 @@
   exact, and frozen before the remaining seeds existed, it has a median error of
   $\numForecastMedian\times$ over $\numForecastSettings$ settings of at most $25$ updates.
 
+  That is a statement about runs that barely move: those settings gain at most
+  $\numHeadlineGainMax$ in pass rate. Raised until runs learn, the same tier breaks the forecast
+  with every input exact, by more than $3\times$ in $\numRegradeCarriedOverThree\%$ of
+  $\numRegradeLearningCount$ settings and by orders of magnitude once a policy collapses.
+  Linearising the model instead of the run survives it there: seeds simulated in the tangent model
+  at the starting policy, with sampling and saturation kept exact and no run trained, are within
+  $1.5\times$ in $\numRegradeTangentWithin\%$ of those settings, about what ten real seeds achieve.
+
   Used to size comparisons whose ordering is clear, with every stopping threshold chosen on other
   tasks before it is applied, it reaches a $\numSizeTarget\%$ mistake rate in
   $\numHeldStrictAdjointRuns$ runs, $\numSplitFixedGainLow$ to $\numSplitFixedGainHigh\times$ fewer

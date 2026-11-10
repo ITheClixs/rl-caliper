@@ -7,7 +7,8 @@ with the recursion lifted to the optimiser state $z = (\theta, m, v)$, it is sho
 $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. On the exact models the lift gives
 $\numAdamLiftWarmMedian\times$ with Adam's moments warmed, but started cold and without bias
 correction, as these runs were, its median error there is $\numAdamLiftColdRawMedian\times$ and
-its worst $\numAdamLiftColdRawWorst\times$.
+its worst $\numAdamLiftColdRawWorst\times$. Section~\ref{sec:forecast} reproduces the shortfall on exact
+models once they learn, so it does not need a pretrained network.
 
 \paragraph{Accuracy is regime-dependent, not uniformly poor.} On the corpus above the reward
 groups go unanimous within five updates, yet its measured seed spread is the largest we report.
@@ -22,44 +23,20 @@ reliably so. Nor is collapse the cause: at $\numCollapseMissedBand$, where the f
 $\numCollapseMissedError\times$ too large, runs barely collapse, refuting two predictions we recorded beforehand.
 
 All four sit inside the $\numTolLooseBreakeven\times$ break-even of Section~\ref{sec:sizing},
-which was measured with $z$ read in sample. That is the narrow sense in which these results are
-usable: in those four regimes the forecast is accurate enough for the decision it serves, while on
-the unanimous corpus and at $7$B under Adam it is not. Running the sizing benchmark itself at this
-scale is the direct test, and it is underpowered.
+measured with $z$ read in sample; the unanimous corpus and $7$B under Adam do not.
 
-\paragraph{The sizing benchmark at this scale.} We trained
-$\numRealSizeRecipes$ recipes on one corpus at a matched rollout budget of $64$ per update,
-crossing $(P,G) \in \{(16,4),(8,8)\}$ with three learning rates spanning a factor of four:
-$\numRealSizeRuns$ training runs. The forecast holds up, at a median error of
-$\numRealSizeError\times$ and a worst of $\numRealSizeErrorWorst\times$, all six inside the
-break-even, tracking $\numRealSizeTrackForecast\times$ of the $\numRealSizeTrackMeasured\times$ spread in measured deviation across recipes.
-
-The benchmark does not. Only $\numRealSizePairs$ of $\numRealSizeAllPairs$ pairs are ordered
-unambiguously at $\numRealSizeMargin$ standard errors, because the recipes differ in mean by at
-most $\numRealSizeMeanGap$ while their deviations run from $\numRealSizeDevLow$ to $\numRealSizeDevHigh$: most are genuine near-ties at
-sixteen seeds, which is the paper's premise appearing in its own data. On four comparisons a
-stopping rule beats a fixed budget by $\numRealSizeFixedGain$
-$[\numRealSizeFixedLo, \numRealSizeFixedHi]$ and nothing else separates, the ordering among the
-$\sigma$-aware policies changing with the seed cap. That the measured deviation itself comes out
-nominally behind the forecast, at $\numRealSizeOracleGain\times$, marks the resolution floor rather
-than a result. The $\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is therefore not
-demonstrated at this scale and we do not claim it.
+\paragraph{The sizing benchmark at this scale.} Across $\numRealSizeRecipes$ recipes on one
+corpus ($\numRealSizeRuns$ runs) the forecast holds up, at a median error of
+$\numRealSizeError\times$ and a worst of $\numRealSizeErrorWorst\times$. The benchmark does not:
+only $\numRealSizePairs$ of $\numRealSizeAllPairs$ pairs are ordered unambiguously at
+$\numRealSizeMargin$ standard errors, most being genuine near-ties at sixteen seeds. On four
+comparisons a stopping rule beats a fixed budget by $\numRealSizeFixedGain$
+$[\numRealSizeFixedLo, \numRealSizeFixedHi]$ and nothing else separates. The
+$\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is therefore not demonstrated at this scale
+and we do not claim it.
 
 \paragraph{Two things the sweep falsified.} It does not support a monotone relationship between
 stochastic support and accuracy: the ordering of errors across the four bands does not follow the
 ordering of their live-group probabilities. And a one-run curvature diagnostic, calibrated on the
 exact models to refuse forecasts whose runs are not small perturbations of each other, does not
 transfer: it refuses every pretrained run, including the accurate one.
-
-\paragraph{What survives is narrower than the magnitude.} The share of prompts whose group is not
-unanimous falls from about a half to under $5\%$ by the fifth update, which is measured rather than
-modelled, so the run stops injecting seed noise there. The failed forecast's own kernel puts
-$\numRealFirstHalfShare\%$ of its predicted variance before that point; whether the actual seed
-variance is distributed the same way we did not test.
-
-\paragraph{A metric can go blind before the seeds agree.} At $7$B on a task the base model already
-mostly passes, twenty updates collapse the response distribution: every held-out prompt scores
-exactly $0$ or $1$, two seeds report the same number to the last decimal, and their policies still
-differ by up to $8\times10^{-2}$ in KL. A zero measured spread on a saturated benchmark is not
-evidence of a reproducible procedure, and it is the failure mode that a practitioner is most likely
-to read as success.

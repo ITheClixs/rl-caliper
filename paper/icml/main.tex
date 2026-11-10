@@ -63,7 +63,10 @@
   along one stored trajectory turns that recursion into the across-seed variance of the metric, as
   a sum of scalars with no covariance matrix formed. On enumerable policies, where every input is
   exact, and frozen before the remaining seeds existed, it has a median error of
-  $\numForecastMedian\times$ over $\numForecastSettings$ settings.
+  $\numForecastMedian\times$ over $\numForecastSettings$ settings whose runs gain at most
+  $\numHeadlineGainMax$ in pass rate. Where runs learn it fails on that tier too, and seeds
+  simulated in a model linearised at the start, with no run trained, are within $1.5\times$ in
+  $\numRegradeTangentWithin\%$ of settings.
 
   Used to size comparisons whose ordering is clear, with every stopping threshold chosen on other
   tasks before it is applied, it reaches a $\numSizeTarget\%$ mistake rate in

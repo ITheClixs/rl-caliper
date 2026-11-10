@@ -44,3 +44,18 @@ the rollouts, the batch composition and the step sizes untouched, turns a diverg
 ends at $\numNullLearning$ of where it started into one that grows by a factor of $\numNullCoin$
 over eighty updates, a gap of $\numNullGap\times$ at the end. The learning condition also moves
 further per update, so what brings those runs back together is not smaller steps.
+
+\paragraph{When the run learns.} The settings above gain at most $\numHeadlineGainMax$ in pass
+rate; the pretrained runs of Section~\ref{sec:real} gain up to $\numSweepGainHigh$. Raising the
+step size until enumerable runs gain as much, on $\numRegradeSettings$ further settings with exact
+inputs, each graded against $\numRegradeSeeds$ seeds and with its predictions recorded first,
+breaks the forecast. On the $\numRegradeLearningCount$ settings gaining at least
+$\numLearnGainCut$ it is more than $3\times$ off in $\numRegradeCarriedOverThree\%$, nearly always
+short, and by up to $\numRegradeCarriedWorst\times$ once the policy has collapsed onto one
+sequence. Seeds simulated in the tangent model at $\theta_0$, with no run trained, are within
+$1.5\times$ in $\numRegradeTangentWithin\%$ of those settings and beyond $3\times$ in
+$\numRegradeTangentOverThree\%$; the deviation over ten real seeds manages
+$\numRegradeTenWithin\%$ and $\numRegradeTenOverThree\%$, and the forecast
+$\numRegradeCarriedWithin\%$. Four of the six parts we had recorded failed, three on one clause.
+A tabular policy and its tangent model span the same family, so
+this tier flatters the surrogate, and on a network it is untested.

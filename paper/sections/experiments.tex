@@ -56,6 +56,13 @@ $\numForecastReplicateMedian\times$, $\numForecastReplicateWorst\times$ and
 $\numForecastReplicateInside$ of $\numForecastSettings$. That last count says the point forecast is consistent with the interval a finite number
 of seeds puts on the measured spread. It is not the coverage of an interval the forecast itself
 produces, which is a quantity this method does not yet report.
+Two qualifications belong next to the headline. The measured deviation is an estimate from
+$\numForecastSeeds$ seeds, and a forecast equal to the true deviation would itself score
+$\numForecastFloor\times$ against it; that sampling error accounts for about
+$\numForecastNoiseShare\%$ of the variance of the log error in Table~\ref{tab:forecast}. And the
+runs of this grid gain a median of $\numHeadlineGainMedian$ in pass rate and at most
+$\numHeadlineGainMax$, so it tests the forecast where a run barely moves.
+Section~\ref{sec:exp-learning} tests it where runs learn, and there it does not hold.
 Two things in the breakdown are worth noting. The two policy shapes agree with each other
 to within a hundredth at the median (Table~\ref{tab:forecast}), so the result is not a property of
 one tabular family.
@@ -397,6 +404,113 @@ because it is the quantity that separates the regime where the forecast has a wo
 $\numLinearityWorstBelow\times$ from the regime where it has one of $\numLinearityWorstAbove\times$, and computing it costs one extra
 gradient evaluation per checkpoint once a second run exists. Making it available before that
 second run is what Section~\ref{sec:discussion} lists first among the things we would build next.
+
+Both statements are about step sizes up to $\numLinearityStepFactor$ times the smallest, at which
+these runs still gain only a few hundredths in pass rate. The next subsection goes further, and
+there the first of them stops being true.
+
+\subsection{When the run learns}
+\label{sec:exp-learning}
+
+The settings behind Figure~\ref{fig:forecast} have something in common that the sweep above did
+not push far enough to expose: their runs barely learn. The run each forecast was made from gains
+a median of $\numHeadlineGainMedian$ in pass rate and at most $\numHeadlineGainMax$
+($\numReplicateGainMax$ on the replicate grid). The pretrained runs of
+Section~\ref{sec:exp-support} gain between $\numSweepGainLow$ and $\numSweepGainHigh$ in twelve
+updates. The tier on which the forecast is validated and the tier on which it fails therefore
+differ in how far the policy moves as well as in everything else, and nothing above separates the
+two.
+
+So we raised the step size on the enumerable tier until its runs moved that far and further, with
+every input still exact: $\numRegradeSettings$ settings on an environment used nowhere else, two
+shapes, two pool diversities, three bands, two group sizes, $8$ and $32$ prompts, $12$ and $50$
+updates, step sizes from $1.5$ to $60$. Runs gain up to $\numRegradeGainMax$. Three estimates of
+the across-seed deviation are made in each setting before the seeds they are graded against exist:
+the forecast of Theorem~\ref{thm:adjoint} from one anchor run; the same with the adjoint held at
+$\nabla M$; and the spread of $\numRegradeSimulated$ seeds simulated in the tangent model of
+Section~\ref{sec:tangent} at the starting policy, which uses no run. A setting is \emph{learning}
+if its anchor gains at least $\numLearnGainCut$ in pass rate; $\numRegradeLearningCount$ are. The
+grid was run twice, on two environments, and each time the settings, the thresholds and the
+predictions were committed first (\texttt{docs/predictions.md}). We report the second run, graded
+against $\numRegradeSeeds$ seeds per setting, and then what the first, graded against
+$\numLearnSeeds$, got wrong.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\columnwidth]{figures/learning.pdf}
+  \caption{Estimate over measured deviation against the pass rate the anchor run gained, on
+  $\numRegradeSettings$ enumerable settings with exact inputs, each graded against
+  $\numRegradeSeeds$ seeds trained afterwards. \textbf{Left:} linear response about one run. It
+  holds while the run barely moves and falls short by orders of magnitude once the policy
+  saturates. \textbf{Right:} seeds simulated in the tangent model at the starting policy, with no
+  run trained. Dotted lines are a factor of $1.5$.}
+  \label{fig:learning}
+\end{figure}
+
+\paragraph{Linear response about one run fails there, with exact inputs.} On the learning
+settings the forecast of Theorem~\ref{thm:adjoint} is within $1.5\times$ of the measured deviation
+in $\numRegradeCarriedWithin\%$ and more than $3\times$ off in $\numRegradeCarriedOverThree\%$,
+with a median error of $\numRegradeCarriedMedian\times$ and a worst case of
+$\numRegradeCarriedWorst\times$. Of the $\numRegradeCarriedOverThreeCount$ settings beyond
+$3\times$ it is too small in $\numRegradeCarriedShort$ and too large in $\numRegradeCarriedLong$.
+The mechanism is the one Section~\ref{sec:exp-real} found on a pretrained model. A policy that
+answers every prompt of this tier has a best single sequence, large steps drive a run onto one,
+and which one differs by seed. At a run that has arrived, $\nabla M(\theta_T)$ is zero and so is
+the forecast, while the realised spread is the choice of sequence. Holding the adjoint fixed is no
+better (median $\numRegradeHeldMedian\times$). No estimate enters any of this. The shortfalls on
+pretrained models therefore need neither estimation noise, nor Adam, nor anything specific to a
+network: linearising about one run that has saturated is sufficient to produce them, and the
+$\numForecastMedian\times$ of Section~\ref{sec:exp-forecast} is a statement about runs that gain
+at most $\numHeadlineGainMax$.
+
+\paragraph{Simulated seeds survive it.} The spread of seeds simulated in the tangent model has a
+median error of $\numRegradeTangentMedian\times$ on the same settings, is within $1.5\times$ in
+$\numRegradeTangentWithin\%$ and beyond $3\times$ in $\numRegradeTangentOverThree\%$
+($\numRegradeTangentOverThreeCount$ settings, $\numRegradeTangentLong$ of them too large), with a
+worst case of $\numRegradeTangentWorst\times$. Where runs barely move it costs nothing: on the
+$\numRegradeStationaryCount$ settings gaining less than $\numLearnStationaryCut$ its median error
+is $\numRegradeStationaryTangentMedian\times$ against $\numRegradeStationaryCarriedMedian\times$
+for the forecast. It was made before any run was trained.
+
+A useful scale for those numbers is what replication buys. Take the deviation over the first $n$
+of the $\numRegradeSeeds$ seeds as an estimate of the deviation over all of them. Ten seeds are
+within $1.5\times$ in $\numRegradeTenWithin\%$ of the learning settings and beyond $3\times$ in
+$\numRegradeTenOverThree\%$; five seeds in $\numRegradeFiveWithin\%$ and
+$\numRegradeFiveOverThree\%$; three in $\numRegradeThreeWithin\%$ and
+$\numRegradeThreeOverThree\%$. On this tier, then, simulating seeds from the starting policy is
+about as accurate as training ten, and is badly wrong less than half as often; the forecast from
+one run sits with three seeds. Forty-seven seeds do better than either, at
+$\numRegradeFortySevenWithin\%$.
+
+\paragraph{What we predicted, and what failed.} Of the six parts recorded across the two
+grids, two held and four failed, three of those on a single clause. On the first grid we predicted a median
+error of at least $2\times$ for the forecast on learning settings and found
+$\numLearnCarriedMedian\times$: it fails in its tail, with $\numLearnCarriedOverFive\%$ of settings
+beyond $5\times$, and not at its median. We predicted no simulated spread beyond $3\times$ and
+found $\numLearnTangentOverThreeCount$ of $\numLearnLearningCount$. And on the second grid we
+predicted at least $75\%$ of simulated spreads within $1.5\times$ and found
+$\numRegradeTangentWithinCount$ of $\numRegradeLearningCount$, one setting short.
+
+The second of those is why there is a second grid. All $\numLearnTangentOverThreeCount$ misses
+were settings where the simulated seeds spread \emph{more} than $\numLearnSeeds$ real ones that
+nearly agreed. Training $1500$ real seeds in each showed that in $23$ of them a few runs in a
+hundred, or in a thousand, end somewhere else, that those runs carry most of the variance, and
+that $\numLearnSeeds$ seeds had not contained one. The simulated seeds had. That was found by
+inspecting failures, so we recorded a test of it before running the second grid: that the first
+$47$ of $500$ seeds would understate the deviation by more than half in at least a tenth of
+learning settings. They do so in $\numRegradeFortySevenBelowHalf\%$, by up to
+$\numRegradeFortySevenUnderstated\times$. The rare outcomes are real and rarer than the settings
+we had picked suggested, and that prediction failed too.
+
+\paragraph{What this does not show.} The enumerable tier favours the tangent model in a way a
+network will not. A tabular tree policy and its tangent model span the same family of
+distributions, so the only error in a simulated seed is that the scores are frozen where the
+reference was taken; a transformer adds a second error, in the model itself, that this tier cannot
+see. Its settled runs are also not all right: in $\numRegradeTangentLong$ settings the simulated
+seeds spread over outcomes that $\numRegradeSeeds$ real seeds do not contain. The test that
+matters is the same comparison on a pretrained model, against seeds already on disk. It is
+recorded in \texttt{docs/predictions.md} with its thresholds, and it had not been run when this
+version was written.
 
 \subsection{The exact moments the forecast is built on}
 

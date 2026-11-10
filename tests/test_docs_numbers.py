@@ -25,6 +25,56 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("README.md", "runs gaining at most {HeadlineGainMax} in pass rate"),
+    ("README.md", "({RegradeLearningCount} settings gaining at least {LearnGainCut}), "
+                  "{RegradeSeeds} seeds each"),
+    ("README.md", "more than 3x off in **{RegradeCarriedOverThree}%** of settings, up to "
+                  "{RegradeCarriedWorst}x short"),
+    ("README.md", "within 1.5x in **{RegradeTangentWithin}%** (the deviation over ten real seeds: "
+                  "{RegradeTenWithin}%), beyond 3x in {RegradeTangentOverThree}%"),
+    ("README.md", "against up to {SweepGainHigh} for the pretrained sweep"),
+    ("README.md", "within 1.5x in {RegradeTangentWithin}% of those settings, about what the "
+                  "deviation over ten real seeds achieves, and beyond 3x in "
+                  "{RegradeTangentOverThree}%"),
+    ("README.md", "it is beyond 3x in {RegradeCarriedOverThree}% of settings"),
+    ("docs/claims.md", "gain a median of {HeadlineGainMedian} in pass rate and at most "
+                       "{HeadlineGainMax} ({ReplicateGainMax} on the replicate)"),
+    ("docs/claims.md", "beyond 3x in {RegradeCarriedOverThree}% of {RegradeLearningCount} "
+                       "learning settings (too small in {RegradeCarriedShort}, too large in "
+                       "{RegradeCarriedLong}), worst {RegradeCarriedWorst}x; cheap form median "
+                       "{RegradeHeldMedian}x"),
+    ("docs/claims.md", "median error {RegradeTangentMedian}x, within 1.5x in "
+                       "{RegradeTangentWithin}% and beyond 3x in {RegradeTangentOverThree}% of the "
+                       "same settings; the deviation over ten real seeds is within 1.5x in "
+                       "{RegradeTenWithin}% and beyond 3x in {RegradeTenOverThree}%"),
+    ("docs/claims.md", "{LearnTangentOverThreeCount} of {LearnLearningCount}, then "
+                       "{RegradeTangentOverThreeCount} of {RegradeLearningCount}; "
+                       "{LearnCarriedMedian}x; {RegradeFortySevenBelowHalf}%"),
+    ("docs/predictions.md", "has a median error of {LearnCarriedMedian}x, not the 2x predicted"),
+    ("docs/predictions.md", "median error of {LearnTangentMedian}x and are within 1.5x in "
+                            "78% of the learning settings, but {LearnTangentOverThreeCount} of "
+                            "the {LearnLearningCount} are beyond 3x"),
+    ("docs/predictions.md", "median error of {RegradeTangentMedian}x against the 500-seed "
+                            "deviation (1.3x allowed), are beyond 3x in "
+                            "{RegradeTangentOverThreeCount} settings, {RegradeTangentOverThree}%"),
+    ("docs/predictions.md", "within 1.5x in {RegradeTangentWithinCount} of "
+                            "{RegradeLearningCount}, which is {RegradeTangentWithin}%"),
+    ("docs/predictions.md", "beyond 3x in {RegradeCarriedOverThreeCount} of "
+                            "{RegradeLearningCount} settings, {RegradeCarriedOverThree}%. It is "
+                            "too small in {RegradeCarriedShort} of them and too large in "
+                            "{RegradeCarriedLong}"),
+    ("docs/predictions.md", "| deviation over 47 real seeds | 47 | {RegradeFortySevenWithin}% | "
+                            "{RegradeFortySevenOverThree}% |"),
+    ("docs/predictions.md", "| seeds simulated in the tangent model | 0 | {RegradeTangentWithin}% "
+                            "| {RegradeTangentOverThree}% |"),
+    ("docs/predictions.md", "| deviation over 10 real seeds | 10 | {RegradeTenWithin}% | "
+                            "{RegradeTenOverThree}% |"),
+    ("docs/predictions.md", "| deviation over 5 real seeds | 5 | {RegradeFiveWithin}% | "
+                            "{RegradeFiveOverThree}% |"),
+    ("docs/predictions.md", "| forecast of Theorem 2 | 1 | {RegradeCarriedWithin}% | "
+                            "{RegradeCarriedOverThree}% |"),
+    ("docs/predictions.md", "| deviation over 3 real seeds | 3 | {RegradeThreeWithin}% | "
+                            "{RegradeThreeOverThree}% |"),
     ("README.md", "fitted exponent `{SpreadExponent}` against a predicted `+0.5`"),
     ("docs/results-seeds.md", "| tail slope of divergence against updates | "
                               "{ReconvergenceSlopeLow} to {ReconvergenceSlopeHigh}, median "
@@ -118,8 +168,8 @@ CHECKS = [
                          "remaining five spread from {RealRestLow} to {RealRestHigh}."),
     ("docs/claims.md", "cheap form {RealCheapForecast} against a measured seed term of "
                        "{RealSeedPart} [{RealSeedLo}, {RealSeedHi}]"),
-    ("README.md", "median error **{ForecastMedian}x** ({ForecastHeldMedian}x in the cheap form used "
-                  "on real models), worst {ForecastWorst}x, inside the measured 95% interval in "
+    ("README.md", "median error **{ForecastMedian}x** ({ForecastHeldMedian}x in the cheap form "
+                  "used on real models), worst {ForecastWorst}x, inside the measured 95% interval in "
                   "{ForecastInside} of {ForecastSettings}"),
     ("README.md", "against the value measured over {ForecastSeeds} seeds trained afterwards"),
     ("README.md", "errors {SweepErrors}"),

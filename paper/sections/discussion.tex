@@ -75,6 +75,18 @@ set,
 so a noisy metric gradient makes the forecast too large, never too small. The second term shrinks
 with the size of the evaluation rollout and can be estimated by splitting it, which we did not do.
 
+\paragraph{What it establishes it only for runs that barely move.} The settings behind that
+median gain at most $\numHeadlineGainMax$ in pass rate. With the step size raised until runs gain
+more, and every input still exact, the same forecast is more than $3\times$ off in
+$\numRegradeCarriedOverThree\%$ of $\numRegradeLearningCount$ settings and short by up to
+$\numRegradeCarriedWorst\times$ (Section~\ref{sec:exp-learning}). That is linear response about
+one run meeting a run that has saturated, and it reproduces on the exact tier the shortfall first
+seen on a pretrained model. The estimator that survives those settings linearises the model
+instead of the run and simulates the seeds (Section~\ref{sec:tangent}): with no run trained it is
+within $1.5\times$ in $\numRegradeTangentWithin\%$ of them, about what ten real seeds achieve. It
+is validated on the enumerable tier only, where a tabular policy and its tangent model span the
+same family, and whether it holds on a network is the first thing we would test.
+
 \paragraph{And on a real model it underpredicts, by a lot.} Section~\ref{sec:exp-real} runs the
 whole thing on Qwen2.5-0.5B and the estimator we recommend comes out $\numRealShortCheap\times$
 short, the transported one $\numRealShortTransported\times$. Most of those runs, the one the forecast was
@@ -200,7 +212,13 @@ correlation is $\numEarlyCorrelationBig$. The number was real each time and the 
 the failure is instructive: eight runs make a correlation look like a finding, and only the third
 run of the same experiment made it obvious that it was not.
 
-\paragraph{What we would do next, in order.} Establish whether stochastic support is causally
+\paragraph{What we would do next, in order.} Run the simulated seeds of
+Section~\ref{sec:tangent} on the pretrained corpora whose real seeds are already on disk. The test
+is recorded with its thresholds and needs no training run: one teacher-forced pass per prompt and
+candidate response at the starting adapters, then the recipe simulated. It can fail in three ways
+the enumerable tier could not show, since a transformer's log-probabilities are not affine in its
+parameters, LoRA's are bilinear, and a simulated run can only give responses the base model
+already gives. Then establish whether stochastic support is causally
 responsible for the difference between $25\times$ and $\numMixedRatio$, rather than associated
 with it. Changing the corpus changed the pass-rate distribution, the live share, the score
 geometry and both noise terms together, so the comparison implicates the measurement regime

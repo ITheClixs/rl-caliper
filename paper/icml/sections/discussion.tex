@@ -13,17 +13,12 @@ near-ties, where the honest answer is to keep training whatever rule is in use.
 \paragraph{Scale.} The largest model is a $4$-bit $7$B with $\numAdamScaleSeeds$ seeds, on one
 laptop, and the exact tier where the forecast is validated is the furthest from a frontier run.
 
-\paragraph{What the forecast costs, which is the objection we cannot fully answer.} Estimating the
-injected term from the eight prompts a run trains on gives two forecasts $\numModeLargeRepeatRatio\times$ apart, because
-only about a tenth of groups are not unanimous and eight prompts rarely contain one. Raising that
-to $\numAdamScaleWidePrompts$ prompts brings the disagreement between disjoint halves to
-$\numAdamScaleHalfRatio\times$ and costs $141$ minutes against the $260$ that training all
-$\numAdamScaleSeeds$ seeds costs. A diagnostic consuming half the experiment it replaces is not yet
-a diagnostic at this scale. What limits it is how well a sparse sample pins down a variance to
-which most prompts contribute exactly zero; an estimator that spends its rollouts finding the live
-groups is the obvious next thing to build, and we have not built it. The closed form
-\eqref{eq:frozen} avoids the backward pass, and on the exact tier estimating its traces from one
-run costs little, but on a pretrained model they face the same sparse sample, untested.
+\paragraph{What the forecast costs.} Estimating the injected term from the eight prompts a run
+trains on gives two forecasts $\numModeLargeRepeatRatio\times$ apart, because only about a tenth of
+groups are not unanimous. Raising that to $\numAdamScaleWidePrompts$ prompts brings disjoint halves
+to within $\numAdamScaleHalfRatio\times$ and costs $141$ minutes against the $260$ that training
+all $\numAdamScaleSeeds$ seeds costs. A diagnostic consuming half the experiment it replaces is not
+yet a diagnostic at this scale.
 
 \paragraph{Claims we withdrew.} A predicted square-root relation between policy divergence and
 outcome spread is not supported by our data. Nor is a short memory horizon: in $\numTiltedEarly$ of

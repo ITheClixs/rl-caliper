@@ -54,7 +54,10 @@ of the reported metric rather than being formed.
   regime-dependent: across $\numSweepBands$ pre-specified regimes the errors are
   $\numSweepErrors$, all inside the break-even above. Outside it, on a task where most runs learn to
   answer one constant whatever they are asked, the forecast is short by $\numRealShortCheap\times$, and at $7$B under Adam the forecast is short by between
-  $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$.
+  $\numAdamScaleShortfallLow$ and $\numAdamScaleShortfallHigh$. The shortfall reappears on
+  enumerable policies once they learn; there, seeds simulated in the tangent model
+  (Section~\ref{sec:tangent}) recover the spread in $\numRegradeTangentWithin\%$ of settings
+  with no run trained.
 \end{itemize}
 
 Every experiment runs on one laptop, and every pretrained forecast spans at most $12$ updates with

@@ -40,10 +40,9 @@ covariance, at finite time, and test it on seeds trained after the forecast was 
 \citep{pontryagin1962mathematical, chen2018neural} to a covariance rather than a loss.
 
 \paragraph{Entropy collapse.} That RLVR drives policy entropy down sharply is documented
-\citep{cui2025entropy} and treated as an optimisation pathology. It has a second consequence that
-follows from \eqref{eq:adjoint}: a count-based advantage is identically zero on a unanimous group,
-so a collapsed policy injects $\Sigma_t = 0$, stops accumulating seed uncertainty, and any
-measurement of its reproducibility from that point is measuring nothing.
+\citep{cui2025entropy}. By \eqref{eq:adjoint} it has a second consequence: a unanimous group has
+zero count-based advantage, so a collapsed policy injects $\Sigma_t = 0$ and stops accumulating
+seed uncertainty.
 
 \paragraph{Batch size and gradient noise.} The gradient noise scale predicts the batch size beyond
 which data parallelism stops buying speed \citep{mccandlish2018empirical, shallue2019measuring}.
@@ -53,8 +52,6 @@ classical two-stage sampling result \citep{cochran1977sampling}. \citet{zhou2026
 concurrently derive an optimal group size from the mean-squared error of the GRPO gradient as a
 U-statistic; ours minimises injected noise at fixed rollout budget, and the two remain uncompared.
 
-\paragraph{Allocating rollouts.} Recent methods vary responses per prompt within a batch from pass
-rates or gradient variance \citep{nguyen2026allocation}, and outside language models the batch size
-itself has been adapted during training \citep{park2026batchscaling}. Those allocate samples
-\emph{within} one run. The budget at issue here is across independent training runs of the same recipe, which
-is a level those methods do not address and where the reproducibility cost is actually incurred.
+\paragraph{Allocating rollouts.} Recent methods vary responses per prompt within a batch
+\citep{nguyen2026allocation} or adapt the batch size during training \citep{park2026batchscaling}.
+Those allocate samples \emph{within} one run; the budget here is across runs of the same recipe.
