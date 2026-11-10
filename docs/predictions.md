@@ -137,3 +137,60 @@ the same keys drawing differently on different states. The leave-one-out spreads
 of their twelve runs, so the four gradings within a band are not independent.
 
 **Result.** Pending: recorded when both bands finish.
+
+## 2026-11-10: the enumerable tier fails the same way once its runs learn, and simulated seeds do not
+
+**Observed so far.** The 192 settings behind the headline (median error 1.10x) barely learn. The
+run each forecast was made from gains a median of 0.009 in pass rate and at most 0.036 (0.069 on
+the replicate grid). The pretrained sweep gains between 0.03 and 0.27. So the tier where the
+forecast works and the tier where it does not differ in how far the policy moves, as well as in
+everything else, and nothing so far separates the two.
+
+An exploratory run on one environment (shape 3x3, pool 24, environment seed 0, group size 8, 32
+later seeds, step sizes 1.5 to 60, 12 and 50 updates; not stored) raised the step size until runs
+gained up to 0.13. With every input still exact, the forecast of Theorem 2 had a median error of
+2.4x over those 48 settings, was more than 25x off in a tenth of them, and was up to 500x short
+where the policy had collapsed onto one sequence. The same two signatures as on pretrained models:
+too large by 2x to 3x at moderate movement, short by orders of magnitude after collapse.
+
+The same exploratory run tried a different estimator. Linearise the model once, at the starting
+parameters, instead of linearising the training dynamics about one run: the surrogate policy is
+`pi'(a) ∝ pi_0(a) exp(s_a . theta')` with `s_a` the score of response `a` at `theta_0`. Training
+this surrogate needs no forward or backward pass through the model, so thousands of seeds can be
+simulated with the sampling, the estimator's weights and the softmax all kept exact. Its spread over
+simulated seeds had a median error of 1.15x on those 48 settings and a worst case of 2.1x. It used
+no training run at all.
+
+**Test.** `experiments/p7_learning_regime/run.py` on settings the exploratory run did not touch:
+shapes 3x3 and 4x2, pool 16, diversities 1.0 and 0.3, environment seed 991, group sizes 4 and 8,
+prompts 8 and 32, 12 and 50 updates, step sizes 1.5, 6, 20 and 60, three difficulty bands: 384
+settings, each graded against 47 seeds trained after the forecasts are made, the anchor excluded.
+A setting is *learning* if its anchor run gains at least 0.05 in pass rate and *stationary* if it
+gains less than 0.02. With 47 seeds a perfect forecast would score a median of about 1.07x.
+
+**Hypothesis.** The failures on pretrained models are failures of linear response in the learning
+regime, which the enumerable tier reproduces with exact inputs; and they are failures of the
+linearisation of the dynamics, not of the model, so a surrogate that linearises only the model
+survives them.
+
+**Prediction.**
+1. Learning settings, forecast of Theorem 2 (adjoint carried back): median error at least 2x, and
+   at least a quarter of them off by more than 5x.
+2. Learning settings, simulated seeds in the tangent model at `theta_0`: median error at most 1.3x,
+   at least three quarters within 1.5x, none beyond 3x.
+3. Stationary settings: the simulated seeds cost nothing where the forecast already works. Their
+   median error is at most 0.10 above the forecast's.
+
+**What would refute it.** Any part failing; each is reported on its own. If part 1 fails the
+exploratory failure was particular to one environment. If part 2 fails the surrogate's exploratory
+accuracy was.
+
+**Confounds checked before the run.** On this tier the surrogate is favoured in a way it will not
+be on a network: a tabular tree policy and its tangent model span the same family of distributions,
+so the only error is that the features `s_a` are frozen while the true scores move. On a
+transformer the log-probabilities are not linear in the parameters and the surrogate has a second
+source of error that this test cannot see. A pass here licenses the test on a pretrained model; it
+does not replace it. For a policy of length one the two coincide exactly, which is a unit test and
+not evidence.
+
+**Result.** Pending.
