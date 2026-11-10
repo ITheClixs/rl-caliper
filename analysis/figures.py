@@ -754,7 +754,8 @@ def figure_learning() -> None:
     carried back along one run and for seeds simulated in the tangent model at the start."""
     hits = [
         r for r in io.load_all("p7_learning_regime")
-        if r["manifest"]["config"].get("seed") == 991 and r["manifest"]["config"].get("pool") == 16
+        if r["manifest"]["config"].get("seed") == 2718
+        and r["manifest"]["config"].get("pool") == 16
     ]
     if len(hits) != 1:
         raise SystemExit(f"expected one learning-regime grid, found {len(hits)}")
@@ -770,7 +771,7 @@ def figure_learning() -> None:
     )
     for ax, (key, title) in zip(axes, panels, strict=True):
         ratio = np.array([c[key] for c in cells]) / measured
-        for band, colour, marker in zip(bands, PALETTE, "os^", strict=True):
+        for band, colour, marker in zip(bands, PALETTE, "os^", strict=False):
             mask = np.array([c["band"] == band for c in cells])
             shown = np.maximum(ratio[mask], floor)
             ax.scatter(gain[mask], shown, s=9, color=colour, marker=marker, alpha=0.7,
@@ -781,7 +782,8 @@ def figure_learning() -> None:
         ax.set_yscale("log")
         ax.set_ylim(floor * 0.7, 30)
         style(ax, "pass rate gained by the anchor run", "", title)
-    axes[0].set_ylabel("forecast / measured s.d.")
+    seeds = len(cells[0]["seed_scores"]) - 1
+    axes[0].set_ylabel(f"estimate / s.d. over {seeds} seeds")
     axes[0].legend(fontsize=7, frameon=False, loc="lower left")
     axes[0].annotate(f"points at {floor:g} are at or below it", xy=(0.98, 0.03),
                      xycoords="axes fraction", ha="right", fontsize=6.5, color="0.35")

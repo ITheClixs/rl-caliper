@@ -1029,17 +1029,34 @@ def linearity_macros() -> dict[str, str]:
 
 LEARNING_GAIN = 0.05  # an anchor gaining at least this much in pass rate is "learning"
 STATIONARY_GAIN = 0.02  # and one gaining less than this is "stationary"; both fixed before p7 ran
+# the two learning-regime grids of docs/predictions.md, by environment seed: the first graded
+# against 47 seeds, the second, recorded after the first was read, against 500
+LEARNING_GRID, REGRADE_GRID = OTHER_ENV_SEED, 2718
+SMALL_SAMPLES = {"FortySeven": 47, "Ten": 10, "Five": 5, "Three": 3}
 
 
-def learning_cells() -> list[dict]:
-    """Every setting of the learning-regime grid, graded against the seeds trained afterwards."""
+def either_way(ratio: float) -> float:
+    """A ratio as an error: whichever of it and its inverse exceeds one. Zero is infinitely off."""
+    return max(ratio, 1 / ratio) if ratio > 0 else np.inf
+
+
+def learning_cells(seed: int) -> list[dict]:
+    """One learning-regime grid, each setting graded against the seeds trained after its anchor.
+
+    `*_error` is an estimator's error against all of those seeds. `sample_<n>` is the deviation
+    over the first `n` of them as a fraction of the deviation over all: what replication at that
+    budget would have reported.
+    """
     cells = []
-    for cell in only("p7_learning_regime", seed=OTHER_ENV_SEED, pool=16)["result"]["cells"]:
-        measured = float(np.std(cell["seed_scores"][1:], ddof=1))
+    for cell in only("p7_learning_regime", seed=seed, pool=16)["result"]["cells"]:
+        later = np.array(cell["seed_scores"][1:])
+        measured = float(later.std(ddof=1))
         row = {**cell, "measured_std": measured}
         for key in ("predicted_std", "untransported_std", "tangent_std"):
-            ratio = cell[key] / measured
-            row[key + "_error"] = max(ratio, 1 / ratio) if ratio > 0 else np.inf
+            row[key + "_error"] = either_way(cell[key] / measured)
+        for n in SMALL_SAMPLES.values():
+            if n < later.size:
+                row[f"sample_{n}"] = float(later[:n].std(ddof=1)) / measured
         cells.append(row)
     return cells
 
@@ -1061,9 +1078,22 @@ def perfect_forecast_error(seeds: int) -> float:
     return float(np.exp(brentq(excess, 1e-6, 2.0)))
 
 
+def error_summary(name: str, error: np.ndarray) -> dict[str, str]:
+    finite = error[np.isfinite(error)]
+    return {
+        f"{name}Median": f"{np.median(error):.2f}",
+        f"{name}Within": f"{100 * np.mean(error <= 1.5):.1f}",
+        f"{name}WithinCount": f"{int(np.sum(error <= 1.5))}",
+        f"{name}OverThree": f"{100 * np.mean(error > 3):.1f}",
+        f"{name}OverThreeCount": f"{int(np.sum(error > 3))}",
+        f"{name}OverFive": f"{100 * np.mean(error > 5):.0f}",
+        f"{name}Worst": f"{finite.max():.0f}" if finite.max() >= 10 else f"{finite.max():.2f}",
+    }
+
+
 def learning_regime_macros() -> dict[str, str]:
-    """How far the headline grid's runs move, and what happens to each estimator when they move
-    further (`p7_learning_regime`, the test recorded in docs/predictions.md before it ran)."""
+    """How far the headline grid's runs move, and what happens to each estimator when runs move
+    further (`p7_learning_regime`, two tests recorded in docs/predictions.md before they ran)."""
     macros = {}
     for tag, grid in (("Headline", headline_grid()), ("Replicate", replicate_grid())):
         gains = np.array([
@@ -1073,34 +1103,49 @@ def learning_regime_macros() -> dict[str, str]:
         macros[f"{tag}GainMedian"] = f"{np.median(gains):.3f}"
         macros[f"{tag}GainMax"] = f"{gains.max():.3f}"
 
-    cells = learning_cells()
-    gain = np.array([c["anchor_gain"] for c in cells])
-    groups = {"Learning": gain >= LEARNING_GAIN, "Stationary": gain < STATIONARY_GAIN}
+    # how much of the headline's error is the measured deviation's own sampling error
+    graded = _graded(grids.HEADLINE_POOL)["result"]["cells"]
+    log_error = np.log([c["predicted_std"] / c["measured_std"] for c in graded])
+    sampling = 1 / (2 * (graded[0]["seeds"] - 1))
+    macros |= {
+        "ForecastFloor": f"{perfect_forecast_error(graded[0]['seeds']):.2f}",
+        "ForecastNoiseShare": f"{100 * sampling / log_error.var(ddof=1):.0f}",
+    }
+
     columns = {"Carried": "predicted_std_error", "Held": "untransported_std_error",
                "Tangent": "tangent_std_error"}
-    macros |= {
-        "LearnSettings": f"{len(cells)}",
-        "LearnSeeds": f"{cells[0]['seeds'] - 1}",
-        "LearnSimulated": f"{cells[0]['tangent_seeds']}",
-        "LearnGainCut": f"{LEARNING_GAIN:.2f}",
-        "LearnStationaryCut": f"{STATIONARY_GAIN:.2f}",
-        "LearnGainMax": f"{gain.max():.2f}",
-        "LearnFloor": f"{perfect_forecast_error(cells[0]['seeds'] - 1):.2f}",
-        "LearnMeasuredLow": sci_plain(min(c["measured_std"] for c in cells)),
-        "LearnMeasuredHigh": sci_plain(max(c["measured_std"] for c in cells)),
-    }
-    for group, mask in groups.items():
-        macros[f"Learn{group}Count"] = f"{int(mask.sum())}"
+    for prefix, seed in (("Learn", LEARNING_GRID), ("Regrade", REGRADE_GRID)):
+        cells = learning_cells(seed)
+        gain = np.array([c["anchor_gain"] for c in cells])
+        learning = gain >= LEARNING_GAIN
+        stationary = gain < STATIONARY_GAIN
+        macros |= {
+            f"{prefix}Settings": f"{len(cells)}",
+            f"{prefix}Seeds": f"{cells[0]['seeds'] - 1}",
+            f"{prefix}Simulated": f"{cells[0]['tangent_seeds']}",
+            f"{prefix}GainMax": f"{gain.max():.2f}",
+            f"{prefix}Floor": f"{perfect_forecast_error(cells[0]['seeds'] - 1):.2f}",
+            f"{prefix}LearningCount": f"{int(learning.sum())}",
+            f"{prefix}StationaryCount": f"{int(stationary.sum())}",
+        }
         for column, key in columns.items():
-            error = np.array([c[key] for c in cells])[mask]
-            name = f"Learn{group}{column}"
-            macros[f"{name}Median"] = f"{np.median(error):.2f}"
-            macros[f"{name}Within"] = f"{100 * np.mean(error <= 1.5):.0f}"
-            macros[f"{name}OverFive"] = f"{100 * np.mean(error > 5):.0f}"
-            macros[f"{name}OverThree"] = f"{int(np.sum(error > 3))}"
-            finite = error[np.isfinite(error)]
-            macros[f"{name}Worst"] = f"{finite.max():.3g}" if finite.size else "0"
-            macros[f"{name}Zero"] = f"{int(np.sum(~np.isfinite(error)))}"
+            error = np.array([c[key] for c in cells])
+            macros |= error_summary(f"{prefix}{column}", error[learning])
+            macros[f"{prefix}Stationary{column}Median"] = f"{np.median(error[stationary]):.2f}"
+        for column, key in (("Carried", "predicted_std"), ("Tangent", "tangent_std")):
+            signed = np.array([c[key] / c["measured_std"] for c in cells])[learning]
+            macros[f"{prefix}{column}Short"] = f"{int(np.sum(signed < 1 / 3))}"
+            macros[f"{prefix}{column}Long"] = f"{int(np.sum(signed > 3))}"
+        for tag, n in SMALL_SAMPLES.items():
+            if f"sample_{n}" not in cells[0]:
+                continue
+            share = np.array([c[f"sample_{n}"] for c in cells])[learning]
+            error = np.array([either_way(v) for v in share])
+            macros |= error_summary(f"{prefix}{tag}", error)
+            macros[f"{prefix}{tag}BelowHalf"] = f"{100 * np.mean(share < 0.5):.1f}"
+            macros[f"{prefix}{tag}Understated"] = f"{1 / share.min():.0f}"
+    macros["LearnGainCut"] = f"{LEARNING_GAIN:.2f}"
+    macros["LearnStationaryCut"] = f"{STATIONARY_GAIN:.2f}"
     return macros
 
 
@@ -1457,7 +1502,10 @@ def table_numbers() -> None:
             for o in bands
         ]
         inside = [o for o in bands if 2 / 3 < o["ratio"] < 1.5]
+        gains = [float(np.mean(o["held_out_scores"])) - o["base_pass_rate"] for o in bands]
         macros |= {
+            "SweepGainLow": f"{min(gains):.2f}",
+            "SweepGainHigh": f"{max(gains):.2f}",
             "SweepBands": f"{len(bands)}",
             "SweepBest": f"{min(errors):.2f}",
             "SweepWorst": f"{max(errors):.2f}",

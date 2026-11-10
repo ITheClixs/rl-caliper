@@ -253,4 +253,85 @@ more often than not. Part 1 allows for that with its 5%. The two settings above 
 showed nothing say the surrogate also invents rare outcomes sometimes, so part 1 is not expected
 to hold with room to spare.
 
+**Result.** One part held and two failed, one of them by a single setting
+(`runs/p7_learning_regime/bca5d1392fb6.json`, 384 settings, 354 learning).
+
+1. Failed on its second clause, by one setting. The simulated seeds have a median error of 1.27x
+   against the 500-seed deviation (1.3x allowed), are beyond 3x in 17 settings, 4.8% (5% allowed),
+   and are within 1.5x in 265 of 354, which is 74.9% where 75% was predicted. Of the 17, 16 are too
+   large and one too small.
+2. Held. The forecast of Theorem 2 is beyond 3x in 156 of 354 settings, 44.1%. It is too small in
+   149 of them and too large in 7.
+3. Failed. The deviation over the first 47 seeds is less than half the 500-seed deviation in 18
+   settings, 5.1%, not the 10% predicted. Where it does understate, it does so by up to 92x.
+
+**What stands.** The rare outcomes are real but rarer than the 25 hand-picked settings suggested:
+47 seeds miss them in one learning setting in twenty, not one in ten. The comparison this run was
+not designed around is the one worth keeping, and it is descriptive, not predicted. Graded against
+500 seeds on the learning settings:
+
+| estimate of the across-seed deviation | runs trained | within 1.5x | beyond 3x |
+|---|---|---|---|
+| deviation over 47 real seeds | 47 | 91.5% | 4.0% |
+| seeds simulated in the tangent model | 0 | 74.9% | 4.8% |
+| deviation over 10 real seeds | 10 | 73.7% | 11.3% |
+| deviation over 5 real seeds | 5 | 55.6% | 18.4% |
+| forecast of Theorem 2 | 1 | 44.4% | 44.1% |
+| deviation over 3 real seeds | 3 | 44.9% | 28.5% |
+
+On this tier, simulating seeds before any run is trained estimates the spread about as well as
+training ten, and is badly wrong less than half as often. The linear forecast from one run sits
+with three seeds. None of this says anything yet about a network, where the tangent model has a
+source of error this tier does not: see the next entry.
+
+## 2026-11-10: seeds simulated at the starting adapters reproduce the support sweep's spread
+
+**Observed so far.** The four corpora of the support sweep were forecast by linearising about one
+anchor run, with errors of 1.66x, 2.13x, 2.80x and 1.24x. The stored per-prompt pass rates show
+why a linearisation about one run is a poor description of them: across the twelve seeds of each
+corpus, between 41% and 64% of (seed, prompt) cells score exactly 0 or exactly 1 on sixteen samples,
+and between 28% and 53% of prompts swing by more than 0.5 between seeds. Runs gain between 0.03 and
+0.27 in held-out pass rate in twelve updates. On the enumerable tier that much movement breaks the
+forecast of Theorem 2 with exact inputs, and seeds simulated in the tangent model survive it (the
+entry above).
+
+**Test.** `experiments/s20_tangent_real/run.py`, once per corpus, from the `modes-band-*` records
+of s11, which store every run's per-prompt pass rates. No run is trained. At the starting adapters
+each prompt's responses are sampled (four groups of eight), the distinct ones and the reference
+answer become its candidates, and one teacher-forced pass per candidate gives its log-probability
+and score. The recipe of the record (plain ascent, learning rate 5e-4, 8 prompts, groups of 8,
+12 updates, batches without replacement) is simulated for 2000 seeds, and the spread of their
+held-out pass rate is compared with the spread measured over the twelve real seeds after removing
+evaluation noise.
+
+**Validity checks, not part of the prediction.** The tangent model's held-out pass rate before any
+update must be within 0.03 of the record's sampled base pass rate, and the candidates must cover a
+median of at least 0.9 of each prompt's probability. A corpus failing either is reported and not
+graded.
+
+**Hypothesis.** The sweep's misses come from linearising the dynamics about one run. A surrogate
+that linearises only the model, and keeps the sampling and the saturation, gets the spread right.
+
+**Prediction.**
+1. Spread: the simulated spread is within 1.5x of the measured one on at least three of the four
+   corpora. The linear forecast managed one.
+2. Movement: the simulated mean held-out pass rate after training is within 0.10 of the measured
+   mean on at least three of the four.
+3. Saturation: drawing sixteen samples per prompt from the simulated pass rates, the share of
+   (seed, prompt) cells scoring exactly 0 or 1 is within 0.15 of the measured share on at least
+   three of the four.
+
+**What would refute it.** Any part failing; each is reported on its own. Part 2 failing means the
+tangent model does not learn at the rate the network does, and then a correct spread in part 1
+would be a coincidence and is to be read as one.
+
+**Confounds checked before the run.** Three things favour a failure here that were absent on the
+enumerable tier. The log-probabilities of a transformer are not affine in its parameters. LoRA is
+bilinear: with B at zero the score with respect to A vanishes, so the tangent model moves B alone
+while the real run moves both. And a simulated run can only give responses that were sampled at the
+start or the reference answer; anything a real run learns to say that the base model never said in
+32 samples is outside the surrogate. The measured spreads carry their own uncertainty, from twelve
+seeds: their 95% intervals are about a factor of 1.5 either way, so a ratio between 0.67 and 1.5
+is not distinguishable from a perfect forecast.
+
 **Result.** Pending.
