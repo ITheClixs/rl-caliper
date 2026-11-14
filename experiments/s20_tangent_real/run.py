@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import tempfile
 import time
 from pathlib import Path
 
@@ -98,11 +99,25 @@ def log_probability_and_score(trainer, prompt_ids, response: list[int], names: l
     return float(value), np.array(flat, dtype=np.float32)
 
 
-def tangent_model(blocks: list[dict], scores: np.ndarray, rank_floor: float) -> TangentModel:
+def gram_matrix(scores: np.ndarray, block: int = 256) -> np.ndarray:
+    """Inner products between every pair of scores, a block of rows at a time so that the scores
+    can stay on disk."""
+    n = scores.shape[0]
+    gram = np.zeros((n, n))
+    for start in range(0, n, block):
+        rows = np.asarray(scores[start : start + block], dtype=np.float64)
+        for other in range(0, start + block, block):
+            columns = np.asarray(scores[other : other + block], dtype=np.float64)
+            piece = rows @ columns.T
+            gram[start : start + block, other : other + block] = piece
+            gram[other : other + block, start : start + block] = piece.T
+    return gram
+
+
+def tangent_model(blocks: list[dict], gram: np.ndarray, rank_floor: float) -> TangentModel:
     """Pack per-prompt candidates into one model, in coordinates where the Gram matrix of the
     scores is the identity's image: K = L L', one row of L per candidate. Inner products between
     scores are all an update or a probability ever uses, so nothing is lost by the change."""
-    gram = scores.astype(np.float64) @ scores.astype(np.float64).T
     values, vectors = np.linalg.eigh(gram)
     keep = values > rank_floor * values.max()
     rows = vectors[:, keep] * np.sqrt(values[keep])
@@ -130,6 +145,9 @@ def main() -> None:
     ap.add_argument("--simulated-seeds", type=int, default=2000)
     ap.add_argument("--rank-floor", type=float, default=1e-10)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--time-prompts", type=int, default=0,
+                    help="score only this many prompts, print what they cost, and stop: a timing "
+                         "run that grades nothing and stores nothing")
     args = ap.parse_args()
 
     source = record(args.label)
@@ -152,26 +170,49 @@ def main() -> None:
     )
     model, tokenizer = load(cfg["model"])
     trainer = RealRLTrainer(model, tokenizer, config)
-    names = [name for name, _ in tree_flatten(trainer.model.trainable_parameters())]
+    # With LoRA's B at zero the score with respect to A is identically zero, so only B is kept.
+    # That is the tangent model's parameter set, and it halves what has to be stored.
+    names = [
+        name for name, _ in tree_flatten(trainer.model.trainable_parameters())
+        if "lora_b" in name
+    ]
+    if not names:
+        raise SystemExit("no LoRA B matrices among the trainable parameters")
 
     started = time.time()
     key = mx.random.key(31_337 + args.seed)
-    blocks, scores = [], []
-    for item in items:
-        prompt_ids, rows, key = candidates(trainer, item, args.groups, key)
-        for row in rows:
-            row["log_probability"], score = log_probability_and_score(
-                trainer, prompt_ids, row["response"], names
-            )
-            scores.append(score)
-        blocks.append({"rows": rows, "offset": len(scores) - len(rows)})
-    scores = np.stack(scores)
-    moving = np.abs(scores).max(axis=0) > 0
-    print(f"{len(items)} prompts, {len(scores)} candidates, {int(moving.sum())} of "
-          f"{scores.shape[1]} parameters with a non-zero score, "
-          f"{(time.time() - started) / 60:.1f} min", flush=True)
+    blocks, count, width = [], 0, 0
+    sampling = scoring = 0.0
+    # one float32 row per candidate, kept on disk: several thousand rows of several hundred
+    # thousand numbers each, of which only the inner products are needed afterwards
+    with tempfile.TemporaryDirectory() as scratch:
+        spool_path = Path(scratch) / "scores.f32"
+        with spool_path.open("wb") as spool:
+            for index, item in enumerate(items):
+                tick = time.time()
+                prompt_ids, rows, key = candidates(trainer, item, args.groups, key)
+                sampling += time.time() - tick
+                tick = time.time()
+                for row in rows:
+                    row["log_probability"], score = log_probability_and_score(
+                        trainer, prompt_ids, row["response"], names
+                    )
+                    spool.write(score.tobytes())
+                    count, width = count + 1, score.size
+                scoring += time.time() - tick
+                blocks.append({"rows": rows, "offset": count - len(rows)})
+                if (index + 1) % 20 == 0 or index + 1 == args.time_prompts:
+                    print(f"  {index + 1:3d} prompts, {count} candidates, sampling "
+                          f"{sampling / 60:.1f} min, scoring {scoring / 60:.1f} min", flush=True)
+                if index + 1 == args.time_prompts:
+                    raise SystemExit("timing run: stopping before anything is simulated or stored")
+        print(f"{len(items)} prompts, {count} candidates, {width} LoRA B parameters, "
+              f"{(time.time() - started) / 60:.1f} min", flush=True)
+        scores = np.memmap(spool_path, dtype=np.float32, mode="r", shape=(count, width))
+        gram = gram_matrix(scores)
+        del scores
 
-    tangent = tangent_model(blocks, scores[:, moving], args.rank_floor)
+    tangent = tangent_model(blocks, gram, args.rank_floor)
     start = tangent.pass_rates(np.zeros((1, tangent.dim)), eval_pool)[0]
     covered = np.array([np.exp([r["log_probability"] for r in b["rows"]]).sum() for b in blocks])
     print(f"tangent model of rank {tangent.dim}; candidates cover a median "
@@ -209,7 +250,7 @@ def main() -> None:
         ),
         "tangent_per_prompt_mean": seeds.pass_rates.mean(axis=0).tolist(),
         "tangent_per_prompt_std": seeds.pass_rates.std(axis=0, ddof=1).tolist(),
-        "candidates": int(len(scores)),
+        "candidates": int(count),
         "rank": int(tangent.dim),
         "coverage_median": float(np.median(covered)),
         "coverage_min": float(covered.min()),
