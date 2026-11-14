@@ -334,4 +334,28 @@ start or the reference answer; anything a real run learns to say that the base m
 seeds: their 95% intervals are about a factor of 1.5 either way, so a ratio between 0.67 and 1.5
 is not distinguishable from a perfect forecast.
 
-**Result.** Pending.
+**Result.** Partial: one of the four corpora has been run, and it fails a validity check, so by
+the rule above it is reported and not graded (`runs/s20_tangent_real/98544bf368ee.json`,
+`modes-band-0.60`, 13 minutes, no run trained).
+
+The check it fails is coverage. The 2707 candidates cover a median of 0.861 of each prompt's
+probability, where 0.9 was required; the least-covered prompt has 0.039. The other check passes:
+the tangent model's held-out pass rate before any update is 0.2205 against 0.2051 sampled.
+
+What the three parts would have read, had it been graded:
+
+1. Spread: 0.0338 simulated against 0.0391 measured, a ratio of 0.86. The linear forecast was
+   0.1095, a ratio of 2.80.
+2. Movement: mean held-out pass rate 0.417 simulated against 0.411 measured, from a start of 0.205.
+3. Saturation: 0.45 of simulated (seed, prompt) cells score exactly 0 or 1 on sixteen samples,
+   against 0.52 measured.
+
+Not predicted, and reported because it is the most specific thing the run shows: the simulated
+per-prompt pass rates after training correlate at 0.98 with the measured ones across the 64
+held-out prompts, with a mean absolute difference of 0.035, and the simulated per-prompt deviations
+across seeds correlate at 0.74 with the measured ones. How much of the 0.98 was already there
+before training this record cannot say, because it did not store where each prompt started; the
+script now does.
+
+One corpus that lands inside every threshold while failing a validity check is not a confirmation.
+The other three corpora have not been run.

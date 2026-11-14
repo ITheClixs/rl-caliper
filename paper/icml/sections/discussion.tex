@@ -7,11 +7,10 @@ its nominal $z$ carries no coverage guarantee and we claim none. What we report 
 the rule realises, measured against an ordering fixed on seeds no policy may draw. Every policy is
 graded the same way and separated at a common realised rate, so the comparison does not rest on the
 boundary being calibrated; a sequentially valid boundary would move all of them together, which we
-expect but have not verified. Pairs whose ordering is ambiguous are excluded, so the benchmark says nothing about
-near-ties, where the honest answer is to keep training whatever rule is in use.
+expect but have not verified. Ambiguous pairs are excluded, so the benchmark says nothing about near-ties.
 
 \paragraph{Scale.} The largest model is a $4$-bit $7$B with $\numAdamScaleSeeds$ seeds, on one
-laptop, and the exact tier where the forecast is validated is the furthest from a frontier run.
+laptop.
 
 \paragraph{What the forecast costs.} Estimating the injected term from the eight prompts a run
 trains on gives two forecasts $\numModeLargeRepeatRatio\times$ apart, because only about a tenth of
@@ -23,4 +22,4 @@ yet a diagnostic at this scale.
 \paragraph{Claims we withdrew.} A predicted square-root relation between policy divergence and
 outcome spread is not supported by our data. Nor is a short memory horizon: in $\numTiltedEarly$ of
 $\numMemorySettings$ settings more of the final variance was injected in the first half of the run.
-Token-level reshaping, length normalisation and clipping are outside \eqref{eq:family}.
+Token-level reshaping and clipping are outside \eqref{eq:family}.

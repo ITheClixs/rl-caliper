@@ -75,8 +75,16 @@ With no run trained, the spread of the simulated seeds is within 1.5x in 74.9% o
 about what the deviation over ten real seeds achieves, and beyond 3x in 4.8%. Two grids were run
 with predictions committed first; four of the six recorded parts failed, three of them on one
 clause, and [`docs/predictions.md`](docs/predictions.md) says which. This is validated on the
-enumerable tier only, where a tabular policy and its tangent model span the same family. The test
-on a pretrained model is recorded there with its thresholds and has not been run.
+enumerable tier only, where a tabular policy and its tangent model span the same family.
+
+On a pretrained model the same test is recorded with its thresholds, and one of its four corpora
+has been run: Qwen2.5-0.5B on the band-0.60 corpus, where the one-run forecast was 2.80x too large.
+Simulated from the starting adapters with no run trained, in 13 minutes, the spread is 0.0338
+against a measured 0.0391 (0.86x), the mean held-out pass rate after training 0.417 against 0.411,
+and the per-prompt pass rates correlate at 0.98 with the measured ones. It fails one validity check
+recorded beforehand (the sampled candidates cover a median 0.861 of each prompt's probability,
+where 0.9 was required), so it is reported and not counted. The other three corpora have not been
+run.
 
 That explanation does not reach the support sweep. Its four corpora were rerun with every answer
 recorded. Where the forecast held (band 0.85) the runs collapse, but onto the same answer;
@@ -92,9 +100,9 @@ strongly, including the claims that were withdrawn and why.
 
 ## What is not established
 
-* That simulated seeds work on a network. They are exact for a softmax over one decision and are
-  tested on enumerable policies only; a transformer's log-probabilities are not affine in its
-  parameters, and that error is unmeasured.
+* That simulated seeds work on a network. They are exact for a softmax over one decision and
+  tested on enumerable policies. On a pretrained model one corpus of four has been run; it lands
+  at 0.86x but fails a recorded validity check, and one corpus is not a result.
 * That the one-run forecast holds once a run learns. Its 1.10x is for runs gaining at most 0.036 in
   pass rate; where enumerable runs gain 0.05 or more it is beyond 3x in 44.1% of settings.
 * Anything at frontier scale. Every experiment runs on one laptop; the largest model is a 4-bit 7B

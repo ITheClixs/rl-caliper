@@ -29,14 +29,11 @@ measured with $z$ read in sample; the unanimous corpus and $7$B under Adam do no
 corpus ($\numRealSizeRuns$ runs) the forecast holds up, at a median error of
 $\numRealSizeError\times$ and a worst of $\numRealSizeErrorWorst\times$. The benchmark does not:
 only $\numRealSizePairs$ of $\numRealSizeAllPairs$ pairs are ordered unambiguously at
-$\numRealSizeMargin$ standard errors, most being genuine near-ties at sixteen seeds. On four
-comparisons a stopping rule beats a fixed budget by $\numRealSizeFixedGain$
-$[\numRealSizeFixedLo, \numRealSizeFixedHi]$ and nothing else separates. The
-$\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is therefore not demonstrated at this scale
-and we do not claim it.
+$\numRealSizeMargin$ standard errors, most being near-ties at sixteen seeds, so the
+$\numSizeFixedGain\times$ of Section~\ref{sec:sizing} is not demonstrated at this scale and we do
+not claim it.
 
-\paragraph{Two things the sweep falsified.} It does not support a monotone relationship between
-stochastic support and accuracy: the ordering of errors across the four bands does not follow the
-ordering of their live-group probabilities. And a one-run curvature diagnostic, calibrated on the
-exact models to refuse forecasts whose runs are not small perturbations of each other, does not
-transfer: it refuses every pretrained run, including the accurate one.
+\paragraph{Two things the sweep falsified.} The errors across the four bands do not follow the
+ordering of their live-group probabilities, so accuracy is not monotone in stochastic support. And
+a one-run curvature diagnostic calibrated on the exact models does not transfer: it refuses every
+pretrained run, including the accurate one.

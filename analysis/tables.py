@@ -1149,6 +1149,57 @@ def learning_regime_macros() -> dict[str, str]:
     return macros
 
 
+REAL_TANGENT = {"Sixty": "modes-band-0.60"}  # the corpora of prediction 6 run so far, by macro tag
+
+
+def real_tangent_macros() -> dict[str, str]:
+    """Seeds simulated in the tangent model of the pretrained policy, against the real seeds of the
+    s11 record of the same label (`s20_tangent_real`). One macro block per corpus that was run."""
+    macros = {"RealTangentCorpora": f"{len(REAL_TANGENT)}"}
+    for tag, label in REAL_TANGENT.items():
+        hits = [r for r in io.load_all("s20_tangent_real") if r["result"]["label"] == label]
+        if len(hits) != 1:
+            raise SystemExit(f"s20_tangent_real: {label} matches {len(hits)} records, not one")
+        result = hits[0]["result"]
+        source = [
+            r["result"] for r in io.load_all("s11_prospective")
+            if r["result"].get("label") == label
+        ]
+        if len(source) != 1:
+            raise SystemExit(f"s11_prospective: {label} matches {len(source)} records, not one")
+        real = np.array(source[0]["per_prompt"])
+        simulated = np.array(result["tangent_per_prompt_mean"])
+        samples = hits[0]["manifest"]["config"].get("eval_samples", 16)
+        noise = (real * (1 - real)).mean(axis=0) / (samples - 1)
+        deviation = np.sqrt(np.clip(real.var(axis=0, ddof=1) - noise, 0, None))
+        name = f"RealTangent{tag}"
+        macros |= {
+            f"{name}Band": label.rsplit("-", 1)[1],
+            f"{name}Std": f"{result['tangent_std']:.4f}",
+            f"{name}Measured": f"{result['measured_std']:.4f}",
+            f"{name}Ratio": f"{result['ratio']:.2f}",
+            f"{name}Linear": f"{result['linear_forecast_std']:.4f}",
+            f"{name}LinearRatio": f"{result['linear_forecast_std'] / result['measured_std']:.2f}",
+            f"{name}Mean": f"{result['tangent_mean']:.3f}",
+            f"{name}MeasuredMean": f"{result['measured_mean']:.3f}",
+            f"{name}Base": f"{result['base_pass_rate']:.3f}",
+            f"{name}Start": f"{result['start']:.4f}",
+            f"{name}Settled": f"{result['tangent_settled_share']:.2f}",
+            f"{name}MeasuredSettled": f"{result['measured_settled_share']:.2f}",
+            f"{name}Correlation": f"{result['per_prompt_mean_correlation']:.2f}",
+            f"{name}Difference": f"{np.abs(simulated - real.mean(axis=0)).mean():.3f}",
+            f"{name}DeviationCorrelation":
+                f"{np.corrcoef(result['tangent_per_prompt_std'], deviation)[0, 1]:.2f}",
+            f"{name}Coverage": f"{result['coverage_median']:.3f}",
+            f"{name}CoverageLeast": f"{result['coverage_min']:.3f}",
+            f"{name}Candidates": f"{result['candidates']}",
+            f"{name}Prompts": f"{real.shape[1]}",
+            f"{name}Seeds": f"{real.shape[0]}",
+            f"{name}Minutes": f"{result['minutes']:.0f}",
+        }
+    return macros
+
+
 def estimated_macros() -> dict[str, str]:
     """The closed form with traces estimated from one run (`s13_sizing/estimated.py`)."""
     result = only("s18_sizing_estimated", holdout=32, cap=16, seed=0)["result"]
@@ -1811,6 +1862,7 @@ def table_numbers() -> None:
     macros |= absorption_test_macros()
     macros |= reconvergence_macros()
     macros |= learning_regime_macros()
+    macros |= real_tangent_macros()
     macros |= variance_share_macros()
     macros |= linearity_macros()
     macros |= example_macros()

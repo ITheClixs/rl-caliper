@@ -125,7 +125,10 @@ be carried against the gradient of the reported metric instead of being formed.
   $\numRegradeTangentWithin\%$ of those settings, against $\numRegradeTenWithin\%$ for the
   deviation over ten real seeds and $\numRegradeCarriedWithin\%$ for the forecast. Two grids were
   run with their predictions recorded first; four of the six recorded parts failed, three on one
-  clause, and we report which. On a network the surrogate is untested.
+  clause, and we report which. On a pretrained model the surrogate has been run on one corpus,
+  where it gives $\numRealTangentSixtyRatio\times$ against the forecast's
+  $\numRealTangentSixtyLinearRatio\times$ but fails a recorded validity check, so it is reported and
+  not counted.
 
   \item \textbf{A metric can go blind before the seeds agree.} At $7$B on a task the base model
   already mostly passes, twenty updates collapse the response distribution: every held-out prompt

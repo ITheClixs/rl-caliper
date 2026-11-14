@@ -248,6 +248,9 @@ def main() -> None:
         "per_prompt_mean_correlation": float(
             np.corrcoef(seeds.pass_rates.mean(axis=0), real.mean(axis=0))[0, 1]
         ),
+        # where each held-out prompt starts, so that agreement after training can be told apart
+        # from agreement that was already there before it
+        "start_per_prompt": start.tolist(),
         "tangent_per_prompt_mean": seeds.pass_rates.mean(axis=0).tolist(),
         "tangent_per_prompt_std": seeds.pass_rates.std(axis=0, ddof=1).tolist(),
         "candidates": int(count),

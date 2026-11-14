@@ -122,7 +122,6 @@ estimator's weights and the saturation all kept exactly.
   distribution of its simulated counterpart.
 \end{proposition}
 
-Both are then Markov chains with one transition kernel. A softmax over one decision qualifies. A
-network does not: there a simulated run is exact in its first update and drifts as the scores
-move. This is the tangent-kernel approximation \citep{jacot2018ntk, malladi2023kernel}, used to
-draw many runs instead of predicting one.
+Both are then Markov chains with one transition kernel. A softmax over one decision qualifies; a
+network does not, and there a simulated run drifts as the scores move. This is the tangent-kernel
+approximation \citep{jacot2018ntk, malladi2023kernel}, used to draw many runs, not predict one.

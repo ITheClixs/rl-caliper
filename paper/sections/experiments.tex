@@ -508,9 +508,35 @@ distributions, so the only error in a simulated seed is that the scores are froz
 reference was taken; a transformer adds a second error, in the model itself, that this tier cannot
 see. Its settled runs are also not all right: in $\numRegradeTangentLong$ settings the simulated
 seeds spread over outcomes that $\numRegradeSeeds$ real seeds do not contain. The test that
-matters is the same comparison on a pretrained model, against seeds already on disk. It is
-recorded in \texttt{docs/predictions.md} with its thresholds, and it had not been run when this
-version was written.
+matters is the same comparison on a pretrained model.
+
+\paragraph{One corpus on a pretrained model, reported and not graded.} That test is recorded in
+\texttt{docs/predictions.md} with its thresholds: the four corpora of the support sweep
+(Section~\ref{sec:exp-support}), each against the $\numRealTangentSixtySeeds$ real seeds already
+on disk. It trains nothing. At the starting adapters each prompt's responses are sampled, the
+distinct ones and the reference answer become its candidates, one teacher-forced pass per
+candidate gives its log-probability and its score with respect to LoRA's $B$ matrices, and the
+sweep's recipe is then simulated for $\numRegradeSimulated$ seeds. One corpus has been run, the
+band at $\numRealTangentSixtyBand$ where the forecast missed worst, in
+$\numRealTangentSixtyMinutes$ minutes.
+
+It fails one of the two validity checks we had recorded, so by our own rule its numbers are
+reported and not counted. The $\numRealTangentSixtyCandidates$ candidates cover a median of
+$\numRealTangentSixtyCoverage$ of each prompt's probability where $0.9$ was required, and the
+least-covered prompt has $\numRealTangentSixtyCoverageLeast$. With that said: the simulated spread
+is $\numRealTangentSixtyStd$ against a measured $\numRealTangentSixtyMeasured$, a ratio of
+$\numRealTangentSixtyRatio$ where the forecast of Section~\ref{sec:exp-support} gave
+$\numRealTangentSixtyLinearRatio$. The simulated runs end at a mean held-out pass rate of
+$\numRealTangentSixtyMean$ against $\numRealTangentSixtyMeasuredMean$, from a start of
+$\numRealTangentSixtyBase$, and $\numRealTangentSixtySettled$ of their (seed, prompt) cells score
+exactly $0$ or $1$ on sixteen samples against $\numRealTangentSixtyMeasuredSettled$. Across the
+$\numRealTangentSixtyPrompts$ held-out prompts the simulated pass rates after training correlate
+at $\numRealTangentSixtyCorrelation$ with the measured ones, with a mean absolute difference of
+$\numRealTangentSixtyDifference$, and the per-prompt deviations across seeds correlate at
+$\numRealTangentSixtyDeviationCorrelation$. How much of the first correlation was there before
+training this record cannot say, because it did not store where each prompt started. One corpus
+inside every threshold while failing a validity check is an encouraging observation and not a
+confirmation; the other three have not been run.
 
 \subsection{The exact moments the forecast is built on}
 

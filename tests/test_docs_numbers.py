@@ -25,6 +25,28 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
+    ("README.md", "the spread is {RealTangentSixtyStd} against a measured "
+                  "{RealTangentSixtyMeasured} ({RealTangentSixtyRatio}x), the mean held-out pass "
+                  "rate after training {RealTangentSixtyMean} against "
+                  "{RealTangentSixtyMeasuredMean}, and the per-prompt pass rates correlate at "
+                  "{RealTangentSixtyCorrelation}"),
+    ("README.md", "the one-run forecast was {RealTangentSixtyLinearRatio}x too large"),
+    ("README.md", "in {RealTangentSixtyMinutes} minutes"),
+    ("README.md", "cover a median {RealTangentSixtyCoverage} of each prompt's probability"),
+    ("docs/claims.md", "spread {RealTangentSixtyStd} against measured {RealTangentSixtyMeasured} "
+                       "({RealTangentSixtyRatio}x; the one-run forecast was "
+                       "{RealTangentSixtyLinearRatio}x), mean pass rate {RealTangentSixtyMean} "
+                       "against {RealTangentSixtyMeasuredMean}, per-prompt correlation "
+                       "{RealTangentSixtyCorrelation}"),
+    ("docs/predictions.md", "The {RealTangentSixtyCandidates} candidates cover a median of "
+                            "{RealTangentSixtyCoverage} of each prompt's probability"),
+    ("docs/predictions.md", "{RealTangentSixtyStd} simulated against {RealTangentSixtyMeasured} "
+                            "measured, a ratio of {RealTangentSixtyRatio}"),
+    ("docs/predictions.md", "correlate at {RealTangentSixtyCorrelation} with the measured ones "
+                            "across the {RealTangentSixtyPrompts} held-out prompts, with a mean "
+                            "absolute difference of {RealTangentSixtyDifference}, and the "
+                            "simulated per-prompt deviations across seeds correlate at "
+                            "{RealTangentSixtyDeviationCorrelation}"),
     ("README.md", "runs gaining at most {HeadlineGainMax} in pass rate"),
     ("README.md", "({RegradeLearningCount} settings gaining at least {LearnGainCut}), "
                   "{RegradeSeeds} seeds each"),

@@ -75,6 +75,8 @@
   Linearising the model instead of the run survives it there: seeds simulated in the tangent model
   at the starting policy, with sampling and saturation kept exact and no run trained, are within
   $1.5\times$ in $\numRegradeTangentWithin\%$ of those settings, about what ten real seeds achieve.
+  On the one pretrained corpus run so far they give $\numRealTangentSixtyRatio\times$ where the
+  forecast gave $\numRealTangentSixtyLinearRatio\times$, with one recorded validity check failed.
 
   Used to size comparisons whose ordering is clear, with every stopping threshold chosen on other
   tasks before it is applied, it reaches a $\numSizeTarget\%$ mistake rate in
