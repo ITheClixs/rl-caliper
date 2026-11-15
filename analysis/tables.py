@@ -1149,13 +1149,23 @@ def learning_regime_macros() -> dict[str, str]:
     return macros
 
 
-REAL_TANGENT = {"Sixty": "modes-band-0.60"}  # the corpora of prediction 6 run so far, by macro tag
+# the four corpora of prediction 6 in docs/predictions.md, by macro tag
+REAL_TANGENT = {
+    "Fifteen": "modes-band-0.15", "ThirtyFive": "modes-band-0.35",
+    "Sixty": "modes-band-0.60", "EightyFive": "modes-band-0.85",
+}
+# the thresholds that prediction fixed before any corpus was run
+TANGENT_SPREAD, TANGENT_MOVE, TANGENT_SETTLED, TANGENT_COVERAGE, TANGENT_START = (
+    1.5, 0.10, 0.15, 0.9, 0.03
+)
 
 
 def real_tangent_macros() -> dict[str, str]:
     """Seeds simulated in the tangent model of the pretrained policy, against the real seeds of the
-    s11 record of the same label (`s20_tangent_real`). One macro block per corpus that was run."""
-    macros = {"RealTangentCorpora": f"{len(REAL_TANGENT)}"}
+    s11 record of the same label (`s20_tangent_real`): one block per corpus, then the counts the
+    recorded prediction is stated in."""
+    macros = {}
+    rows = []
     for tag, label in REAL_TANGENT.items():
         hits = [r for r in io.load_all("s20_tangent_real") if r["result"]["label"] == label]
         if len(hits) != 1:
@@ -1168,10 +1178,20 @@ def real_tangent_macros() -> dict[str, str]:
         if len(source) != 1:
             raise SystemExit(f"s11_prospective: {label} matches {len(source)} records, not one")
         real = np.array(source[0]["per_prompt"])
+        measured = real.mean(axis=0)
         simulated = np.array(result["tangent_per_prompt_mean"])
-        samples = hits[0]["manifest"]["config"].get("eval_samples", 16)
-        noise = (real * (1 - real)).mean(axis=0) / (samples - 1)
+        noise = (real * (1 - real)).mean(axis=0) / 15  # sixteen evaluation samples per prompt
         deviation = np.sqrt(np.clip(real.var(axis=0, ddof=1) - noise, 0, None))
+        linear = result["linear_forecast_std"] / result["measured_std"]
+        row = {
+            "ratio": result["ratio"], "linear": linear,
+            "move": result["tangent_mean"] - result["measured_mean"],
+            "settled": result["tangent_settled_share"] - result["measured_settled_share"],
+            "coverage": result["coverage_median"],
+            "start": result["start"] - result["base_pass_rate"],
+            "correlation": result["per_prompt_mean_correlation"],
+            "minutes": result["minutes"],
+        }
         name = f"RealTangent{tag}"
         macros |= {
             f"{name}Band": label.rsplit("-", 1)[1],
@@ -1179,7 +1199,7 @@ def real_tangent_macros() -> dict[str, str]:
             f"{name}Measured": f"{result['measured_std']:.4f}",
             f"{name}Ratio": f"{result['ratio']:.2f}",
             f"{name}Linear": f"{result['linear_forecast_std']:.4f}",
-            f"{name}LinearRatio": f"{result['linear_forecast_std'] / result['measured_std']:.2f}",
+            f"{name}LinearRatio": f"{linear:.2f}",
             f"{name}Mean": f"{result['tangent_mean']:.3f}",
             f"{name}MeasuredMean": f"{result['measured_mean']:.3f}",
             f"{name}Base": f"{result['base_pass_rate']:.3f}",
@@ -1187,7 +1207,7 @@ def real_tangent_macros() -> dict[str, str]:
             f"{name}Settled": f"{result['tangent_settled_share']:.2f}",
             f"{name}MeasuredSettled": f"{result['measured_settled_share']:.2f}",
             f"{name}Correlation": f"{result['per_prompt_mean_correlation']:.2f}",
-            f"{name}Difference": f"{np.abs(simulated - real.mean(axis=0)).mean():.3f}",
+            f"{name}Difference": f"{np.abs(simulated - measured).mean():.3f}",
             f"{name}DeviationCorrelation":
                 f"{np.corrcoef(result['tangent_per_prompt_std'], deviation)[0, 1]:.2f}",
             f"{name}Coverage": f"{result['coverage_median']:.3f}",
@@ -1197,6 +1217,40 @@ def real_tangent_macros() -> dict[str, str]:
             f"{name}Seeds": f"{real.shape[0]}",
             f"{name}Minutes": f"{result['minutes']:.0f}",
         }
+        if "start_per_prompt" in result:
+            # how much of the per-prompt agreement was there before any update, and how well the
+            # simulated change of each prompt tracks its measured change
+            start = np.array(result["start_per_prompt"])
+            row["before"] = float(np.corrcoef(start, measured)[0, 1])
+            row["change"] = float(np.corrcoef(simulated - start, measured - start)[0, 1])
+            macros[f"{name}Before"] = f"{row['before']:.2f}"
+            macros[f"{name}Change"] = f"{row['change']:.2f}"
+        rows.append(row)
+
+    errors = [either_way(r["ratio"]) for r in rows]
+    linear_errors = [either_way(r["linear"]) for r in rows]
+    macros |= {
+        "RealTangentCorpora": f"{len(rows)}",
+        "RealTangentRatios": ", ".join(f"{r['ratio']:.2f}" for r in rows),
+        "RealTangentLinearRatios": ", ".join(f"{r['linear']:.2f}" for r in rows),
+        "RealTangentWithin": f"{sum(e <= TANGENT_SPREAD for e in errors)}",
+        "RealTangentLinearWithin": f"{sum(e <= TANGENT_SPREAD for e in linear_errors)}",
+        "RealTangentMedianError": f"{np.median(errors):.2f}",
+        "RealTangentLinearMedianError": f"{np.median(linear_errors):.2f}",
+        "RealTangentMoveWithin": f"{sum(abs(r['move']) <= TANGENT_MOVE for r in rows)}",
+        "RealTangentSettledWithin": f"{sum(abs(r['settled']) <= TANGENT_SETTLED for r in rows)}",
+        "RealTangentCovered": f"{sum(r['coverage'] >= TANGENT_COVERAGE for r in rows)}",
+        "RealTangentStartOk": f"{sum(abs(r['start']) <= TANGENT_START for r in rows)}",
+        "RealTangentCoverageLow": f"{min(r['coverage'] for r in rows):.3f}",
+        "RealTangentCoverageHigh": f"{max(r['coverage'] for r in rows):.3f}",
+        "RealTangentCorrelationLow": f"{min(r['correlation'] for r in rows):.2f}",
+        "RealTangentCorrelationHigh": f"{max(r['correlation'] for r in rows):.2f}",
+        "RealTangentMinutesLow": f"{min(r['minutes'] for r in rows):.0f}",
+        "RealTangentMinutesHigh": f"{max(r['minutes'] for r in rows):.0f}",
+        "RealTangentClosestRatio": f"{min(errors, key=lambda e: abs(e - TANGENT_SPREAD)):.4f}",
+        "RealTangentClosestSettled":
+            f"{min((abs(r['settled']) for r in rows), key=lambda v: abs(v - TANGENT_SETTLED)):.4f}",
+    }
     return macros
 
 

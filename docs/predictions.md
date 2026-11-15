@@ -334,28 +334,38 @@ start or the reference answer; anything a real run learns to say that the base m
 seeds: their 95% intervals are about a factor of 1.5 either way, so a ratio between 0.67 and 1.5
 is not distinguishable from a perfect forecast.
 
-**Result.** Partial: one of the four corpora has been run, and it fails a validity check, so by
-the rule above it is reported and not graded (`runs/s20_tangent_real/98544bf368ee.json`,
-`modes-band-0.60`, 13 minutes, no run trained).
+**Result.** Not graded: all four corpora fail a validity check. What the three parts would have
+read is given below, and should be read with that in mind (`runs/s20_tangent_real/`, four records,
+13 to 16 minutes each, no run trained).
 
-The check it fails is coverage. The 2707 candidates cover a median of 0.861 of each prompt's
-probability, where 0.9 was required; the least-covered prompt has 0.039. The other check passes:
-the tangent model's held-out pass rate before any update is 0.2205 against 0.2051 sampled.
+The check they fail is coverage. The candidates cover a median of 0.858, 0.868, 0.861 and 0.860 of
+each prompt's probability, where 0.9 was required. The other check passes on all four: the tangent
+model's held-out pass rate before any update is within 0.016 of the sampled one.
 
-What the three parts would have read, had it been graded:
+| corpus | simulated / measured spread | one-run forecast / measured | pass rate after training, simulated and measured | cells at exactly 0 or 1, simulated and measured |
+|---|---|---|---|---|
+| band 0.15 | 2.80 | 0.60 | 0.237, 0.160 | 0.66, 0.64 |
+| band 0.35 | 1.50 | 2.13 | 0.305, 0.275 | 0.45, 0.41 |
+| band 0.60 | 0.86 | 2.80 | 0.417, 0.411 | 0.45, 0.52 |
+| band 0.85 | 0.83 | 0.81 | 0.502, 0.532 | 0.46, 0.61 |
 
-1. Spread: 0.0338 simulated against 0.0391 measured, a ratio of 0.86. The linear forecast was
-   0.1095, a ratio of 2.80.
-2. Movement: mean held-out pass rate 0.417 simulated against 0.411 measured, from a start of 0.205.
-3. Saturation: 0.45 of simulated (seed, prompt) cells score exactly 0 or 1 on sixteen samples,
-   against 0.52 measured.
+1. Spread: within 1.5x on three of the four, which is the threshold. One of the three is at
+   1.4965. The one-run forecast is within 1.5x on one. On band 0.15 the simulated spread is 2.80x
+   too large, a worse miss than the forecast's 0.60x.
+2. Movement: within 0.10 on all four. Band 0.15 is the furthest, 0.077 too high: the simulated
+   runs learn that corpus more than twice as fast as the real ones.
+3. Saturation: within 0.15 on three of the four. The fourth is at 0.1503.
 
-Not predicted, and reported because it is the most specific thing the run shows: the simulated
-per-prompt pass rates after training correlate at 0.98 with the measured ones across the 64
-held-out prompts, with a mean absolute difference of 0.035, and the simulated per-prompt deviations
-across seeds correlate at 0.74 with the measured ones. How much of the 0.98 was already there
-before training this record cannot say, because it did not store where each prompt started; the
-script now does.
+So each part would have met its threshold, two of them by margins too thin to mean anything, and
+none of it counts, because the check that was supposed to guarantee the candidates were adequate
+failed everywhere. The threshold of 0.9 was a guess made before any corpus had been sampled; four
+groups of eight do not reach it on these corpora. Sampling more responses per prompt is the
+obvious next run, and it would be a change to the recorded protocol, to be reported as one.
 
-One corpus that lands inside every threshold while failing a validity check is not a confirmation.
-The other three corpora have not been run.
+Not predicted: across the 64 held-out prompts of each corpus the simulated pass rates after
+training correlate with the measured ones at 0.89, 0.94, 0.98 and 0.96. Three of the four records
+also store where each prompt started, which says how much of that was there before training. On
+band 0.85 the starting rates correlate with the measured outcome at 0.12 and the simulated change
+of each prompt correlates with its measured change at 0.97. On band 0.35 those are 0.82 and 0.86.
+On band 0.15 they are 0.94 and 0.68: there the starting rates predict the outcome better than the
+simulation does (0.94 against 0.89), which is the same failure as part 1 seen per prompt.

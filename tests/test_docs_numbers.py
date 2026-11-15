@@ -25,28 +25,48 @@ def flat(path: str) -> str:
 
 
 CHECKS = [
-    ("README.md", "the spread is {RealTangentSixtyStd} against a measured "
-                  "{RealTangentSixtyMeasured} ({RealTangentSixtyRatio}x), the mean held-out pass "
-                  "rate after training {RealTangentSixtyMean} against "
-                  "{RealTangentSixtyMeasuredMean}, and the per-prompt pass rates correlate at "
-                  "{RealTangentSixtyCorrelation}"),
-    ("README.md", "the one-run forecast was {RealTangentSixtyLinearRatio}x too large"),
-    ("README.md", "in {RealTangentSixtyMinutes} minutes"),
-    ("README.md", "cover a median {RealTangentSixtyCoverage} of each prompt's probability"),
-    ("docs/claims.md", "spread {RealTangentSixtyStd} against measured {RealTangentSixtyMeasured} "
-                       "({RealTangentSixtyRatio}x; the one-run forecast was "
-                       "{RealTangentSixtyLinearRatio}x), mean pass rate {RealTangentSixtyMean} "
-                       "against {RealTangentSixtyMeasuredMean}, per-prompt correlation "
-                       "{RealTangentSixtyCorrelation}"),
-    ("docs/predictions.md", "The {RealTangentSixtyCandidates} candidates cover a median of "
-                            "{RealTangentSixtyCoverage} of each prompt's probability"),
-    ("docs/predictions.md", "{RealTangentSixtyStd} simulated against {RealTangentSixtyMeasured} "
-                            "measured, a ratio of {RealTangentSixtyRatio}"),
-    ("docs/predictions.md", "correlate at {RealTangentSixtyCorrelation} with the measured ones "
-                            "across the {RealTangentSixtyPrompts} held-out prompts, with a mean "
-                            "absolute difference of {RealTangentSixtyDifference}, and the "
-                            "simulated per-prompt deviations across seeds correlate at "
-                            "{RealTangentSixtyDeviationCorrelation}"),
+    ("README.md", "ratios {RealTangentRatios} against the forecast's {RealTangentLinearRatios}"),
+    ("README.md", "cover a median {RealTangentCoverageLow} to {RealTangentCoverageHigh} of each "
+                  "prompt's probability"),
+    ("README.md", "on {RealTangentWithin} of the four (ratios {RealTangentRatios}), where the "
+                  "one-run forecast is on {RealTangentLinearWithin}; one of those three sits at "
+                  "{RealTangentClosestRatio}"),
+    ("README.md", "it is {RealTangentFifteenRatio}x too large"),
+    ("README.md", "correlate at {RealTangentCorrelationLow} to {RealTangentCorrelationHigh}"),
+    ("README.md", "outcome at only {RealTangentEightyFiveBefore}, the simulated change of each "
+                  "prompt correlates with its measured change at {RealTangentEightyFiveChange}"),
+    ("README.md", "{RealTangentMinutesLow} to {RealTangentMinutesHigh} minutes a corpus"),
+    ("README.md", "within 1.5x on {RealTangentWithin} of four corpora"),
+    ("docs/claims.md", "simulated over measured spread {RealTangentRatios} (the one-run forecast: "
+                       "{RealTangentLinearRatios}), within 1.5x on {RealTangentWithin} against "
+                       "{RealTangentLinearWithin}; per-prompt correlation "
+                       "{RealTangentCorrelationLow} to {RealTangentCorrelationHigh}"),
+    ("docs/claims.md", "coverage {RealTangentCoverageLow} to {RealTangentCoverageHigh}"),
+    ("docs/predictions.md", "| band 0.15 | {RealTangentFifteenRatio} | "
+                            "{RealTangentFifteenLinearRatio} | {RealTangentFifteenMean}, "
+                            "{RealTangentFifteenMeasuredMean} | {RealTangentFifteenSettled}, "
+                            "{RealTangentFifteenMeasuredSettled} |"),
+    ("docs/predictions.md", "| band 0.35 | {RealTangentThirtyFiveRatio} | "
+                            "{RealTangentThirtyFiveLinearRatio} | {RealTangentThirtyFiveMean}, "
+                            "{RealTangentThirtyFiveMeasuredMean} | {RealTangentThirtyFiveSettled}, "
+                            "{RealTangentThirtyFiveMeasuredSettled} |"),
+    ("docs/predictions.md", "| band 0.60 | {RealTangentSixtyRatio} | "
+                            "{RealTangentSixtyLinearRatio} | {RealTangentSixtyMean}, "
+                            "{RealTangentSixtyMeasuredMean} | {RealTangentSixtySettled}, "
+                            "{RealTangentSixtyMeasuredSettled} |"),
+    ("docs/predictions.md", "| band 0.85 | {RealTangentEightyFiveRatio} | "
+                            "{RealTangentEightyFiveLinearRatio} | {RealTangentEightyFiveMean}, "
+                            "{RealTangentEightyFiveMeasuredMean} | {RealTangentEightyFiveSettled}, "
+                            "{RealTangentEightyFiveMeasuredSettled} |"),
+    ("docs/predictions.md", "One of the three is at {RealTangentClosestRatio}"),
+    ("docs/predictions.md", "The fourth is at {RealTangentClosestSettled}"),
+    ("docs/predictions.md", "correlate with the measured outcome at "
+                            "{RealTangentEightyFiveBefore} and the simulated change of each "
+                            "prompt correlates with its measured change at "
+                            "{RealTangentEightyFiveChange}. On band 0.35 those are "
+                            "{RealTangentThirtyFiveBefore} and {RealTangentThirtyFiveChange}. On "
+                            "band 0.15 they are {RealTangentFifteenBefore} and "
+                            "{RealTangentFifteenChange}"),
     ("README.md", "runs gaining at most {HeadlineGainMax} in pass rate"),
     ("README.md", "({RegradeLearningCount} settings gaining at least {LearnGainCut}), "
                   "{RegradeSeeds} seeds each"),
