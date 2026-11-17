@@ -131,4 +131,5 @@ Legend for strength:
   what eight runs can resolve
 * that the cheap estimator is safe over long runs: it is exact only where `Phi ~ I` along `grad M`
 * that the bootstrap interval on the real-model spread has nominal coverage: simulated coverage is
-  68-88% (see `experiments/s7_real_forecast/power.py`)
+  72-78% at eight runs and 58-88% across six to sixteen (see `experiments/s7_real_forecast/power.py`;
+  an earlier hand-typed 68-88% understated how far below 95% it falls)

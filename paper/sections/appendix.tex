@@ -138,18 +138,25 @@ number from it without knowing where that boundary lies would be reporting noise
 
 Three readings from Table~\ref{tab:power}, and the first is a warning about the method rather than
 about the data. At a true
-spread of zero the subtraction still returns a positive number in about half of trials, because a
-difference of two noisy variances is positive half the time. A non-zero reading is therefore not by
-itself evidence of a seed spread; the interval is.
+spread of zero the subtraction still returns a positive number in $\numPowerNullLow$ to
+$\numPowerNullHigh\%$ of trials, because a difference of two noisy variances is positive about half
+the time. A non-zero reading is therefore not by itself evidence of a seed spread; the interval is.
 
-Second, the design resolves what it needs to. At a true spread of $0.02$ the subtraction recovers
-something in $88\%$ of trials at eight runs and lands at a median of $0.018$; at $0.04$ it succeeds
-essentially always. Those bracket the forecast we make.
+Second, the design resolves what it needs to, and not much less. At a true spread of $0.02$ the
+subtraction recovers something in $\numPowerMidResolved\%$ of trials at eight runs and
+lands at a median of $\numPowerMidEstimate$; at $0.04$ it succeeds in $\numPowerLargeResolved\%$.
+Those bracket the forecast we make. At $0.01$ it comes back positive in
+$\numPowerSmallResolved\%$ of trials, against $\numPowerNullResolved\%$ when there is no spread at
+all, so a single measurement there barely separates a spread from none.
 
-Third, the bootstrap interval is anti-conservative here: its coverage of the true value runs from
-$68\%$ to $88\%$ rather than the nominal $95\%$, which is the percentile bootstrap applied to a
+Third, the bootstrap interval is anti-conservative here. Wherever there is a spread to cover, its
+coverage of the true value is $\numPowerCoverageLow$ to $\numPowerCoverageHigh\%$ at
+eight runs and $\numPowerCoverageAllLow$ to $\numPowerCoverageAllHigh\%$ across six,
+eight and sixteen, rather than the nominal $95\%$, which is the percentile bootstrap applied to a
 variance difference at small $n$. We report the intervals because they are far more informative
-than a point estimate, and note that they are narrower than they should be.
+than a point estimate, and note that they are narrower than they should be. An earlier version of
+this appendix gave the range as $68$ to $88\%$, typed by hand; the stored simulation goes lower
+than that, and the numbers above are now generated from it.
 
 \section{The estimator family as a table}
 \label{app:family}

@@ -42,6 +42,8 @@ CHECKS = [
                        "{RealTangentLinearWithin}; per-prompt correlation "
                        "{RealTangentCorrelationLow} to {RealTangentCorrelationHigh}"),
     ("docs/claims.md", "coverage {RealTangentCoverageLow} to {RealTangentCoverageHigh}"),
+    ("docs/claims.md", "{PowerCoverageLow}-{PowerCoverageHigh}% at eight runs and "
+                       "{PowerCoverageAllLow}-{PowerCoverageAllHigh}% across six to sixteen"),
     ("docs/predictions.md", "| band 0.15 | {RealTangentFifteenRatio} | "
                             "{RealTangentFifteenLinearRatio} | {RealTangentFifteenMean}, "
                             "{RealTangentFifteenMeasuredMean} | {RealTangentFifteenSettled}, "

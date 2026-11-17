@@ -1914,6 +1914,7 @@ def table_numbers() -> None:
     macros |= shortfall_macros()
     macros |= collapse_sweep_macros()
     macros |= absorption_test_macros()
+    macros |= power_macros()
     macros |= reconvergence_macros()
     macros |= learning_regime_macros()
     macros |= real_tangent_macros()
@@ -2042,12 +2043,51 @@ def table_scale() -> None:
     write("scale", "\n".join(lines))
 
 
+def power_rows() -> list[dict]:
+    """The power simulation at the design the 0.5B runs used: 48 questions, 16 samples, near 0.35.
+
+    Selected by that design, not by which simulation ran last.
+    """
+    return only("s7_power", questions=48, samples=16, centre=0.35)["result"]["rows"]
+
+
+# the number of runs the 0.5B measurement used, which is the column the prose quotes as "eight"
+POWER_RUNS = 8
+
+
+def power_macros() -> dict[str, str]:
+    """What Appendix app:power and the step-size paragraph quote from the power simulation."""
+    rows = power_rows()
+
+    def at(true_sd: float, runs: int = POWER_RUNS) -> dict:
+        (row,) = [r for r in rows if r["true_sd"] == true_sd and r["runs"] == runs]
+        return row
+
+    percent = "{:.0f}".format
+    null = [100 * r["nonzero_rate"] for r in rows if r["true_sd"] == 0.0]
+    # coverage is only meaningful where there is a spread to cover
+    covered = [r for r in rows if r["true_sd"] > 0.0]
+    used = [100 * r["coverage"] for r in covered if r["runs"] == POWER_RUNS]
+    every = [100 * r["coverage"] for r in covered]
+    return {
+        "PowerNullResolved": percent(100 * at(0.0)["nonzero_rate"]),
+        "PowerNullLow": percent(min(null)),
+        "PowerNullHigh": percent(max(null)),
+        "PowerSmallResolved": percent(100 * at(0.01)["nonzero_rate"]),
+        "PowerSmallEstimate": f"{at(0.01)['median_estimate']:.3f}",
+        "PowerMidResolved": percent(100 * at(0.02)["nonzero_rate"]),
+        "PowerMidEstimate": f"{at(0.02)['median_estimate']:.3f}",
+        "PowerLargeResolved": percent(100 * at(0.04)["nonzero_rate"]),
+        "PowerCoverageLow": percent(min(used)),
+        "PowerCoverageHigh": percent(max(used)),
+        "PowerCoverageAllLow": percent(min(every)),
+        "PowerCoverageAllHigh": percent(max(every)),
+    }
+
+
 def table_power() -> None:
     """What the real-model design can resolve, simulated at the design actually used."""
-    runs = [r for r in io.load_all("s7_power") if r["result"].get("rows")]
-    if not runs:
-        raise SystemExit("no power simulation")
-    rows = runs[-1]["result"]["rows"]
+    rows = power_rows()
     counts = sorted({row["runs"] for row in rows})[:2]  # two columns fit; three do not
     lines = [
         r"\footnotesize",

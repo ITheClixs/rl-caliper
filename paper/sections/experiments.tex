@@ -841,8 +841,9 @@ applies.
 
 \paragraph{Whether a better-behaved step size exists.} Not obviously, at this scale. A smaller step
 keeps the runs closer and the linearisation valid, but then the metric barely moves and the seed
-term drops below what eight runs can resolve at all (Appendix~\ref{app:power}: below about $0.01$
-the subtraction returns nothing usable). The window where the runs both learn and stay in the
+term drops below what eight runs can resolve (Appendix~\ref{app:power}: at a true spread of $0.01$
+the subtraction comes back positive in $\numPowerSmallResolved\%$ of trials, against
+$\numPowerNullResolved\%$ with no spread at all). The window where the runs both learn and stay in the
 linear regime may simply be empty for a half-billion-parameter model on a task it finds hard, which
 is a statement about the experiment we could afford rather than about the method.
 
